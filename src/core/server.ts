@@ -52,5 +52,5 @@ export function resolveUrl(path?: string): string {
   if (!path) {
     return initOptions.serverUrl;
   }
-  return url.resolve(path, initOptions.serverUrl);
+  return url.resolve(initOptions.serverUrl, path);
 }
