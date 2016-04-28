@@ -2,10 +2,17 @@
     "compilerOptions": {
         "target": "ES5",
         "module": "commonjs",
-        "declaration": false,
+        "declaration": true,
         "sourceMap": true,
         "rootDir": "./src",
-        "outDir": "./lib"
+        "outDir": "./lib",
+        "pretty": true,
+        "stripInternal": true,
+        "noEmitOnError": true,
+        "noImplicitAny": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true
     },
     "filesGlob": [
         "src/**/*.ts",
@@ -14,7 +21,9 @@
     ],
     "files": [
         "typings/main.d.ts",
-        "src/gii/Gii.spec.ts",
-        "src/gii/Gii.ts"
+        "src/core/index.ts",
+        "src/core/init.ts",
+        "src/index.ts",
+        "src/security/index.ts"
     ]
 }

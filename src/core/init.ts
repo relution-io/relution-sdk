@@ -1,4 +1,5 @@
 /**
+ * @file core/init.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
@@ -21,4 +22,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-module.exports = require('./lib');
+
+import * as _ from 'lodash';
+
+/**
+ * optional options passed to init.
+ */
+export interface InitOptions {
+  /**
+   * absolute url path of (default) Relution server.
+   */
+  serverUrl?: string;
+}
+
+/**
+ * copy of options the SDK was initialized with using init function serving as defaults.
+ *
+ * @internal for SDK internal use only!
+ */
+export let initOptions: InitOptions = {};
+
+/**
+ * (re)initializes the SDK providing global configuration parameters.
+ *
+ * @param options of configuration, often these are hardcoded values of the mobile client app.
+ */
+export function init(options: InitOptions = {}) {
+  initOptions = _.cloneDeep(options);
+}

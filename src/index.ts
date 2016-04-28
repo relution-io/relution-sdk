@@ -1,4 +1,5 @@
 /**
+ * @file index.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
@@ -21,4 +22,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-module.exports = require('./lib');
+
+// core module
+import * as theCore from './core';
+export let core = theCore;
+
+// security module
+import * as theSecurity from './security';
+export let security = theSecurity;

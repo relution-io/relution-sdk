@@ -8,7 +8,7 @@
     "tslint": "tslint src/**/*.ts",
     "test": "npm run build && mocha lib/**/*.spec.js",
     "build": "tsc -p .",
-    "api": "typedoc --out public/docs src --module commonjs --target ES5 --name Relution-SDK --exclude **/*.spec.ts",
+    "api": "typedoc -p . --rootDir src --out public/docs --module commonjs --stripInternal --name Relution-SDK --exclude **/*.spec.ts src typings/main.d.ts",
     "watch": "tsc -p . -w",
     "postinstall": "typings install"
   },
@@ -21,5 +21,8 @@
     "tslint": "^3.8.1",
     "typedoc": "^0.3.12",
     "typescript": "^1.8.10"
+  },
+  "dependencies": {
+    "lodash": "^4.0.0"
   }
 }
