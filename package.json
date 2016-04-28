@@ -19,7 +19,7 @@
     "mocha": "^2.4.5",
     "sinon": "^1.16.0",
     "tslint": "^3.8.1",
-    "typedoc": "^0.3.12",
+    "typedoc": "sierrasoftworks/typedoc#v1.8.10",
     "typescript": "^1.8.10"
   },
   "dependencies": {

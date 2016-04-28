@@ -26,7 +26,7 @@
 import * as _ from 'lodash';
 
 /**
- * optional options passed to init.
+ * optional options passed to [[init]].
  */
 export interface InitOptions {
   /**
@@ -36,7 +36,7 @@ export interface InitOptions {
 }
 
 /**
- * copy of options the SDK was initialized with using init function serving as defaults.
+ * copy of options the SDK was initialized with using [[init]] function serving as defaults.
  *
  * @internal for SDK internal use only!
  */

@@ -23,6 +23,7 @@
         "typings/main.d.ts",
         "src/core/index.ts",
         "src/core/init.ts",
+        "src/core/server.ts",
         "src/index.ts",
         "src/security/index.ts"
     ]

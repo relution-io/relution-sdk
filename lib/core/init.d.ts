@@ -1,5 +1,5 @@
 /**
- * optional options passed to init.
+ * optional options passed to [[init]].
  */
 export interface InitOptions {
     /**

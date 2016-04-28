@@ -5,7 +5,8 @@
     "sinon": "registry:npm/sinon#1.16.0+20160309002336"
   },
   "ambientDependencies": {
-    "mocha": "registry:dt/mocha#2.2.5+20160317120654"
+    "mocha": "registry:dt/mocha#2.2.5+20160317120654",
+    "node": "registry:dt/node#4.0.0+20160423143914"
   },
   "dependencies": {
     "lodash": "registry:npm/lodash#4.0.0+20160416211519"
