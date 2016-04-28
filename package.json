@@ -23,6 +23,7 @@
     "typescript": "^1.8.10"
   },
   "dependencies": {
-    "lodash": "^4.0.0"
+    "lodash": "^4.0.0",
+    "q": "^1.4.1"
   }
 }
