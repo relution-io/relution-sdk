@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;core/server.spec&quot; | Relution-SDK</title>
+	<title>LogonCallback | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,16 +57,61 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_core_server_spec_.html">&quot;core/server.spec&quot;</a>
+					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
+				</li>
+				<li>
+					<a href="_core_init_.logoncallback.html">LogonCallback</a>
 				</li>
 			</ul>
-			<h1>External module &quot;core/server.spec&quot;</h1>
+			<h1>Interface LogonCallback</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>applied on each successful authentication with the Relution server.</p>
+					</div>
+					<p>The function may be executed multiple times, for example when the session times out. The purpose
+						of it is to call application-specific logons passing information such as credentials of 3rd-tier
+					backend servers.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">LogonCallback</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3 class="tsd-before-signature">Callable</h3>
+				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-external-module">
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in core/init.ts:35</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>applied on each successful authentication with the Relution server.</p>
+							</div>
+							<p>The function may be executed multiple times, for example when the session times out. The purpose
+								of it is to call application-specific logons passing information such as credentials of 3rd-tier
+							backend servers.</p>
+						</div>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
@@ -75,33 +120,49 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_core_index_.html">"core/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_init_.html">"core/init"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_server_.html">"core/server"</a>
+						<a href="../modules/_core_index_.html">"core/index"</a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_core_server_spec_.html">"core/server.spec"</a>
+						<a href="../modules/_core_init_.html">"core/init"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_index_.html">"index"</a>
+						<a href="../modules/_core_server_.html">"core/server"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_security_index_.html">"security/index"</a>
+						<a href="../modules/_core_server_spec_.html">"core/server.spec"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_web_http_.html">"web/http"</a>
+						<a href="../modules/_index_.html">"index"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_web_index_.html">"web/index"</a>
+						<a href="../modules/_security_index_.html">"security/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_web_http_.html">"web/http"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_web_index_.html">"web/index"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>
+					</li>
 				</ul>
 			</nav>
 		</div>
