@@ -68,13 +68,22 @@ export interface FieldFilter extends Filter {
      */
     fieldName: string;
 }
+/**
+ * implementation detail of the library.
+ */
 export interface ValueFilter<T> extends FieldFilter {
     value: T;
 }
+/**
+ * implementation detail of the library.
+ */
 export interface RangeFilter<T> extends FieldFilter {
     min?: T;
     max?: T;
 }
+/**
+ * implementation detail of the library.
+ */
 export interface EnumFilter<T> extends FieldFilter {
     values: T[];
 }
@@ -85,6 +94,9 @@ export interface ContainsStringFilter extends FieldFilter {
 }
 export interface DateRangeFilter extends RangeFilter<Date> {
 }
+/**
+ * implementation detail of the library.
+ */
 export interface NumberRangeFilter extends RangeFilter<number> {
 }
 export interface DoubleRangeFilter extends NumberRangeFilter {
