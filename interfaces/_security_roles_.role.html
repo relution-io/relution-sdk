@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Item | Relution-SDK</title>
+	<title>Role | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,24 +57,50 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_model_modelcontainer_.html">&quot;model/ModelContainer&quot;</a>
+					<a href="../modules/_security_roles_.html">&quot;security/roles&quot;</a>
 				</li>
 				<li>
-					<a href="_model_modelcontainer_.item.html">Item</a>
+					<a href="_security_roles_.role.html">Role</a>
 				</li>
 			</ul>
-			<h1>Interface Item</h1>
+			<h1>Interface Role</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>role data as exchanged with Relution server.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Item</span>
+						<a href="_core_domain_.referenceable.html" class="tsd-signature-type">Referenceable</a>
+					</li>
+					<li>
+						<a href="_core_domain_.secure.html" class="tsd-signature-type">Secure</a>
+					</li>
+					<li>
+						<a href="_core_domain_.hasversion.html" class="tsd-signature-type">HasVersion</a>
+					</li>
+					<li>
+						<a href="_core_domain_.hasbundle.html" class="tsd-signature-type">HasBundle</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">Role</span>
+								<ul class="tsd-hierarchy">
+									<li>
+										<a href="_security_roles_.user.html" class="tsd-signature-type">User</a>
+									</li>
+								</ul>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</section>
@@ -85,9 +111,13 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_model_modelcontainer_.item.html#label" class="tsd-kind-icon">label</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_model_modelcontainer_.item.html#url" class="tsd-kind-icon">url</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_model_modelcontainer_.item.html#value" class="tsd-kind-icon">value</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_security_roles_.role.html#aclentries" class="tsd-kind-icon">acl<wbr>Entries</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_security_roles_.role.html#bundle" class="tsd-kind-icon">bundle</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_security_roles_.role.html#effectivepermissions" class="tsd-kind-icon">effective<wbr>Permissions</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_security_roles_.role.html#foreignkey" class="tsd-kind-icon">foreign<wbr>Key</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_security_roles_.role.html#provider" class="tsd-kind-icon">provider</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_security_roles_.role.html#uuid" class="tsd-kind-icon">uuid</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_security_roles_.role.html#version" class="tsd-kind-icon">version</a></li>
 							</ul>
 						</section>
 					</div>
@@ -95,33 +125,78 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="label" class="tsd-anchor"></a>
-					<h3>label</h3>
-					<div class="tsd-signature tsd-kind-icon">label<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="aclentries" class="tsd-anchor"></a>
+					<h3>acl<wbr>Entries</h3>
+					<div class="tsd-signature tsd-kind-icon">acl<wbr>Entries<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_domain_.secure.html">Secure</a>.<a href="_core_domain_.secure.html#aclentries">aclEntries</a></p>
 						<ul>
-							<li>Defined in model/ModelContainer.ts:296</li>
+							<li>Defined in core/domain.ts:31</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="bundle" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> bundle</h3>
+					<div class="tsd-signature tsd-kind-icon">bundle<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_domain_.hasbundle.html">HasBundle</a>.<a href="_core_domain_.hasbundle.html#bundle">bundle</a></p>
+						<ul>
+							<li>Defined in core/domain.ts:40</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="effectivepermissions" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> effective<wbr>Permissions</h3>
+					<div class="tsd-signature tsd-kind-icon">effective<wbr>Permissions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_domain_.secure.html">Secure</a>.<a href="_core_domain_.secure.html#effectivepermissions">effectivePermissions</a></p>
+						<ul>
+							<li>Defined in core/domain.ts:32</li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="url" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> url</h3>
-					<div class="tsd-signature tsd-kind-icon">url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="foreignkey" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> foreign<wbr>Key</h3>
+					<div class="tsd-signature tsd-kind-icon">foreign<wbr>Key<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in model/ModelContainer.ts:298</li>
+							<li>Defined in security/roles.ts:34</li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="value" class="tsd-anchor"></a>
-					<h3>value</h3>
-					<div class="tsd-signature tsd-kind-icon">value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<a name="provider" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> provider</h3>
+					<div class="tsd-signature tsd-kind-icon">provider<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in model/ModelContainer.ts:295</li>
+							<li>Defined in security/roles.ts:33</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="uuid" class="tsd-anchor"></a>
+					<h3>uuid</h3>
+					<div class="tsd-signature tsd-kind-icon">uuid<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_domain_.referenceable.html">Referenceable</a>.<a href="_core_domain_.referenceable.html#uuid">uuid</a></p>
+						<ul>
+							<li>Defined in core/domain.ts:27</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="version" class="tsd-anchor"></a>
+					<h3>version</h3>
+					<div class="tsd-signature tsd-kind-icon">version<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_domain_.hasversion.html">HasVersion</a>.<a href="_core_domain_.hasversion.html#version">version</a></p>
+						<ul>
+							<li>Defined in core/domain.ts:36</li>
 						</ul>
 					</aside>
 				</section>
@@ -151,7 +226,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_index_.html">"index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_model_modelcontainer_.html">"model/<wbr>Model<wbr>Container"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -187,7 +262,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_security_index_.html">"security/index"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="../modules/_security_roles_.html">"security/roles"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -200,44 +275,65 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_model_modelcontainer_.enumdefinition.html" class="tsd-kind-icon">Enum<wbr>Definition</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_model_modelcontainer_.fielddefinition.html" class="tsd-kind-icon">Field<wbr>Definition</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_model_modelcontainer_.items.html" class="tsd-kind-icon">Items</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_model_modelcontainer_.metamodel.html" class="tsd-kind-icon">Meta<wbr>Model</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_model_modelcontainer_.modelcontainer.html" class="tsd-kind-icon">Model<wbr>Container</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_model_modelcontainer_.modelfactory.html" class="tsd-kind-icon">Model<wbr>Factory</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_security_roles_.organization.html" class="tsd-kind-icon">Organization</a>
 					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_model_modelcontainer_.item.html" class="tsd-kind-icon">Item</a>
+						<a href="_security_roles_.role.html" class="tsd-kind-icon">Role</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_model_modelcontainer_.item.html#label" class="tsd-kind-icon">label</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_security_roles_.role.html#aclentries" class="tsd-kind-icon">acl<wbr>Entries</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_security_roles_.role.html#bundle" class="tsd-kind-icon">bundle</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_security_roles_.role.html#effectivepermissions" class="tsd-kind-icon">effective<wbr>Permissions</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_model_modelcontainer_.item.html#url" class="tsd-kind-icon">url</a>
+								<a href="_security_roles_.role.html#foreignkey" class="tsd-kind-icon">foreign<wbr>Key</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_model_modelcontainer_.item.html#value" class="tsd-kind-icon">value</a>
+								<a href="_security_roles_.role.html#provider" class="tsd-kind-icon">provider</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_security_roles_.role.html#uuid" class="tsd-kind-icon">uuid</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_security_roles_.role.html#version" class="tsd-kind-icon">version</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_model_modelcontainer_.modelfactoryctor.html" class="tsd-kind-icon">Model<wbr>Factory<wbr>Ctor</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_security_roles_.user.html" class="tsd-kind-icon">User</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_security_roles_.html#currentorganization" class="tsd-kind-icon">current<wbr>Organization</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_security_roles_.html#currentuser" class="tsd-kind-icon">current<wbr>User</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_roles_.html#freezeorganization" class="tsd-kind-icon">freeze<wbr>Organization</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_roles_.html#freezeuser" class="tsd-kind-icon">freeze<wbr>User</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_roles_.html#getcurrentorganization" class="tsd-kind-icon">get<wbr>Current<wbr>Organization</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_roles_.html#getcurrentuser" class="tsd-kind-icon">get<wbr>Current<wbr>User</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_roles_.html#setcurrentorganization" class="tsd-kind-icon">set<wbr>Current<wbr>Organization</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_roles_.html#setcurrentuser" class="tsd-kind-icon">set<wbr>Current<wbr>User</a>
 					</li>
 				</ul>
 			</nav>
