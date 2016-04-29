@@ -3,6 +3,7 @@
  */
 export interface Credentials {
     [key: string]: any;
+    [index: number]: any;
 }
 /**
  * version of [[Credentials]] used by Relution server.

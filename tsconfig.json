@@ -26,6 +26,8 @@
         "src/core/server.spec.ts",
         "src/core/server.ts",
         "src/index.ts",
+        "src/model/index.ts",
+        "src/model/ModelContainer.ts",
         "src/query/Filter.ts",
         "src/query/FilterVisitor.ts",
         "src/query/GetQuery.ts",

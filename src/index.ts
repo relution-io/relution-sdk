@@ -27,6 +27,10 @@
 import * as theCore from './core';
 export let core = theCore;
 
+// model module
+import * as theModel from './model';
+export let model = theModel;
+
 // query module
 import * as theQuery from './query';
 export let query = theQuery;
