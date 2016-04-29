@@ -23,3 +23,4 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 export * from './Authorization';
+export * from './roles';

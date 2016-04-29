@@ -62,46 +62,17 @@ export interface Authorization {
   roles: string[];
 }
 
-class AuthorizationImpl implements Authorization {
-  public name: string;
-  public roles: string[];
-
-  /**
-   * copy-constructs a deeply independent and mutable copy.
-   *
-   * @param json to copy.
-   */
-  constructor(json: Authorization);
-  /**
-   * explicitly initializes an instance.
-   *
-   * @param name stored in instance, the *UUID* of a user.
-   * @param roles of user.
-     */
-  constructor(name: string, ...roles: string[]);
-  /**
-   * @internal overloaded constructor.
-   */
-  constructor(jsonOrName: string | Authorization, ...roles: string[]) {
-    this.roles = roles; // never null thanks to TypeScript
-    if (_.isString(jsonOrName)) {
-      this.name = jsonOrName;
-    } else if (jsonOrName) {
-      _.assign(this, jsonOrName);
-      assert.equal(roles.length, 0, 'roles argument can not be used with json');
-      assert(_.isArray(this.roles), 'roles literal must be an array');
-    }
-  }
-
-  /**
-   * turns the object immutable.
-   *
-   * @return {AuthorizationImpl} this for convenience of fluent API.
-   */
-  public freeze(): Authorization {
-    this.roles = Object.freeze(this.roles);
-    return Object.freeze(this);
-  }
+/**
+ * turns the object deeply immutable.
+ *
+ * @param authorization to freeze.
+ * @return {Authorization} authorization for convenience.
+ *
+ * @internal for library use only.
+ */
+export function freezeAuthorization(authorization: Authorization): Authorization {
+  authorization.roles = Object.freeze(authorization.roles);
+  return Object.freeze(this);
 }
 
 /**
@@ -123,21 +94,76 @@ export const USER_ANYONE	= 'user.anyone';
  *
  * @type {Authorization}
  */
-export const ANONYMOUS_AUTHORIZATION = new AuthorizationImpl(void 0, USER_ANYONE).freeze();
+export const ANONYMOUS_AUTHORIZATION = freezeAuthorization({
+  name: void 0,
+  roles: [
+    USER_ANYONE
+  ]
+});
+
+/**
+ * explicit class allowing to provide additional management capability.
+ *
+ * @internal intended for library extensibility only.
+ */
+class AuthorizationImpl {
+  private authorization: Authorization = {
+    name: ANONYMOUS_AUTHORIZATION.name,
+    roles: ANONYMOUS_AUTHORIZATION.roles
+  };
+
+  /**
+   * copy-constructs a deeply independent and mutable copy.
+   *
+   * @param json to copy.
+   */
+  constructor(json: Authorization);
+  /**
+   * explicitly initializes an instance.
+   *
+   * @param name stored in instance, the *UUID* of a user.
+   * @param roles of user.
+     */
+  constructor(name: string, ...roles: string[]);
+  /**
+   * @internal overloaded constructor.
+   */
+  constructor(jsonOrName: string | Authorization, ...roles: string[]) {
+    let authorization = this.authorization;
+    authorization.roles = roles; // never null thanks to TypeScript
+    if (_.isString(jsonOrName)) {
+      authorization.name = jsonOrName;
+    } else if (jsonOrName) {
+      _.assign(authorization, jsonOrName);
+      assert.equal(roles.length, 0, 'roles argument can not be used with json');
+      assert(_.isArray(authorization.roles), 'roles literal must be an array');
+    }
+    this.authorization = freezeAuthorization(authorization);
+  }
+
+  /**
+   * when stringifying all management data must be erased!
+   *
+   * @return {{name: string, roles: string[]}} minimal information only.
+   */
+  public toJSON(): Authorization {
+    return this.authorization;
+  }
+}
 
 /**
  * storage of [[Authorization]] in effect.
  *
  * @type {Authorization} in effect, never null.
  */
-let currentAuthorization = ANONYMOUS_AUTHORIZATION;
+let currentAuthorization = new AuthorizationImpl(null);
 /**
  * gets the [[currentAuthorization]] in effect.
  *
  * @return {Authorization} in effect, never null.
  */
 export function getCurrentAuthorization(): Authorization {
-  return currentAuthorization;
+  return currentAuthorization.toJSON();
 }
 /**
  * sets the [[currentAuthorization]].
@@ -146,12 +172,10 @@ export function getCurrentAuthorization(): Authorization {
  *
  * @internal for library use only!
  */
-export function setCurrentAuthorization(authorization: Authorization) {
+export function setCurrentAuthorization(authorization?: Authorization | AuthorizationImpl) {
   if (authorization instanceof AuthorizationImpl) {
     currentAuthorization = authorization;
-  } else if (authorization) {
-    currentAuthorization = new AuthorizationImpl(authorization).freeze();
   } else {
-    currentAuthorization = ANONYMOUS_AUTHORIZATION;
+    currentAuthorization = new AuthorizationImpl(authorization);
   }
 }

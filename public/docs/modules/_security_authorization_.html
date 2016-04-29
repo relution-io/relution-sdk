@@ -98,6 +98,7 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_authorization_.html#freezeauthorization" class="tsd-kind-icon">freeze<wbr>Authorization</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_authorization_.html#getcurrentauthorization" class="tsd-kind-icon">get<wbr>Current<wbr>Authorization</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_authorization_.html#setcurrentauthorization" class="tsd-kind-icon">set<wbr>Current<wbr>Authorization</a></li>
 							</ul>
@@ -113,7 +114,7 @@
 					<div class="tsd-signature tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/Authorization.ts:126</li>
+							<li>Defined in security/Authorization.ts:97</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -133,7 +134,7 @@
 					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>ADMIN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/Authorization.ts:115</li>
+							<li>Defined in security/Authorization.ts:86</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -149,7 +150,7 @@
 					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>AUTHENTICATED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/Authorization.ts:110</li>
+							<li>Defined in security/Authorization.ts:81</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -164,7 +165,7 @@
 					<div class="tsd-signature tsd-kind-icon">USER_<wbr>ANYONE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/Authorization.ts:120</li>
+							<li>Defined in security/Authorization.ts:91</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -177,10 +178,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="currentauthorization" class="tsd-anchor"></a>
 					<h3>current<wbr>Authorization</h3>
-					<div class="tsd-signature tsd-kind-icon">current<wbr>Authorization<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></div>
+					<div class="tsd-signature tsd-kind-icon">current<wbr>Authorization<span class="tsd-signature-symbol">:</span> <a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-signature-type">AuthorizationImpl</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/Authorization.ts:133</li>
+							<li>Defined in security/Authorization.ts:159</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -198,6 +199,43 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="freezeauthorization" class="tsd-anchor"></a>
+					<h3>freeze<wbr>Authorization</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">freeze<wbr>Authorization<span class="tsd-signature-symbol">(</span>authorization<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in security/Authorization.ts:73</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>turns the object deeply immutable.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>internal</dt>
+									<dd><p>for library use only.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>authorization: <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to freeze.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></h4>
+							<p>authorization for convenience.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
 					<a name="getcurrentauthorization" class="tsd-anchor"></a>
 					<h3>get<wbr>Current<wbr>Authorization</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
@@ -207,7 +245,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in security/Authorization.ts:139</li>
+									<li>Defined in security/Authorization.ts:165</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -224,13 +262,13 @@
 					<a name="setcurrentauthorization" class="tsd-anchor"></a>
 					<h3>set<wbr>Current<wbr>Authorization</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Current<wbr>Authorization<span class="tsd-signature-symbol">(</span>authorization<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Current<wbr>Authorization<span class="tsd-signature-symbol">(</span>authorization<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a><span class="tsd-signature-symbol"> | </span><a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-signature-type">AuthorizationImpl</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in security/Authorization.ts:149</li>
+									<li>Defined in security/Authorization.ts:175</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -246,7 +284,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>authorization: <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> authorization: <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a><span class="tsd-signature-symbol"> | </span><a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-signature-type">AuthorizationImpl</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>to set.</p>
 									</div>
@@ -263,6 +301,9 @@
 				<ul>
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_core_domain_.html">"core/domain"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_core_index_.html">"core/index"</a>
@@ -313,10 +354,10 @@
 						<a href="_security_authorization_.html">"security/<wbr>Authorization"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_security_organization_.html">"security/<wbr>Organization"</a>
+						<a href="_security_index_.html">"security/index"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_security_index_.html">"security/index"</a>
+						<a href="_security_roles_.html">"security/roles"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_web_http_.html">"web/http"</a>
@@ -354,6 +395,9 @@
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_security_authorization_.html#currentauthorization" class="tsd-kind-icon">current<wbr>Authorization</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_security_authorization_.html#freezeauthorization" class="tsd-kind-icon">freeze<wbr>Authorization</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_security_authorization_.html#getcurrentauthorization" class="tsd-kind-icon">get<wbr>Current<wbr>Authorization</a>

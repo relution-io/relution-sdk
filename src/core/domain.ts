@@ -1,5 +1,5 @@
 /**
- * @file security/Organization.ts
+ * @file core/domain.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
@@ -23,20 +23,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as _ from 'lodash';
-import * as assert from 'assert';
-
-export interface Organization {
+export interface Referenceable {
   uuid: string;
+}
 
-  createdUser: string;
-  createdDate: Date;
-  modifiedUser: string;
-  modifiedDate: Date;
+export interface Secure {
+  aclEntries: string[];
+  effectivePermissions?: string;
+}
+
+export interface HasVersion {
   version: number;
+}
 
-  name: string;
-  uniqueName: string;
+export interface HasBundle {
+  bundle?: string;
+}
 
-  propertyMap: any;
+export interface HasModified {
+  createdRole?: string;
+  createdDate?: Date;
+  modifiedUser?: string;
+  modifiedDate?: Date;
+}
+
+/**
+ * turns the object deeply immutable.
+ *
+ * @param self to freeze.
+ * @return {T} self for convenience.
+ *
+ * @internal for library use only.
+ */
+export function freeze<T>(self: T): T {
+  let anything: any = self;
+  if (anything.aclEntries) {
+    anything.aclEntries = Object.freeze(anything.aclEntries);
+  }
+  if (anything.createdDate) {
+    anything.createdDate = Object.freeze(new Date(+anything.createdDate));
+  }
+  if (anything.modifiedDate) {
+    anything.modifiedDate = Object.freeze(new Date(+anything.modifiedDate));
+  }
+  return Object.freeze(anything);
 }

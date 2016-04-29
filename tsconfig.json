@@ -21,6 +21,7 @@
     ],
     "files": [
         "typings/main.d.ts",
+        "src/core/domain.ts",
         "src/core/index.ts",
         "src/core/init.ts",
         "src/core/server.spec.ts",
@@ -38,7 +39,7 @@
         "src/query/SortOrderComparator.ts",
         "src/security/Authorization.ts",
         "src/security/index.ts",
-        "src/security/Organization.ts",
+        "src/security/roles.ts",
         "src/web/http.ts",
         "src/web/index.ts"
     ]

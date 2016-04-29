@@ -24,3 +24,4 @@
  */
 export * from './init';
 export * from './server';
+export * from './domain';
