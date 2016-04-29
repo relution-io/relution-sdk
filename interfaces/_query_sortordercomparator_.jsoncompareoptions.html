@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>InitOptions | Relution-SDK</title>
+	<title>JsonCompareOptions | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,13 +57,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
+					<a href="../modules/_query_sortordercomparator_.html">&quot;query/SortOrderComparator&quot;</a>
 				</li>
 				<li>
-					<a href="_core_init_.initoptions.html">InitOptions</a>
+					<a href="_query_sortordercomparator_.jsoncompareoptions.html">JsonCompareOptions</a>
 				</li>
 			</ul>
-			<h1>Interface InitOptions</h1>
+			<h1>Interface JsonCompareOptions</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>optional options passed to <a href="../modules/_core_init_.html#init">init</a>.</p>
+						<p>options of #jsonCompare function.</p>
 					</div>
 				</div>
 			</section>
@@ -81,7 +81,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">InitOptions</span>
+						<span class="target">JsonCompareOptions</span>
 					</li>
 				</ul>
 			</section>
@@ -92,8 +92,7 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_query_sortordercomparator_.jsoncompareoptions.html#casesensitive" class="tsd-kind-icon">casesensitive</a></li>
 							</ul>
 						</section>
 					</div>
@@ -102,32 +101,18 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="logoncallback" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> logon<wbr>Callback</h3>
-					<div class="tsd-signature tsd-kind-icon">logon<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_core_init_.logoncallback.html" class="tsd-signature-type">LogonCallback</a></div>
+					<a name="casesensitive" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> casesensitive</h3>
+					<div class="tsd-signature tsd-kind-icon">casesensitive<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:51</li>
+							<li>Defined in query/SortOrderComparator.ts:39</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>optional logon applied after each login.</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="serverurl" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> server<wbr>Url</h3>
-					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in core/init.ts:46</li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>absolute url path of (default) Relution server.</p>
+							<p>set to explicitly use case-sensitive string matching, evalates to false to use matching
+							semantics of WebSQL.</p>
 						</div>
 					</div>
 				</section>
@@ -142,7 +127,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_index_.html">"core/index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_init_.html">"core/init"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -172,7 +157,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="../modules/_query_sortordercomparator_.html">"query/<wbr>Sort<wbr>Order<wbr>Comparator"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -197,29 +182,26 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../classes/_query_sortordercomparator_.sortordercomparator.html" class="tsd-kind-icon">Sort<wbr>Order<wbr>Comparator</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_query_sortordercomparator_.jsoncomparefn.html" class="tsd-kind-icon">Json<wbr>Compare<wbr>Fn</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+						<a href="_query_sortordercomparator_.jsoncompareoptions.html" class="tsd-kind-icon">Json<wbr>Compare<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+								<a href="_query_sortordercomparator_.jsoncompareoptions.html#casesensitive" class="tsd-kind-icon">casesensitive</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../modules/_query_sortordercomparator_.html#jsoncompare" class="tsd-kind-icon">json<wbr>Compare</a>
 					</li>
 				</ul>
 			</nav>

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>InitOptions | Relution-SDK</title>
+	<title>JsonPath | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,13 +57,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
+					<a href="../modules/_query_jsonpath_.html">&quot;query/JsonPath&quot;</a>
 				</li>
 				<li>
-					<a href="_core_init_.initoptions.html">InitOptions</a>
+					<a href="_query_jsonpath_.jsonpath.html">JsonPath</a>
 				</li>
 			</ul>
-			<h1>Interface InitOptions</h1>
+			<h1>Class JsonPath</h1>
 		</div>
 	</div>
 </header>
@@ -73,15 +73,23 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>optional options passed to <a href="../modules/_core_init_.html#init">init</a>.</p>
+						<p>compiled JSON path expression.</p>
 					</div>
+					<dl class="tsd-comment-tags">
+						<dt>see</dt>
+						<dd><p><a href="http://goessner.net/articles/JsonPath/">http://goessner.net/articles/JsonPath/</a></p>
+						</dd>
+						<dt>see</dt>
+						<dd><p><a href="https://libraries.io/bower/JSONPath">https://libraries.io/bower/JSONPath</a></p>
+						</dd>
+					</dl>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">InitOptions</span>
+						<span class="target">JsonPath</span>
 					</li>
 				</ul>
 			</section>
@@ -90,46 +98,137 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_query_jsonpath_.jsonpath.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-private tsd-is-private-protected">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_query_jsonpath_.jsonpath.html#expression" class="tsd-kind-icon">expression</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_query_jsonpath_.jsonpath.html#simple" class="tsd-kind-icon">simple</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_query_jsonpath_.jsonpath.html#evaluate" class="tsd-kind-icon">evaluate</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Json<wbr>Path<span class="tsd-signature-symbol">(</span>expression<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_query_jsonpath_.jsonpath.html" class="tsd-signature-type">JsonPath</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/JsonPath.ts:58</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>constructs a compiled expression.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>expression: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>to compile.</p>
+										</div>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_query_jsonpath_.jsonpath.html" class="tsd-signature-type">JsonPath</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="logoncallback" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> logon<wbr>Callback</h3>
-					<div class="tsd-signature tsd-kind-icon">logon<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_core_init_.logoncallback.html" class="tsd-signature-type">LogonCallback</a></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="expression" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> expression</h3>
+					<div class="tsd-signature tsd-kind-icon">expression<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:51</li>
+							<li>Defined in query/JsonPath.ts:53</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>optional logon applied after each login.</p>
+							<p>normalized JSON path expression.</p>
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="serverurl" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> server<wbr>Url</h3>
-					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="simple" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> simple</h3>
+					<div class="tsd-signature tsd-kind-icon">simple<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:46</li>
+							<li>Defined in query/JsonPath.ts:58</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>absolute url path of (default) Relution server.</p>
+							<p>whether the expression is a simple property access.</p>
 						</div>
 					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="evaluate" class="tsd-anchor"></a>
+					<h3>evaluate</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">evaluate<span class="tsd-signature-symbol">(</span>obj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, arg<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/JsonPath.ts:79</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>evaluates the expression on a target object.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>obj: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to evaluate expression on.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> arg: <span class="tsd-signature-type">object</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>options object.</p>
+									</div>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<p>result of evaluating expression on object.</p>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -142,7 +241,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_index_.html">"core/index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_init_.html">"core/init"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -166,7 +265,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_query_jsonfiltervisitor_.html">"query/<wbr>Json<wbr>Filter<wbr>Visitor"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="../modules/_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -199,27 +298,27 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+					<li class="current tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_query_jsonpath_.jsonpath.html" class="tsd-kind-icon">Json<wbr>Path</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="_query_jsonpath_.jsonpath.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_query_jsonpath_.jsonpath.html#expression" class="tsd-kind-icon">expression</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_query_jsonpath_.jsonpath.html#simple" class="tsd-kind-icon">simple</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_query_jsonpath_.jsonpath.html#evaluate" class="tsd-kind-icon">evaluate</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_query_jsonpath_.html#jsonpath-1" class="tsd-kind-icon">json<wbr>Path</a>
 					</li>
 				</ul>
 			</nav>

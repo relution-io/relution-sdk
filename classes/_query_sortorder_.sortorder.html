@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>InitOptions | Relution-SDK</title>
+	<title>SortOrder | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,13 +57,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
+					<a href="../modules/_query_sortorder_.html">&quot;query/SortOrder&quot;</a>
 				</li>
 				<li>
-					<a href="_core_init_.initoptions.html">InitOptions</a>
+					<a href="_query_sortorder_.sortorder.html">SortOrder</a>
 				</li>
 			</ul>
-			<h1>Interface InitOptions</h1>
+			<h1>Class SortOrder</h1>
 		</div>
 	</div>
 </header>
@@ -73,15 +73,17 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>optional options passed to <a href="../modules/_core_init_.html#init">init</a>.</p>
+						<p>defines a sort order of fields.</p>
 					</div>
+					<p>Caution, member fields eventually are shared by multiple instances! You may mutate member
+					fields, but not the objects and arrays referenced by them.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">InitOptions</span>
+						<span class="target">SortOrder</span>
 					</li>
 				</ul>
 			</section>
@@ -90,46 +92,194 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_query_sortorder_.sortorder.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_query_sortorder_.sortorder.html#sortfields" class="tsd-kind-icon">sort<wbr>Fields</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_query_sortorder_.sortorder.html#fromjson" class="tsd-kind-icon">fromJSON</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_query_sortorder_.sortorder.html#merge" class="tsd-kind-icon">merge</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_query_sortorder_.sortorder.html#optimize" class="tsd-kind-icon">optimize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_query_sortorder_.sortorder.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Sort<wbr>Order<span class="tsd-signature-symbol">(</span>other<span class="tsd-signature-symbol">?: </span><a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/SortOrder.ts:38</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>default/copy constructor.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> other: <a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>instance to optionally initialize an independent copy of.</p>
+										</div>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="logoncallback" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> logon<wbr>Callback</h3>
-					<div class="tsd-signature tsd-kind-icon">logon<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_core_init_.logoncallback.html" class="tsd-signature-type">LogonCallback</a></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="sortfields" class="tsd-anchor"></a>
+					<h3>sort<wbr>Fields</h3>
+					<div class="tsd-signature tsd-kind-icon">sort<wbr>Fields<span class="tsd-signature-symbol">:</span> <a href="_query_sortorder_.sortfield.html" class="tsd-signature-type">SortField</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:51</li>
+							<li>Defined in query/SortOrder.ts:38</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>optional logon applied after each login.</p>
+							<p>ordered list of fields to sort on.</p>
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="serverurl" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> server<wbr>Url</h3>
-					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in core/init.ts:46</li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>absolute url path of (default) Relution server.</p>
-						</div>
-					</div>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="fromjson" class="tsd-anchor"></a>
+					<h3>fromJSON</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">fromJSON<span class="tsd-signature-symbol">(</span>json<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/SortOrder.ts:55</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>parses a JSON literal such as [&#39;-rating&#39;, &#39;+date&#39;, &#39;id&#39;] into this instance.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>json: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>data, such as [&#39;-rating&#39;, &#39;+date&#39;].</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a></h4>
+							<p>this instance.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="merge" class="tsd-anchor"></a>
+					<h3>merge</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">merge<span class="tsd-signature-symbol">(</span>other<span class="tsd-signature-symbol">: </span><a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/SortOrder.ts:88</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>combines an other instance such that this order is maintained by priority and equivalent elements are ordered by
+									the other order.</p>
+								</div>
+								<p>You may want to optimize after merging several instances.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>other: <a href="_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>order to merge into this as secondary.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="optimize" class="tsd-anchor"></a>
+					<h3>optimize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">optimize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/SortOrder.ts:95</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>eliminates redundant sort fields that do not affect overall order.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="tostring" class="tsd-anchor"></a>
+					<h3>to<wbr>String</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">to<wbr>String<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/SortOrder.ts:68</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>formats a string such as &#39;+name,-id&#39;.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>representation of SortOrder, may be the empty string when this is empty.</p>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -142,7 +292,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_index_.html">"core/index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_init_.html">"core/init"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -169,7 +319,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="../modules/_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -197,30 +347,36 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_query_sortorder_.sortfield.html" class="tsd-kind-icon">Sort<wbr>Field</a>
+					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+					<li class="current tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_query_sortorder_.sortorder.html" class="tsd-kind-icon">Sort<wbr>Order</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="_query_sortorder_.sortorder.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_query_sortorder_.sortorder.html#sortfields" class="tsd-kind-icon">sort<wbr>Fields</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_query_sortorder_.sortorder.html#fromjson" class="tsd-kind-icon">fromJSON</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_query_sortorder_.sortorder.html#merge" class="tsd-kind-icon">merge</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_query_sortorder_.sortorder.html#optimize" class="tsd-kind-icon">optimize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_query_sortorder_.sortorder.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>
-					</li>
 				</ul>
 			</nav>
 		</div>

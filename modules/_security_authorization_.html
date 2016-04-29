@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;core/init&quot; | Relution-SDK</title>
+	<title>&quot;security/Authorization&quot; | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,10 +57,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_core_init_.html">&quot;core/init&quot;</a>
+					<a href="_security_authorization_.html">&quot;security/Authorization&quot;</a>
 				</li>
 			</ul>
-			<h1>External module &quot;core/init&quot;</h1>
+			<h1>External module &quot;security/Authorization&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -71,23 +71,35 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Classes</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-class tsd-parent-kind-external-module tsd-is-not-exported"><a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-kind-icon">Authorization<wbr>Impl</a></li>
+							</ul>
+						</section>
 						<section class="tsd-index-section ">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-kind-icon">Authorization</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_security_authorization_.credentials.html" class="tsd-kind-icon">Credentials</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_security_authorization_.loginobject.html" class="tsd-kind-icon">Login<wbr>Object</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_security_authorization_.html#anonymous_authorization" class="tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_security_authorization_.html#role_admin" class="tsd-kind-icon">ROLE_<wbr>ADMIN</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_security_authorization_.html#role_authenticated" class="tsd-kind-icon">ROLE_<wbr>AUTHENTICATED</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_security_authorization_.html#user_anyone" class="tsd-kind-icon">USER_<wbr>ANYONE</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_security_authorization_.html#currentauthorization" class="tsd-kind-icon">current<wbr>Authorization</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_core_init_.html#init" class="tsd-kind-icon">init</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_authorization_.html#getcurrentauthorization" class="tsd-kind-icon">get<wbr>Current<wbr>Authorization</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_authorization_.html#setcurrentauthorization" class="tsd-kind-icon">set<wbr>Current<wbr>Authorization</a></li>
 							</ul>
 						</section>
 					</div>
@@ -96,21 +108,88 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Variables</h2>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
-					<a name="initoptions-1" class="tsd-anchor"></a>
-					<h3>init<wbr>Options</h3>
-					<div class="tsd-signature tsd-kind-icon">init<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a></div>
+					<a name="anonymous_authorization" class="tsd-anchor"></a>
+					<h3>ANONYMOUS_<wbr>AUTHORIZATION</h3>
+					<div class="tsd-signature tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:59</li>
+							<li>Defined in security/Authorization.ts:125</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>copy of options the SDK was initialized with using <a href="_core_init_.html#init">init</a> function serving as defaults.</p>
+							<p>immutable <a href="../interfaces/_security_authorization_.authorization.html">Authorization</a> representing the anonymous user.</p>
 						</div>
 						<dl class="tsd-comment-tags">
-							<dt>internal</dt>
-							<dd><p>for SDK internal use only!</p>
+							<dt>type</dt>
+							<dd><p>{Authorization}</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+					<a name="role_admin" class="tsd-anchor"></a>
+					<h3>ROLE_<wbr>ADMIN</h3>
+					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>ADMIN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in security/Authorization.ts:114</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Administrator&#39;s role name. Users in this role should have full access to
+							all services in the system.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+					<a name="role_authenticated" class="tsd-anchor"></a>
+					<h3>ROLE_<wbr>AUTHENTICATED</h3>
+					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>AUTHENTICATED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in security/Authorization.ts:109</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Virtual role for all authenticated users.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+					<a name="user_anyone" class="tsd-anchor"></a>
+					<h3>USER_<wbr>ANYONE</h3>
+					<div class="tsd-signature tsd-kind-icon">USER_<wbr>ANYONE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in security/Authorization.ts:119</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The name of the predefined role, user.anyone, that all users and groups
+							belong to.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="currentauthorization" class="tsd-anchor"></a>
+					<h3>current<wbr>Authorization</h3>
+					<div class="tsd-signature tsd-kind-icon">current<wbr>Authorization<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in security/Authorization.ts:132</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>storage of <a href="../interfaces/_security_authorization_.authorization.html">Authorization</a> in effect.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{Authorization} in effect, never null.</p>
 							</dd>
 						</dl>
 					</div>
@@ -119,29 +198,57 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="init" class="tsd-anchor"></a>
-					<h3>init</h3>
+					<a name="getcurrentauthorization" class="tsd-anchor"></a>
+					<h3>get<wbr>Current<wbr>Authorization</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Current<wbr>Authorization<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/init.ts:66</li>
+									<li>Defined in security/Authorization.ts:138</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>(re)initializes the SDK providing global configuration parameters.</p>
+									<p>gets the <a href="_security_authorization_.html#currentauthorization">currentAuthorization</a> in effect.</p>
 								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></h4>
+							<p>in effect, never null.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="setcurrentauthorization" class="tsd-anchor"></a>
+					<h3>set<wbr>Current<wbr>Authorization</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Current<wbr>Authorization<span class="tsd-signature-symbol">(</span>authorization<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in security/Authorization.ts:148</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>sets the <a href="_security_authorization_.html#currentauthorization">currentAuthorization</a>.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>internal</dt>
+									<dd><p>for library use only!</p>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<h5>authorization: <a href="../interfaces/_security_authorization_.authorization.html" class="tsd-signature-type">Authorization</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>of configuration, often these are hardcoded values of the mobile client app.</p>
+										<p>to set.</p>
 									</div>
 								</li>
 							</ul>
@@ -160,7 +267,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="_core_index_.html">"core/index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="_core_init_.html">"core/init"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -196,7 +303,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="_query_index_.html">"query/index"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="_security_authorization_.html">"security/<wbr>Authorization"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -215,17 +322,38 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-kind-icon">Authorization<wbr>Impl</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
+						<a href="../interfaces/_security_authorization_.authorization.html" class="tsd-kind-icon">Authorization</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_security_authorization_.credentials.html" class="tsd-kind-icon">Credentials</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_security_authorization_.loginobject.html" class="tsd-kind-icon">Login<wbr>Object</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
+						<a href="_security_authorization_.html#anonymous_authorization" class="tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="_security_authorization_.html#role_admin" class="tsd-kind-icon">ROLE_<wbr>ADMIN</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="_security_authorization_.html#role_authenticated" class="tsd-kind-icon">ROLE_<wbr>AUTHENTICATED</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="_security_authorization_.html#user_anyone" class="tsd-kind-icon">USER_<wbr>ANYONE</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_security_authorization_.html#currentauthorization" class="tsd-kind-icon">current<wbr>Authorization</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_core_init_.html#init" class="tsd-kind-icon">init</a>
+						<a href="_security_authorization_.html#getcurrentauthorization" class="tsd-kind-icon">get<wbr>Current<wbr>Authorization</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_security_authorization_.html#setcurrentauthorization" class="tsd-kind-icon">set<wbr>Current<wbr>Authorization</a>
 					</li>
 				</ul>
 			</nav>

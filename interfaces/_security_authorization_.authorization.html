@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>InitOptions | Relution-SDK</title>
+	<title>Authorization | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,13 +57,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
+					<a href="../modules/_security_authorization_.html">&quot;security/Authorization&quot;</a>
 				</li>
 				<li>
-					<a href="_core_init_.initoptions.html">InitOptions</a>
+					<a href="_security_authorization_.authorization.html">Authorization</a>
 				</li>
 			</ul>
-			<h1>Interface InitOptions</h1>
+			<h1>Interface Authorization</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>optional options passed to <a href="../modules/_core_init_.html#init">init</a>.</p>
+						<p>provides access control related information.</p>
 					</div>
 				</div>
 			</section>
@@ -81,8 +81,14 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">InitOptions</span>
+						<span class="target">Authorization</span>
 					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implemented by</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-signature-type">AuthorizationImpl</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -92,8 +98,8 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_security_authorization_.authorization.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_security_authorization_.authorization.html#roles" class="tsd-kind-icon">roles</a></li>
 							</ul>
 						</section>
 					</div>
@@ -102,32 +108,33 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="logoncallback" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> logon<wbr>Callback</h3>
-					<div class="tsd-signature tsd-kind-icon">logon<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_core_init_.logoncallback.html" class="tsd-signature-type">LogonCallback</a></div>
+					<a name="name" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:51</li>
+							<li>Defined in security/Authorization.ts:57</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>optional logon applied after each login.</p>
+							<p>the <em>UUID</em> of the user represented.</p>
 						</div>
+						<p>Notice, only the <a href="../modules/_security_authorization_.html#anonymous_authorization">ANONYMOUS_AUTHORIZATION</a> does not specify a name.</p>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="serverurl" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> server<wbr>Url</h3>
-					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<a name="roles" class="tsd-anchor"></a>
+					<h3>roles</h3>
+					<div class="tsd-signature tsd-kind-icon">roles<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:46</li>
+							<li>Defined in security/Authorization.ts:61</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>absolute url path of (default) Relution server.</p>
+							<p>security roles the user belongs to, never null.</p>
 						</div>
 					</div>
 				</section>
@@ -142,7 +149,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_index_.html">"core/index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_core_init_.html">"core/init"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -178,7 +185,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_query_index_.html">"query/index"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="../modules/_security_authorization_.html">"security/<wbr>Authorization"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -197,29 +204,50 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../classes/_security_authorization_.authorizationimpl.html" class="tsd-kind-icon">Authorization<wbr>Impl</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+						<a href="_security_authorization_.authorization.html" class="tsd-kind-icon">Authorization</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a>
+								<a href="_security_authorization_.authorization.html#name" class="tsd-kind-icon">name</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+								<a href="_security_authorization_.authorization.html#roles" class="tsd-kind-icon">roles</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
+						<a href="_security_authorization_.credentials.html" class="tsd-kind-icon">Credentials</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_security_authorization_.loginobject.html" class="tsd-kind-icon">Login<wbr>Object</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
+						<a href="../modules/_security_authorization_.html#anonymous_authorization" class="tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_security_authorization_.html#role_admin" class="tsd-kind-icon">ROLE_<wbr>ADMIN</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_security_authorization_.html#role_authenticated" class="tsd-kind-icon">ROLE_<wbr>AUTHENTICATED</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_security_authorization_.html#user_anyone" class="tsd-kind-icon">USER_<wbr>ANYONE</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_security_authorization_.html#currentauthorization" class="tsd-kind-icon">current<wbr>Authorization</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>
+						<a href="../modules/_security_authorization_.html#getcurrentauthorization" class="tsd-kind-icon">get<wbr>Current<wbr>Authorization</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_security_authorization_.html#setcurrentauthorization" class="tsd-kind-icon">set<wbr>Current<wbr>Authorization</a>
 					</li>
 				</ul>
 			</nav>
