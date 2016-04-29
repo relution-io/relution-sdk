@@ -10,6 +10,7 @@
     "q": "registry:dt/q#0.0.0+20160417152954"
   },
   "dependencies": {
-    "lodash": "registry:npm/lodash#4.0.0+20160416211519"
+    "lodash": "registry:npm/lodash#4.0.0+20160416211519",
+    "request": "registry:npm/request#2.69.0+20160304121250"
   }
 }

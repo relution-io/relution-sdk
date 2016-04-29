@@ -1,5 +1,5 @@
 /**
- * @file index.ts
+ * @file web/index.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
@@ -23,14 +23,4 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// core module
-import * as theCore from './core';
-export let core = theCore;
-
-// security module
-import * as theSecurity from './security';
-export let security = theSecurity;
-
-// web module
-import * as theWeb from './web';
-export let web = theWeb;
+export * from './http';

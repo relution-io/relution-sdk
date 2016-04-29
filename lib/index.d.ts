@@ -26,3 +26,5 @@ import * as theCore from './core';
 export declare let core: typeof theCore;
 import * as theSecurity from './security';
 export declare let security: typeof theSecurity;
+import * as theWeb from './web';
+export declare let web: typeof theWeb;

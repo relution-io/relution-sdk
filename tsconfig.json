@@ -26,6 +26,8 @@
         "src/core/server.spec.ts",
         "src/core/server.ts",
         "src/index.ts",
-        "src/security/index.ts"
+        "src/security/index.ts",
+        "src/web/http.ts",
+        "src/web/index.ts"
     ]
 }
