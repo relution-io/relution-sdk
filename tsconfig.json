@@ -26,7 +26,17 @@
         "src/core/server.spec.ts",
         "src/core/server.ts",
         "src/index.ts",
+        "src/query/Filter.ts",
+        "src/query/FilterVisitor.ts",
+        "src/query/GetQuery.ts",
+        "src/query/index.ts",
+        "src/query/JsonFilterVisitor.ts",
+        "src/query/JsonPath.ts",
+        "src/query/SortOrder.ts",
+        "src/query/SortOrderComparator.ts",
+        "src/security/Authorization.ts",
         "src/security/index.ts",
+        "src/security/Organization.ts",
         "src/web/http.ts",
         "src/web/index.ts"
     ]
