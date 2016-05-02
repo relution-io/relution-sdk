@@ -24,11 +24,22 @@
  */
 
 import * as _ from 'lodash';
+import * as Q from 'q';
+
 import * as request from 'request';
 import * as http from 'http';
 import * as assert from 'assert';
 
-import * as server from '../core/server';
+import * as init from '../core/init';
+import * as auth from '../security/auth';
+import * as server from '../security/server';
+
+// require request.js to manage cookies for us
+let requestDefaults = {
+  json: true,
+  jar: true
+};
+let requestWithDefaults = request.defaults(requestDefaults);
 
 /**
  * callback allowing customizing an object not immediately available at time of call.
@@ -48,7 +59,8 @@ export type HttpResponse = http.IncomingMessage;
 /**
  * named parameters of the [[http]] function.
  */
-export interface HttpOptions extends request.CoreOptions, request.UrlOptions {
+export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
+    init.ServerUrlOptions {
   /**
    * optional callback allowing to inspect the server response in more detail than provided by
    * default.
@@ -63,12 +75,12 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions {
  * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
  *    `statusCode` and `statusMessage`.
  */
-export function http(options: HttpOptions): Q.Promise<any> {
-  let url = server.resolveUrl(options.url);
+export function ajax(options: HttpOptions): Q.Promise<any> {
+  let url = server.resolveUrl(options.url, options.serverUrl);
   let responseCallback = options.responseCallback || _.identity;
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
-      request(url, options, (error: any, response: http.IncomingMessage, body: any) => {
+      requestWithDefaults(url, options, (error: any, response: http.IncomingMessage, body: any) => {
         resolveResponse(response);
         promiseResponse.then((responseResult: http.IncomingMessage) => {
           assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
@@ -85,5 +97,91 @@ export function http(options: HttpOptions): Q.Promise<any> {
         }).done();
       });
     }));
+  });
+}
+
+/**
+ * options for use by both [[login]] and [[logout]].
+ */
+export interface LogonOptions extends request.CoreOptions {
+
+  /**
+   * specifies whether login response data is persisted such that subsequent logons can be
+   * processed even if communication with the Relution server is impossible at that time.
+   *
+   * On [[login]] set to `true` to persist the response to offline storage such that
+   * subsequent logon to the same server will reuse it even after the client app is restarted.
+   * The response data is stored in encrypted form. Once stored, calling [[login]] with the
+   * same set of credentials will succeed even if the Relution server can not be reached. In
+   * this case, credentials are verified by decryption of the encrypted response data.
+   *
+   * On [[logout]] set to `true` to ultimately erase the response from offline storage as well,
+   * after having it stored using the mechanism described above.
+   */
+  offlineCapable?: boolean; // future extension not implemented yet
+
+};
+
+/**
+ * options specific to [[login]] function.
+ */
+export interface LoginOptions extends LogonOptions, init.ServerUrlOptions {
+};
+
+/**
+ * logs into a Relution server.
+ *
+ * @param credentials to use.
+ * @param loginOptions overwriting [[init]] defaults.
+ *
+ * @return {Q.Promise<any>} of login response.
+ */
+export function login(credentials: auth.Credentials,
+                      loginOptions: LoginOptions = {}): Q.Promise<any> {
+  let url = server.resolveUrl('/gofer/security/rest/auth/login', loginOptions.serverUrl);
+  let serverUrl = server.resolveUrl('/', url);
+  return ajax(_.defaults<HttpOptions>({
+    url: url,
+    method: 'POST',
+    body: credentials,
+    serverUrl: serverUrl
+  }, loginOptions)).then((response) => {
+    // switch current server
+    init.initOptions.serverUrl = serverUrl;
+    server.setCurrentAuthorization({
+      name: response.user.uuid,
+      roles: _.map(response.roles.roles, (role: any) => role.uuid)
+    });
+    server.setCurrentOrganization(response.organization);
+    server.setCurrentUser(response.user);
+    return response;
+  });
+}
+
+/**
+ * options specific to [[logout]] function.
+ */
+export interface LogoutOptions extends LogonOptions {
+};
+
+/**
+ * logs out of a Relution server.
+ *
+ * @param logoutOptions overwriting [[init]] defaults.
+ *
+ * @return {Q.Promise<any>} of logout response.
+ */
+export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
+  let url = server.resolveUrl('/gofer/security/rest/auth/logout');
+  let serverUrl = server.resolveUrl('/', url);
+  return ajax(_.defaults<HttpOptions>({
+    url: url,
+    method: 'POST',
+    body: {},
+    serverUrl: serverUrl
+  }, logoutOptions)).finally(() => {
+    server.setCurrentAuthorization(auth.ANONYMOUS_AUTHORIZATION);
+    server.setCurrentOrganization(null);
+    server.setCurrentUser(null);
   });
 }

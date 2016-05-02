@@ -24,8 +24,6 @@
         "src/core/domain.ts",
         "src/core/index.ts",
         "src/core/init.ts",
-        "src/core/server.spec.ts",
-        "src/core/server.ts",
         "src/index.ts",
         "src/model/index.ts",
         "src/model/ModelContainer.ts",
@@ -37,9 +35,12 @@
         "src/query/JsonPath.ts",
         "src/query/SortOrder.ts",
         "src/query/SortOrderComparator.ts",
-        "src/security/Authorization.ts",
+        "src/security/auth.ts",
         "src/security/index.ts",
         "src/security/roles.ts",
+        "src/security/server.spec.ts",
+        "src/security/server.ts",
+        "src/web/http.spec.ts",
         "src/web/http.ts",
         "src/web/index.ts"
     ]

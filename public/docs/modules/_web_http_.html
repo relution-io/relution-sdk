@@ -76,6 +76,9 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/_web_http_.httpcallback.html" class="tsd-kind-icon">Http<wbr>Callback</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-kind-icon">Http<wbr>Options</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.loginoptions.html" class="tsd-kind-icon">Login<wbr>Options</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.logonoptions.html" class="tsd-kind-icon">Logon<wbr>Options</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-kind-icon">Logout<wbr>Options</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -84,10 +87,24 @@
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a></li>
 							</ul>
 						</section>
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Variables</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_web_http_.html#requestwithdefaults" class="tsd-kind-icon">request<wbr>With<wbr>Defaults</a></li>
+							</ul>
+						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#http" class="tsd-kind-icon">http</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#login" class="tsd-kind-icon">login</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#logout" class="tsd-kind-icon">logout</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Object literals</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-not-exported"><a href="_web_http_.html#requestdefaults" class="tsd-kind-icon">request<wbr>Defaults</a></li>
 							</ul>
 						</section>
 					</div>
@@ -101,7 +118,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IncomingMessage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:46</li>
+							<li>Defined in web/http.ts:57</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -111,19 +128,32 @@
 					</div>
 				</section>
 			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="requestwithdefaults" class="tsd-anchor"></a>
+					<h3>request<wbr>With<wbr>Defaults</h3>
+					<div class="tsd-signature tsd-kind-icon">request<wbr>With<wbr>Defaults<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestAPI</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">CoreOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">UriOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">UrlOptions</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:42</li>
+						</ul>
+					</aside>
+				</section>
+			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="http" class="tsd-anchor"></a>
-					<h3>http</h3>
+					<a name="ajax" class="tsd-anchor"></a>
+					<h3>ajax</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">http<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">ajax<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:66</li>
+									<li>Defined in web/http.ts:78</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -146,6 +176,109 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="login" class="tsd-anchor"></a>
+					<h3>login</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">login<span class="tsd-signature-symbol">(</span>credentials<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_auth_.credentials.html" class="tsd-signature-type">Credentials</a>, loginOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_web_http_.loginoptions.html" class="tsd-signature-type">LoginOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in web/http.ts:139</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>logs into a Relution server.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>credentials: <a href="../interfaces/_security_auth_.credentials.html" class="tsd-signature-type">Credentials</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to use.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> loginOptions: <a href="../interfaces/_web_http_.loginoptions.html" class="tsd-signature-type">LoginOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>overwriting <a href="_core_init_.html#init">init</a> defaults.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>of login response.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="logout" class="tsd-anchor"></a>
+					<h3>logout</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">logout<span class="tsd-signature-symbol">(</span>logoutOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in web/http.ts:174</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>logs out of a Relution server.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> logoutOptions: <a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>overwriting <a href="_core_init_.html#init">init</a> defaults.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>of logout response.</p>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+				<h2>Object literals</h2>
+				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="requestdefaults" class="tsd-anchor"></a>
+					<h3>request<wbr>Defaults</h3>
+					<div class="tsd-signature tsd-kind-icon">request<wbr>Defaults<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:38</li>
+						</ul>
+					</aside>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
+						<a name="requestdefaults.jar" class="tsd-anchor"></a>
+						<h3>jar</h3>
+						<div class="tsd-signature tsd-kind-icon">jar<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in web/http.ts:40</li>
+							</ul>
+						</aside>
+					</section>
+					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
+						<a name="requestdefaults.json" class="tsd-anchor"></a>
+						<h3>json</h3>
+						<div class="tsd-signature tsd-kind-icon">json<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in web/http.ts:39</li>
+							</ul>
+						</aside>
+					</section>
+				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -162,12 +295,6 @@
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_core_init_.html">"core/init"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_server_.html">"core/server"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_server_spec_.html">"core/server.spec"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_index_.html">"index"</a>
@@ -203,7 +330,7 @@
 						<a href="_query_index_.html">"query/index"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_security_authorization_.html">"security/<wbr>Authorization"</a>
+						<a href="_security_auth_.html">"security/auth"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_security_index_.html">"security/index"</a>
@@ -211,8 +338,17 @@
 					<li class=" tsd-kind-external-module">
 						<a href="_security_roles_.html">"security/roles"</a>
 					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_security_server_.html">"security/server"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_security_server_spec_.html">"security/server.spec"</a>
+					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_web_http_.html">"web/http"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_web_http_spec_.html">"web/http.spec"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_web_index_.html">"web/index"</a>
@@ -227,11 +363,32 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_web_http_.httpoptions.html" class="tsd-kind-icon">Http<wbr>Options</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_web_http_.loginoptions.html" class="tsd-kind-icon">Login<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_web_http_.logonoptions.html" class="tsd-kind-icon">Logon<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-kind-icon">Logout<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a>
 					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_web_http_.html#requestwithdefaults" class="tsd-kind-icon">request<wbr>With<wbr>Defaults</a>
+					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#http" class="tsd-kind-icon">http</a>
+						<a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_web_http_.html#login" class="tsd-kind-icon">login</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_web_http_.html#logout" class="tsd-kind-icon">logout</a>
+					</li>
+					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_web_http_.html#requestdefaults" class="tsd-kind-icon">request<wbr>Defaults</a>
 					</li>
 				</ul>
 			</nav>
