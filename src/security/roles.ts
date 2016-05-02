@@ -60,38 +60,6 @@ export function freezeOrganization(organization: Organization): Organization {
   return domain.freeze(organization);
 }
 
-/**
- * storage of [[Organization]] in effect.
- *
- * Uses null instead of {} for empty value so you can test using if statement via cohersion to
- * boolean.
- *
- * @type {Organization} in effect, may be null.
- */
-let currentOrganization: Organization = null;
-/**
- * gets the [[currentOrganization]] in effect.
- *
- * @param fields of interest.
- * @return {Organization} in effect, may be null.
- */
-export function getCurrentOrganization(...fields: string[]): Organization {
-  return currentOrganization;
-}
-/**
- * sets the [[currentOrganization]].
- *
- * @param organization to set.
- *
- * @internal for library use only!
- */
-export function setCurrentOrganization(organization: Organization) {
-  if (organization) {
-    currentOrganization = freezeOrganization(organization);
-  } else {
-    currentOrganization = null;
-  }
-}
 
 /**
  * user data as exchanged with Relution server.
@@ -140,38 +108,4 @@ export function freezeUser(user: User): User {
     user.preferences = Object.freeze(user.preferences);
   }
   return domain.freeze(user);
-}
-
-/**
- * storage of [[User]] in effect.
- *
- * Uses null instead of {} for empty value so you can test using if statement via cohersion to
- * boolean.
- *
- * @type {User} in effect, may be null.
- */
-let currentUser: User = null;
-/**
- * gets the [[currentUser]] in effect.
- *
- * @param fields of interest.
- *
- * @return {User} in effect, may be null.
- */
-export function getCurrentUser(...fields: string[]): User {
-  return currentUser;
-}
-/**
- * sets the [[currentUser]].
- *
- * @param user to set.
- *
- * @internal for library use only!
- */
-export function setCurrentUser(user: User) {
-  if (user) {
-    currentUser = freezeUser(user);
-  } else {
-    currentUser = null;
-  }
 }

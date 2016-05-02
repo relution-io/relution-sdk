@@ -1,5 +1,5 @@
 /**
- * @file core/server.spec.ts
+ * @file security/server.spec.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
@@ -22,17 +22,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-"use strict";
-var assert = require('assert');
-var core = require('./index');
-describe(module.filename, function () {
-    return it('resolveUrl', function () {
-        core.init({
-            serverUrl: 'http://192.168.0.10:8080'
-        });
-        assert.equal(core.resolveUrl('http://localhost:8090/mway/myapp/api/v1/some_endpoint'), 'http://localhost:8090/mway/myapp/api/v1/some_endpoint');
-        assert.equal(core.resolveUrl('/mway/myapp/api/v1/some_endpoint'), 'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint');
-        assert.equal(core.resolveUrl('mway/myapp/api/v1/some_endpoint'), 'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint');
+
+import * as assert from 'assert';
+
+import * as core from '../core';
+import * as server from './server';
+
+describe(module.filename, () => {
+  return it('resolveUrl', () => {
+    core.init({
+      serverUrl: 'http://192.168.0.10:8080'
     });
+
+    assert.equal(server.resolveUrl('http://localhost:8090/mway/myapp/api/v1/some_endpoint'),
+      'http://localhost:8090/mway/myapp/api/v1/some_endpoint');
+    assert.equal(server.resolveUrl('/mway/myapp/api/v1/some_endpoint'),
+      'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint');
+    assert.equal(server.resolveUrl('mway/myapp/api/v1/some_endpoint'),
+      'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint');
+  });
 });
-//# sourceMappingURL=server.spec.js.map

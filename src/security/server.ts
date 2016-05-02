@@ -1,0 +1,231 @@
+/**
+ * @file security/server.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 28.04.2016
+ * Copyright (c)
+ * 2016
+ * M-Way Solutions GmbH. All rights reserved.
+ * http://www.mwaysolutions.com
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are not permitted.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import * as url from 'url';
+import * as assert from 'assert';
+
+import * as init from '../core/init';
+
+import * as auth from './auth';
+import * as roles from './roles';
+
+/**
+ * computes a url from a given path.
+ *
+ * - absolute URLs are used as is, e.g.
+ *   ``http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint`` stays as is,
+ * - machine-relative URLs beginning with ``/`` are resolved against the Relution server logged
+ *   into, so that ``/gofer/.../rest/...``-style URLs work as expected, for example
+ *   ``/mway/myapp/api/v1/some_endpoint`` resolves as above when logged into
+ *   ``http://192.168.0.10:8080``,
+ * - context-relative URLs such as ``api/v1/...`` are resolved using the Relution server logged in,
+ *   the ``uniqueName`` of the ``currentOrganization`` and the application name, for example
+ *   ``api/v1/some_endpoint`` resolves as above when application myapp logged into
+ *   ``http://192.168.0.10:8080`` using a user of organization mway provided currentOrganization
+ *   was not changed explicitly to something else.
+ *
+ * @param path optional path to resolve.
+ * @return {string} absolute URL of path on current server.
+ */
+export function resolveUrl(path?: string, serverUrl: string = init.initOptions.serverUrl): string {
+  if (!serverUrl) {
+    return path;
+  }
+  if (!path) {
+    return serverUrl;
+  }
+  return url.resolve(serverUrl, path);
+}
+
+/**
+ * per-server state management.
+ *
+ * @internal for library use only.
+ */
+export class Server {
+
+  /**
+   * servers by url.
+   */
+  private static servers: {
+    [url: string]: Server;
+  } = {};
+
+  public static getInstance(serverUrl: string = init.initOptions.serverUrl): Server {
+    if (!serverUrl) {
+      throw new Error('no server set');
+    }
+    let server = Server.servers[serverUrl];
+    if (!server) {
+      server = new Server(serverUrl);
+      Server.servers[serverUrl] = server;
+    }
+    return server;
+  }
+
+  public makeCurrent() {
+    init.initOptions.serverUrl = this.options.serverUrl;
+  }
+
+  /**
+   * current set of options in effect for this server.
+   */
+  private options: init.ServerUrlOptions;
+
+  // security state
+  private state: {
+    authorization: auth.Authorization,
+    /**
+     * storage of [[Organization]] in effect.
+     *
+     * Uses null instead of {} for empty value so you can test using if statement via cohersion to
+     * boolean.
+     *
+     * @type {Organization} in effect, may be null.
+     */
+    organization: roles.Organization,
+    user: roles.User,
+    /**
+     * copy of credentials required for reestablishing the session when it timed out, for example.
+     */
+    credentials: auth.Credentials
+  } = {
+    authorization: auth.ANONYMOUS_AUTHORIZATION,
+    organization: null,
+    user: null,
+    credentials: null
+  };
+
+  constructor(serverUrl: string) {
+    this.options = init.cloneServerUrlOptions(init.initOptions);
+    this.options.serverUrl = serverUrl;
+  }
+
+  get authorization(): auth.Authorization {
+    return this.state.authorization;
+  }
+  set authorization(authorization: auth.Authorization) {
+    if (authorization && authorization != auth.ANONYMOUS_AUTHORIZATION) {
+      this.state.authorization = auth.freezeAuthorization(authorization);
+    } else {
+      this.state.authorization = auth.ANONYMOUS_AUTHORIZATION;
+    }
+  }
+
+  get organization(): roles.Organization {
+    return this.state.organization;
+  }
+  set organization(organization: roles.Organization) {
+    if (organization) {
+      this.state.organization = roles.freezeOrganization(organization);
+    } else {
+      this.state.organization = null;
+    }
+  }
+
+  get user(): roles.User {
+    return this.state.user;
+  }
+  set user(user: roles.User) {
+    if (user) {
+      this.state.user = roles.freezeUser(user);
+    } else {
+      this.state.user = null;
+    }
+  }
+
+  get credentials(): auth.Credentials {
+    return this.state.credentials;
+  }
+  set credentials(credentials: auth.Credentials) {
+    if (credentials) {
+      this.state.credentials = auth.freezeCredentials(auth.cloneCredentials(credentials));
+    } else {
+      this.state.credentials = null;
+    }
+  }
+
+}
+
+/**
+ * gets the current [[Server]].
+ *
+ * @param serverUrl to get state of.
+ * @return {Server} state parameter.
+ */
+export function getCurrentServer(): Server {
+  return Server.getInstance();
+}
+/**
+ * sets the current [[Server]].
+ *
+ * @param server to set state of.
+ */
+export function setCurrentServer(server: Server) {
+  if (server) {
+    server.makeCurrent();
+    assert.strictEqual(getCurrentServer(), server);
+  } else {
+    init.initOptions.serverUrl = null;
+  }
+}
+
+/**
+ * gets the [[Authorization]] in effect.
+ *
+ * @return {Authorization} in effect, may be null.
+ */
+export function getCurrentAuthorization(): auth.Authorization {
+  return getCurrentServer().authorization;
+}
+
+/**
+ * gets the [[Organization]] in effect.
+ *
+ * @param fields of interest.
+ * @return {Organization} in effect, may be null.
+ */
+export function getCurrentOrganization(...fields: string[]): roles.Organization {
+  return getCurrentServer().organization;
+}
+/**
+ * sets the [[Organization]].
+ *
+ * @param organization to set.
+ */
+export function setCurrentOrganization(organization: roles.Organization) {
+  getCurrentServer().organization = organization;
+  assert.equal(getCurrentOrganization(), organization);
+}
+
+/**
+ * gets the [[User]] in effect.
+ *
+ * @param fields of interest.
+ * @return {User} in effect, may be null.
+ */
+export function getCurrentUser(...fields: string[]): roles.User {
+  return getCurrentServer().user;
+}

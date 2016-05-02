@@ -23,5 +23,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export * from './Authorization';
+export * from './auth';
 export * from './roles';
+export * from './server';

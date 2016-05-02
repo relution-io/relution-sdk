@@ -9,17 +9,42 @@ export interface LogonCallback {
     (): Q.Promise<any>;
 }
 /**
- * optional options passed to [[init]].
+ * options passed to [[login]] method as well as to [[init]] serving as defaults for HTTP logins.
  */
-export interface InitOptions {
+export interface ServerUrlOptions {
     /**
      * absolute url path of (default) Relution server.
      */
     serverUrl?: string;
     /**
+     * name of (backend) application as specified in relution.json.
+     */
+    application?: string;
+    /**
      * optional logon applied after each login.
      */
     logonCallback?: LogonCallback;
+    /**
+     * when set, this is used as `pfx` for the requests to the server.
+     */
+    clientCertificate?: {
+        cert?: Buffer;
+        passphrase?: string;
+    } | any;
+    /**
+     * specifies additional options for the HTTP agent, advanced operation.
+     */
+    agentOptions?: any;
+}
+export declare function cloneServerUrlOptions(serverUrlOptions: ServerUrlOptions): ServerUrlOptions;
+/**
+ * optional options passed to [[init]].
+ */
+export interface InitOptions extends ServerUrlOptions {
+    /**
+     * when set, reconfigures console debugging and assertion testing of the library.
+     */
+    debug?: boolean;
 }
 /**
  * (re)initializes the SDK providing global configuration parameters.

@@ -23,9 +23,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as _ from 'lodash';
-import * as assert from 'assert';
-
 /**
  * some JSON literal of key/value pairs representing credentials.
  */
@@ -44,6 +41,15 @@ export interface LoginObject extends Credentials {
    * used only if [[userName]] is not set.
    */
   email?: string;
+}
+
+export function cloneCredentials<CredentialsT extends Credentials>(credentials: CredentialsT):
+    CredentialsT {
+  return JSON.parse(JSON.stringify(credentials));
+}
+export function freezeCredentials<CredentialsT extends Credentials>(credentials: CredentialsT):
+    CredentialsT {
+  return Object.freeze(credentials);
 }
 
 /**
@@ -72,7 +78,7 @@ export interface Authorization {
  */
 export function freezeAuthorization(authorization: Authorization): Authorization {
   authorization.roles = Object.freeze(authorization.roles);
-  return Object.freeze(this);
+  return Object.freeze(authorization);
 }
 
 /**
@@ -100,82 +106,3 @@ export const ANONYMOUS_AUTHORIZATION = freezeAuthorization({
     USER_ANYONE
   ]
 });
-
-/**
- * explicit class allowing to provide additional management capability.
- *
- * @internal intended for library extensibility only.
- */
-class AuthorizationImpl {
-  private authorization: Authorization = {
-    name: ANONYMOUS_AUTHORIZATION.name,
-    roles: ANONYMOUS_AUTHORIZATION.roles
-  };
-
-  /**
-   * copy-constructs a deeply independent and mutable copy.
-   *
-   * @param json to copy.
-   */
-  constructor(json: Authorization);
-  /**
-   * explicitly initializes an instance.
-   *
-   * @param name stored in instance, the *UUID* of a user.
-   * @param roles of user.
-     */
-  constructor(name: string, ...roles: string[]);
-  /**
-   * @internal overloaded constructor.
-   */
-  constructor(jsonOrName: string | Authorization, ...roles: string[]) {
-    let authorization = this.authorization;
-    authorization.roles = roles; // never null thanks to TypeScript
-    if (_.isString(jsonOrName)) {
-      authorization.name = jsonOrName;
-    } else if (jsonOrName) {
-      _.assign(authorization, jsonOrName);
-      assert.equal(roles.length, 0, 'roles argument can not be used with json');
-      assert(_.isArray(authorization.roles), 'roles literal must be an array');
-    }
-    this.authorization = freezeAuthorization(authorization);
-  }
-
-  /**
-   * when stringifying all management data must be erased!
-   *
-   * @return {{name: string, roles: string[]}} minimal information only.
-   */
-  public toJSON(): Authorization {
-    return this.authorization;
-  }
-}
-
-/**
- * storage of [[Authorization]] in effect.
- *
- * @type {Authorization} in effect, never null.
- */
-let currentAuthorization = new AuthorizationImpl(null);
-/**
- * gets the [[currentAuthorization]] in effect.
- *
- * @return {Authorization} in effect, never null.
- */
-export function getCurrentAuthorization(): Authorization {
-  return currentAuthorization.toJSON();
-}
-/**
- * sets the [[currentAuthorization]].
- *
- * @param authorization to set.
- *
- * @internal for library use only!
- */
-export function setCurrentAuthorization(authorization?: Authorization | AuthorizationImpl) {
-  if (authorization instanceof AuthorizationImpl) {
-    currentAuthorization = authorization;
-  } else {
-    currentAuthorization = new AuthorizationImpl(authorization);
-  }
-}

@@ -37,18 +37,63 @@ export interface LogonCallback {
 }
 
 /**
- * optional options passed to [[init]].
+ * options passed to [[login]] method as well as to [[init]] serving as defaults for HTTP logins.
  */
-export interface InitOptions {
+export interface ServerUrlOptions {
   /**
    * absolute url path of (default) Relution server.
    */
   serverUrl?: string;
 
   /**
+   * name of (backend) application as specified in relution.json.
+   */
+  application?: string;
+
+  /**
    * optional logon applied after each login.
    */
   logonCallback?: LogonCallback;
+
+  /**
+   * when set, this is used as `pfx` for the requests to the server.
+   */
+  clientCertificate?: {
+    cert?: Buffer;
+    passphrase?: string;
+  } | any;
+
+  /**
+   * specifies additional options for the HTTP agent, advanced operation.
+   */
+  agentOptions?: any;
+}
+
+export function cloneServerUrlOptions(serverUrlOptions: ServerUrlOptions): ServerUrlOptions {
+  let result: ServerUrlOptions = {
+    serverUrl: serverUrlOptions.serverUrl,
+    application: serverUrlOptions.application,
+    logonCallback: serverUrlOptions.logonCallback,
+  };
+  if (serverUrlOptions.clientCertificate) {
+    result.clientCertificate = _.clone(serverUrlOptions.clientCertificate);
+  }
+  if (serverUrlOptions.agentOptions) {
+    result.agentOptions = _.clone(serverUrlOptions.agentOptions);
+  }
+  return result;
+}
+
+/**
+ * optional options passed to [[init]].
+ */
+export interface InitOptions extends ServerUrlOptions {
+
+  /**
+   * when set, reconfigures console debugging and assertion testing of the library.
+   */
+  debug?: boolean;
+
 }
 
 /**
@@ -64,5 +109,5 @@ export let initOptions: InitOptions = {};
  * @param options of configuration, often these are hardcoded values of the mobile client app.
  */
 export function init(options: InitOptions = {}) {
-  initOptions = _.cloneDeep(options);
+  _.assign(initOptions, cloneServerUrlOptions(options));
 }

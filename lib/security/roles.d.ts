@@ -39,13 +39,6 @@ export interface Organization extends domain.Referenceable, domain.Secure, domai
     propertyMap?: any;
 }
 /**
- * gets the [[currentOrganization]] in effect.
- *
- * @param fields of interest.
- * @return {Organization} in effect, may be null.
- */
-export declare function getCurrentOrganization(...fields: string[]): Organization;
-/**
  * user data as exchanged with Relution server.
  */
 export interface User extends Role {
@@ -67,11 +60,3 @@ export interface User extends Role {
     confirmationTokenValidTo?: Date;
     preferences?: any;
 }
-/**
- * gets the [[currentUser]] in effect.
- *
- * @param fields of interest.
- *
- * @return {User} in effect, may be null.
- */
-export declare function getCurrentUser(...fields: string[]): User;
