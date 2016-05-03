@@ -10,11 +10,13 @@
     "build": "tsc -p .",
     "api": "typedoc -p . --rootDir src --out public/docs --module commonjs --stripInternal --name Relution-SDK --exclude **/*.spec.ts src typings/main.d.ts",
     "watch": "tsc -p . -w",
-    "postinstall": "typings install"
+    "postinstall": "typings install",
+	"browserify": "browserify index.js -o browser.js"
   },
   "author": "Thomas Beckmann",
   "license": "Apache License",
   "devDependencies": {
+    "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
     "sinon": "^1.16.0",
