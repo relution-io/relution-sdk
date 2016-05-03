@@ -33,3 +33,5 @@ import * as theSecurity from './security';
 export declare const security: typeof theSecurity;
 import * as theWeb from './web';
 export declare const web: typeof theWeb;
+import * as theConnector from './connector';
+export declare const connector: typeof theConnector;

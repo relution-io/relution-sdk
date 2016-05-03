@@ -45,3 +45,7 @@ export const security = theSecurity;
 // web module
 import * as theWeb from './web';
 export const web = theWeb;
+
+// connector module
+import * as theConnector from './connector';
+export const connector = theConnector;
