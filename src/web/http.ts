@@ -30,6 +30,7 @@ import * as request from 'request';
 import * as http from 'http';
 import * as assert from 'assert';
 
+import * as diag from '../core/diag';
 import * as init from '../core/init';
 import * as auth from '../security/auth';
 import * as server from '../security/server';
@@ -80,7 +81,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   let responseCallback = options.responseCallback || _.identity;
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
-      console.log(url);
+      diag.debug.debug(options.method + ' ' + url);
       requestWithDefaults(url, options, (error: any, response: http.IncomingMessage, body: any) => {
         resolveResponse(response);
         promiseResponse.then((responseResult: http.IncomingMessage) => {
@@ -157,7 +158,6 @@ export function login(credentials: auth.Credentials,
     serverObj.user = response.user;
     serverObj.credentials = credentials;
     server.setCurrentServer(serverObj);
-    console.log(init.initOptions.serverUrl);
     return response;
   });
 }

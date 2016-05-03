@@ -23,5 +23,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+export * from './diag';
 export * from './init';
 export * from './domain';

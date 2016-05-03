@@ -22,13 +22,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+export { debug } from './core/diag';
 import * as theCore from './core';
-export declare let core: typeof theCore;
+export declare const core: typeof theCore;
 import * as theModel from './model';
-export declare let model: typeof theModel;
+export declare const model: typeof theModel;
 import * as theQuery from './query';
-export declare let query: typeof theQuery;
+export declare const query: typeof theQuery;
 import * as theSecurity from './security';
-export declare let security: typeof theSecurity;
+export declare const security: typeof theSecurity;
 import * as theWeb from './web';
-export declare let web: typeof theWeb;
+export declare const web: typeof theWeb;

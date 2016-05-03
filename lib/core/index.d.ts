@@ -22,5 +22,6 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+export * from './diag';
 export * from './init';
 export * from './domain';

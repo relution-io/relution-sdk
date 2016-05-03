@@ -23,22 +23,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+// debug support
+export {debug} from './core/diag';
+
 // core module
 import * as theCore from './core';
-export let core = theCore;
+export const core = theCore;
 
 // model module
 import * as theModel from './model';
-export let model = theModel;
+export const model = theModel;
 
 // query module
 import * as theQuery from './query';
-export let query = theQuery;
+export const query = theQuery;
 
 // security module
 import * as theSecurity from './security';
-export let security = theSecurity;
+export const security = theSecurity;
 
 // web module
 import * as theWeb from './web';
-export let web = theWeb;
+export const web = theWeb;

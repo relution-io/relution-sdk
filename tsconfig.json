@@ -21,6 +21,8 @@
     ],
     "files": [
         "typings/main.d.ts",
+        "src/core/diag.spec.ts",
+        "src/core/diag.ts",
         "src/core/domain.ts",
         "src/core/index.ts",
         "src/core/init.ts",

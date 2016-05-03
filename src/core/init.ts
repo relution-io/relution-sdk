@@ -25,6 +25,8 @@
 
 import * as _ from 'lodash';
 
+import * as diag from './diag';
+
 /**
  * applied on each successful authentication with the Relution server.
  *
@@ -109,5 +111,9 @@ export let initOptions: InitOptions = {};
  * @param options of configuration, often these are hardcoded values of the mobile client app.
  */
 export function init(options: InitOptions = {}) {
+  if ('debug' in options) {
+    diag.debug.enabled = options.debug;
+  }
+
   _.assign(initOptions, cloneServerUrlOptions(options));
 }
