@@ -23,6 +23,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 export { debug } from './core/diag';
+export { init } from './core/init';
 import * as theCore from './core';
 export declare const core: typeof theCore;
 import * as theModel from './model';

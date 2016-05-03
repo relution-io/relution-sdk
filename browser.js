@@ -1,4 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process){
 /**
  * Relution SDK
  *
@@ -24,7 +25,15 @@
  */
 module.exports = require('./lib');
 
-},{"./lib":8}],2:[function(require,module,exports){
+if (!process || 'browser' in process) {
+  // browser
+  if (window) {
+    window.Relution = module.exports;
+  }
+}
+
+}).call(this,require('_process'))
+},{"./lib":8,"_process":242}],2:[function(require,module,exports){
 /**
  * @file connector/connector.ts
  * Relution SDK
@@ -461,9 +470,11 @@ exports.init = init;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 "use strict";
-// debug support
+// aliases
 var diag_1 = require('./core/diag');
 exports.debug = diag_1.debug;
+var init_1 = require('./core/init');
+exports.init = init_1.init;
 // core module
 var theCore = require('./core');
 exports.core = theCore;
@@ -483,7 +494,7 @@ exports.web = theWeb;
 var theConnector = require('./connector');
 exports.connector = theConnector;
 
-},{"./connector":3,"./core":6,"./core/diag":4,"./model":10,"./query":17,"./security":19,"./web":23}],9:[function(require,module,exports){
+},{"./connector":3,"./core":6,"./core/diag":4,"./core/init":7,"./model":10,"./query":17,"./security":19,"./web":23}],9:[function(require,module,exports){
 /**
  * model/ModelContainer.ts
  * Relution SDK

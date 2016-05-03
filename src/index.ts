@@ -23,8 +23,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// debug support
+// aliases
 export {debug} from './core/diag';
+export {init} from './core/init';
 
 // core module
 import * as theCore from './core';

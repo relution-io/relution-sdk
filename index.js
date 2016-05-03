@@ -22,3 +22,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 module.exports = require('./lib');
+
+if (!process || 'browser' in process) {
+  // browser
+  if (window) {
+    window.Relution = module.exports;
+  }
+}
