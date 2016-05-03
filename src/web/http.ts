@@ -143,8 +143,8 @@ export function login(credentials: auth.Credentials,
   let url = server.resolveUrl('/gofer/security/rest/auth/login', loginOptions.serverUrl);
   let serverUrl = server.resolveUrl('/', url);
   return ajax(_.defaults<HttpOptions>({
-    url: url,
     method: 'POST',
+    url: url,
     body: credentials,
     serverUrl: serverUrl
   }, loginOptions)).then((response) => {
@@ -179,8 +179,8 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
   let url = server.resolveUrl('/gofer/security/rest/auth/logout');
   let serverUrl = server.resolveUrl('/', url);
   return ajax(_.defaults<HttpOptions>({
-    url: url,
     method: 'POST',
+    url: url,
     body: {},
     serverUrl: serverUrl
   }, logoutOptions)).finally(() => {
