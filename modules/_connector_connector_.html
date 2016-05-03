@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;security/roles&quot; | Relution-SDK</title>
+	<title>&quot;connector/connector&quot; | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,10 +57,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_security_roles_.html">&quot;security/roles&quot;</a>
+					<a href="_connector_connector_.html">&quot;connector/connector&quot;</a>
 				</li>
 			</ul>
-			<h1>External module &quot;security/roles&quot;</h1>
+			<h1>External module &quot;connector/connector&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -71,97 +71,133 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section ">
-							<h3>Interfaces</h3>
+						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Variables</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_security_roles_.organization.html" class="tsd-kind-icon">Organization</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_security_roles_.role.html" class="tsd-kind-icon">Role</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_security_roles_.user.html" class="tsd-kind-icon">User</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_connector_connector_.html#connectorsurl" class="tsd-kind-icon">connectors<wbr>Url</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_roles_.html#freezeorganization" class="tsd-kind-icon">freeze<wbr>Organization</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_security_roles_.html#freezeuser" class="tsd-kind-icon">freeze<wbr>User</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_connector_connector_.html#configuresession" class="tsd-kind-icon">configure<wbr>Session</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_connector_connector_.html#runcall" class="tsd-kind-icon">run<wbr>Call</a></li>
 							</ul>
 						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="connectorsurl" class="tsd-anchor"></a>
+					<h3>connectors<wbr>Url</h3>
+					<div class="tsd-signature tsd-kind-icon">connectors<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in connector/connector.ts:35</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>endpoint URL of connectors REST API set up by CLI project generation by default.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{string}</p>
+							</dd>
+						</dl>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="freezeorganization" class="tsd-anchor"></a>
-					<h3>freeze<wbr>Organization</h3>
+					<a name="configuresession" class="tsd-anchor"></a>
+					<h3>configure<wbr>Session</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">freeze<wbr>Organization<span class="tsd-signature-symbol">(</span>organization<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_roles_.organization.html" class="tsd-signature-type">Organization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_roles_.organization.html" class="tsd-signature-type">Organization</a></li>
+						<li class="tsd-signature tsd-kind-icon">configure<wbr>Session<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, properties<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in security/roles.ts:56</li>
+									<li>Defined in connector/connector.ts:51</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>turns the object deeply immutable.</p>
+									<p>provides per-user connection properties to be stored as part of the session,
+									such as credentials for a given connection.</p>
 								</div>
-								<dl class="tsd-comment-tags">
-									<dt>internal</dt>
-									<dd><p>for library use only.</p>
-									</dd>
-								</dl>
+								<p>
+									All parameters in properties are copied to the transient session store,
+									overwriting any already existing values. To delete a previously stored
+									parameter, provide an empty value explicitly.
+								</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>organization: <a href="../interfaces/_security_roles_.organization.html" class="tsd-signature-type">Organization</a></h5>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>to freeze.</p>
+										<p>of connection.</p>
+									</div>
+								</li>
+								<li>
+									<h5>properties: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to store in session.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_security_roles_.organization.html" class="tsd-signature-type">Organization</a></h4>
-							<p>organization for convenience.</p>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>promise of async execution.</p>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="freezeuser" class="tsd-anchor"></a>
-					<h3>freeze<wbr>User</h3>
+					<a name="runcall" class="tsd-anchor"></a>
+					<h3>run<wbr>Call</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">freeze<wbr>User<span class="tsd-signature-symbol">(</span>user<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_roles_.user.html" class="tsd-signature-type">User</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_roles_.user.html" class="tsd-signature-type">User</a></li>
+						<li class="tsd-signature tsd-kind-icon">run<wbr>Call<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, call<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, input<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in security/roles.ts:97</li>
+									<li>Defined in connector/connector.ts:67</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>turns the object deeply immutable.</p>
+									<p>executes a call on a connection.</p>
 								</div>
-								<dl class="tsd-comment-tags">
-									<dt>internal</dt>
-									<dd><p>for library use only.</p>
-									</dd>
-								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>user: <a href="../interfaces/_security_roles_.user.html" class="tsd-signature-type">User</a></h5>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>to freeze.</p>
+										<p>of connection.</p>
+									</div>
+								</li>
+								<li>
+									<h5>call: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>name.</p>
+									</div>
+								</li>
+								<li>
+									<h5>input: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>data, i.e. an instance of a model or object compatible to the
+										model in terms of attributes defined.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_security_roles_.user.html" class="tsd-signature-type">User</a></h4>
-							<p>user for convenience.</p>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>promise providing output/error.</p>
 						</li>
 					</ul>
 				</section>
@@ -174,26 +210,20 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_security_roles_.html">"security/roles"</a>
+						<a href="_connector_connector_.html">"connector/connector"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_security_roles_.organization.html" class="tsd-kind-icon">Organization</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_security_roles_.role.html" class="tsd-kind-icon">Role</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_security_roles_.user.html" class="tsd-kind-icon">User</a>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_connector_connector_.html#connectorsurl" class="tsd-kind-icon">connectors<wbr>Url</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_security_roles_.html#freezeorganization" class="tsd-kind-icon">freeze<wbr>Organization</a>
+						<a href="_connector_connector_.html#configuresession" class="tsd-kind-icon">configure<wbr>Session</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_security_roles_.html#freezeuser" class="tsd-kind-icon">freeze<wbr>User</a>
+						<a href="_connector_connector_.html#runcall" class="tsd-kind-icon">run<wbr>Call</a>
 					</li>
 				</ul>
 			</nav>
