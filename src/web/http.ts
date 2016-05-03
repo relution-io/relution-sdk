@@ -38,7 +38,8 @@ import * as server from '../security/server';
 // require request.js to manage cookies for us
 let requestDefaults = {
   json: true,
-  jar: true
+  jar: true,
+  withCredentials: true
 };
 let requestWithDefaults = request.defaults(requestDefaults);
 
@@ -87,7 +88,19 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
         promiseResponse.then((responseResult: http.IncomingMessage) => {
           assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
             'original response is reserved for future extension!');
+
+          if (!error && responseResult.statusCode >= 400) {
+            if (!body) {
+              error = new Error(responseResult.statusMessage);
+            } else if (_.isString(body)) {
+              error = new Error(body);
+            } else {
+              error = body;
+            }
+          }
+
           if (error) {
+            error.requestUrl = url;
             error.statusCode = responseResult.statusCode;
             error.statusMessage = responseResult.statusMessage;
             rejectResult(error);
@@ -183,7 +196,21 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
     url: url,
     body: {},
     serverUrl: serverUrl
-  }, logoutOptions)).finally(() => {
+  }, logoutOptions)).catch((error) => {
+    // REST-based logout URL currently is broken reporting a 422 in all cases
+    return ajax(_.defaults<HttpOptions>({
+      method: 'GET',
+      url: '/gofer/security-logout',
+      serverUrl: serverUrl
+    }, logoutOptions)).then((result) => {
+      diag.debug.warn('resorted to classic PATH-based logout as REST-based logout failed: ', error);
+      return result;
+    }, (error2) => {
+      error.suppressed = error.suppressed || [];
+      error.suppressed.push(error2);
+      throw error;
+    });
+  }).finally(() => {
     let serverObj = server.Server.getInstance(serverUrl);
     serverObj.credentials = null;
     serverObj.authorization = auth.ANONYMOUS_AUTHORIZATION;
