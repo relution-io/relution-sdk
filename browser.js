@@ -408,11 +408,22 @@ __export(require('./domain'));
  */
 "use strict";
 var _ = require('lodash');
+var Q = require('q');
 var diag = require('./diag');
+// initialize to go in sync with init() call
+Q.longStackSupport = diag.debug.enabled;
+/**
+ * creates a deeply independent copy of some [[ServerUrlOptions]].
+ *
+ * @param serverUrlOptions to clone.
+ * @return {ServerUrlOptions} cloned object.
+ */
 function cloneServerUrlOptions(serverUrlOptions) {
     var result = {
         serverUrl: serverUrlOptions.serverUrl,
         application: serverUrlOptions.application,
+        clientapp: serverUrlOptions.clientapp,
+        tenantorga: serverUrlOptions.tenantorga,
         logonCallback: serverUrlOptions.logonCallback,
     };
     if (serverUrlOptions.clientCertificate) {
@@ -439,12 +450,13 @@ function init(options) {
     if (options === void 0) { options = {}; }
     if ('debug' in options) {
         diag.debug.enabled = options.debug;
+        Q.longStackSupport = options.debug;
     }
     _.assign(exports.initOptions, cloneServerUrlOptions(options));
 }
 exports.init = init;
 
-},{"./diag":4,"lodash":276}],8:[function(require,module,exports){
+},{"./diag":4,"lodash":276,"q":277}],8:[function(require,module,exports){
 /**
  * @file index.ts
  * Relution SDK
@@ -2254,24 +2266,50 @@ var requestWithDefaults = request.defaults(requestDefaults);
 /**
  * drives an HTTP request against the Relution server.
  *
+ * Behavior of this method is simplified from most HTTP/AJAX implementations:
+ * - When the HTTP request succeeds the resulting promise resolves to the response body.
+ * - In case of a network Error the promise resolves to an Error object providing `requestUrl`
+ *   but neither `statusCode` nor `statusMessage`.
+ * - In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+ *   the properties `requestUrl`, `statusCode` and `statusMessage`.
+ * - If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
+ *   is augmented by the properties as defined above.
+ * - Otherwise the body is stored as `message` of an Error object created. Again, the properties
+ *   above are provided.
+ * - Finally, in case of HTTP failure with the server not providing any response body, the Error
+ *   `message` is set to the `statusMessage`.
+ *
+ * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
+ * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ *
  * @param options of request, including target `url`.
  * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
- *    `statusCode` and `statusMessage`.
+ *    `requestUrl`, `statusCode` and `statusMessage`.
  */
 function ajax(options) {
     var url = server.resolveUrl(options.url, options.serverUrl);
+    var serverUrl = server.resolveUrl('/', url);
+    var serverObj = server.Server.getInstance(serverUrl);
+    if (!serverObj.sessionUserUuid && serverObj.credentials) {
+        // not logged in
+        var credentials_1 = serverObj.credentials;
+        serverObj.credentials = null;
+        return login(credentials_1, options).then(function () {
+            diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
+            diag.debug.assert(function () { return serverObj.credentials == credentials_1; });
+            return ajax(options); // repeat after login
+        });
+    }
     var responseCallback = options.responseCallback || _.identity;
     return Q.Promise(function (resolveResult, rejectResult) {
         var promiseResponse = responseCallback(Q.Promise(function (resolveResponse, rejectResponse) {
             diag.debug.debug(options.method + ' ' + url);
             requestWithDefaults(url, options, function (error, response, body) {
-                resolveResponse(response);
-                promiseResponse.then(function (responseResult) {
-                    assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
-                        'original response is reserved for future extension!');
-                    if (!error && responseResult.statusCode >= 400) {
+                // error processing
+                if (!error && response) {
+                    if (response.statusCode >= 400) {
                         if (!body) {
-                            error = new Error(responseResult.statusMessage);
+                            error = new Error(response.statusMessage);
                         }
                         else if (_.isString(body)) {
                             error = new Error(body);
@@ -2280,10 +2318,43 @@ function ajax(options) {
                             error = body;
                         }
                     }
+                }
+                if (error) {
+                    error.requestUrl = url;
+                    if (response) {
+                        error.statusCode = response.statusCode;
+                        error.statusMessage = response.statusMessage;
+                    }
+                }
+                // logon session processing
+                if (response) {
+                    var sessionUserUuid = response.headers['x-gofer-user'];
+                    if (sessionUserUuid) {
+                        serverObj.sessionUserUuid = sessionUserUuid;
+                    }
+                    else if (response.statusCode === 401) {
+                        // apparently our session is lost!
+                        serverObj.sessionUserUuid = null;
+                        diag.debug.assert(function () { return error; });
+                        diag.debug.warn('server session is lost!', error);
+                        if (serverObj.credentials) {
+                        }
+                    }
+                }
+                if (response) {
+                    // transport response
+                    // Notice, we might have an error object never the less here
+                    resolveResponse(response);
+                }
+                else {
+                    // network connectivity problem
+                    diag.debug.assertIsError(error);
+                    rejectResponse(error);
+                }
+                promiseResponse.then(function (responseResult) {
+                    assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
+                        'original response is reserved for future extension!');
                     if (error) {
-                        error.requestUrl = url;
-                        error.statusCode = responseResult.statusCode;
-                        error.statusMessage = responseResult.statusMessage;
                         rejectResult(error);
                     }
                     else {
@@ -2311,6 +2382,14 @@ function login(credentials, loginOptions) {
     if (loginOptions === void 0) { loginOptions = {}; }
     var url = server.resolveUrl('/gofer/security/rest/auth/login', loginOptions.serverUrl);
     var serverUrl = server.resolveUrl('/', url);
+    var serverObj = server.Server.getInstance(serverUrl);
+    if (serverObj.sessionUserUuid) {
+        // logged in already
+        return logout(loginOptions).then(function () {
+            diag.debug.assert(function () { return !serverObj.sessionUserUuid; });
+            return login(credentials, loginOptions); // repeat after logout
+        });
+    }
     return ajax(_.defaults({
         method: 'POST',
         url: url,
@@ -2318,7 +2397,10 @@ function login(credentials, loginOptions) {
         serverUrl: serverUrl
     }, loginOptions)).then(function (response) {
         // switch current server
-        var serverObj = server.Server.getInstance(serverUrl);
+        if (!serverObj.sessionUserUuid) {
+            diag.debug.warn('BUG: Relution did not set X-Gofer-User response header');
+            serverObj.sessionUserUuid = response.user.uuid;
+        }
         serverObj.authorization = {
             name: response.user.uuid,
             roles: _.map(response.roles.roles, function (role) { return role.uuid; })
@@ -2326,6 +2408,7 @@ function login(credentials, loginOptions) {
         serverObj.organization = response.organization;
         serverObj.user = response.user;
         serverObj.credentials = credentials;
+        diag.debug.assert(function () { return serverObj.sessionUserUuid === serverObj.authorization.name; });
         server.setCurrentServer(serverObj);
         return response;
     });
@@ -2355,7 +2438,7 @@ function logout(logoutOptions) {
             url: '/gofer/security-logout',
             serverUrl: serverUrl
         }, logoutOptions)).then(function (result) {
-            diag.debug.warn('resorted to classic PATH-based logout as REST-based logout failed: ', error);
+            diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed: ', error);
             return result;
         }, function (error2) {
             error.suppressed = error.suppressed || [];

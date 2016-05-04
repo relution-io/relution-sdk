@@ -29,9 +29,25 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions, in
 /**
  * drives an HTTP request against the Relution server.
  *
+ * Behavior of this method is simplified from most HTTP/AJAX implementations:
+ * - When the HTTP request succeeds the resulting promise resolves to the response body.
+ * - In case of a network Error the promise resolves to an Error object providing `requestUrl`
+ *   but neither `statusCode` nor `statusMessage`.
+ * - In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+ *   the properties `requestUrl`, `statusCode` and `statusMessage`.
+ * - If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
+ *   is augmented by the properties as defined above.
+ * - Otherwise the body is stored as `message` of an Error object created. Again, the properties
+ *   above are provided.
+ * - Finally, in case of HTTP failure with the server not providing any response body, the Error
+ *   `message` is set to the `statusMessage`.
+ *
+ * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
+ * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ *
  * @param options of request, including target `url`.
  * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
- *    `statusCode` and `statusMessage`.
+ *    `requestUrl`, `statusCode` and `statusMessage`.
  */
 export declare function ajax(options: HttpOptions): Q.Promise<any>;
 /**

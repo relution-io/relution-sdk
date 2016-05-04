@@ -100,9 +100,11 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#application" class="tsd-kind-icon">application</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#clientcertificate" class="tsd-kind-icon">client<wbr>Certificate</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#clientapp" class="tsd-kind-icon">clientapp</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#debug" class="tsd-kind-icon">debug</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a></li>
 							</ul>
 						</section>
 					</div>
@@ -117,13 +119,14 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#agentoptions">agentOptions</a></p>
 						<ul>
-							<li>Defined in core/init.ts:71</li>
+							<li>Defined in core/init.ts:111</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>specifies additional options for the HTTP agent, advanced operation.</p>
 						</div>
+						<p>In rare cases this field may be useful to alter behavior of the underlying http client.</p>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -133,13 +136,16 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#application">application</a></p>
 						<ul>
-							<li>Defined in core/init.ts:53</li>
+							<li>Defined in core/init.ts:64</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>name of (backend) application as specified in relution.json.</p>
 						</div>
+						<p>It is adviced following the convention of using this name prefixed by a slash as the
+							<code>baseAlias</code>. However, in case a different alias is used, set the field to the alias
+						including the slash instead to make the library communicate to the correct endpoint.</p>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -149,7 +155,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#clientcertificate">clientCertificate</a></p>
 						<ul>
-							<li>Defined in core/init.ts:63</li>
+							<li>Defined in core/init.ts:101</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -158,19 +164,38 @@
 						</div>
 					</div>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="clientapp" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> clientapp</h3>
+					<div class="tsd-signature tsd-kind-icon">clientapp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#clientapp">clientapp</a></p>
+						<ul>
+							<li>Defined in core/init.ts:71</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>(mobile) client app using the (backend) <a href="_core_init_.initoptions.html#application">application</a>.</p>
+						</div>
+						<p>When set, the value of this field is send to the Relution server for identification
+						of the app using it. Typically, this is the name or uuid of the app in the appstore.</p>
+					</div>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="debug" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> debug</h3>
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:97</li>
+							<li>Defined in core/init.ts:147</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>when set, reconfigures console debugging and assertion testing of the library.</p>
 						</div>
+						<p>Default setting of the library is debug enabled.</p>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -180,13 +205,17 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#logoncallback">logonCallback</a></p>
 						<ul>
-							<li>Defined in core/init.ts:58</li>
+							<li>Defined in core/init.ts:96</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>optional logon applied after each login.</p>
 						</div>
+						<p>Typically the callback supplied uses connector.configureSession() to transfer required
+						credentials of 3rd-tier backend servers after logon.</p>
+						<p>Notice, logon may be called mutiple times after <a href="../modules/_web_http_.html#login">login</a> as due to inactivity the server
+						side session may be lost and needs to be reacquired eventually.</p>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -196,13 +225,39 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#serverurl">serverUrl</a></p>
 						<ul>
-							<li>Defined in core/init.ts:48</li>
+							<li>Defined in core/init.ts:55</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
 							<p>absolute url path of (default) Relution server.</p>
 						</div>
+						<p>Notice, the library will work correctly only if the Relution server endpoints are exposed
+						as a (sub-)domain. Operation of Relution at a subpath of URL space is not supported!</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="tenantorga" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> tenantorga</h3>
+					<div class="tsd-signature tsd-kind-icon">tenantorga<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#tenantorga">tenantorga</a></p>
+						<ul>
+							<li>Defined in core/init.ts:85</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>optional tenant <a href="_security_roles_.organization.html">Organization</a> unique name.</p>
+						</div>
+						<p>For fully multi-tenant capable backends this field selects the backend instance the client
+							talks to. The field defaults to using the <a href="_security_roles_.organization.html">Organization</a> of the logon <a href="_security_roles_.user.html">User</a> which
+						suffices for most use cases.</p>
+						<p>When set to the unique name of an <a href="_security_roles_.organization.html">Organization</a>, users of of one <a href="_security_roles_.organization.html">Organization</a> may
+							log into the (backend) <a href="_core_init_.initoptions.html#application">application</a> instance of another <a href="_security_roles_.organization.html">Organization</a> serving as
+							the tenant. Notice, in order to use this feature the tenant <a href="_security_roles_.organization.html">Organization</a> must have
+							at least execute rights on the (backend) <a href="_core_init_.initoptions.html#application">application</a> and the <a href="_security_roles_.user.html">User</a> using it needs
+						to have read permission on the tenant <a href="_security_roles_.organization.html">Organization</a> used.</p>
 					</div>
 				</section>
 			</section>
@@ -234,6 +289,9 @@
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 								<a href="_core_init_.initoptions.html#clientcertificate" class="tsd-kind-icon">client<wbr>Certificate</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.initoptions.html#clientapp" class="tsd-kind-icon">clientapp</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="_core_init_.initoptions.html#debug" class="tsd-kind-icon">debug</a>
 							</li>
@@ -242,6 +300,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 								<a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.initoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a>
 							</li>
 						</ul>
 					</li>

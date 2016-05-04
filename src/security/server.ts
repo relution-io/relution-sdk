@@ -118,6 +118,11 @@ export class Server {
     credentials: null
   };
 
+  /**
+   * last seen X-Gofer-User header value indicating a server session.
+   */
+  public sessionUserUuid: string;
+
   constructor(serverUrl: string) {
     this.options = init.cloneServerUrlOptions(init.initOptions);
     this.options.serverUrl = serverUrl;

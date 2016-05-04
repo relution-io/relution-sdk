@@ -73,36 +73,97 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
 /**
  * drives an HTTP request against the Relution server.
  *
+ * Behavior of this method is simplified from most HTTP/AJAX implementations:
+ * - When the HTTP request succeeds the resulting promise resolves to the response body.
+ * - In case of a network Error the promise resolves to an Error object providing `requestUrl`
+ *   but neither `statusCode` nor `statusMessage`.
+ * - In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+ *   the properties `requestUrl`, `statusCode` and `statusMessage`.
+ * - If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
+ *   is augmented by the properties as defined above.
+ * - Otherwise the body is stored as `message` of an Error object created. Again, the properties
+ *   above are provided.
+ * - Finally, in case of HTTP failure with the server not providing any response body, the Error
+ *   `message` is set to the `statusMessage`.
+ *
+ * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
+ * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ *
  * @param options of request, including target `url`.
  * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
- *    `statusCode` and `statusMessage`.
+ *    `requestUrl`, `statusCode` and `statusMessage`.
  */
 export function ajax(options: HttpOptions): Q.Promise<any> {
   let url = server.resolveUrl(options.url, options.serverUrl);
+  let serverUrl = server.resolveUrl('/', url);
+  let serverObj = server.Server.getInstance(serverUrl);
+  if (!serverObj.sessionUserUuid && serverObj.credentials) {
+    // not logged in
+    let credentials = serverObj.credentials;
+    serverObj.credentials = null;
+    return login(credentials, options).then(() => {
+      diag.debug.assert(() => !!serverObj.sessionUserUuid);
+      diag.debug.assert(() => serverObj.credentials == credentials);
+      return ajax(options); // repeat after login
+    });
+  }
+
   let responseCallback = options.responseCallback || _.identity;
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
       diag.debug.debug(options.method + ' ' + url);
       requestWithDefaults(url, options, (error: any, response: http.IncomingMessage, body: any) => {
-        resolveResponse(response);
-        promiseResponse.then((responseResult: http.IncomingMessage) => {
-          assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
-            'original response is reserved for future extension!');
 
-          if (!error && responseResult.statusCode >= 400) {
+        // error processing
+        if (!error && response) {
+          if (response.statusCode >= 400) {
             if (!body) {
-              error = new Error(responseResult.statusMessage);
+              error = new Error(response.statusMessage);
             } else if (_.isString(body)) {
               error = new Error(body);
             } else {
               error = body;
             }
           }
+        }
+        if (error) {
+          error.requestUrl = url;
+          if (response) {
+            error.statusCode = response.statusCode;
+            error.statusMessage = response.statusMessage;
+          }
+        }
+
+        // logon session processing
+        if (response) {
+          let sessionUserUuid = response.headers['x-gofer-user'];
+          if (sessionUserUuid) {
+            serverObj.sessionUserUuid = sessionUserUuid;
+          } else if (response.statusCode === 401) {
+            // apparently our session is lost!
+            serverObj.sessionUserUuid = null;
+            diag.debug.assert(() => error);
+            diag.debug.warn('server session is lost!', error);
+            if (serverObj.credentials) {
+              // TODO: recover by attempting login
+            }
+          }
+        }
+
+        if (response) {
+          // transport response
+          // Notice, we might have an error object never the less here
+          resolveResponse(response);
+        } else {
+          // network connectivity problem
+          diag.debug.assertIsError(error);
+          rejectResponse(error);
+        }
+        promiseResponse.then((responseResult: http.IncomingMessage) => {
+          assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
+            'original response is reserved for future extension!');
 
           if (error) {
-            error.requestUrl = url;
-            error.statusCode = responseResult.statusCode;
-            error.statusMessage = responseResult.statusMessage;
             rejectResult(error);
           } else {
             resolveResult(body);
@@ -155,6 +216,15 @@ export function login(credentials: auth.Credentials,
                       loginOptions: LoginOptions = {}): Q.Promise<any> {
   let url = server.resolveUrl('/gofer/security/rest/auth/login', loginOptions.serverUrl);
   let serverUrl = server.resolveUrl('/', url);
+  let serverObj = server.Server.getInstance(serverUrl);
+  if (serverObj.sessionUserUuid) {
+    // logged in already
+    return logout(loginOptions).then(() => {
+      diag.debug.assert(() => !serverObj.sessionUserUuid);
+      return login(credentials, loginOptions); // repeat after logout
+    });
+  }
+
   return ajax(_.defaults<HttpOptions>({
     method: 'POST',
     url: url,
@@ -162,7 +232,10 @@ export function login(credentials: auth.Credentials,
     serverUrl: serverUrl
   }, loginOptions)).then((response) => {
     // switch current server
-    let serverObj = server.Server.getInstance(serverUrl);
+    if (!serverObj.sessionUserUuid) {
+      diag.debug.warn('BUG: Relution did not set X-Gofer-User response header');
+      serverObj.sessionUserUuid = response.user.uuid;
+    }
     serverObj.authorization = {
       name: response.user.uuid,
       roles: _.map(response.roles.roles, (role: any) => role.uuid)
@@ -170,6 +243,7 @@ export function login(credentials: auth.Credentials,
     serverObj.organization = response.organization;
     serverObj.user = response.user;
     serverObj.credentials = credentials;
+    diag.debug.assert(() => serverObj.sessionUserUuid === serverObj.authorization.name);
     server.setCurrentServer(serverObj);
     return response;
   });
@@ -203,7 +277,7 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
       url: '/gofer/security-logout',
       serverUrl: serverUrl
     }, logoutOptions)).then((result) => {
-      diag.debug.warn('resorted to classic PATH-based logout as REST-based logout failed: ', error);
+      diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed: ', error);
       return result;
     }, (error2) => {
       error.suppressed = error.suppressed || [];

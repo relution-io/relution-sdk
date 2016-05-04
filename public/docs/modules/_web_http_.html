@@ -153,13 +153,29 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:80</li>
+									<li>Defined in web/http.ts:96</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>drives an HTTP request against the Relution server.</p>
 								</div>
+								<p>Behavior of this method is simplified from most HTTP/AJAX implementations:</p>
+								<ul>
+									<li>When the HTTP request succeeds the resulting promise resolves to the response body.</li>
+									<li>In case of a network Error the promise resolves to an Error object providing <code>requestUrl</code>
+									but neither <code>statusCode</code> nor <code>statusMessage</code>.</li>
+									<li>In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+									the properties <code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</li>
+									<li>If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
+									is augmented by the properties as defined above.</li>
+									<li>Otherwise the body is stored as <code>message</code> of an Error object created. Again, the properties
+									above are provided.</li>
+									<li>Finally, in case of HTTP failure with the server not providing any response body, the Error
+									<code>message</code> is set to the <code>statusMessage</code>.</li>
+								</ul>
+								<p>Thus, to differentiate network failures from server-side failures the <code>statusCode</code> of the Error
+								rejection is to being used. For deeper inspection provide an [[options.responseCallback]].</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -172,7 +188,7 @@
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>of response body, in case of failure rejects to an Error object including
-							<code>statusCode</code> and <code>statusMessage</code>.</p>
+							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
 						</li>
 					</ul>
 				</section>
@@ -186,7 +202,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:154</li>
+									<li>Defined in web/http.ts:215</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -224,7 +240,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:191</li>
+									<li>Defined in web/http.ts:265</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
