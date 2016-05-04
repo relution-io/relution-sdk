@@ -77,6 +77,20 @@ export interface LoginOptions extends LogonOptions, init.ServerUrlOptions {
 /**
  * logs into a Relution server.
  *
+ * ```javascript
+ * import * as Relution from 'relution-sdk';
+ *
+ * Relution.init({
+ *    serverUrl: 'http://localhost:8080'
+ * });
+ *
+ * let credentials: security.LoginObject = {
+ *    userName: 'myusername',
+ *    password: 'mypassword'
+ * };
+ * Relution.web.login(credentials).then(...);
+ * ```
+ *
  * @param credentials to use.
  * @param loginOptions overwriting [[init]] defaults.
  *

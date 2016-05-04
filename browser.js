@@ -2373,6 +2373,20 @@ exports.ajax = ajax;
 /**
  * logs into a Relution server.
  *
+ * ```javascript
+ * import * as Relution from 'relution-sdk';
+ *
+ * Relution.init({
+ *    serverUrl: 'http://localhost:8080'
+ * });
+ *
+ * let credentials: security.LoginObject = {
+ *    userName: 'myusername',
+ *    password: 'mypassword'
+ * };
+ * Relution.web.login(credentials).then(...);
+ * ```
+ *
  * @param credentials to use.
  * @param loginOptions overwriting [[init]] defaults.
  *
@@ -2451,6 +2465,7 @@ function logout(logoutOptions) {
         serverObj.authorization = auth.ANONYMOUS_AUTHORIZATION;
         serverObj.organization = null;
         serverObj.user = null;
+        serverObj.sessionUserUuid = null;
     });
 }
 exports.logout = logout;
