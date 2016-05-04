@@ -202,13 +202,25 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:215</li>
+									<li>Defined in web/http.ts:229</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>logs into a Relution server.</p>
 								</div>
+								<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> Relution <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk'</span>;
+
+Relution.init({
+   serverUrl: <span class="hljs-string">'http://localhost:8080'</span>
+});
+
+<span class="hljs-keyword">let</span> credentials: security.LoginObject = {
+   userName: <span class="hljs-string">'myusername'</span>,
+   password: <span class="hljs-string">'mypassword'</span>
+};
+Relution.web.login(credentials).then(...);
+</code></pre>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -240,7 +252,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:265</li>
+									<li>Defined in web/http.ts:279</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
