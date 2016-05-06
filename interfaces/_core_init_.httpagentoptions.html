@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;core/init&quot; | Relution-SDK</title>
+	<title>HttpAgentOptions | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,133 +57,78 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_core_init_.html">&quot;core/init&quot;</a>
+					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
+				</li>
+				<li>
+					<a href="_core_init_.httpagentoptions.html">HttpAgentOptions</a>
 				</li>
 			</ul>
-			<h1>External module &quot;core/init&quot;</h1>
+			<h1>Interface HttpAgentOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>specifies additional options for the HTTP agent, advanced operation.</p>
+					</div>
+					<p>In rare cases this field may be useful to alter behavior of the underlying http client.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">HttpAgentOptions</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<a href="_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a>
+							</li>
+							<li>
+								<a href="_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Interfaces</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.httpagentoptions.html" class="tsd-kind-icon">Http<wbr>Agent<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Variables</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Functions</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_core_init_.html#cloneserverinitoptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_core_init_.html#init" class="tsd-kind-icon">init</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.httpagentoptions.html#agentclass" class="tsd-kind-icon">agent<wbr>Class</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.httpagentoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Variables</h2>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
-					<a name="initoptions-1" class="tsd-anchor"></a>
-					<h3>init<wbr>Options</h3>
-					<div class="tsd-signature tsd-kind-icon">init<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a></div>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="agentclass" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> agent<wbr>Class</h3>
+					<div class="tsd-signature tsd-kind-icon">agent<wbr>Class<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:164</li>
+							<li>Defined in core/init.ts:52</li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>copy of options the SDK was initialized with using <a href="_core_init_.html#init">init</a> function serving as defaults.</p>
-						</div>
-						<dl class="tsd-comment-tags">
-							<dt>internal</dt>
-							<dd><p>for SDK internal use only!</p>
-							</dd>
-						</dl>
-					</div>
 				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="cloneserverinitoptions" class="tsd-anchor"></a>
-					<h3>clone<wbr>Server<wbr>Init<wbr>Options</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options<span class="tsd-signature-symbol">(</span>serverInitOptions<span class="tsd-signature-symbol">: </span><a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in core/init.ts:128</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>creates a deeply independent copy of some <a href="../interfaces/_core_init_.serverinitoptions.html">ServerInitOptions</a>.</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>serverInitOptions: <a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>to clone.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a></h4>
-							<p>cloned object.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="init" class="tsd-anchor"></a>
-					<h3>init</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in core/init.ts:171</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>(re)initializes the SDK providing global configuration parameters.</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of configuration, often these are hardcoded values of the mobile client app.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="agentoptions" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> agent<wbr>Options</h3>
+					<div class="tsd-signature tsd-kind-icon">agent<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in core/init.ts:51</li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 		</div>
@@ -194,35 +139,47 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_core_init_.html">"core/init"</a>
+						<a href="../modules/_core_init_.html">"core/init"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_core_init_.httpagentoptions.html" class="tsd-kind-icon">Http<wbr>Agent<wbr>Options</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_core_init_.httpagentoptions.html#agentclass" class="tsd-kind-icon">agent<wbr>Class</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_core_init_.httpagentoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.httpagentoptions.html" class="tsd-kind-icon">Http<wbr>Agent<wbr>Options</a>
+						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
+						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
+						<a href="_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a>
+						<a href="_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
+						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_core_init_.html#cloneserverinitoptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options</a>
+						<a href="../modules/_core_init_.html#cloneserverinitoptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_core_init_.html#init" class="tsd-kind-icon">init</a>
+						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>
 					</li>
 				</ul>
 			</nav>
