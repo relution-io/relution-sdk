@@ -116,8 +116,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
     agentClass: options.agentClass || init.initOptions.agentClass,
     // options taking effect at request time
     application: options.application || init.initOptions.application,
-    clientapp: options.clientapp || init.initOptions.clientapp,
-    tenantorga: options.tenantorga || init.initOptions.tenantorga
+    tenantOrga: options.tenantOrga || init.initOptions.tenantOrga
   });
 
   // resolve target url
@@ -127,11 +126,17 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   options = _.clone(options);
   options.agentOptions = currentOptions.agentOptions;
   options.agentClass = currentOptions.agentClass;
+  let headers = {};
   if (serverObj.sessionUserUuid) {
     // add X-Gofer-User header so that server may check we are running under correct identity
-    options.headers = _.defaults({
-      'X-Gofer-User': serverObj.sessionUserUuid
-    }, options.headers);
+    headers['X-Gofer-User'] = serverObj.sessionUserUuid;
+  }
+  if (currentOptions.clientApp) {
+    // add X-Relution-ClientApp for server-side analytics
+    headers['X-Relution-ClientApp'] = currentOptions.clientApp;
+  }
+  if (!_.isEmpty(headers)) {
+    options.headers = _.defaults(headers, options.headers);
   }
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
@@ -270,6 +275,7 @@ export function login(credentials: auth.Credentials,
     agentOptions: loginOptions.agentOptions || init.initOptions.agentOptions,
     agentClass: loginOptions.agentClass || init.initOptions.agentClass,
     // options taking effect at login time
+    clientApp: loginOptions.clientApp || init.initOptions.clientApp,
     logonCallback: loginOptions.logonCallback || init.initOptions.logonCallback,
     clientCertificate: loginOptions.clientCertificate || init.initOptions.clientCertificate,
   });

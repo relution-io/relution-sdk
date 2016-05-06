@@ -33,7 +33,7 @@ describe(module.filename, () => {
     core.init({
       serverUrl: 'http://192.168.0.10:8080',
       application: 'myapp',
-      tenantorga: 'mway'
+      tenantOrga: 'mway'
     });
 
     assert.equal(server.resolveUrl('http://localhost:8090/mway/myapp/api/v1/some_endpoint?A'),

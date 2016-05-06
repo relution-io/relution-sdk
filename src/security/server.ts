@@ -59,9 +59,9 @@ export function resolveUrl(path: string, options: init.ServerUrlOptions = {}): s
 
   if (path.charAt(0) !== '/') {
     // construct full application url
-    let tenantorga = options.tenantorga || init.initOptions.tenantorga;
+    let tenantOrga = options.tenantOrga || init.initOptions.tenantOrga;
     let application = options.application || init.initOptions.application;
-    serverUrl = url.resolve(serverUrl, '/' + tenantorga + '/' + application + '/');
+    serverUrl = url.resolve(serverUrl, '/' + tenantOrga + '/' + application + '/');
   }
 
   return url.resolve(serverUrl, path);
@@ -164,8 +164,8 @@ export class Server {
   set organization(organization: roles.Organization) {
     if (organization) {
       this.state.organization = roles.freezeOrganization(organization);
-      if (!this.options.tenantorga) {
-        this.options.tenantorga = organization.uniqueName;
+      if (!this.options.tenantOrga) {
+        this.options.tenantOrga = organization.uniqueName;
       }
     } else {
       this.state.organization = null;

@@ -84,7 +84,7 @@ export interface ServerUrlOptions {
    * at least execute rights on the (backend) [[application]] and the [[User]] using it needs
    * to have read permission on the tenant [[Organization]] used.
    */
-  tenantorga?: string;
+  tenantOrga?: string;
 }
 
 /**
@@ -97,7 +97,7 @@ export interface ServerInitOptions extends ServerUrlOptions, HttpAgentOptions {
    * When set, the value of this field is send to the Relution server for identification
    * of the app using it. Typically, this is the name or uuid of the app in the appstore.
    */
-  clientapp?: string;
+  clientApp?: string;
 
   /**
    * optional logon applied after each login.
@@ -129,8 +129,8 @@ export function cloneServerInitOptions(serverInitOptions: ServerInitOptions): Se
   let result: ServerInitOptions = {
     serverUrl: serverInitOptions.serverUrl,
     application: serverInitOptions.application,
-    clientapp: serverInitOptions.clientapp,
-    tenantorga: serverInitOptions.tenantorga,
+    clientApp: serverInitOptions.clientApp,
+    tenantOrga: serverInitOptions.tenantOrga,
     logonCallback: serverInitOptions.logonCallback,
   };
   if (serverInitOptions.clientCertificate) {

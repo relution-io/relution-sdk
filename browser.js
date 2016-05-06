@@ -422,8 +422,8 @@ function cloneServerInitOptions(serverInitOptions) {
     var result = {
         serverUrl: serverInitOptions.serverUrl,
         application: serverInitOptions.application,
-        clientapp: serverInitOptions.clientapp,
-        tenantorga: serverInitOptions.tenantorga,
+        clientApp: serverInitOptions.clientApp,
+        tenantOrga: serverInitOptions.tenantOrga,
         logonCallback: serverInitOptions.logonCallback,
     };
     if (serverInitOptions.clientCertificate) {
@@ -2050,9 +2050,9 @@ function resolveUrl(path, options) {
     }
     if (path.charAt(0) !== '/') {
         // construct full application url
-        var tenantorga = options.tenantorga || init.initOptions.tenantorga;
+        var tenantOrga = options.tenantOrga || init.initOptions.tenantOrga;
         var application = options.application || init.initOptions.application;
-        serverUrl = url.resolve(serverUrl, '/' + tenantorga + '/' + application + '/');
+        serverUrl = url.resolve(serverUrl, '/' + tenantOrga + '/' + application + '/');
     }
     return url.resolve(serverUrl, path);
 }
@@ -2122,8 +2122,8 @@ var Server = (function () {
         set: function (organization) {
             if (organization) {
                 this.state.organization = roles.freezeOrganization(organization);
-                if (!this.options.tenantorga) {
-                    this.options.tenantorga = organization.uniqueName;
+                if (!this.options.tenantOrga) {
+                    this.options.tenantOrga = organization.uniqueName;
                 }
             }
             else {
@@ -2329,8 +2329,7 @@ function ajax(options) {
         agentClass: options.agentClass || init.initOptions.agentClass,
         // options taking effect at request time
         application: options.application || init.initOptions.application,
-        clientapp: options.clientapp || init.initOptions.clientapp,
-        tenantorga: options.tenantorga || init.initOptions.tenantorga
+        tenantOrga: options.tenantOrga || init.initOptions.tenantOrga
     });
     // resolve target url
     var url = server.resolveUrl(options.url, currentOptions);
@@ -2338,11 +2337,17 @@ function ajax(options) {
     options = _.clone(options);
     options.agentOptions = currentOptions.agentOptions;
     options.agentClass = currentOptions.agentClass;
+    var headers = {};
     if (serverObj.sessionUserUuid) {
         // add X-Gofer-User header so that server may check we are running under correct identity
-        options.headers = _.defaults({
-            'X-Gofer-User': serverObj.sessionUserUuid
-        }, options.headers);
+        headers['X-Gofer-User'] = serverObj.sessionUserUuid;
+    }
+    if (currentOptions.clientApp) {
+        // add X-Relution-ClientApp for server-side analytics
+        headers['X-Relution-ClientApp'] = currentOptions.clientApp;
+    }
+    if (!_.isEmpty(headers)) {
+        options.headers = _.defaults(headers, options.headers);
     }
     return Q.Promise(function (resolveResult, rejectResult) {
         var promiseResponse = responseCallback(Q.Promise(function (resolveResponse, rejectResponse) {
@@ -2454,6 +2459,7 @@ function login(credentials, loginOptions) {
         agentOptions: loginOptions.agentOptions || init.initOptions.agentOptions,
         agentClass: loginOptions.agentClass || init.initOptions.agentClass,
         // options taking effect at login time
+        clientApp: loginOptions.clientApp || init.initOptions.clientApp,
         logonCallback: loginOptions.logonCallback || init.initOptions.logonCallback,
         clientCertificate: loginOptions.clientCertificate || init.initOptions.clientCertificate,
     });
