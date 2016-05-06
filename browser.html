@@ -2,8 +2,37 @@
   <head>
     <meta charset="utf-8">
     <title>Relution SDK</title>
+    <script src="./browser.js"></script>
   </head>
   <body>
-    <script src="./browser.js"></script>
+    <h1>Relution SDK</h1>
+    <p>
+      Following is a working example you may copy &amp; paste to the Developer Tools console:
+      <pre>
+Relution.web.login({
+	// put your credentials here:
+	userName: 't.beckmann',
+	password: 'mcap'
+}, {
+	// what Relution server to talk to:
+	serverUrl: 'http://localhost:8080'
+}).then(function (response) {
+	var user = Relution.security.getCurrentUser();
+	return response;
+}).then(function (loginResponse) {
+	return Relution.web.ajax({
+		method: 'GET',
+		url: '/gofer/system/security/currentAuthorization'
+	}).then(function (currentAuthorizationResponse) {
+		return loginResponse;
+	});
+}).finally(function () {
+	return Relution.web.logout();
+}).then(function (response) {
+	var user = Relution.security.getCurrentUser();
+	return response;
+}).done();
+      </pre>
+    </p>
   </body>
 </script>
