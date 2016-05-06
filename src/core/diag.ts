@@ -172,6 +172,7 @@ export class Diagnostics {
       } catch (error) {
         if (debugMode) {
           this.error('Assertion failed: ' + error.message, error);
+          debugger; // so you can inspect what causes the problem
         } else {
           console.error('Assertion failed: ' + error.message, error);
         }
