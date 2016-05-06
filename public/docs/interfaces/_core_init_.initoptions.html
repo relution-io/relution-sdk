@@ -82,6 +82,9 @@
 				<ul class="tsd-hierarchy">
 					<li>
 						<a href="_core_init_.serverurloptions.html" class="tsd-signature-type">ServerUrlOptions</a>
+					</li>
+					<li>
+						<a href="_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">InitOptions</span>
@@ -97,14 +100,15 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#agentclass" class="tsd-kind-icon">agent<wbr>Class</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#application" class="tsd-kind-icon">application</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited"><a href="_core_init_.initoptions.html#application" class="tsd-kind-icon">application</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#clientcertificate" class="tsd-kind-icon">client<wbr>Certificate</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#clientapp" class="tsd-kind-icon">clientapp</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.initoptions.html#debug" class="tsd-kind-icon">debug</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.initoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited"><a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited"><a href="_core_init_.initoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a></li>
 							</ul>
 						</section>
 					</div>
@@ -113,30 +117,36 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="agentclass" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> agent<wbr>Class</h3>
+					<div class="tsd-signature tsd-kind-icon">agent<wbr>Class<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.httpagentoptions.html">HttpAgentOptions</a>.<a href="_core_init_.httpagentoptions.html#agentclass">agentClass</a></p>
+						<ul>
+							<li>Defined in core/init.ts:52</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="agentoptions" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> agent<wbr>Options</h3>
 					<div class="tsd-signature tsd-kind-icon">agent<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#agentoptions">agentOptions</a></p>
+						<p>Inherited from <a href="_core_init_.httpagentoptions.html">HttpAgentOptions</a>.<a href="_core_init_.httpagentoptions.html#agentoptions">agentOptions</a></p>
 						<ul>
-							<li>Defined in core/init.ts:111</li>
+							<li>Defined in core/init.ts:51</li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>specifies additional options for the HTTP agent, advanced operation.</p>
-						</div>
-						<p>In rare cases this field may be useful to alter behavior of the underlying http client.</p>
-					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 					<a name="application" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> application</h3>
 					<div class="tsd-signature tsd-kind-icon">application<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#application">application</a></p>
+						<p>Overwrites <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#application">application</a></p>
 						<ul>
-							<li>Defined in core/init.ts:64</li>
+							<li>Defined in core/init.ts:73</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -153,9 +163,9 @@
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> client<wbr>Certificate</h3>
 					<div class="tsd-signature tsd-kind-icon">client<wbr>Certificate<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#clientcertificate">clientCertificate</a></p>
+						<p>Inherited from <a href="_core_init_.serverinitoptions.html">ServerInitOptions</a>.<a href="_core_init_.serverinitoptions.html#clientcertificate">clientCertificate</a></p>
 						<ul>
-							<li>Defined in core/init.ts:101</li>
+							<li>Defined in core/init.ts:116</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -169,9 +179,9 @@
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> clientapp</h3>
 					<div class="tsd-signature tsd-kind-icon">clientapp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#clientapp">clientapp</a></p>
+						<p>Inherited from <a href="_core_init_.serverinitoptions.html">ServerInitOptions</a>.<a href="_core_init_.serverinitoptions.html#clientapp">clientapp</a></p>
 						<ul>
-							<li>Defined in core/init.ts:71</li>
+							<li>Defined in core/init.ts:100</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -188,7 +198,7 @@
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:147</li>
+							<li>Defined in core/init.ts:155</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -203,9 +213,9 @@
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> logon<wbr>Callback</h3>
 					<div class="tsd-signature tsd-kind-icon">logon<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_core_init_.logoncallback.html" class="tsd-signature-type">LogonCallback</a></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#logoncallback">logonCallback</a></p>
+						<p>Inherited from <a href="_core_init_.serverinitoptions.html">ServerInitOptions</a>.<a href="_core_init_.serverinitoptions.html#logoncallback">logonCallback</a></p>
 						<ul>
-							<li>Defined in core/init.ts:96</li>
+							<li>Defined in core/init.ts:111</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -218,14 +228,15 @@
 						side session may be lost and needs to be reacquired eventually.</p>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 					<a name="serverurl" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> server<wbr>Url</h3>
 					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#serverurl">serverUrl</a></p>
+						<p>Overwrites <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#serverurl">serverUrl</a></p>
 						<ul>
-							<li>Defined in core/init.ts:55</li>
+							<li>Defined in core/init.ts:65</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -236,14 +247,15 @@
 						as a (sub-)domain. Operation of Relution at a subpath of URL space is not supported!</p>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 					<a name="tenantorga" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> tenantorga</h3>
 					<div class="tsd-signature tsd-kind-icon">tenantorga<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#tenantorga">tenantorga</a></p>
+						<p>Overwrites <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#tenantorga">tenantorga</a></p>
 						<ul>
-							<li>Defined in core/init.ts:85</li>
+							<li>Defined in core/init.ts:87</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -275,15 +287,21 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_core_init_.httpagentoptions.html" class="tsd-kind-icon">Http<wbr>Agent<wbr>Options</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="_core_init_.initoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a>
+								<a href="_core_init_.initoptions.html#agentclass" class="tsd-kind-icon">agent<wbr>Class</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.initoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 								<a href="_core_init_.initoptions.html#application" class="tsd-kind-icon">application</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -298,10 +316,10 @@
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 								<a href="_core_init_.initoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 								<a href="_core_init_.initoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 								<a href="_core_init_.initoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a>
 							</li>
 						</ul>
@@ -312,13 +330,16 @@
 						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_core_init_.html#cloneserverurloptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Url<wbr>Options</a>
+						<a href="../modules/_core_init_.html#cloneserverinitoptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="../modules/_core_init_.html#init" class="tsd-kind-icon">init</a>

@@ -10,7 +10,16 @@ export interface LogonCallback {
     (): Q.Promise<any>;
 }
 /**
- * options passed to [[login]] method as well as to [[init]] serving as defaults for HTTP logins.
+ * specifies additional options for the HTTP agent, advanced operation.
+ *
+ * In rare cases this field may be useful to alter behavior of the underlying http client.
+ */
+export interface HttpAgentOptions {
+    agentOptions?: any;
+    agentClass?: any;
+}
+/**
+ * options selecting Relution server to talk to.
  */
 export interface ServerUrlOptions {
     /**
@@ -29,13 +38,6 @@ export interface ServerUrlOptions {
      */
     application?: string;
     /**
-     * (mobile) client app using the (backend) [[application]].
-     *
-     * When set, the value of this field is send to the Relution server for identification
-     * of the app using it. Typically, this is the name or uuid of the app in the appstore.
-     */
-    clientapp?: string;
-    /**
      * optional tenant [[Organization]] unique name.
      *
      * For fully multi-tenant capable backends this field selects the backend instance the client
@@ -49,6 +51,18 @@ export interface ServerUrlOptions {
      * to have read permission on the tenant [[Organization]] used.
      */
     tenantorga?: string;
+}
+/**
+ * options passed to [[login]] method as well as to [[init]] serving as defaults for HTTP logins.
+ */
+export interface ServerInitOptions extends ServerUrlOptions, HttpAgentOptions {
+    /**
+     * (mobile) client app using the (backend) [[application]].
+     *
+     * When set, the value of this field is send to the Relution server for identification
+     * of the app using it. Typically, this is the name or uuid of the app in the appstore.
+     */
+    clientapp?: string;
     /**
      * optional logon applied after each login.
      *
@@ -66,24 +80,18 @@ export interface ServerUrlOptions {
         cert?: Buffer;
         passphrase?: string;
     } | any;
-    /**
-     * specifies additional options for the HTTP agent, advanced operation.
-     *
-     * In rare cases this field may be useful to alter behavior of the underlying http client.
-     */
-    agentOptions?: any;
 }
 /**
- * creates a deeply independent copy of some [[ServerUrlOptions]].
+ * creates a deeply independent copy of some [[ServerInitOptions]].
  *
- * @param serverUrlOptions to clone.
- * @return {ServerUrlOptions} cloned object.
+ * @param serverInitOptions to clone.
+ * @return {ServerInitOptions} cloned object.
  */
-export declare function cloneServerUrlOptions(serverUrlOptions: ServerUrlOptions): ServerUrlOptions;
+export declare function cloneServerInitOptions(serverInitOptions: ServerInitOptions): ServerInitOptions;
 /**
  * optional options passed to [[init]].
  */
-export interface InitOptions extends ServerUrlOptions {
+export interface InitOptions extends ServerUrlOptions, ServerInitOptions {
     /**
      * when set, reconfigures console debugging and assertion testing of the library.
      *

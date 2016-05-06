@@ -43,7 +43,17 @@ export interface LogonCallback {
 }
 
 /**
- * options passed to [[login]] method as well as to [[init]] serving as defaults for HTTP logins.
+ * specifies additional options for the HTTP agent, advanced operation.
+ *
+ * In rare cases this field may be useful to alter behavior of the underlying http client.
+ */
+export interface HttpAgentOptions {
+  agentOptions?: any;
+  agentClass?: any;
+}
+
+/**
+ * options selecting Relution server to talk to.
  */
 export interface ServerUrlOptions {
   /**
@@ -53,7 +63,6 @@ export interface ServerUrlOptions {
    * as a (sub-)domain. Operation of Relution at a subpath of URL space is not supported!
    */
   serverUrl?: string;
-
   /**
    * name of (backend) application as specified in relution.json.
    *
@@ -62,13 +71,6 @@ export interface ServerUrlOptions {
    * including the slash instead to make the library communicate to the correct endpoint.
    */
   application?: string;
-  /**
-   * (mobile) client app using the (backend) [[application]].
-   *
-   * When set, the value of this field is send to the Relution server for identification
-   * of the app using it. Typically, this is the name or uuid of the app in the appstore.
-   */
-  clientapp?: string;
   /**
    * optional tenant [[Organization]] unique name.
    *
@@ -83,6 +85,19 @@ export interface ServerUrlOptions {
    * to have read permission on the tenant [[Organization]] used.
    */
   tenantorga?: string;
+}
+
+/**
+ * options passed to [[login]] method as well as to [[init]] serving as defaults for HTTP logins.
+ */
+export interface ServerInitOptions extends ServerUrlOptions, HttpAgentOptions {
+  /**
+   * (mobile) client app using the (backend) [[application]].
+   *
+   * When set, the value of this field is send to the Relution server for identification
+   * of the app using it. Typically, this is the name or uuid of the app in the appstore.
+   */
+  clientapp?: string;
 
   /**
    * optional logon applied after each login.
@@ -102,34 +117,27 @@ export interface ServerUrlOptions {
     cert?: Buffer;
     passphrase?: string;
   } | any;
-
-  /**
-   * specifies additional options for the HTTP agent, advanced operation.
-   *
-   * In rare cases this field may be useful to alter behavior of the underlying http client.
-   */
-  agentOptions?: any;
 }
 
 /**
- * creates a deeply independent copy of some [[ServerUrlOptions]].
+ * creates a deeply independent copy of some [[ServerInitOptions]].
  *
- * @param serverUrlOptions to clone.
- * @return {ServerUrlOptions} cloned object.
+ * @param serverInitOptions to clone.
+ * @return {ServerInitOptions} cloned object.
  */
-export function cloneServerUrlOptions(serverUrlOptions: ServerUrlOptions): ServerUrlOptions {
-  let result: ServerUrlOptions = {
-    serverUrl: serverUrlOptions.serverUrl,
-    application: serverUrlOptions.application,
-    clientapp: serverUrlOptions.clientapp,
-    tenantorga: serverUrlOptions.tenantorga,
-    logonCallback: serverUrlOptions.logonCallback,
+export function cloneServerInitOptions(serverInitOptions: ServerInitOptions): ServerInitOptions {
+  let result: ServerInitOptions = {
+    serverUrl: serverInitOptions.serverUrl,
+    application: serverInitOptions.application,
+    clientapp: serverInitOptions.clientapp,
+    tenantorga: serverInitOptions.tenantorga,
+    logonCallback: serverInitOptions.logonCallback,
   };
-  if (serverUrlOptions.clientCertificate) {
-    result.clientCertificate = _.clone(serverUrlOptions.clientCertificate);
+  if (serverInitOptions.clientCertificate) {
+    result.clientCertificate = _.clone(serverInitOptions.clientCertificate);
   }
-  if (serverUrlOptions.agentOptions) {
-    result.agentOptions = _.clone(serverUrlOptions.agentOptions);
+  if (serverInitOptions.agentOptions) {
+    result.agentOptions = _.clone(serverInitOptions.agentOptions);
   }
   return result;
 }
@@ -137,7 +145,7 @@ export function cloneServerUrlOptions(serverUrlOptions: ServerUrlOptions): Serve
 /**
  * optional options passed to [[init]].
  */
-export interface InitOptions extends ServerUrlOptions {
+export interface InitOptions extends ServerUrlOptions, ServerInitOptions {
 
   /**
    * when set, reconfigures console debugging and assertion testing of the library.
@@ -166,5 +174,5 @@ export function init(options: InitOptions = {}) {
     Q.longStackSupport = options.debug;
   }
 
-  _.assign(initOptions, cloneServerUrlOptions(options));
+  _.assign(initOptions, cloneServerInitOptions(options));
 }

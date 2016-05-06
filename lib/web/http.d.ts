@@ -19,7 +19,7 @@ export declare type HttpResponse = http.IncomingMessage;
 /**
  * named parameters of the [[http]] function.
  */
-export interface HttpOptions extends request.CoreOptions, request.UrlOptions, init.ServerUrlOptions {
+export interface HttpOptions extends request.CoreOptions, request.UrlOptions, init.ServerInitOptions {
     /**
      * optional callback allowing to inspect the server response in more detail than provided by
      * default.
@@ -53,7 +53,7 @@ export declare function ajax(options: HttpOptions): Q.Promise<any>;
 /**
  * options for use by both [[login]] and [[logout]].
  */
-export interface LogonOptions extends request.CoreOptions {
+export interface LogonOptions extends init.ServerUrlOptions {
     /**
      * specifies whether login response data is persisted such that subsequent logons can be
      * processed even if communication with the Relution server is impossible at that time.
@@ -72,7 +72,7 @@ export interface LogonOptions extends request.CoreOptions {
 /**
  * options specific to [[login]] function.
  */
-export interface LoginOptions extends LogonOptions, init.ServerUrlOptions {
+export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
 }
 /**
  * logs into a Relution server.
@@ -100,7 +100,7 @@ export declare function login(credentials: auth.Credentials, loginOptions?: Logi
 /**
  * options specific to [[logout]] function.
  */
-export interface LogoutOptions extends LogonOptions {
+export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
 }
 /**
  * logs out of a Relution server.

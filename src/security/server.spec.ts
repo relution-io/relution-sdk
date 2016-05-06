@@ -31,14 +31,16 @@ import * as server from './server';
 describe(module.filename, () => {
   return it('resolveUrl', () => {
     core.init({
-      serverUrl: 'http://192.168.0.10:8080'
+      serverUrl: 'http://192.168.0.10:8080',
+      application: 'myapp',
+      tenantorga: 'mway'
     });
 
-    assert.equal(server.resolveUrl('http://localhost:8090/mway/myapp/api/v1/some_endpoint'),
-      'http://localhost:8090/mway/myapp/api/v1/some_endpoint');
-    assert.equal(server.resolveUrl('/mway/myapp/api/v1/some_endpoint'),
-      'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint');
-    assert.equal(server.resolveUrl('mway/myapp/api/v1/some_endpoint'),
-      'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint');
+    assert.equal(server.resolveUrl('http://localhost:8090/mway/myapp/api/v1/some_endpoint?A'),
+      'http://localhost:8090/mway/myapp/api/v1/some_endpoint?A');
+    assert.equal(server.resolveUrl('/mway/myapp/api/v1/some_endpoint?B'),
+      'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint?B');
+    assert.equal(server.resolveUrl('api/v1/some_endpoint?C'),
+      'http://192.168.0.10:8080/mway/myapp/api/v1/some_endpoint?C');
   });
 });

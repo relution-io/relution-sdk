@@ -25,8 +25,10 @@
 
 import * as url from 'url';
 import * as assert from 'assert';
+import * as _ from 'lodash';
 
 import * as init from '../core/init';
+import * as diag from '../core/diag';
 
 import * as auth from './auth';
 import * as roles from './roles';
@@ -46,16 +48,22 @@ import * as roles from './roles';
  *   ``http://192.168.0.10:8080`` using a user of organization mway provided currentOrganization
  *   was not changed explicitly to something else.
  *
- * @param path optional path to resolve.
+ * @param path path to resolve.
  * @return {string} absolute URL of path on current server.
  */
-export function resolveUrl(path?: string, serverUrl: string = init.initOptions.serverUrl): string {
+export function resolveUrl(path: string, options: init.ServerUrlOptions = {}): string {
+  let serverUrl = options.serverUrl || init.initOptions.serverUrl;
   if (!serverUrl) {
     return path;
   }
-  if (!path) {
-    return serverUrl;
+
+  if (path.charAt(0) !== '/') {
+    // construct full application url
+    let tenantorga = options.tenantorga || init.initOptions.tenantorga;
+    let application = options.application || init.initOptions.application;
+    serverUrl = url.resolve(serverUrl, '/' + tenantorga + '/' + application + '/');
   }
+
   return url.resolve(serverUrl, path);
 }
 
@@ -92,7 +100,7 @@ export class Server {
   /**
    * current set of options in effect for this server.
    */
-  private options: init.ServerUrlOptions;
+  private options: init.ServerInitOptions;
 
   // security state
   private state: {
@@ -124,8 +132,19 @@ export class Server {
   public sessionUserUuid: string;
 
   constructor(serverUrl: string) {
-    this.options = init.cloneServerUrlOptions(init.initOptions);
+    this.options = init.cloneServerInitOptions(init.initOptions);
     this.options.serverUrl = serverUrl;
+  }
+
+  /**
+   * used to update options.
+   *
+   * @param opts to apply.
+   * @return {*} updated options.
+   */
+  public applyOptions(serverInitOptions: init.ServerInitOptions): init.ServerInitOptions {
+    diag.debug.assert(() => this.options.serverUrl === serverInitOptions.serverUrl);
+    return _.assign(this.options, serverInitOptions);
   }
 
   get authorization(): auth.Authorization {
@@ -145,6 +164,9 @@ export class Server {
   set organization(organization: roles.Organization) {
     if (organization) {
       this.state.organization = roles.freezeOrganization(organization);
+      if (!this.options.tenantorga) {
+        this.options.tenantorga = organization.uniqueName;
+      }
     } else {
       this.state.organization = null;
     }

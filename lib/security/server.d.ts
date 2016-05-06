@@ -1,3 +1,4 @@
+import * as init from '../core/init';
 import * as auth from './auth';
 import * as roles from './roles';
 /**
@@ -15,10 +16,10 @@ import * as roles from './roles';
  *   ``http://192.168.0.10:8080`` using a user of organization mway provided currentOrganization
  *   was not changed explicitly to something else.
  *
- * @param path optional path to resolve.
+ * @param path path to resolve.
  * @return {string} absolute URL of path on current server.
  */
-export declare function resolveUrl(path?: string, serverUrl?: string): string;
+export declare function resolveUrl(path: string, options?: init.ServerUrlOptions): string;
 /**
  * gets the current [[Server]].
  *

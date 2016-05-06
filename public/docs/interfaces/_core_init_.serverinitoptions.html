@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ServerUrlOptions | Relution-SDK</title>
+	<title>ServerInitOptions | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -60,10 +60,10 @@
 					<a href="../modules/_core_init_.html">&quot;core/init&quot;</a>
 				</li>
 				<li>
-					<a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>
+					<a href="_core_init_.serverinitoptions.html">ServerInitOptions</a>
 				</li>
 			</ul>
-			<h1>Interface ServerUrlOptions</h1>
+			<h1>Interface ServerInitOptions</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>options selecting Relution server to talk to.</p>
+						<p>options passed to <a href="../modules/_web_http_.html#login">login</a> method as well as to <a href="../modules/_core_init_.html#init">init</a> serving as defaults for HTTP logins.</p>
 					</div>
 				</div>
 			</section>
@@ -81,16 +81,24 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">ServerUrlOptions</span>
+						<a href="_core_init_.serverurloptions.html" class="tsd-signature-type">ServerUrlOptions</a>
+					</li>
+					<li>
+						<a href="_core_init_.httpagentoptions.html" class="tsd-signature-type">HttpAgentOptions</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<a href="_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a>
-							</li>
-							<li>
-								<a href="_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a>
-							</li>
-							<li>
-								<a href="_web_http_.logonoptions.html" class="tsd-signature-type">LogonOptions</a>
+								<span class="target">ServerInitOptions</span>
+								<ul class="tsd-hierarchy">
+									<li>
+										<a href="_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a>
+									</li>
+									<li>
+										<a href="_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a>
+									</li>
+									<li>
+										<a href="_web_http_.loginoptions.html" class="tsd-signature-type">LoginOptions</a>
+									</li>
+								</ul>
 							</li>
 						</ul>
 					</li>
@@ -103,9 +111,14 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.serverurloptions.html#application" class="tsd-kind-icon">application</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.serverurloptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.serverurloptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.serverinitoptions.html#agentclass" class="tsd-kind-icon">agent<wbr>Class</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.serverinitoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.serverinitoptions.html#application" class="tsd-kind-icon">application</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.serverinitoptions.html#clientcertificate" class="tsd-kind-icon">client<wbr>Certificate</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.serverinitoptions.html#clientapp" class="tsd-kind-icon">clientapp</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_core_init_.serverinitoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.serverinitoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_core_init_.serverinitoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a></li>
 							</ul>
 						</section>
 					</div>
@@ -113,11 +126,34 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="agentclass" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> agent<wbr>Class</h3>
+					<div class="tsd-signature tsd-kind-icon">agent<wbr>Class<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.httpagentoptions.html">HttpAgentOptions</a>.<a href="_core_init_.httpagentoptions.html#agentclass">agentClass</a></p>
+						<ul>
+							<li>Defined in core/init.ts:52</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="agentoptions" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> agent<wbr>Options</h3>
+					<div class="tsd-signature tsd-kind-icon">agent<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.httpagentoptions.html">HttpAgentOptions</a>.<a href="_core_init_.httpagentoptions.html#agentoptions">agentOptions</a></p>
+						<ul>
+							<li>Defined in core/init.ts:51</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="application" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> application</h3>
 					<div class="tsd-signature tsd-kind-icon">application<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#application">application</a></p>
 						<ul>
 							<li>Defined in core/init.ts:73</li>
 						</ul>
@@ -132,10 +168,62 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="clientcertificate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> client<wbr>Certificate</h3>
+					<div class="tsd-signature tsd-kind-icon">client<wbr>Certificate<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in core/init.ts:116</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>when set, this is used as <code>pfx</code> for the requests to the server.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="clientapp" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> clientapp</h3>
+					<div class="tsd-signature tsd-kind-icon">clientapp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in core/init.ts:100</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>(mobile) client app using the (backend) <a href="_core_init_.serverinitoptions.html#application">application</a>.</p>
+						</div>
+						<p>When set, the value of this field is send to the Relution server for identification
+						of the app using it. Typically, this is the name or uuid of the app in the appstore.</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="logoncallback" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> logon<wbr>Callback</h3>
+					<div class="tsd-signature tsd-kind-icon">logon<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_core_init_.logoncallback.html" class="tsd-signature-type">LogonCallback</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in core/init.ts:111</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>optional logon applied after each login.</p>
+						</div>
+						<p>Typically the callback supplied uses connector.configureSession() to transfer required
+						credentials of 3rd-tier backend servers after logon.</p>
+						<p>Notice, logon may be called mutiple times after <a href="../modules/_web_http_.html#login">login</a> as due to inactivity the server
+						side session may be lost and needs to be reacquired eventually.</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="serverurl" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> server<wbr>Url</h3>
 					<div class="tsd-signature tsd-kind-icon">server<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#serverurl">serverUrl</a></p>
 						<ul>
 							<li>Defined in core/init.ts:65</li>
 						</ul>
@@ -148,11 +236,12 @@
 						as a (sub-)domain. Operation of Relution at a subpath of URL space is not supported!</p>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 					<a name="tenantorga" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> tenantorga</h3>
 					<div class="tsd-signature tsd-kind-icon">tenantorga<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="_core_init_.serverurloptions.html">ServerUrlOptions</a>.<a href="_core_init_.serverurloptions.html#tenantorga">tenantorga</a></p>
 						<ul>
 							<li>Defined in core/init.ts:87</li>
 						</ul>
@@ -165,9 +254,9 @@
 							talks to. The field defaults to using the <a href="_security_roles_.organization.html">Organization</a> of the logon <a href="_security_roles_.user.html">User</a> which
 						suffices for most use cases.</p>
 						<p>When set to the unique name of an <a href="_security_roles_.organization.html">Organization</a>, users of of one <a href="_security_roles_.organization.html">Organization</a> may
-							log into the (backend) <a href="_core_init_.serverurloptions.html#application">application</a> instance of another <a href="_security_roles_.organization.html">Organization</a> serving as
+							log into the (backend) <a href="_core_init_.serverinitoptions.html#application">application</a> instance of another <a href="_security_roles_.organization.html">Organization</a> serving as
 							the tenant. Notice, in order to use this feature the tenant <a href="_security_roles_.organization.html">Organization</a> must have
-							at least execute rights on the (backend) <a href="_core_init_.serverurloptions.html#application">application</a> and the <a href="_security_roles_.user.html">User</a> using it needs
+							at least execute rights on the (backend) <a href="_core_init_.serverinitoptions.html#application">application</a> and the <a href="_security_roles_.user.html">User</a> using it needs
 						to have read permission on the tenant <a href="_security_roles_.organization.html">Organization</a> used.</p>
 					</div>
 				</section>
@@ -195,27 +284,42 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a>
+						<a href="_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.serverurloptions.html#application" class="tsd-kind-icon">application</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.serverinitoptions.html#agentclass" class="tsd-kind-icon">agent<wbr>Class</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.serverinitoptions.html#agentoptions" class="tsd-kind-icon">agent<wbr>Options</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.serverinitoptions.html#application" class="tsd-kind-icon">application</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.serverurloptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+								<a href="_core_init_.serverinitoptions.html#clientcertificate" class="tsd-kind-icon">client<wbr>Certificate</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_core_init_.serverurloptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a>
+								<a href="_core_init_.serverinitoptions.html#clientapp" class="tsd-kind-icon">clientapp</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_core_init_.serverinitoptions.html#logoncallback" class="tsd-kind-icon">logon<wbr>Callback</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.serverinitoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="_core_init_.serverinitoptions.html#tenantorga" class="tsd-kind-icon">tenantorga</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a>
+					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="../modules/_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
 					</li>

@@ -62,7 +62,7 @@ export type HttpResponse = http.IncomingMessage;
  * named parameters of the [[http]] function.
  */
 export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
-    init.ServerUrlOptions {
+    init.ServerInitOptions {
   /**
    * optional callback allowing to inspect the server response in more detail than provided by
    * default.
@@ -94,21 +94,38 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
  *    `requestUrl`, `statusCode` and `statusMessage`.
  */
 export function ajax(options: HttpOptions): Q.Promise<any> {
-  let url = server.resolveUrl(options.url, options.serverUrl);
-  let serverUrl = server.resolveUrl('/', url);
+  let serverUrl = server.resolveUrl('/', options);
   let serverObj = server.Server.getInstance(serverUrl);
   if (!serverObj.sessionUserUuid && serverObj.credentials) {
     // not logged in
     let credentials = serverObj.credentials;
     serverObj.credentials = null;
-    return login(credentials, options).then(() => {
+    return login(credentials, {
+      serverUrl: serverUrl
+    }).then(() => {
       diag.debug.assert(() => !!serverObj.sessionUserUuid);
       diag.debug.assert(() => serverObj.credentials == credentials);
       return ajax(options); // repeat after login
     });
   }
 
+  // process options
+  let currentOptions = serverObj.applyOptions({
+    serverUrl: serverUrl,
+    agentOptions: options.agentOptions || init.initOptions.agentOptions,
+    agentClass: options.agentClass || init.initOptions.agentClass,
+    // options taking effect at request time
+    application: options.application || init.initOptions.application,
+    clientapp: options.clientapp || init.initOptions.clientapp,
+    tenantorga: options.tenantorga || init.initOptions.tenantorga
+  });
+
+  // resolve target url
+  let url = server.resolveUrl(options.url, currentOptions);
+
   let responseCallback = options.responseCallback || _.identity;
+  options.agentOptions = currentOptions.agentOptions;
+  options.agentClass = currentOptions.agentClass;
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
       diag.debug.debug(options.method + ' ' + url);
@@ -179,7 +196,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
 /**
  * options for use by both [[login]] and [[logout]].
  */
-export interface LogonOptions extends request.CoreOptions {
+export interface LogonOptions extends init.ServerUrlOptions {
 
   /**
    * specifies whether login response data is persisted such that subsequent logons can be
@@ -201,7 +218,7 @@ export interface LogonOptions extends request.CoreOptions {
 /**
  * options specific to [[login]] function.
  */
-export interface LoginOptions extends LogonOptions, init.ServerUrlOptions {
+export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
 };
 
 /**
@@ -228,23 +245,33 @@ export interface LoginOptions extends LogonOptions, init.ServerUrlOptions {
  */
 export function login(credentials: auth.Credentials,
                       loginOptions: LoginOptions = {}): Q.Promise<any> {
-  let url = server.resolveUrl('/gofer/security/rest/auth/login', loginOptions.serverUrl);
-  let serverUrl = server.resolveUrl('/', url);
+  let serverUrl = server.resolveUrl('/', loginOptions);
   let serverObj = server.Server.getInstance(serverUrl);
   if (serverObj.sessionUserUuid) {
     // logged in already
-    return logout(loginOptions).then(() => {
+    return logout({
+      serverUrl: serverUrl
+    }).then(() => {
       diag.debug.assert(() => !serverObj.sessionUserUuid);
       return login(credentials, loginOptions); // repeat after logout
     });
   }
 
+  // process options
+  let currentOptions = serverObj.applyOptions({
+    serverUrl: serverUrl,
+    agentOptions: loginOptions.agentOptions || init.initOptions.agentOptions,
+    agentClass: loginOptions.agentClass || init.initOptions.agentClass,
+    // options taking effect at login time
+    logonCallback: loginOptions.logonCallback || init.initOptions.logonCallback,
+    clientCertificate: loginOptions.clientCertificate || init.initOptions.clientCertificate,
+  });
   return ajax(_.defaults<HttpOptions>({
+    serverUrl: serverUrl,
     method: 'POST',
-    url: url,
-    body: credentials,
-    serverUrl: serverUrl
-  }, loginOptions)).then((response) => {
+    url: '/gofer/security/rest/auth/login',
+    body: credentials
+  }, currentOptions)).then((response) => {
     // switch current server
     if (!serverObj.sessionUserUuid) {
       diag.debug.warn('BUG: Relution did not set X-Gofer-User response header');
@@ -266,7 +293,7 @@ export function login(credentials: auth.Credentials,
 /**
  * options specific to [[logout]] function.
  */
-export interface LogoutOptions extends LogonOptions {
+export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
 };
 
 /**
@@ -277,20 +304,28 @@ export interface LogoutOptions extends LogonOptions {
  * @return {Q.Promise<any>} of logout response.
  */
 export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
-  let url = server.resolveUrl('/gofer/security/rest/auth/logout');
-  let serverUrl = server.resolveUrl('/', url);
+  let serverUrl = server.resolveUrl('/', logoutOptions);
+  let serverObj = server.Server.getInstance(serverUrl);
+
+  // process options
+  let currentOptions = serverObj.applyOptions({
+    serverUrl: serverUrl,
+    agentOptions: logoutOptions.agentOptions || init.initOptions.agentOptions,
+    agentClass: logoutOptions.agentClass || init.initOptions.agentClass,
+    // options taking effect at logout time
+  });
   return ajax(_.defaults<HttpOptions>({
+    serverUrl: serverUrl,
     method: 'POST',
-    url: url,
-    body: {},
-    serverUrl: serverUrl
-  }, logoutOptions)).catch((error) => {
+    url: '/gofer/security/rest/auth/logout',
+    body: {}
+  }, currentOptions)).catch((error) => {
     // REST-based logout URL currently is broken reporting a 422 in all cases
     return ajax(_.defaults<HttpOptions>({
+      serverUrl: serverUrl,
       method: 'GET',
-      url: '/gofer/security-logout',
-      serverUrl: serverUrl
-    }, logoutOptions)).then((result) => {
+      url: '/gofer/security-logout'
+    }, currentOptions)).then((result) => {
       diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed: ', error);
       return result;
     }, (error2) => {
@@ -299,7 +334,6 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
       throw error;
     });
   }).finally(() => {
-    let serverObj = server.Server.getInstance(serverUrl);
     serverObj.credentials = null;
     serverObj.authorization = auth.ANONYMOUS_AUTHORIZATION;
     serverObj.organization = null;

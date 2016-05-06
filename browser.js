@@ -413,28 +413,28 @@ var diag = require('./diag');
 // initialize to go in sync with init() call
 Q.longStackSupport = diag.debug.enabled;
 /**
- * creates a deeply independent copy of some [[ServerUrlOptions]].
+ * creates a deeply independent copy of some [[ServerInitOptions]].
  *
- * @param serverUrlOptions to clone.
- * @return {ServerUrlOptions} cloned object.
+ * @param serverInitOptions to clone.
+ * @return {ServerInitOptions} cloned object.
  */
-function cloneServerUrlOptions(serverUrlOptions) {
+function cloneServerInitOptions(serverInitOptions) {
     var result = {
-        serverUrl: serverUrlOptions.serverUrl,
-        application: serverUrlOptions.application,
-        clientapp: serverUrlOptions.clientapp,
-        tenantorga: serverUrlOptions.tenantorga,
-        logonCallback: serverUrlOptions.logonCallback,
+        serverUrl: serverInitOptions.serverUrl,
+        application: serverInitOptions.application,
+        clientapp: serverInitOptions.clientapp,
+        tenantorga: serverInitOptions.tenantorga,
+        logonCallback: serverInitOptions.logonCallback,
     };
-    if (serverUrlOptions.clientCertificate) {
-        result.clientCertificate = _.clone(serverUrlOptions.clientCertificate);
+    if (serverInitOptions.clientCertificate) {
+        result.clientCertificate = _.clone(serverInitOptions.clientCertificate);
     }
-    if (serverUrlOptions.agentOptions) {
-        result.agentOptions = _.clone(serverUrlOptions.agentOptions);
+    if (serverInitOptions.agentOptions) {
+        result.agentOptions = _.clone(serverInitOptions.agentOptions);
     }
     return result;
 }
-exports.cloneServerUrlOptions = cloneServerUrlOptions;
+exports.cloneServerInitOptions = cloneServerInitOptions;
 /**
  * copy of options the SDK was initialized with using [[init]] function serving as defaults.
  *
@@ -452,7 +452,7 @@ function init(options) {
         diag.debug.enabled = options.debug;
         Q.longStackSupport = options.debug;
     }
-    _.assign(exports.initOptions, cloneServerUrlOptions(options));
+    _.assign(exports.initOptions, cloneServerInitOptions(options));
 }
 exports.init = init;
 
@@ -2019,7 +2019,9 @@ exports.freezeUser = freezeUser;
 "use strict";
 var url = require('url');
 var assert = require('assert');
+var _ = require('lodash');
 var init = require('../core/init');
+var diag = require('../core/diag');
 var auth = require('./auth');
 var roles = require('./roles');
 /**
@@ -2037,16 +2039,20 @@ var roles = require('./roles');
  *   ``http://192.168.0.10:8080`` using a user of organization mway provided currentOrganization
  *   was not changed explicitly to something else.
  *
- * @param path optional path to resolve.
+ * @param path path to resolve.
  * @return {string} absolute URL of path on current server.
  */
-function resolveUrl(path, serverUrl) {
-    if (serverUrl === void 0) { serverUrl = init.initOptions.serverUrl; }
+function resolveUrl(path, options) {
+    if (options === void 0) { options = {}; }
+    var serverUrl = options.serverUrl || init.initOptions.serverUrl;
     if (!serverUrl) {
         return path;
     }
-    if (!path) {
-        return serverUrl;
+    if (path.charAt(0) !== '/') {
+        // construct full application url
+        var tenantorga = options.tenantorga || init.initOptions.tenantorga;
+        var application = options.application || init.initOptions.application;
+        serverUrl = url.resolve(serverUrl, '/' + tenantorga + '/' + application + '/');
     }
     return url.resolve(serverUrl, path);
 }
@@ -2065,7 +2071,7 @@ var Server = (function () {
             user: null,
             credentials: null
         };
-        this.options = init.cloneServerUrlOptions(init.initOptions);
+        this.options = init.cloneServerInitOptions(init.initOptions);
         this.options.serverUrl = serverUrl;
     }
     Server.getInstance = function (serverUrl) {
@@ -2082,6 +2088,17 @@ var Server = (function () {
     };
     Server.prototype.makeCurrent = function () {
         init.initOptions.serverUrl = this.options.serverUrl;
+    };
+    /**
+     * used to update options.
+     *
+     * @param opts to apply.
+     * @return {*} updated options.
+     */
+    Server.prototype.applyOptions = function (serverInitOptions) {
+        var _this = this;
+        diag.debug.assert(function () { return _this.options.serverUrl === serverInitOptions.serverUrl; });
+        return _.assign(this.options, serverInitOptions);
     };
     Object.defineProperty(Server.prototype, "authorization", {
         get: function () {
@@ -2105,6 +2122,9 @@ var Server = (function () {
         set: function (organization) {
             if (organization) {
                 this.state.organization = roles.freezeOrganization(organization);
+                if (!this.options.tenantorga) {
+                    this.options.tenantorga = organization.uniqueName;
+                }
             }
             else {
                 this.state.organization = null;
@@ -2223,7 +2243,7 @@ function getCurrentUser() {
 }
 exports.getCurrentUser = getCurrentUser;
 
-},{"../core/init":7,"./auth":18,"./roles":20,"assert":26,"url":269}],22:[function(require,module,exports){
+},{"../core/diag":4,"../core/init":7,"./auth":18,"./roles":20,"assert":26,"lodash":276,"url":269}],22:[function(require,module,exports){
 /**
  * @file web/http.ts
  * Relution SDK
@@ -2254,6 +2274,7 @@ var Q = require('q');
 var request = require('request');
 var assert = require('assert');
 var diag = require('../core/diag');
+var init = require('../core/init');
 var auth = require('../security/auth');
 var server = require('../security/server');
 // require request.js to manage cookies for us
@@ -2287,20 +2308,35 @@ var requestWithDefaults = request.defaults(requestDefaults);
  *    `requestUrl`, `statusCode` and `statusMessage`.
  */
 function ajax(options) {
-    var url = server.resolveUrl(options.url, options.serverUrl);
-    var serverUrl = server.resolveUrl('/', url);
+    var serverUrl = server.resolveUrl('/', options);
     var serverObj = server.Server.getInstance(serverUrl);
     if (!serverObj.sessionUserUuid && serverObj.credentials) {
         // not logged in
         var credentials_1 = serverObj.credentials;
         serverObj.credentials = null;
-        return login(credentials_1, options).then(function () {
+        return login(credentials_1, {
+            serverUrl: serverUrl
+        }).then(function () {
             diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
             diag.debug.assert(function () { return serverObj.credentials == credentials_1; });
             return ajax(options); // repeat after login
         });
     }
+    // process options
+    var currentOptions = serverObj.applyOptions({
+        serverUrl: serverUrl,
+        agentOptions: options.agentOptions || init.initOptions.agentOptions,
+        agentClass: options.agentClass || init.initOptions.agentClass,
+        // options taking effect at request time
+        application: options.application || init.initOptions.application,
+        clientapp: options.clientapp || init.initOptions.clientapp,
+        tenantorga: options.tenantorga || init.initOptions.tenantorga
+    });
+    // resolve target url
+    var url = server.resolveUrl(options.url, currentOptions);
     var responseCallback = options.responseCallback || _.identity;
+    options.agentOptions = currentOptions.agentOptions;
+    options.agentClass = currentOptions.agentClass;
     return Q.Promise(function (resolveResult, rejectResult) {
         var promiseResponse = responseCallback(Q.Promise(function (resolveResponse, rejectResponse) {
             diag.debug.debug(options.method + ' ' + url);
@@ -2394,22 +2430,32 @@ exports.ajax = ajax;
  */
 function login(credentials, loginOptions) {
     if (loginOptions === void 0) { loginOptions = {}; }
-    var url = server.resolveUrl('/gofer/security/rest/auth/login', loginOptions.serverUrl);
-    var serverUrl = server.resolveUrl('/', url);
+    var serverUrl = server.resolveUrl('/', loginOptions);
     var serverObj = server.Server.getInstance(serverUrl);
     if (serverObj.sessionUserUuid) {
         // logged in already
-        return logout(loginOptions).then(function () {
+        return logout({
+            serverUrl: serverUrl
+        }).then(function () {
             diag.debug.assert(function () { return !serverObj.sessionUserUuid; });
             return login(credentials, loginOptions); // repeat after logout
         });
     }
+    // process options
+    var currentOptions = serverObj.applyOptions({
+        serverUrl: serverUrl,
+        agentOptions: loginOptions.agentOptions || init.initOptions.agentOptions,
+        agentClass: loginOptions.agentClass || init.initOptions.agentClass,
+        // options taking effect at login time
+        logonCallback: loginOptions.logonCallback || init.initOptions.logonCallback,
+        clientCertificate: loginOptions.clientCertificate || init.initOptions.clientCertificate,
+    });
     return ajax(_.defaults({
+        serverUrl: serverUrl,
         method: 'POST',
-        url: url,
-        body: credentials,
-        serverUrl: serverUrl
-    }, loginOptions)).then(function (response) {
+        url: '/gofer/security/rest/auth/login',
+        body: credentials
+    }, currentOptions)).then(function (response) {
         // switch current server
         if (!serverObj.sessionUserUuid) {
             diag.debug.warn('BUG: Relution did not set X-Gofer-User response header');
@@ -2438,20 +2484,26 @@ exports.login = login;
  */
 function logout(logoutOptions) {
     if (logoutOptions === void 0) { logoutOptions = {}; }
-    var url = server.resolveUrl('/gofer/security/rest/auth/logout');
-    var serverUrl = server.resolveUrl('/', url);
+    var serverUrl = server.resolveUrl('/', logoutOptions);
+    var serverObj = server.Server.getInstance(serverUrl);
+    // process options
+    var currentOptions = serverObj.applyOptions({
+        serverUrl: serverUrl,
+        agentOptions: logoutOptions.agentOptions || init.initOptions.agentOptions,
+        agentClass: logoutOptions.agentClass || init.initOptions.agentClass,
+    });
     return ajax(_.defaults({
+        serverUrl: serverUrl,
         method: 'POST',
-        url: url,
-        body: {},
-        serverUrl: serverUrl
-    }, logoutOptions)).catch(function (error) {
+        url: '/gofer/security/rest/auth/logout',
+        body: {}
+    }, currentOptions)).catch(function (error) {
         // REST-based logout URL currently is broken reporting a 422 in all cases
         return ajax(_.defaults({
+            serverUrl: serverUrl,
             method: 'GET',
-            url: '/gofer/security-logout',
-            serverUrl: serverUrl
-        }, logoutOptions)).then(function (result) {
+            url: '/gofer/security-logout'
+        }, currentOptions)).then(function (result) {
             diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed: ', error);
             return result;
         }, function (error2) {
@@ -2460,7 +2512,6 @@ function logout(logoutOptions) {
             throw error;
         });
     }).finally(function () {
-        var serverObj = server.Server.getInstance(serverUrl);
         serverObj.credentials = null;
         serverObj.authorization = auth.ANONYMOUS_AUTHORIZATION;
         serverObj.organization = null;
@@ -2470,7 +2521,7 @@ function logout(logoutOptions) {
 }
 exports.logout = logout;
 
-},{"../core/diag":4,"../security/auth":18,"../security/server":21,"assert":26,"lodash":276,"q":277,"request":278}],23:[function(require,module,exports){
+},{"../core/diag":4,"../core/init":7,"../security/auth":18,"../security/server":21,"assert":26,"lodash":276,"q":277,"request":278}],23:[function(require,module,exports){
 /**
  * @file web/index.ts
  * Relution SDK
