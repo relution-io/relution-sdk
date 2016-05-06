@@ -124,8 +124,15 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   let url = server.resolveUrl(options.url, currentOptions);
 
   let responseCallback = options.responseCallback || _.identity;
+  options = _.clone(options);
   options.agentOptions = currentOptions.agentOptions;
   options.agentClass = currentOptions.agentClass;
+  if (serverObj.sessionUserUuid) {
+    // add X-Gofer-User header so that server may check we are running under correct identity
+    options.headers = _.defaults({
+      'X-Gofer-User': serverObj.sessionUserUuid
+    }, options.headers);
+  }
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
       diag.debug.debug(options.method + ' ' + url);
