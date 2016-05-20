@@ -201,6 +201,8 @@ export class Server {
  *
  * @param serverUrl to get state of.
  * @return {Server} state parameter.
+ *
+ * @internal for library use only.
  */
 export function getCurrentServer(): Server {
   return Server.getInstance();
@@ -209,6 +211,8 @@ export function getCurrentServer(): Server {
  * sets the current [[Server]].
  *
  * @param server to set state of.
+ *
+ * @internal for library use only.
  */
 export function setCurrentServer(server: Server) {
   if (server) {

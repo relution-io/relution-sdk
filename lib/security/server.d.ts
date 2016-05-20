@@ -21,19 +21,6 @@ import * as roles from './roles';
  */
 export declare function resolveUrl(path: string, options?: init.ServerUrlOptions): string;
 /**
- * gets the current [[Server]].
- *
- * @param serverUrl to get state of.
- * @return {Server} state parameter.
- */
-export declare function getCurrentServer(): Server;
-/**
- * sets the current [[Server]].
- *
- * @param server to set state of.
- */
-export declare function setCurrentServer(server: Server): void;
-/**
  * gets the [[Authorization]] in effect.
  *
  * @return {Authorization} in effect, may be null.

@@ -2176,6 +2176,8 @@ exports.Server = Server;
  *
  * @param serverUrl to get state of.
  * @return {Server} state parameter.
+ *
+ * @internal for library use only.
  */
 function getCurrentServer() {
     return Server.getInstance();
@@ -2185,6 +2187,8 @@ exports.getCurrentServer = getCurrentServer;
  * sets the current [[Server]].
  *
  * @param server to set state of.
+ *
+ * @internal for library use only.
  */
 function setCurrentServer(server) {
     if (server) {
