@@ -4,7 +4,7 @@
   "devDependencies": {
     "sinon": "registry:npm/sinon#1.16.0+20160309002336"
   },
-  "ambientDependencies": {
+  "globalDependencies": {
     "mocha": "registry:dt/mocha#2.2.5+20160317120654",
     "node": "registry:dt/node#4.0.0+20160423143914",
     "q": "registry:dt/q#0.0.0+20160417152954"

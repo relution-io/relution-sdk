@@ -17,10 +17,10 @@
     "filesGlob": [
         "src/**/*.ts",
         "!src/**/*.d.ts",
-        "typings/main.d.ts"
+        "typings/index.d.ts"
     ],
     "files": [
-        "typings/main.d.ts",
+        "typings/index.d.ts",
         "src/connector/connector.ts",
         "src/connector/index.ts",
         "src/core/diag.spec.ts",
