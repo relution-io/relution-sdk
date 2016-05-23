@@ -118,7 +118,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IncomingMessage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:59</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L59">web/http.ts:59</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -136,7 +136,7 @@
 					<div class="tsd-signature tsd-kind-icon">request<wbr>With<wbr>Defaults<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestAPI</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">CoreOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">UriOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">UrlOptions</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:44</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L44">web/http.ts:44</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -153,7 +153,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:96</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L116">web/http.ts:116</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -176,6 +176,26 @@
 								</ul>
 								<p>Thus, to differentiate network failures from server-side failures the <code>statusCode</code> of the Error
 								rejection is to being used. For deeper inspection provide an [[options.responseCallback]].</p>
+								<pre><code class="lang-javascript">Relution.init({
+   serverUrl: <span class="hljs-string">'http://localhost:8080'</span>,
+   organization: <span class="hljs-string">'myOrga'</span>
+});
+
+<span class="hljs-keyword">let</span> httpOptions: HttpOptions = {method: <span class="hljs-string">'GET'</span>, url: <span class="hljs-string">'api/v1/posts'</span>};
+
+<span class="hljs-comment">//usage as Promise</span>
+Relution.web.ajax(httpOptions)
+ .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp);)
+ .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
+ .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>));
+
+<span class="hljs-comment">// as Observable</span>
+Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
+ (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp),
+ (e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
+ () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>)
+)
+</code></pre>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -202,7 +222,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:258</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L292">web/http.ts:292</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -210,16 +230,30 @@
 									<p>logs into a Relution server.</p>
 								</div>
 								<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> Relution <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk'</span>;
-
+<span class="hljs-comment">//config</span>
 Relution.init({
    serverUrl: <span class="hljs-string">'http://localhost:8080'</span>
 });
 
-<span class="hljs-keyword">let</span> credentials: security.LoginObject = {
+<span class="hljs-keyword">let</span> credentials = {
    userName: <span class="hljs-string">'myusername'</span>,
    password: <span class="hljs-string">'mypassword'</span>
 };
-Relution.web.login(credentials).then(...);
+
+<span class="hljs-comment">//usage</span>
+
+<span class="hljs-comment">// Promise</span>
+Relution.web.login(credentials)
+ .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
+ .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
+ .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'complete'</span>));
+
+<span class="hljs-comment">//Observable</span>
+Observable.fromPromise(Relution.web.login(credentials)).subscribe(
+ (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp),
+ (e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
+ () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'complete'</span>)
+)
 </code></pre>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -252,7 +286,7 @@ Relution.web.login(credentials).then(...);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:319</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L366">web/http.ts:366</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -266,6 +300,19 @@ Relution.web.login(credentials).then(...);
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> logoutOptions: <a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>overwriting <a href="_core_init_.html#init">init</a> defaults.</p>
+										<pre><code class="lang-javascript">
+Relution.web.logout()
+ .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
+ .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
+ .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'bye bye'</span>));
+
+<span class="hljs-comment">//Observable</span>
+Observable.fromPromise(Relution.web.logout()).subscribe(
+ (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp),
+ (e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
+ () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'bye bye'</span>)
+)
+</code></pre>
 									</div>
 								</li>
 							</ul>
@@ -283,7 +330,7 @@ Relution.web.login(credentials).then(...);
 					<div class="tsd-signature tsd-kind-icon">request<wbr>Defaults<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:39</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L39">web/http.ts:39</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -292,7 +339,7 @@ Relution.web.login(credentials).then(...);
 						<div class="tsd-signature tsd-kind-icon">jar<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in web/http.ts:41</li>
+								<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L41">web/http.ts:41</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -302,7 +349,7 @@ Relution.web.login(credentials).then(...);
 						<div class="tsd-signature tsd-kind-icon">json<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in web/http.ts:40</li>
+								<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L40">web/http.ts:40</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -312,7 +359,7 @@ Relution.web.login(credentials).then(...);
 						<div class="tsd-signature tsd-kind-icon">with<wbr>Credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in web/http.ts:42</li>
+								<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/feature/docs-login/src/web/http.ts#L42">web/http.ts:42</a></li>
 							</ul>
 						</aside>
 					</section>
