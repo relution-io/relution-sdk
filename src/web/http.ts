@@ -238,16 +238,30 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
  *
  * ```javascript
  * import * as Relution from 'relution-sdk';
- *
+ * //config
  * Relution.init({
  *    serverUrl: 'http://localhost:8080'
  * });
  *
- * let credentials: security.LoginObject = {
+ * let credentials = {
  *    userName: 'myusername',
  *    password: 'mypassword'
  * };
- * Relution.web.login(credentials).then(...);
+ *
+ * //usage
+ *
+ * // Promise
+ * Relution.web.login(credentials)
+ *  .then((resp) => console.log('resp', resp);)
+ *  .catch((e:Error) => console.error(e.message, e))
+ *  .finally(() => console.log('complete'));
+ *
+ * //Observable
+ * Observable.fromPromise(Relution.web.login(credentials)).subscribe(
+ *  (resp: any) => console.log('resp', resp),
+ *  (e:Error) => console.error(e.message, e);,
+ *  () => console.log('complete')
+ * )
  * ```
  *
  * @param credentials to use.
