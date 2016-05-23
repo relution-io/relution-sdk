@@ -88,7 +88,27 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
  *
  * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
  * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ * ```javascript
+ * Relution.init({
+ *    serverUrl: 'http://localhost:8080',
+ *    organization: 'myOrga'
+ * });
  *
+ * let httpOptions: HttpOptions = {method: 'GET', url: 'api/v1/posts'};
+ *
+ * //usage as Promise
+ * Relution.web.ajax(httpOptions)
+ *  .then((resp) => console.log('posts', resp);)
+ *  .catch((e:Error) => console.error(e.message, e))
+ *  .finally(() => console.log('loading complete!'));
+ *
+ * // as Observable
+ * Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
+ *  (resp: any) => console.log('posts', resp),
+ *  (e:Error) => console.error(e.message, e);,
+ *  () => console.log('loading complete!')
+ * )
+ * ```
  * @param options of request, including target `url`.
  * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
  *    `requestUrl`, `statusCode` and `statusMessage`.
@@ -327,7 +347,20 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
  * logs out of a Relution server.
  *
  * @param logoutOptions overwriting [[init]] defaults.
+ * ```javascript
  *
+ * Relution.web.logout()
+ *  .then((resp) => console.log('resp', resp);)
+ *  .catch((e:Error) => console.error(e.message, e))
+ *  .finally(() => console.log('bye bye'));
+ *
+ * //Observable
+ * Observable.fromPromise(Relution.web.logout()).subscribe(
+ *  (resp: any) => console.log('resp', resp),
+ *  (e:Error) => console.error(e.message, e);,
+ *  () => console.log('bye bye')
+ * )
+ * ```
  * @return {Q.Promise<any>} of logout response.
  */
 export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
