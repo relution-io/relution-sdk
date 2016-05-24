@@ -133,6 +133,9 @@ export function cloneServerInitOptions(serverInitOptions: ServerInitOptions): Se
     tenantOrga: serverInitOptions.tenantOrga,
     logonCallback: serverInitOptions.logonCallback,
   };
+  if (result.serverUrl && result.serverUrl[result.serverUrl.length - 1] !== '/') {
+    result.serverUrl += '/';
+  }
   if (serverInitOptions.clientCertificate) {
     result.clientCertificate = _.clone(serverInitOptions.clientCertificate);
   }
@@ -174,5 +177,6 @@ export function init(options: InitOptions = {}) {
     Q.longStackSupport = options.debug;
   }
 
-  _.assign(initOptions, cloneServerInitOptions(options));
+  _.assignWith(initOptions, cloneServerInitOptions(options),
+    (left: any, right: any) => _.isUndefined(right) ? left : right);
 }

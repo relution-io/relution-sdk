@@ -85,6 +85,7 @@ export class Server {
     if (!serverUrl) {
       throw new Error('no server set');
     }
+    diag.debug.assert(() => serverUrl[serverUrl.length - 1] === '/', serverUrl);
     let server = Server.servers[serverUrl];
     if (!server) {
       server = new Server(serverUrl);
@@ -142,9 +143,9 @@ export class Server {
    * @param opts to apply.
    * @return {*} updated options.
    */
-  public applyOptions(serverInitOptions: init.ServerInitOptions): init.ServerInitOptions {
+  public applyOptions(serverInitOptions: any): init.ServerInitOptions {
     diag.debug.assert(() => this.options.serverUrl === serverInitOptions.serverUrl);
-    return _.assignWith(this.options, serverInitOptions, (left: any, right: any) => _.isUndefined(left) ? right : left);
+    return _.assignWith(this.options, serverInitOptions, (left: any, right: any) => _.isUndefined(right) ? left : right);
   }
 
   get authorization(): auth.Authorization {
