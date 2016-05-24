@@ -427,6 +427,9 @@ function cloneServerInitOptions(serverInitOptions) {
         tenantOrga: serverInitOptions.tenantOrga,
         logonCallback: serverInitOptions.logonCallback,
     };
+    if (result.serverUrl && result.serverUrl[result.serverUrl.length - 1] !== '/') {
+        result.serverUrl += '/';
+    }
     if (serverInitOptions.clientCertificate) {
         result.clientCertificate = _.clone(serverInitOptions.clientCertificate);
     }
@@ -453,7 +456,7 @@ function init(options) {
         diag.debug.enabled = options.debug;
         Q.longStackSupport = options.debug;
     }
-    _.assign(exports.initOptions, cloneServerInitOptions(options));
+    _.assignWith(exports.initOptions, cloneServerInitOptions(options), function (left, right) { return _.isUndefined(right) ? left : right; });
 }
 exports.init = init;
 
@@ -2080,6 +2083,7 @@ var Server = (function () {
         if (!serverUrl) {
             throw new Error('no server set');
         }
+        diag.debug.assert(function () { return serverUrl[serverUrl.length - 1] === '/'; }, serverUrl);
         var server = Server.servers[serverUrl];
         if (!server) {
             server = new Server(serverUrl);
@@ -2099,7 +2103,7 @@ var Server = (function () {
     Server.prototype.applyOptions = function (serverInitOptions) {
         var _this = this;
         diag.debug.assert(function () { return _this.options.serverUrl === serverInitOptions.serverUrl; });
-        return _.assignWith(this.options, serverInitOptions, function (left, right) { return _.isUndefined(left) ? right : left; });
+        return _.assignWith(this.options, serverInitOptions, function (left, right) { return _.isUndefined(right) ? left : right; });
     };
     Object.defineProperty(Server.prototype, "authorization", {
         get: function () {
@@ -2308,6 +2312,27 @@ var requestWithDefaults = request.defaults(requestDefaults);
  * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
  * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
  *
+ * ```javascript
+ * Relution.init({
+ *    serverUrl: 'http://localhost:8080',
+ *    organization: 'myOrga'
+ * });
+ *
+ * let httpOptions: HttpOptions = {method: 'GET', url: 'api/v1/posts'};
+ *
+ * //usage as Promise
+ * Relution.web.ajax(httpOptions)
+ *  .then((resp) => console.log('posts', resp);)
+ *  .catch((e:Error) => console.error(e.message, e))
+ *  .finally(() => console.log('loading complete!'));
+ *
+ * // as Observable
+ * Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
+ *  (resp: any) => console.log('posts', resp),
+ *  (e:Error) => console.error(e.message, e);,
+ *  () => console.log('loading complete!')
+ * )
+ * ```
  * @param options of request, including target `url`.
  * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
  *    `requestUrl`, `statusCode` and `statusMessage`.
@@ -2428,16 +2453,30 @@ exports.ajax = ajax;
  *
  * ```javascript
  * import * as Relution from 'relution-sdk';
- *
+ * //config
  * Relution.init({
  *    serverUrl: 'http://localhost:8080'
  * });
  *
- * let credentials: security.LoginObject = {
+ * let credentials = {
  *    userName: 'myusername',
  *    password: 'mypassword'
  * };
- * Relution.web.login(credentials).then(...);
+ *
+ * //usage
+ *
+ * // Promise
+ * Relution.web.login(credentials)
+ *  .then((resp) => console.log('resp', resp);)
+ *  .catch((e:Error) => console.error(e.message, e))
+ *  .finally(() => console.log('complete'));
+ *
+ * //Observable
+ * Observable.fromPromise(Relution.web.login(credentials)).subscribe(
+ *  (resp: any) => console.log('resp', resp),
+ *  (e:Error) => console.error(e.message, e);,
+ *  () => console.log('complete')
+ * )
  * ```
  *
  * @param credentials to use.
@@ -2497,7 +2536,20 @@ exports.login = login;
  * logs out of a Relution server.
  *
  * @param logoutOptions overwriting [[init]] defaults.
+ * ```javascript
  *
+ * Relution.web.logout()
+ *  .then((resp) => console.log('resp', resp);)
+ *  .catch((e:Error) => console.error(e.message, e))
+ *  .finally(() => console.log('bye bye'));
+ *
+ * //Observable
+ * Observable.fromPromise(Relution.web.logout()).subscribe(
+ *  (resp: any) => console.log('resp', resp),
+ *  (e:Error) => console.error(e.message, e);,
+ *  () => console.log('bye bye')
+ * )
+ * ```
  * @return {Q.Promise<any>} of logout response.
  */
 function logout(logoutOptions) {

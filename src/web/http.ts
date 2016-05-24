@@ -88,6 +88,7 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
  *
  * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
  * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ *
  * ```javascript
  * Relution.init({
  *    serverUrl: 'http://localhost:8080',
