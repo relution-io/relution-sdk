@@ -143,7 +143,7 @@ export class Server {
    * @param opts to apply.
    * @return {*} updated options.
    */
-  public applyOptions(serverInitOptions: any): init.ServerInitOptions {
+  public applyOptions(serverInitOptions:  init.ServerInitOptions): init.ServerInitOptions {
     diag.debug.assert(() => this.options.serverUrl === serverInitOptions.serverUrl);
     return _.assignWith(this.options, serverInitOptions, (left: any, right: any) => _.isUndefined(right) ? left : right);
   }
