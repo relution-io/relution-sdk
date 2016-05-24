@@ -144,7 +144,7 @@ export class Server {
    */
   public applyOptions(serverInitOptions: init.ServerInitOptions): init.ServerInitOptions {
     diag.debug.assert(() => this.options.serverUrl === serverInitOptions.serverUrl);
-    return _.assign(this.options, serverInitOptions);
+    return _.assignWith(this.options, serverInitOptions, (left: any, right: any) => _.isUndefined(left) ? right : left);
   }
 
   get authorization(): auth.Authorization {

@@ -2099,7 +2099,7 @@ var Server = (function () {
     Server.prototype.applyOptions = function (serverInitOptions) {
         var _this = this;
         diag.debug.assert(function () { return _this.options.serverUrl === serverInitOptions.serverUrl; });
-        return _.assign(this.options, serverInitOptions);
+        return _.assignWith(this.options, serverInitOptions, function (left, right) { return _.isUndefined(left) ? right : left; });
     };
     Object.defineProperty(Server.prototype, "authorization", {
         get: function () {
