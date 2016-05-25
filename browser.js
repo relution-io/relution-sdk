@@ -492,23 +492,17 @@ exports.debug = diag_1.debug;
 var init_1 = require('./core/init');
 exports.init = init_1.init;
 // core module
-var theCore = require('./core');
-exports.core = theCore;
+exports.core = require('./core');
 // model module
-var theModel = require('./model');
-exports.model = theModel;
+exports.model = require('./model');
 // query module
-var theQuery = require('./query');
-exports.query = theQuery;
+exports.query = require('./query');
 // security module
-var theSecurity = require('./security');
-exports.security = theSecurity;
+exports.security = require('./security');
 // web module
-var theWeb = require('./web');
-exports.web = theWeb;
+exports.web = require('./web');
 // connector module
-var theConnector = require('./connector');
-exports.connector = theConnector;
+exports.connector = require('./connector');
 
 },{"./connector":3,"./core":6,"./core/diag":4,"./core/init":7,"./model":10,"./query":17,"./security":19,"./web":23}],9:[function(require,module,exports){
 /**

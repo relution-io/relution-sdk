@@ -24,15 +24,9 @@
  */
 export { debug } from './core/diag';
 export { init } from './core/init';
-import * as theCore from './core';
-export declare const core: typeof theCore;
-import * as theModel from './model';
-export declare const model: typeof theModel;
-import * as theQuery from './query';
-export declare const query: typeof theQuery;
-import * as theSecurity from './security';
-export declare const security: typeof theSecurity;
-import * as theWeb from './web';
-export declare const web: typeof theWeb;
-import * as theConnector from './connector';
-export declare const connector: typeof theConnector;
+export import core = require('./core');
+export import model = require('./model');
+export import query = require('./query');
+export import security = require('./security');
+export import web = require('./web');
+export import connector = require('./connector');

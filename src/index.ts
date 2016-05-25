@@ -28,25 +28,19 @@ export {debug} from './core/diag';
 export {init} from './core/init';
 
 // core module
-import * as theCore from './core';
-export const core = theCore;
+export import core = require('./core');
 
 // model module
-import * as theModel from './model';
-export const model = theModel;
+export import model = require('./model');
 
 // query module
-import * as theQuery from './query';
-export const query = theQuery;
+export import query = require('./query');
 
 // security module
-import * as theSecurity from './security';
-export const security = theSecurity;
+export import security = require('./security');
 
 // web module
-import * as theWeb from './web';
-export const web = theWeb;
+export import web = require('./web');
 
 // connector module
-import * as theConnector from './connector';
-export const connector = theConnector;
+export import connector = require('./connector');
