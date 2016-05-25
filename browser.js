@@ -2275,7 +2275,6 @@ exports.getCurrentUser = getCurrentUser;
 var _ = require('lodash');
 var Q = require('q');
 var request = require('request');
-var assert = require('assert');
 var diag = require('../core/diag');
 var init = require('../core/init');
 var auth = require('../security/auth');
@@ -2357,6 +2356,7 @@ function ajax(options) {
     });
     // resolve target url
     var url = server.resolveUrl(options.url, currentOptions);
+    diag.debug.debug(options.method + ' ' + url);
     var responseCallback = options.responseCallback || _.identity;
     options = _.clone(options);
     options.agentOptions = currentOptions.agentOptions;
@@ -2375,20 +2375,19 @@ function ajax(options) {
     }
     return Q.Promise(function (resolveResult, rejectResult) {
         var promiseResponse = responseCallback(Q.Promise(function (resolveResponse, rejectResponse) {
-            diag.debug.debug(options.method + ' ' + url);
-            requestWithDefaults(url, options, function (error, response, body) {
+            var resp;
+            var req = requestWithDefaults(url, options, function (error, response, body) {
+                if (response === void 0) { response = resp; }
                 // error processing
-                if (!error && response) {
-                    if (response.statusCode >= 400) {
-                        if (!body) {
-                            error = new Error(response.statusMessage);
-                        }
-                        else if (_.isString(body)) {
-                            error = new Error(body);
-                        }
-                        else {
-                            error = body;
-                        }
+                if (!error && response && response.statusCode >= 400) {
+                    if (!body) {
+                        error = new Error(response.statusMessage);
+                    }
+                    else if (_.isString(body)) {
+                        error = new Error(body);
+                    }
+                    else {
+                        error = body;
                     }
                 }
                 if (error) {
@@ -2398,9 +2397,14 @@ function ajax(options) {
                         error.statusMessage = response.statusMessage;
                     }
                 }
-                // logon session processing
-                if (response) {
-                    var sessionUserUuid = response.headers['x-gofer-user'];
+                if (!response) {
+                    // network connectivity problem
+                    diag.debug.assertIsError(error);
+                    rejectResponse(error); // will also rejectResult(error)
+                }
+                else {
+                    // logon session processing
+                    var sessionUserUuid = resp.headers['x-gofer-user'];
                     if (sessionUserUuid) {
                         serverObj.sessionUserUuid = sessionUserUuid;
                     }
@@ -2410,22 +2414,24 @@ function ajax(options) {
                         diag.debug.assert(function () { return error; });
                         diag.debug.warn('server session is lost!', error);
                         if (serverObj.credentials) {
+                            // recover by attempting login,
+                            // here promiseResponse must have been resolved already,
+                            // we chain anyways because of error propagation
+                            promiseResponse.thenResolve(login(serverObj.credentials, {
+                                serverUrl: serverUrl
+                            }).then(function () {
+                                diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
+                                diag.debug.info('server session recovered.');
+                                return ajax(options);
+                            })).done(resolveResult, rejectResult);
+                            return; // early exit
                         }
                     }
                 }
-                if (response) {
-                    // transport response
-                    // Notice, we might have an error object never the less here
-                    resolveResponse(response);
-                }
-                else {
-                    // network connectivity problem
-                    diag.debug.assertIsError(error);
-                    rejectResponse(error);
-                }
+                // completing the chain
                 promiseResponse.then(function (responseResult) {
-                    assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
-                        'original response is reserved for future extension!');
+                    diag.debug.assert(function () { return responseResult === resp; }, 'definition of behavior in case of ' +
+                        'proxying the original response is reserved for future extension!');
                     if (error) {
                         rejectResult(error);
                     }
@@ -2435,6 +2441,13 @@ function ajax(options) {
                 }, function (responseError) {
                     rejectResult(responseError);
                 }).done();
+            });
+            // transport response
+            req.on('response', function (response) {
+                if (!resp) {
+                    resp = response;
+                    resolveResponse(resp);
+                }
             });
         }));
     });
@@ -2585,7 +2598,7 @@ function logout(logoutOptions) {
 }
 exports.logout = logout;
 
-},{"../core/diag":4,"../core/init":7,"../security/auth":18,"../security/server":21,"assert":26,"lodash":276,"q":277,"request":278}],23:[function(require,module,exports){
+},{"../core/diag":4,"../core/init":7,"../security/auth":18,"../security/server":21,"lodash":276,"q":277,"request":278}],23:[function(require,module,exports){
 /**
  * @file web/index.ts
  * Relution SDK

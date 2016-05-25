@@ -39,21 +39,22 @@ describe(module.filename, () => {
   return it('login/logout', (done) => {
     return http.login(credentials, {
       serverUrl: 'http://localhost:8080'
-    }).then((response) => {
+    }).then((loginResponse) => {
+      // logged in
       assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
       let user = security.getCurrentUser();
       assert.equal(user.name, credentials.userName);
-      return response;
-    }).then((loginResponse) => {
       return http.ajax({
         method: 'GET',
         url: '/gofer/system/security/currentAuthorization'
       }).then((currentAuthorizationResponse) => {
         assert.equal(currentAuthorizationResponse.user.uuid, loginResponse.user.uuid);
-        assert.equal(currentAuthorizationResponse.organization.uuid, loginResponse.organization.uuid);
-        return loginResponse;
+        assert.equal(currentAuthorizationResponse.organization.uuid,
+          loginResponse.organization.uuid);
+        return currentAuthorizationResponse;
       });
     }).finally(() => http.logout()).then((response) => {
+      // logged out again
       assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
       let user = security.getCurrentUser();
       assert(!user);

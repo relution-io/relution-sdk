@@ -142,6 +142,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
 
   // resolve target url
   let url = server.resolveUrl(options.url, currentOptions);
+  diag.debug.debug(options.method + ' ' + url);
 
   let responseCallback = options.responseCallback || _.identity;
   options = _.clone(options);
@@ -161,19 +162,17 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   }
   return Q.Promise((resolveResult, rejectResult) => {
     let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
-      diag.debug.debug(options.method + ' ' + url);
-      requestWithDefaults(url, options, (error: any, response: http.IncomingMessage, body: any) => {
+      let resp: http.IncomingMessage;
+      let req = requestWithDefaults(url, options, (error: any, response = resp, body?: any) => {
 
         // error processing
-        if (!error && response) {
-          if (response.statusCode >= 400) {
-            if (!body) {
-              error = new Error(response.statusMessage);
-            } else if (_.isString(body)) {
-              error = new Error(body);
-            } else {
-              error = body;
-            }
+        if (!error && response && response.statusCode >= 400) {
+          if (!body) {
+            error = new Error(response.statusMessage);
+          } else if (_.isString(body)) {
+            error = new Error(body);
+          } else {
+            error = body;
           }
         }
         if (error) {
@@ -184,9 +183,13 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
           }
         }
 
-        // logon session processing
-        if (response) {
-          let sessionUserUuid = response.headers['x-gofer-user'];
+        if (!response) {
+          // network connectivity problem
+          diag.debug.assertIsError(error);
+          rejectResponse(error); // will also rejectResult(error)
+        } else {
+          // logon session processing
+          let sessionUserUuid = resp.headers['x-gofer-user'];
           if (sessionUserUuid) {
             serverObj.sessionUserUuid = sessionUserUuid;
           } else if (response.statusCode === 401) {
@@ -195,23 +198,25 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
             diag.debug.assert(() => error);
             diag.debug.warn('server session is lost!', error);
             if (serverObj.credentials) {
-              // TODO: recover by attempting login
+              // recover by attempting login,
+              // here promiseResponse must have been resolved already,
+              // we chain anyways because of error propagation
+              promiseResponse.thenResolve(login(serverObj.credentials, {
+                serverUrl: serverUrl
+              }).then(() => {
+                diag.debug.assert(() => !!serverObj.sessionUserUuid);
+                diag.debug.info('server session recovered.');
+                return ajax(options);
+              })).done(resolveResult, rejectResult);
+              return; // early exit
             }
           }
         }
 
-        if (response) {
-          // transport response
-          // Notice, we might have an error object never the less here
-          resolveResponse(response);
-        } else {
-          // network connectivity problem
-          diag.debug.assertIsError(error);
-          rejectResponse(error);
-        }
+        // completing the chain
         promiseResponse.then((responseResult: http.IncomingMessage) => {
-          assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
-            'original response is reserved for future extension!');
+          diag.debug.assert(() => responseResult === resp, 'definition of behavior in case of ' +
+            'proxying the original response is reserved for future extension!');
 
           if (error) {
             rejectResult(error);
@@ -221,6 +226,14 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
         }, (responseError) => {
           rejectResult(responseError);
         }).done();
+      });
+
+      // transport response
+      req.on('response', (response: http.IncomingMessage) => {
+        if (!resp) {
+          resp = response;
+          resolveResponse(resp);
+        }
       });
     }));
   });
