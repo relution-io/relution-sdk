@@ -39,26 +39,22 @@ describe(module.filename, () => {
   return it('login/logout', (done) => {
     return http.login(credentials, {
       serverUrl: 'http://localhost:8080'
-    }).then((loginResponse) => {
+    }).then((loginResp) => {
       // logged in
       assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
       let user = security.getCurrentUser();
+      assert(!!user);
       assert.equal(user.name, credentials.userName);
-      return http.ajax({
-        method: 'GET',
-        url: '/gofer/system/security/currentAuthorization'
-      }).then((currentAuthorizationResponse) => {
-        assert.equal(currentAuthorizationResponse.user.uuid, loginResponse.user.uuid);
-        assert.equal(currentAuthorizationResponse.organization.uuid,
-          loginResponse.organization.uuid);
-        return currentAuthorizationResponse;
+      return http.get('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
+        assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
+        assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
+        return currentAuthResp;
+      }).finally(() => http.logout()).then((response) => {
+        // logged out again
+        assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
+        assert(!security.getCurrentUser());
+        return response;
       });
-    }).finally(() => http.logout()).then((response) => {
-      // logged out again
-      assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
-      let user = security.getCurrentUser();
-      assert(!user);
-      return response;
     }).done((result) => done(), (error) => done(error));
   });
 });

@@ -2453,6 +2453,212 @@ function ajax(options) {
     });
 }
 exports.ajax = ajax;
+/**
+ * issues an http/ajax HEAD request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see get
+ * @see put
+ * @see post
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ */
+function head(optionsOrUrl) {
+    var options = {
+        method: 'HEAD'
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    return ajax(options);
+}
+exports.head = head;
+/**
+ * issues an http/ajax GET request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see put
+ * @see post
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ */
+function get(optionsOrUrl) {
+    var options = {
+        method: 'GET'
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    return ajax(options);
+}
+exports.get = get;
+/**
+ * issues an http/ajax PUT request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see post
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ */
+function put(optionsOrUrl, body) {
+    var options = {
+        method: 'PUT'
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    if (!_.isUndefined(body)) {
+        options.body = body;
+    }
+    return ajax(options);
+}
+exports.put = put;
+/**
+ * issues an http/ajax POST request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see put
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ */
+function post(optionsOrUrl, body) {
+    var options = {
+        method: 'POST'
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    if (!_.isUndefined(body)) {
+        options.body = body;
+    }
+    return ajax(options);
+}
+exports.post = post;
+/**
+ * issues an http/ajax PATCH request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see put
+ * @see post
+ * @see delete
+ *
+ * @see ajax
+ */
+function patch(optionsOrUrl, body) {
+    var options = {
+        method: 'PATCH'
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    if (!_.isUndefined(body)) {
+        options.body = body;
+    }
+    return ajax(options);
+}
+exports.patch = patch;
+/**
+ * issues an http/ajax DELETE request against the Relution server.
+ *
+ * <p>
+ * Please consider this export as an implementation detail of the library and use delete instead.
+ * </p>
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see put
+ * @see post
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ */
+function del(optionsOrUrl, body) {
+    var options = {
+        method: 'DELETE'
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    if (!_.isUndefined(body)) {
+        options.body = body;
+    }
+    return ajax(options);
+}
+exports.del = del;
+exports.delete = del;
+/**
+ * issues an http/ajax DELETE request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see put
+ * @see post
+ * @see patch
+ *
+ * @see ajax
+ */
 ;
 ;
 /**
