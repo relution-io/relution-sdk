@@ -97,15 +97,8 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#del" class="tsd-kind-icon">del</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#get" class="tsd-kind-icon">get</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#head" class="tsd-kind-icon">head</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#login" class="tsd-kind-icon">login</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#logout" class="tsd-kind-icon">logout</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#patch" class="tsd-kind-icon">patch</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#post" class="tsd-kind-icon">post</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#put" class="tsd-kind-icon">put</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_web_http_.html#verb" class="tsd-kind-icon">verb</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-not-exported">
@@ -220,177 +213,6 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="del" class="tsd-anchor"></a>
-					<h3>del</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">del<span class="tsd-signature-symbol">(</span>optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:394</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax DELETE request against the Relution server.</p>
-								</div>
-								<p>
-									Please consider this export as an implementation detail of the library and use delete instead.
-								</p>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>request body to submit in case optionsOrUrl is a url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="get" class="tsd-anchor"></a>
-					<h3>get</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">get<span class="tsd-signature-symbol">(</span>optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:309</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax GET request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="head" class="tsd-anchor"></a>
-					<h3>head</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">head<span class="tsd-signature-symbol">(</span>optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:290</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax HEAD request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
 					<a name="login" class="tsd-anchor"></a>
 					<h3>login</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
@@ -400,7 +222,7 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:480</li>
+									<li>Defined in web/http.ts:305</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -464,7 +286,7 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:554</li>
+									<li>Defined in web/http.ts:379</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -496,251 +318,6 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>of logout response.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="patch" class="tsd-anchor"></a>
-					<h3>patch</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">patch<span class="tsd-signature-symbol">(</span>optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:369</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax PATCH request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>request body to submit in case optionsOrUrl is a url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="post" class="tsd-anchor"></a>
-					<h3>post</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">post<span class="tsd-signature-symbol">(</span>optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:349</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax POST request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>request body to submit in case optionsOrUrl is a url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="put" class="tsd-anchor"></a>
-					<h3>put</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">put<span class="tsd-signature-symbol">(</span>optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:329</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax PUT request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>request body to submit in case optionsOrUrl is a url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="verb" class="tsd-anchor"></a>
-					<h3>verb</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">verb<span class="tsd-signature-symbol">(</span>method<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/http.ts:260</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-									<dt>internal</dt>
-									<dd><p>Implements verb methods.</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>method: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>request body to submit in case optionsOrUrl is a url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
 						</li>
 					</ul>
 				</section>
@@ -827,31 +404,10 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 						<a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#del" class="tsd-kind-icon">del</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#get" class="tsd-kind-icon">get</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#head" class="tsd-kind-icon">head</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_web_http_.html#login" class="tsd-kind-icon">login</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_web_http_.html#logout" class="tsd-kind-icon">logout</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#patch" class="tsd-kind-icon">patch</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#post" class="tsd-kind-icon">post</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_web_http_.html#put" class="tsd-kind-icon">put</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_web_http_.html#verb" class="tsd-kind-icon">verb</a>
 					</li>
 					<li class=" tsd-kind-object-literal tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_web_http_.html#requestdefaults" class="tsd-kind-icon">request<wbr>Defaults</a>

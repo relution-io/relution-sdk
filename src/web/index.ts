@@ -24,3 +24,4 @@
  */
 
 export * from './http';
+export * from './verb';
