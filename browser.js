@@ -2454,6 +2454,40 @@ function ajax(options) {
 }
 exports.ajax = ajax;
 /**
+ * issues an http/ajax request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see put
+ * @see post
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ *
+ * @internal Implements verb methods.
+ */
+function verb(method, optionsOrUrl, body) {
+    var options = {
+        method: method
+    };
+    if (_.isString(optionsOrUrl)) {
+        options.url = optionsOrUrl;
+    }
+    else {
+        _.defaults(options, optionsOrUrl);
+    }
+    if (!_.isUndefined(body)) {
+        options.body = body;
+    }
+    return ajax(options);
+}
+/**
  * issues an http/ajax HEAD request against the Relution server.
  *
  * @param optionsOrUrl of request, including target `url`, or url.
@@ -2469,16 +2503,7 @@ exports.ajax = ajax;
  * @see ajax
  */
 function head(optionsOrUrl) {
-    var options = {
-        method: 'HEAD'
-    };
-    if (_.isString(optionsOrUrl)) {
-        options.url = optionsOrUrl;
-    }
-    else {
-        _.defaults(options, optionsOrUrl);
-    }
-    return ajax(options);
+    return verb('HEAD', optionsOrUrl);
 }
 exports.head = head;
 /**
@@ -2497,16 +2522,7 @@ exports.head = head;
  * @see ajax
  */
 function get(optionsOrUrl) {
-    var options = {
-        method: 'GET'
-    };
-    if (_.isString(optionsOrUrl)) {
-        options.url = optionsOrUrl;
-    }
-    else {
-        _.defaults(options, optionsOrUrl);
-    }
-    return ajax(options);
+    return verb('GET', optionsOrUrl);
 }
 exports.get = get;
 /**
@@ -2526,19 +2542,7 @@ exports.get = get;
  * @see ajax
  */
 function put(optionsOrUrl, body) {
-    var options = {
-        method: 'PUT'
-    };
-    if (_.isString(optionsOrUrl)) {
-        options.url = optionsOrUrl;
-    }
-    else {
-        _.defaults(options, optionsOrUrl);
-    }
-    if (!_.isUndefined(body)) {
-        options.body = body;
-    }
-    return ajax(options);
+    return verb('PUT', optionsOrUrl, body);
 }
 exports.put = put;
 /**
@@ -2558,19 +2562,7 @@ exports.put = put;
  * @see ajax
  */
 function post(optionsOrUrl, body) {
-    var options = {
-        method: 'POST'
-    };
-    if (_.isString(optionsOrUrl)) {
-        options.url = optionsOrUrl;
-    }
-    else {
-        _.defaults(options, optionsOrUrl);
-    }
-    if (!_.isUndefined(body)) {
-        options.body = body;
-    }
-    return ajax(options);
+    return verb('POST', optionsOrUrl, body);
 }
 exports.post = post;
 /**
@@ -2590,19 +2582,7 @@ exports.post = post;
  * @see ajax
  */
 function patch(optionsOrUrl, body) {
-    var options = {
-        method: 'PATCH'
-    };
-    if (_.isString(optionsOrUrl)) {
-        options.url = optionsOrUrl;
-    }
-    else {
-        _.defaults(options, optionsOrUrl);
-    }
-    if (!_.isUndefined(body)) {
-        options.body = body;
-    }
-    return ajax(options);
+    return verb('PATCH', optionsOrUrl, body);
 }
 exports.patch = patch;
 /**
@@ -2627,19 +2607,7 @@ exports.patch = patch;
  * @see ajax
  */
 function del(optionsOrUrl, body) {
-    var options = {
-        method: 'DELETE'
-    };
-    if (_.isString(optionsOrUrl)) {
-        options.url = optionsOrUrl;
-    }
-    else {
-        _.defaults(options, optionsOrUrl);
-    }
-    if (!_.isUndefined(body)) {
-        options.body = body;
-    }
-    return ajax(options);
+    return verb('DELETE', optionsOrUrl, body);
 }
 exports.del = del;
 exports.delete = del;

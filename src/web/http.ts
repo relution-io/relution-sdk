@@ -239,6 +239,40 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
 }
 
 /**
+ * issues an http/ajax request against the Relution server.
+ *
+ * @param optionsOrUrl of request, including target `url`, or url.
+ * @param body request body to submit in case optionsOrUrl is a url.
+ * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
+ *    `requestUrl`, `statusCode` and `statusMessage`.
+ *
+ * @see head
+ * @see get
+ * @see put
+ * @see post
+ * @see patch
+ * @see delete
+ *
+ * @see ajax
+ *
+ * @internal Implements verb methods.
+ */
+function verb(method: string, optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<any> {
+  const options: any = {
+    method: method
+  };
+  if (_.isString(optionsOrUrl)) {
+    options.url = optionsOrUrl;
+  } else {
+    _.defaults(options, optionsOrUrl);
+  }
+  if (!_.isUndefined(body)) {
+    options.body = body;
+  }
+  return ajax(options);
+}
+
+/**
  * issues an http/ajax HEAD request against the Relution server.
  *
  * @param optionsOrUrl of request, including target `url`, or url.
@@ -254,15 +288,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
  * @see ajax
  */
 export function head(optionsOrUrl: HttpOptions | string): Q.Promise<any> {
-  let options: any = {
-    method: 'HEAD'
-  };
-  if (_.isString(optionsOrUrl)) {
-    options.url = optionsOrUrl;
-  } else {
-    _.defaults(options, optionsOrUrl);
-  }
-  return ajax(options);
+  return verb('HEAD', optionsOrUrl);
 }
 
 /**
@@ -281,15 +307,7 @@ export function head(optionsOrUrl: HttpOptions | string): Q.Promise<any> {
  * @see ajax
  */
 export function get(optionsOrUrl: HttpOptions | string): Q.Promise<any> {
-  let options: any = {
-    method: 'GET'
-  };
-  if (_.isString(optionsOrUrl)) {
-    options.url = optionsOrUrl;
-  } else {
-    _.defaults(options, optionsOrUrl);
-  }
-  return ajax(options);
+  return verb('GET', optionsOrUrl);
 }
 
 /**
@@ -309,18 +327,7 @@ export function get(optionsOrUrl: HttpOptions | string): Q.Promise<any> {
  * @see ajax
  */
 export function put(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<any> {
-  let options: any = {
-    method: 'PUT'
-  };
-  if (_.isString(optionsOrUrl)) {
-    options.url = optionsOrUrl;
-  } else {
-    _.defaults(options, optionsOrUrl);
-  }
-  if (!_.isUndefined(body)) {
-    options.body = body;
-  }
-  return ajax(options);
+  return verb('PUT', optionsOrUrl, body);
 }
 
 /**
@@ -340,18 +347,7 @@ export function put(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<a
  * @see ajax
  */
 export function post(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<any> {
-  let options: any = {
-    method: 'POST'
-  };
-  if (_.isString(optionsOrUrl)) {
-    options.url = optionsOrUrl;
-  } else {
-    _.defaults(options, optionsOrUrl);
-  }
-  if (!_.isUndefined(body)) {
-    options.body = body;
-  }
-  return ajax(options);
+  return verb('POST', optionsOrUrl, body);
 }
 
 /**
@@ -371,18 +367,7 @@ export function post(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<
  * @see ajax
  */
 export function patch(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<any> {
-  let options: any = {
-    method: 'PATCH'
-  };
-  if (_.isString(optionsOrUrl)) {
-    options.url = optionsOrUrl;
-  } else {
-    _.defaults(options, optionsOrUrl);
-  }
-  if (!_.isUndefined(body)) {
-    options.body = body;
-  }
-  return ajax(options);
+  return verb('PATCH', optionsOrUrl, body);
 }
 
 /**
@@ -407,18 +392,7 @@ export function patch(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise
  * @see ajax
  */
 export function del(optionsOrUrl: HttpOptions | string, body?: any): Q.Promise<any> {
-  let options: any = {
-    method: 'DELETE'
-  };
-  if (_.isString(optionsOrUrl)) {
-    options.url = optionsOrUrl;
-  } else {
-    _.defaults(options, optionsOrUrl);
-  }
-  if (!_.isUndefined(body)) {
-    options.body = body;
-  }
-  return ajax(options);
+  return verb('DELETE', optionsOrUrl, body);
 }
 
 /**
