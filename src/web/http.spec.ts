@@ -26,23 +26,41 @@ import * as _ from 'lodash';
 
 import * as security from '../security';
 
-let credentials: security.LoginObject = {
+const credentials: security.LoginObject = {
   userName: 't.beckmann',
   password: 'mcap'
 };
 
 describe(module.filename, () => {
-  return it('login/logout', (done) => {
-    return web.login(credentials, {
-      serverUrl: 'http://localhost:8080'
-    }).then((loginResp) => {
-      // logged in
-      assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
-      let user = security.getCurrentUser();
-      assert(!!user);
-      assert.equal(user.name, credentials.userName);
+  return [
+
+    it('login/logout', (done) => {
+      return web.login(credentials, {
+        serverUrl: 'http://localhost:8080'
+      }).then((loginResp) => {
+        // logged in
+        assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
+        const user = security.getCurrentUser();
+        assert(!!user);
+        assert.equal(user.name, credentials.userName);
+        return web.get('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
+          assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
+          assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
+          return currentAuthResp;
+        }).finally(() => web.logout()).then((response) => {
+          // logged out again
+          assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
+          assert(!security.getCurrentUser());
+          return response;
+        });
+      }).done((result) => done(), (error) => done(error));
+    }),
+
+    it('callback order', (done) => {
+      assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
       let state = 0;
       return web.get({
+        serverUrl: 'http://localhost:8080',
         url: '/gofer/system/security/currentAuthorization',
         requestCallback: (request) => {
           debug.debug('request callback fired.');
@@ -54,18 +72,12 @@ describe(module.filename, () => {
           assert.equal(state++, 1, 'response must be reported after request');
           return response;
         },
-      }).then((currentAuthResp) => {
+      }).then((result) => {
         debug.debug('body data fired.');
         assert.equal(state++, 2, 'body data must be reported lastly');
-        assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
-        assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
-        return currentAuthResp;
-      }).finally(() => web.logout()).then((response) => {
-        // logged out again
-        assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
-        assert(!security.getCurrentUser());
-        return response;
-      });
-    }).done((result) => done(), (error) => done(error));
-  });
+        return result;
+      }).done((result) => done(), (error) => done(error));
+    })
+
+  ];
 });
