@@ -20,6 +20,7 @@
 
 import * as assert from 'assert';
 import * as web from './index';
+import {debug} from '../core/diag';
 
 import * as _ from 'lodash';
 
@@ -40,7 +41,22 @@ describe(module.filename, () => {
       let user = security.getCurrentUser();
       assert(!!user);
       assert.equal(user.name, credentials.userName);
-      return web.get('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
+      let state = 0;
+      return web.get({
+        url: '/gofer/system/security/currentAuthorization',
+        requestCallback: (request) => {
+          debug.debug('request callback fired.');
+          assert.equal(state++, 0, 'request must be reported firstly');
+          return request;
+        },
+        responseCallback: (response) => {
+          debug.debug('response callback fired.');
+          assert.equal(state++, 1, 'response must be reported after request');
+          return response;
+        },
+      }).then((currentAuthResp) => {
+        debug.debug('body data fired.');
+        assert.equal(state++, 2, 'body data must be reported lastly');
         assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
         assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
         return currentAuthResp;

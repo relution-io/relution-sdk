@@ -2247,6 +2247,7 @@ function ajax(options) {
     // resolve target url
     var url = server.resolveUrl(options.url, currentOptions);
     diag.debug.debug(options.method + ' ' + url);
+    var requestCallback = options.requestCallback || _.identity;
     var responseCallback = options.responseCallback || _.identity;
     options = _.clone(options);
     options.agentOptions = currentOptions.agentOptions;
@@ -2264,82 +2265,99 @@ function ajax(options) {
         options.headers = _.defaults(headers, options.headers);
     }
     return Q.Promise(function (resolveResult, rejectResult) {
-        var promiseResponse = responseCallback(Q.Promise(function (resolveResponse, rejectResponse) {
+        var promiseResponse = Q.Promise(function (resolveResponse, rejectResponse) {
             var resp;
-            var req = requestWithDefaults(url, options, function (error, response, body) {
-                if (response === void 0) { response = resp; }
-                // error processing
-                if (!error && response && response.statusCode >= 400) {
-                    if (!body) {
-                        error = new Error(response.statusMessage);
-                    }
-                    else if (_.isString(body)) {
-                        error = new Error(body);
-                    }
-                    else {
-                        error = body;
-                    }
-                }
-                if (error) {
-                    error.requestUrl = url;
-                    if (response) {
-                        error.statusCode = response.statusCode;
-                        error.statusMessage = response.statusMessage;
-                    }
-                }
-                if (!response) {
-                    // network connectivity problem
-                    diag.debug.assertIsError(error);
-                    rejectResponse(error); // will also rejectResult(error)
-                }
-                else {
-                    // logon session processing
-                    var sessionUserUuid = resp.headers['x-gofer-user'];
-                    if (sessionUserUuid) {
-                        serverObj.sessionUserUuid = sessionUserUuid;
-                    }
-                    else if (response.statusCode === 401) {
-                        // apparently our session is lost!
-                        serverObj.sessionUserUuid = null;
-                        diag.debug.assert(function () { return error; });
-                        diag.debug.warn('server session is lost!', error);
-                        if (serverObj.credentials) {
-                            // recover by attempting login,
-                            // here promiseResponse must have been resolved already,
-                            // we chain anyways because of error propagation
-                            promiseResponse.thenResolve(login(serverObj.credentials, {
-                                serverUrl: serverUrl
-                            }).then(function () {
-                                diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
-                                diag.debug.info('server session recovered.');
-                                return ajax(options);
-                            })).done(resolveResult, rejectResult);
-                            return; // early exit
+            var req;
+            try {
+                req = requestWithDefaults(url, options, function (error, response, body) {
+                    if (response === void 0) { response = resp; }
+                    // error processing
+                    if (!error && response && response.statusCode >= 400) {
+                        if (!body) {
+                            error = new Error(response.statusMessage);
+                        }
+                        else if (_.isString(body)) {
+                            error = new Error(body);
+                        }
+                        else {
+                            error = body;
                         }
                     }
-                }
-                // completing the chain
-                promiseResponse.then(function (responseResult) {
-                    diag.debug.assert(function () { return responseResult === resp; }, 'definition of behavior in case of ' +
-                        'proxying the original response is reserved for future extension!');
                     if (error) {
-                        rejectResult(error);
+                        error.requestUrl = url;
+                        if (response) {
+                            error.statusCode = response.statusCode;
+                            error.statusMessage = response.statusMessage;
+                        }
+                    }
+                    if (!response) {
+                        // network connectivity problem
+                        diag.debug.assertIsError(error);
+                        rejectResponse(error); // will also rejectResult(error)
                     }
                     else {
-                        resolveResult(body);
+                        // logon session processing
+                        var sessionUserUuid = resp.headers['x-gofer-user'];
+                        if (sessionUserUuid) {
+                            serverObj.sessionUserUuid = sessionUserUuid;
+                        }
+                        else if (response.statusCode === 401) {
+                            // apparently our session is lost!
+                            serverObj.sessionUserUuid = null;
+                            diag.debug.assert(function () { return error; });
+                            diag.debug.warn('server session is lost!', error);
+                            if (serverObj.credentials) {
+                                // recover by attempting login,
+                                // here promiseResponse must have been resolved already,
+                                // we chain anyways because of error propagation
+                                promiseResponse.thenResolve(login(serverObj.credentials, {
+                                    serverUrl: serverUrl
+                                }).then(function () {
+                                    diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
+                                    diag.debug.info('server session recovered.');
+                                    return ajax(options);
+                                })).done(resolveResult, rejectResult);
+                                return; // early exit
+                            }
+                        }
                     }
-                }, function (responseError) {
-                    rejectResult(responseError);
-                }).done();
-            });
+                    // completing the chain
+                    promiseResponse.then(function (responseResult) {
+                        diag.debug.assert(function () { return responseResult === resp; }, 'definition of behavior in case of ' +
+                            'proxying the original response is reserved for future extension!');
+                        if (error) {
+                            rejectResult(error);
+                        }
+                        else {
+                            resolveResult(body);
+                        }
+                    }, function (responseError) {
+                        rejectResult(responseError);
+                    }).done();
+                });
+            }
+            catch (error) {
+                // path taken when request.js throws
+                return rejectResult(error);
+            }
             // transport response
-            req.on('response', function (response) {
-                if (!resp) {
-                    resp = response;
-                    resolveResponse(resp);
-                }
-            });
-        }));
+            try {
+                Q(requestCallback(req)).then(function (request) {
+                    if (request === void 0) { request = req; }
+                    request.on('response', function (response) {
+                        if (!resp) {
+                            resp = response;
+                            resolveResponse(responseCallback(resp));
+                        }
+                    });
+                    return request;
+                }).done();
+            }
+            catch (error) {
+                // path taken when requestCallback throws
+                return rejectResponse(error);
+            }
+        });
     });
 }
 exports.ajax = ajax;
