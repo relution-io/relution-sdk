@@ -141,6 +141,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httpoptions.html#preamblecrlf" class="tsd-kind-icon">preambleCRLF</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httpoptions.html#proxy" class="tsd-kind-icon">proxy</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httpoptions.html#qs" class="tsd-kind-icon">qs</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httpoptions.html#requestcallback" class="tsd-kind-icon">request<wbr>Callback</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httpoptions.html#responsecallback" class="tsd-kind-icon">response<wbr>Callback</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httpoptions.html#serverurl" class="tsd-kind-icon">server<wbr>Url</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httpoptions.html#strictssl" class="tsd-kind-icon">strictSSL</a></li>
@@ -632,12 +633,28 @@
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="requestcallback" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> request<wbr>Callback</h3>
+					<div class="tsd-signature tsd-kind-icon">request<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_web_http_.httpcallback.html" class="tsd-signature-type">HttpCallback</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_web_http_.html#httprequest" class="tsd-signature-type">HttpRequest</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:68</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>optional callback allowing to customize the client request in more detail than provided by
+							default.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="responsecallback" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> response<wbr>Callback</h3>
 					<div class="tsd-signature tsd-kind-icon">response<wbr>Callback<span class="tsd-signature-symbol">:</span> <a href="_web_http_.httpcallback.html" class="tsd-signature-type">HttpCallback</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_web_http_.html#httpresponse" class="tsd-signature-type">HttpResponse</a><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:64</li>
+							<li>Defined in web/http.ts:73</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -871,6 +888,9 @@
 								<a href="_web_http_.httpoptions.html#qs" class="tsd-kind-icon">qs</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httpoptions.html#requestcallback" class="tsd-kind-icon">request<wbr>Callback</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="_web_http_.httpoptions.html#responsecallback" class="tsd-kind-icon">response<wbr>Callback</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
@@ -903,6 +923,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="_web_http_.logoutoptions.html" class="tsd-kind-icon">Logout<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/_web_http_.html#httprequest" class="tsd-kind-icon">Http<wbr>Request</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="../modules/_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a>
