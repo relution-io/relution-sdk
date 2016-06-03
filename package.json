@@ -8,7 +8,7 @@
     "tslint": "tslint src/**/*.ts",
     "test": "npm run build && mocha lib/**/*.spec.js",
     "build": "tsc -p .",
-    "api": "typedoc -p . --rootDir src --out public/docs --module commonjs --stripInternal --name Relution-SDK --exclude **/*.spec.ts src typings/index.d.ts",
+    "api": "typedoc --options %CD%/typedoc.json",
     "watch": "tsc -p . -w",
     "postinstall": "typings install",
 	"browserify": "browserify index.js -o browser.js"
