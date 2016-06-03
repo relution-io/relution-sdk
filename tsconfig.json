@@ -46,6 +46,7 @@
         "src/security/server.ts",
         "src/web/http.spec.ts",
         "src/web/http.ts",
-        "src/web/index.ts"
+        "src/web/index.ts",
+        "src/web/verb.ts"
     ]
 }

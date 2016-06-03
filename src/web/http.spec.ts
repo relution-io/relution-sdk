@@ -19,40 +19,65 @@
  */
 
 import * as assert from 'assert';
-import * as http from './http';
+import * as web from './index';
+import {debug} from '../core/diag';
 
 import * as _ from 'lodash';
 
 import * as security from '../security';
 
-let credentials: security.LoginObject = {
+const credentials: security.LoginObject = {
   userName: 't.beckmann',
   password: 'mcap'
 };
 
 describe(module.filename, () => {
-  return it('login/logout', (done) => {
-    return http.login(credentials, {
-      serverUrl: 'http://localhost:8080'
-    }).then((response) => {
-      assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
-      let user = security.getCurrentUser();
-      assert.equal(user.name, credentials.userName);
-      return response;
-    }).then((loginResponse) => {
-      return http.ajax({
-        method: 'GET',
-        url: '/gofer/system/security/currentAuthorization'
-      }).then((currentAuthorizationResponse) => {
-        assert.equal(currentAuthorizationResponse.user.uuid, loginResponse.user.uuid);
-        assert.equal(currentAuthorizationResponse.organization.uuid, loginResponse.organization.uuid);
-        return loginResponse;
-      });
-    }).finally(() => http.logout()).then((response) => {
+  return [
+
+    it('login/logout', (done) => {
+      return web.login(credentials, {
+        serverUrl: 'http://localhost:8080'
+      }).then((loginResp) => {
+        // logged in
+        assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
+        const user = security.getCurrentUser();
+        assert(!!user);
+        assert.equal(user.name, credentials.userName);
+        return web.get('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
+          assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
+          assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
+          return currentAuthResp;
+        }).finally(() => web.logout()).then((response) => {
+          // logged out again
+          assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
+          assert(!security.getCurrentUser());
+          return response;
+        });
+      }).done((result) => done(), (error) => done(error));
+    }),
+
+    it('callback order', (done) => {
       assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
-      let user = security.getCurrentUser();
-      assert(!user);
-      return response;
-    }).done((result) => done(), (error) => done(error));
-  });
+      let state = 0;
+      return web.get({
+        serverUrl: 'http://localhost:8080',
+        url: '/gofer/system/security/currentAuthorization',
+        requestCallback: (request) => {
+          debug.debug('request callback fired.');
+          assert.equal(state++, 0, 'request must be reported firstly');
+          return request;
+        },
+        responseCallback: (response) => {
+          debug.debug('response callback fired.');
+          assert.equal(state++, 1, 'response must be reported after request');
+          return response;
+        },
+      }).then((result) => {
+        debug.debug('body data fired.');
+        assert.equal(state++, 2, 'body data must be reported lastly');
+        return result;
+      }).done((result) => done(), (error) => done(error));
+    })
+
+  ];
 });

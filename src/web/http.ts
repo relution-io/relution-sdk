@@ -23,7 +23,6 @@ import * as Q from 'q';
 
 import * as request from 'request';
 import * as http from 'http';
-import * as assert from 'assert';
 
 import * as diag from '../core/diag';
 import * as init from '../core/init';
@@ -41,13 +40,17 @@ let requestWithDefaults = request.defaults(requestDefaults);
 /**
  * callback allowing customizing an object not immediately available at time of call.
  *
- * @param promise of deferred object for inspection or customization.
- * @return promise on same deferred object.
+ * @param object for inspection or customization.
+ * @return promise or object on same deferred object.
  */
 export interface HttpCallback<T> {
-  (promise: Q.Promise<T>): Q.Promise<T>;
+  (value: T): Q.Promise<T> | T;
 }
 
+/**
+ * type representing a raw request.
+ */
+export type HttpRequest = request.Request;
 /**
  * type representing a raw response.
  */
@@ -58,6 +61,11 @@ export type HttpResponse = http.IncomingMessage;
  */
 export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
     init.ServerInitOptions {
+  /**
+   * optional callback allowing to customize the client request in more detail than provided by
+   * default.
+   */
+  requestCallback?: HttpCallback<HttpRequest>;
   /**
    * optional callback allowing to inspect the server response in more detail than provided by
    * default.
@@ -137,7 +145,9 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
 
   // resolve target url
   let url = server.resolveUrl(options.url, currentOptions);
+  diag.debug.debug(options.method + ' ' + url);
 
+  let requestCallback = options.requestCallback || _.identity;
   let responseCallback = options.responseCallback || _.identity;
   options = _.clone(options);
   options.agentOptions = currentOptions.agentOptions;
@@ -155,13 +165,14 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
     options.headers = _.defaults(headers, options.headers);
   }
   return Q.Promise((resolveResult, rejectResult) => {
-    let promiseResponse = responseCallback(Q.Promise((resolveResponse, rejectResponse) => {
-      diag.debug.debug(options.method + ' ' + url);
-      requestWithDefaults(url, options, (error: any, response: http.IncomingMessage, body: any) => {
+    let promiseResponse = Q.Promise((resolveResponse, rejectResponse) => {
+      let resp: http.IncomingMessage;
+      let req: request.Request;
+      try {
+        req = requestWithDefaults(url, options, (error:any, response = resp, body?:any) => {
 
-        // error processing
-        if (!error && response) {
-          if (response.statusCode >= 400) {
+          // error processing
+          if (!error && response && response.statusCode >= 400) {
             if (!body) {
               error = new Error(response.statusMessage);
             } else if (_.isString(body)) {
@@ -170,54 +181,79 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
               error = body;
             }
           }
-        }
-        if (error) {
-          error.requestUrl = url;
-          if (response) {
-            error.statusCode = response.statusCode;
-            error.statusMessage = response.statusMessage;
-          }
-        }
-
-        // logon session processing
-        if (response) {
-          let sessionUserUuid = response.headers['x-gofer-user'];
-          if (sessionUserUuid) {
-            serverObj.sessionUserUuid = sessionUserUuid;
-          } else if (response.statusCode === 401) {
-            // apparently our session is lost!
-            serverObj.sessionUserUuid = null;
-            diag.debug.assert(() => error);
-            diag.debug.warn('server session is lost!', error);
-            if (serverObj.credentials) {
-              // TODO: recover by attempting login
+          if (error) {
+            error.requestUrl = url;
+            if (response) {
+              error.statusCode = response.statusCode;
+              error.statusMessage = response.statusMessage;
             }
           }
-        }
 
-        if (response) {
-          // transport response
-          // Notice, we might have an error object never the less here
-          resolveResponse(response);
-        } else {
-          // network connectivity problem
-          diag.debug.assertIsError(error);
-          rejectResponse(error);
-        }
-        promiseResponse.then((responseResult: http.IncomingMessage) => {
-          assert.equal(responseResult, response, 'definition of behavior in case of proxying the ' +
-            'original response is reserved for future extension!');
-
-          if (error) {
-            rejectResult(error);
+          if (!response) {
+            // network connectivity problem
+            diag.debug.assertIsError(error);
+            rejectResponse(error); // will also rejectResult(error)
           } else {
-            resolveResult(body);
+            // logon session processing
+            let sessionUserUuid = resp.headers['x-gofer-user'];
+            if (sessionUserUuid) {
+              serverObj.sessionUserUuid = sessionUserUuid;
+            } else if (response.statusCode === 401) {
+              // apparently our session is lost!
+              serverObj.sessionUserUuid = null;
+              diag.debug.assert(() => error);
+              diag.debug.warn('server session is lost!', error);
+              if (serverObj.credentials) {
+                // recover by attempting login,
+                // here promiseResponse must have been resolved already,
+                // we chain anyways because of error propagation
+                promiseResponse.thenResolve(login(serverObj.credentials, {
+                  serverUrl: serverUrl
+                }).then(() => {
+                  diag.debug.assert(() => !!serverObj.sessionUserUuid);
+                  diag.debug.info('server session recovered.');
+                  return ajax(options);
+                })).done(resolveResult, rejectResult);
+                return; // early exit
+              }
+            }
           }
-        }, (responseError) => {
-          rejectResult(responseError);
+
+          // completing the chain
+          promiseResponse.then((responseResult: http.IncomingMessage) => {
+            diag.debug.assert(() => responseResult === resp, 'definition of behavior in case of ' +
+              'proxying the original response is reserved for future extension!');
+
+            if (error) {
+              rejectResult(error);
+            } else {
+              resolveResult(body);
+            }
+          }, (responseError) => {
+            rejectResult(responseError);
+          }).done();
+        });
+      } catch (error) {
+        // path taken when request.js throws
+        return rejectResult(error);
+      }
+
+      // transport response
+      try {
+        Q(requestCallback(req)).then((request = req) => {
+          request.on('response', (response: http.IncomingMessage) => {
+            if (!resp) {
+              resp = response;
+              resolveResponse(responseCallback(resp));
+            }
+          });
+          return request;
         }).done();
-      });
-    }));
+      } catch (error) {
+        // path taken when requestCallback throws
+        return rejectResponse(error);
+      }
+    });
   });
 }
 

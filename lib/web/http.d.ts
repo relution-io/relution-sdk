@@ -6,12 +6,16 @@ import * as auth from '../security/auth';
 /**
  * callback allowing customizing an object not immediately available at time of call.
  *
- * @param promise of deferred object for inspection or customization.
- * @return promise on same deferred object.
+ * @param object for inspection or customization.
+ * @return promise or object on same deferred object.
  */
 export interface HttpCallback<T> {
-    (promise: Q.Promise<T>): Q.Promise<T>;
+    (value: T): Q.Promise<T> | T;
 }
+/**
+ * type representing a raw request.
+ */
+export declare type HttpRequest = request.Request;
 /**
  * type representing a raw response.
  */
@@ -20,6 +24,11 @@ export declare type HttpResponse = http.IncomingMessage;
  * named parameters of the [[http]] function.
  */
 export interface HttpOptions extends request.CoreOptions, request.UrlOptions, init.ServerInitOptions {
+    /**
+     * optional callback allowing to customize the client request in more detail than provided by
+     * default.
+     */
+    requestCallback?: HttpCallback<HttpRequest>;
     /**
      * optional callback allowing to inspect the server response in more detail than provided by
      * default.

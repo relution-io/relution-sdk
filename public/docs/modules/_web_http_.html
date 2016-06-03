@@ -84,6 +84,7 @@
 						<section class="tsd-index-section ">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_web_http_.html#httprequest" class="tsd-kind-icon">Http<wbr>Request</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a></li>
 							</ul>
 						</section>
@@ -113,12 +114,27 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Type aliases</h2>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="httprequest" class="tsd-anchor"></a>
+					<h3>Http<wbr>Request</h3>
+					<div class="tsd-signature tsd-kind-icon">Http<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:53</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>type representing a raw request.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
 					<a name="httpresponse" class="tsd-anchor"></a>
 					<h3>Http<wbr>Response</h3>
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IncomingMessage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:59</li>
+							<li>Defined in web/http.ts:57</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -136,7 +152,7 @@
 					<div class="tsd-signature tsd-kind-icon">request<wbr>With<wbr>Defaults<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RequestAPI</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Request</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">CoreOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">UriOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">UrlOptions</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:44</li>
+							<li>Defined in web/http.ts:38</li>
 						</ul>
 					</aside>
 				</section>
@@ -153,7 +169,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:117</li>
+									<li>Defined in web/http.ts:120</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -222,7 +238,7 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:293</li>
+									<li>Defined in web/http.ts:324</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -286,7 +302,7 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:367</li>
+									<li>Defined in web/http.ts:398</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -330,7 +346,7 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 					<div class="tsd-signature tsd-kind-icon">request<wbr>Defaults<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:39</li>
+							<li>Defined in web/http.ts:33</li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal tsd-is-not-exported">
@@ -339,7 +355,7 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 						<div class="tsd-signature tsd-kind-icon">jar<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in web/http.ts:41</li>
+								<li>Defined in web/http.ts:35</li>
 							</ul>
 						</aside>
 					</section>
@@ -349,7 +365,7 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 						<div class="tsd-signature tsd-kind-icon">json<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in web/http.ts:40</li>
+								<li>Defined in web/http.ts:34</li>
 							</ul>
 						</aside>
 					</section>
@@ -359,7 +375,7 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 						<div class="tsd-signature tsd-kind-icon">with<wbr>Credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in web/http.ts:42</li>
+								<li>Defined in web/http.ts:36</li>
 							</ul>
 						</aside>
 					</section>
@@ -393,6 +409,9 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-kind-icon">Logout<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_web_http_.html#httprequest" class="tsd-kind-icon">Http<wbr>Request</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a>
