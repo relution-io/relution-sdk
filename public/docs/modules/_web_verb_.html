@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-externals" checked />
-							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
 							<input type="checkbox" id="tsd-filter-only-exported" />
 							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
@@ -80,7 +78,6 @@
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_verb_.html#patch" class="tsd-kind-icon">patch</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_verb_.html#post" class="tsd-kind-icon">post</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_verb_.html#put" class="tsd-kind-icon">put</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_web_verb_.html#verb" class="tsd-kind-icon">verb</a></li>
 							</ul>
 						</section>
 					</div>
@@ -436,74 +433,6 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="verb" class="tsd-anchor"></a>
-					<h3>verb</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">verb<span class="tsd-signature-symbol">(</span>method<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, optionsOrUrl<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, body<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in web/verb.ts:45</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>issues an http/ajax request against the Relution server.</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>see</dt>
-									<dd><p>head</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>get</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>put</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>post</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>patch</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>delete</p>
-									</dd>
-									<dt>see</dt>
-									<dd><p>ajax</p>
-									</dd>
-									<dt>internal</dt>
-									<dd><p>Implements verb methods.</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>method: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>optionsOrUrl: <a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>of request, including target <code>url</code>, or url.</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> body: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>request body to submit in case optionsOrUrl is a url.</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
-						</li>
-					</ul>
-				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -511,6 +440,75 @@
 				<ul>
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_connector_connector_.html">"connector/connector"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_connector_index_.html">"connector/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_core_diag_.html">"core/diag"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_core_domain_.html">"core/domain"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_core_index_.html">"core/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_core_init_.html">"core/init"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_index_.html">"index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_model_modelcontainer_.html">"model/<wbr>Model<wbr>Container"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_model_index_.html">"model/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_filter_.html">"query/<wbr>Filter"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_filtervisitor_.html">"query/<wbr>Filter<wbr>Visitor"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_getquery_.html">"query/<wbr>Get<wbr>Query"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_jsonfiltervisitor_.html">"query/<wbr>Json<wbr>Filter<wbr>Visitor"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_sortordercomparator_.html">"query/<wbr>Sort<wbr>Order<wbr>Comparator"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_query_index_.html">"query/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_security_auth_.html">"security/auth"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_security_index_.html">"security/index"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_security_roles_.html">"security/roles"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_security_server_.html">"security/server"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_web_http_.html">"web/http"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_web_index_.html">"web/index"</a>
 					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_web_verb_.html">"web/verb"</a>
@@ -536,9 +534,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_web_verb_.html#put" class="tsd-kind-icon">put</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_web_verb_.html#verb" class="tsd-kind-icon">verb</a>
 					</li>
 				</ul>
 			</nav>

@@ -20,6 +20,58 @@
 
 import * as _ from 'lodash';
 
+import {debug} from '../core/diag';
+
+/**
+ * custom Array type supporting an index lookup.
+ *
+ * Beware, the implementation does not support modifications to the data contained.
+ */
+export class ArrayLookup<T> extends Array<T> {
+  /**
+   * elements keyed by lookup property.
+   */
+  public index: _.Dictionary<T>;
+
+  /**
+   * shallowly copies a given array and indexes it by lookup property.
+   *
+   * @param array data.
+   * @param lookup property.
+     */
+  constructor(array: T[], lookup: string) {
+    super(...array);
+    this.index = _.keyBy(array, lookup, this);
+  }
+
+  /**
+   * whether an element of key exists.
+   *
+   * @param key to check.
+   * @return {boolean} existance indication.
+   *
+   * @see get
+   */
+  public has(key: string) {
+    return key in this.index;
+  }
+
+  /**
+   * accesses an element by key.
+   *
+   * Use this method in case it is known that the key is valid. An assertion will fire if it is not.
+   *
+   * @param key lookup property value.
+   * @return {T} element of key.
+   *
+   * @see has
+   */
+  public get(key: string) {
+    debug.assert(() => this.has(key), key);
+    return this.index[key];
+  }
+}
+
 /**
  * mirrors ModelContainer of Relution server.
  */
@@ -45,10 +97,7 @@ export class ModelContainer {
   name: string;
   description: string;
 
-  models: MetaModel[] | {
-    [name: string]: MetaModel | number;
-    length: number;
-  };
+  models: ArrayLookup<MetaModel>;
 
   constructor(other?: ModelContainer) {
     if (other) {
@@ -73,13 +122,13 @@ export class ModelContainer {
     this.name = json.name;
     this.description = json.description || this.name;
 
-    var array = (<MetaModel[]>(_.values(json.models) || []));
-    array = array.map((jsonModel) => new this.factory.MetaModel(jsonModel));
-    this.models = array.reduce((result: MetaModel[], model: MetaModel) => {
+    var array = <MetaModel[]>(_.values(json.models) || []);
+    array = array.map((jsonModel) => {
+      const model = new this.factory.MetaModel(jsonModel);
       model.containerUuid = this.uuid;
-      result[model.name] = model;
-      return result;
-    }, array);
+      return model;
+    });
+    this.models = new ArrayLookup(array, 'name');
 
     return this;
   }
@@ -111,10 +160,7 @@ export class MetaModel {
   abstrakt: boolean;
   icon: any;
 
-  fieldDefinitions: FieldDefinition[] | {
-    [name: string]: FieldDefinition | number;
-    length: number;
-  };
+  fieldDefinitions: ArrayLookup<FieldDefinition>;
 
   propertyMap: any;
 
@@ -142,13 +188,9 @@ export class MetaModel {
     this.abstrakt = json.abstrakt || false;
     this.icon = json.icon;
 
-    var array = (<FieldDefinition[]>(json.fieldDefinitions || []));
+    var array = <FieldDefinition[]>(json.fieldDefinitions || []);
     array = array.map((jsonField) => new this.factory.FieldDefinition(jsonField));
-    this.fieldDefinitions = array.reduce((result: FieldDefinition[],
-                                          fieldDefinition: FieldDefinition) => {
-      result[fieldDefinition.name] = fieldDefinition;
-      return result;
-    }, array);
+    this.fieldDefinitions = new ArrayLookup(array, 'name');
 
     this.propertyMap = json.propertyMap || {};
 
@@ -243,7 +285,7 @@ export class EnumDefinition {
     return ModelFactory.factoryOf(this);
   }
 
-  items: Items;
+  items: ArrayLookup<Item>;
   enumerable: string;
   strict: boolean;
 
@@ -254,7 +296,9 @@ export class EnumDefinition {
   }
 
   public fromJSON(json: EnumDefinition) {
-    this.items = json.items && new Items(json.items);
+    const array = json.items || <Item[]>[];
+    this.items = new ArrayLookup(array, 'value');
+
     this.enumerable = json.enumerable;
     this.strict = json.strict || false;
 
@@ -263,29 +307,8 @@ export class EnumDefinition {
 }
 
 /**
- * captures deviation of JSON data regarding internal object and external array representations.
+ * represents a predefined choice of an EnumDefinition.
  */
-export class Items {
-  [valueTextual: string]: Item | Function; // Function to allow member functions on prototype
-  [valueNumeric: number]: Item;
-
-  constructor(other: Items) {
-    this.fromJSON(other);
-  }
-
-  public fromJSON(json: Items) {
-    _.values(json).forEach((item: Item) => {
-        this[<string | number>(item.value)] = item;
-      }
-    );
-    return this;
-  }
-
-  public toJSON(): Item[] {
-    return <Item[]>_.values(this);
-  }
-}
-
 export interface Item {
   value: number | string;
   label: string;
