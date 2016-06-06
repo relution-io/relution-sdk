@@ -27,22 +27,11 @@ import {debug} from '../core/diag';
  *
  * Beware, the implementation does not support modifications to the data contained.
  */
-export class ArrayLookup<T> extends Array<T> {
+export interface ArrayLookup<T> extends Array<T> {
   /**
    * elements keyed by lookup property.
    */
-  public index: _.Dictionary<T>;
-
-  /**
-   * shallowly copies a given array and indexes it by lookup property.
-   *
-   * @param array data.
-   * @param lookup property.
-     */
-  constructor(array: T[], lookup: string) {
-    super(...array);
-    this.index = _.keyBy(array, lookup, this);
-  }
+  index: _.Dictionary<T>;
 
   /**
    * whether an element of key exists.
@@ -52,20 +41,53 @@ export class ArrayLookup<T> extends Array<T> {
    *
    * @see get
    */
-  public has(key: string) {
-    return key in this.index;
-  }
+  has(key: string): boolean;
 
   /**
    * accesses an element by key.
    *
-   * Use this method in case it is known that the key is valid. An assertion will fire if it is not.
+   * Use this method in case it is known that the key is valid.
+   * An assertion will fire if it is not.
    *
    * @param key lookup property value.
    * @return {T} element of key.
    *
    * @see has
    */
+  get(key: string): T;
+}
+
+/**
+ * implementation details of ArrayLookup.
+ */
+class ArrayLookupImpl<T> extends Array<T> implements ArrayLookup<T> {
+  public index: _.Dictionary<T>;
+
+  /**
+   * turns a given array into an ArrayLookup and indexes it by lookup property.
+   *
+   * <p>
+   * This must be used instead of the new operator.
+   * </p>
+   *
+   * @param array data.
+   * @param lookup property.
+     */
+  static create<T>(array: T[], lookup: string): ArrayLookup<T> {
+    const self: any = array;
+    Object.defineProperty(array, 'index', {
+      value: _.keyBy(array, lookup),
+      enumerable: false
+    })
+    self.has = ArrayLookupImpl.prototype.has;
+    self.get = ArrayLookupImpl.prototype.get;
+    return self;
+  }
+
+  public has(key: string) {
+    return key in this.index;
+  }
+
   public get(key: string) {
     debug.assert(() => this.has(key), key);
     return this.index[key];
@@ -128,7 +150,7 @@ export class ModelContainer {
       model.containerUuid = this.uuid;
       return model;
     });
-    this.models = new ArrayLookup(array, 'name');
+    this.models = ArrayLookupImpl.create(array, 'name');
 
     return this;
   }
@@ -190,7 +212,7 @@ export class MetaModel {
 
     var array = <FieldDefinition[]>(json.fieldDefinitions || []);
     array = array.map((jsonField) => new this.factory.FieldDefinition(jsonField));
-    this.fieldDefinitions = new ArrayLookup(array, 'name');
+    this.fieldDefinitions = ArrayLookupImpl.create(array, 'name');
 
     this.propertyMap = json.propertyMap || {};
 
@@ -297,7 +319,7 @@ export class EnumDefinition {
 
   public fromJSON(json: EnumDefinition) {
     const array = json.items || <Item[]>[];
-    this.items = new ArrayLookup(array, 'value');
+    this.items = ArrayLookupImpl.create(array, 'value');
 
     this.enumerable = json.enumerable;
     this.strict = json.strict || false;

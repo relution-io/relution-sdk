@@ -23,18 +23,11 @@ import * as _ from 'lodash';
  *
  * Beware, the implementation does not support modifications to the data contained.
  */
-export declare class ArrayLookup<T> extends Array<T> {
+export interface ArrayLookup<T> extends Array<T> {
     /**
      * elements keyed by lookup property.
      */
     index: _.Dictionary<T>;
-    /**
-     * shallowly copies a given array and indexes it by lookup property.
-     *
-     * @param array data.
-     * @param lookup property.
-       */
-    constructor(array: T[], lookup: string);
     /**
      * whether an element of key exists.
      *
@@ -47,7 +40,8 @@ export declare class ArrayLookup<T> extends Array<T> {
     /**
      * accesses an element by key.
      *
-     * Use this method in case it is known that the key is valid. An assertion will fire if it is not.
+     * Use this method in case it is known that the key is valid.
+     * An assertion will fire if it is not.
      *
      * @param key lookup property value.
      * @return {T} element of key.
