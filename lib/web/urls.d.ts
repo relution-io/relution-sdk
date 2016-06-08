@@ -22,9 +22,9 @@ export declare function resolveUrl(path: string, options?: init.ServerUrlOptions
 /**
  * computes the basepath of a BaaS application.
  *
- * @param baseUrlOrNameOrApp baseUrl of application, may be name when baseUrl is not changed by
- *    developer or application metadata object of Relution server.
+ * @param baseAliasOrNameOrApp baseAlias of application, may be name when baseAlias is not changed
+ *    by developer or application metadata object of Relution server.
  * @param options of server in effect.
  * @return {string} absolute URL of application alias on current server.
  */
-export declare function resolveApp(baseUrlOrNameOrApp: any, options?: init.ServerUrlOptions): string;
+export declare function resolveApp(baseAliasOrNameOrApp: any, options?: init.ServerUrlOptions): string;

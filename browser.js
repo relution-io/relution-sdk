@@ -2625,23 +2625,23 @@ exports.resolveUrl = resolveUrl;
 /**
  * computes the basepath of a BaaS application.
  *
- * @param baseUrlOrNameOrApp baseUrl of application, may be name when baseUrl is not changed by
- *    developer or application metadata object of Relution server.
+ * @param baseAliasOrNameOrApp baseAlias of application, may be name when baseAlias is not changed
+ *    by developer or application metadata object of Relution server.
  * @param options of server in effect.
  * @return {string} absolute URL of application alias on current server.
  */
-function resolveApp(baseUrlOrNameOrApp, options) {
+function resolveApp(baseAliasOrNameOrApp, options) {
     if (options === void 0) { options = {}; }
     // defaults on arguments given
     var url;
-    if (!baseUrlOrNameOrApp) {
+    if (!baseAliasOrNameOrApp) {
         url = options.application || init.initOptions.application;
     }
-    else if (_.isString(baseUrlOrNameOrApp)) {
-        url = baseUrlOrNameOrApp;
+    else if (_.isString(baseAliasOrNameOrApp)) {
+        url = baseAliasOrNameOrApp;
     }
     else {
-        url = baseUrlOrNameOrApp.baseUrl || baseUrlOrNameOrApp.name;
+        url = baseAliasOrNameOrApp.baseAlias || baseAliasOrNameOrApp.name;
     }
     // application must not include the leading slash for resolveUrl to do the job
     url = url.replace(/\/?(.*)/, '$1');
