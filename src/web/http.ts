@@ -28,6 +28,7 @@ import * as diag from '../core/diag';
 import * as init from '../core/init';
 import * as auth from '../security/auth';
 import * as server from '../security/server';
+import * as urls from './urls';
 
 // require request.js to manage cookies for us
 let requestDefaults = {
@@ -74,23 +75,69 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
 }
 
 /**
+ * failure of an ajax request.
+ *
+ * This type can be used as type annotation of the error the Promise returned by ajax is rejected
+ * with.
+ *
+ * @see ajax
+ */
+export interface HttpError extends Error {
+  /**
+   * fully resolved url the request was sent to.
+   */
+  requestUrl?: string;
+
+  /**
+   * HTTP status code of failure.
+   */
+  statusCode?: number;
+  /**
+   * HTTP status message of failure.
+   */
+  statusMessage?: string;
+
+  /**
+   * details of request failed.
+   *
+   * This is a non-enumerable property and thus not part of the JSON representation of the failure.
+   * It is provided for informal purposes as a debugging aid only. Client code should not rely on
+   * this value.
+   *
+   * @see response
+   */
+  rawRequest?: HttpRequest;
+  /**
+   * details of response failed.
+   *
+   * This is a non-enumerable property and thus not part of the JSON representation of the failure.
+   * It is provided for informal purposes as a debugging aid only. Client code should not rely on
+   * this value.
+   *
+   * @see request
+   */
+  rawResponse?: HttpResponse;
+}
+
+/**
  * drives an HTTP request against the Relution server.
  *
  * Behavior of this method is simplified from most HTTP/AJAX implementations:
  * - When the HTTP request succeeds the resulting promise resolves to the response body.
- * - In case of a network Error the promise resolves to an Error object providing `requestUrl`
+ * - In case of a network Error the promise resolves to an HttpError object providing `requestUrl`
  *   but neither `statusCode` nor `statusMessage`.
- * - In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+ * - In case of HTTP failure the resulting promise is rejected to an HttpError-like object carrying
  *   the properties `requestUrl`, `statusCode` and `statusMessage`.
- * - If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
- *   is augmented by the properties as defined above.
- * - Otherwise the body is stored as `message` of an Error object created. Again, the properties
+ * - If the server responds a JSON, it is parsed and assumed to be an HttpError-like object. The
+ *   object is augmented by the properties as defined above.
+ * - Otherwise the body is stored as `message` of an HttpError object created. Again, the properties
  *   above are provided.
- * - Finally, in case of HTTP failure with the server not providing any response body, the Error
+ * - Finally, in case of HTTP failure with the server not providing any response body, the HttpError
  *   `message` is set to the `statusMessage`.
  *
- * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
- * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ * Thus, to differentiate network failures from server-side failures the `statusCode` of the
+ * HttpError rejection is to being used. For deeper inspection provide an
+ * [[options.responseCallback]].
  *
  * ```javascript
  * Relution.init({
@@ -103,22 +150,22 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions,
  * //usage as Promise
  * Relution.web.ajax(httpOptions)
  *  .then((resp) => console.log('posts', resp);)
- *  .catch((e:Error) => console.error(e.message, e))
+ *  .catch((e:Relution.web.HttpError) => console.error(e.message, e))
  *  .finally(() => console.log('loading complete!'));
  *
  * // as Observable
  * Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
  *  (resp: any) => console.log('posts', resp),
- *  (e:Error) => console.error(e.message, e);,
+ *  (e:Relution.web.HttpError) => console.error(e.message, e);,
  *  () => console.log('loading complete!')
  * )
  * ```
  * @param options of request, including target `url`.
- * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
- *    `requestUrl`, `statusCode` and `statusMessage`.
+ * @return {Q.Promise} of response body, in case of failure rejects to an HttpError object
+ *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
 export function ajax(options: HttpOptions): Q.Promise<any> {
-  let serverUrl = server.resolveUrl('/', options);
+  let serverUrl = urls.resolveUrl('/', options);
   let serverObj = server.Server.getInstance(serverUrl);
   if (!serverObj.sessionUserUuid && serverObj.credentials) {
     // not logged in
@@ -144,7 +191,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   });
 
   // resolve target url
-  let url = server.resolveUrl(options.url, currentOptions);
+  let url = urls.resolveUrl(options.url, currentOptions);
   diag.debug.debug(options.method + ' ' + url);
 
   let requestCallback = options.requestCallback || _.identity;
@@ -169,7 +216,12 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
       let resp: http.IncomingMessage;
       let req: request.Request;
       try {
-        req = requestWithDefaults(url, options, (error:any, response = resp, body?:any) => {
+        req = requestWithDefaults(url, options, (error: HttpError, response = resp, body?: any) => {
+          // node.js assigns response object as body for status codes not having body data
+          if (response.statusCode === 202) {
+            diag.debug.assert(body === http.STATUS_CODES[202], body);
+            body = undefined;
+          }
 
           // error processing
           if (!error && response && response.statusCode >= 400) {
@@ -186,7 +238,15 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
             if (response) {
               error.statusCode = response.statusCode;
               error.statusMessage = response.statusMessage;
+              Object.defineProperty(error, 'rawResponse', {
+                value: response,
+                enumerable: false
+              });
             }
+            Object.defineProperty(error, 'rawRequest', {
+              value: req,
+              enumerable: false
+            });
           }
 
           if (!response) {
@@ -201,7 +261,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
             } else if (response.statusCode === 401) {
               // apparently our session is lost!
               serverObj.sessionUserUuid = null;
-              diag.debug.assert(() => error);
+              diag.debug.assert(() => !!error);
               diag.debug.warn('server session is lost!', error);
               if (serverObj.credentials) {
                 // recover by attempting login,
@@ -323,7 +383,7 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
  */
 export function login(credentials: auth.Credentials,
                       loginOptions: LoginOptions = {}): Q.Promise<any> {
-  let serverUrl = server.resolveUrl('/', loginOptions);
+  let serverUrl = urls.resolveUrl('/', loginOptions);
   let serverObj = server.Server.getInstance(serverUrl);
   if (serverObj.sessionUserUuid) {
     // logged in already
@@ -396,7 +456,7 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
  * @return {Q.Promise<any>} of logout response.
  */
 export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
-  let serverUrl = server.resolveUrl('/', logoutOptions);
+  let serverUrl = urls.resolveUrl('/', logoutOptions);
   let serverObj = server.Server.getInstance(serverUrl);
 
   // process options

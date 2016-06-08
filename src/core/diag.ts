@@ -143,27 +143,35 @@ export class Diagnostics {
    * evaluates given check expression as a strong invariant never ever violated.
    *
    * <p>
-   * Use assert to ensure an assumption at runtime. When running with assertions enabled, the check expression is
-   * evaluated immediately. A check expression evaluating to false signals a violation of invariant that should never
-   * happen. If it does, a hard error is output unconditionally to the console and an AssertionError is thrown.
+   * Use assert to ensure an assumption at runtime. When running with assertions enabled, the
+   * check expression is evaluated immediately. A check expression evaluating to false signals a
+   * violation of invariant that should never happen. If it does, a hard error is output
+   * unconditionally to the console and an AssertionError is thrown.
    * </p>
    * <p>
-   * Do not use assertions as a means of ordinary error checking. Here are some valid examples of assertions:
+   * Do not use assertions as a means of ordinary error checking. Here are some valid examples of
+   * assertions:
    * <pre>
    *     assert(() => Date.now() > 0, 'current time millis can not be before 1970 start of time!');
-   *     assert(() => total_price >= item_price, 'total is sum of individal prices and thus can not be less than each one!');
+   *     assert(() => total_price >= item_price,
+   *                  'total is sum of individual prices and thus can not be less than each one!');
    *     assert(() => num*num >= 0, 'squared num is less than zero!');
    * </pre>
    * </p>
    *
-   * @param check expression validating an assumption of the calling code, typically an arrow-function expression.
+   * @param check expression validating an assumption of the calling code, typically an
+   *    arrow-function expression.
    * @param message optional explanation of disaster.
    */
-  public assert(check: AssertionCheck, message?: string): void {
+  public assert(check: AssertionCheck | boolean, message?: string): void {
     let debugMode = this.enabled;
     if (assertions === undefined ? debugMode : assertions) {
       try {
-        assert(check(), message || Diagnostics.toSource(check));
+        if (_.isFunction(check)) {
+          assert(check(), message || Diagnostics.toSource(check));
+        } else {
+          assert(check, message);
+        }
       } catch (error) {
         if (debugMode) {
           this.error('Assertion failed: ' + error.message, error);

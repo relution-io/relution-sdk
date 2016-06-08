@@ -36,23 +36,66 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions, in
     responseCallback?: HttpCallback<HttpResponse>;
 }
 /**
+ * failure of an ajax request.
+ *
+ * This type can be used as type annotation of the error the Promise returned by ajax is rejected
+ * with.
+ *
+ * @see ajax
+ */
+export interface HttpError extends Error {
+    /**
+     * fully resolved url the request was sent to.
+     */
+    requestUrl?: string;
+    /**
+     * HTTP status code of failure.
+     */
+    statusCode?: number;
+    /**
+     * HTTP status message of failure.
+     */
+    statusMessage?: string;
+    /**
+     * details of request failed.
+     *
+     * This is a non-enumerable property and thus not part of the JSON representation of the failure.
+     * It is provided for informal purposes as a debugging aid only. Client code should not rely on
+     * this value.
+     *
+     * @see response
+     */
+    rawRequest?: HttpRequest;
+    /**
+     * details of response failed.
+     *
+     * This is a non-enumerable property and thus not part of the JSON representation of the failure.
+     * It is provided for informal purposes as a debugging aid only. Client code should not rely on
+     * this value.
+     *
+     * @see request
+     */
+    rawResponse?: HttpResponse;
+}
+/**
  * drives an HTTP request against the Relution server.
  *
  * Behavior of this method is simplified from most HTTP/AJAX implementations:
  * - When the HTTP request succeeds the resulting promise resolves to the response body.
- * - In case of a network Error the promise resolves to an Error object providing `requestUrl`
+ * - In case of a network Error the promise resolves to an HttpError object providing `requestUrl`
  *   but neither `statusCode` nor `statusMessage`.
- * - In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+ * - In case of HTTP failure the resulting promise is rejected to an HttpError-like object carrying
  *   the properties `requestUrl`, `statusCode` and `statusMessage`.
- * - If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
- *   is augmented by the properties as defined above.
- * - Otherwise the body is stored as `message` of an Error object created. Again, the properties
+ * - If the server responds a JSON, it is parsed and assumed to be an HttpError-like object. The
+ *   object is augmented by the properties as defined above.
+ * - Otherwise the body is stored as `message` of an HttpError object created. Again, the properties
  *   above are provided.
- * - Finally, in case of HTTP failure with the server not providing any response body, the Error
+ * - Finally, in case of HTTP failure with the server not providing any response body, the HttpError
  *   `message` is set to the `statusMessage`.
  *
- * Thus, to differentiate network failures from server-side failures the `statusCode` of the Error
- * rejection is to being used. For deeper inspection provide an [[options.responseCallback]].
+ * Thus, to differentiate network failures from server-side failures the `statusCode` of the
+ * HttpError rejection is to being used. For deeper inspection provide an
+ * [[options.responseCallback]].
  *
  * ```javascript
  * Relution.init({
@@ -65,19 +108,19 @@ export interface HttpOptions extends request.CoreOptions, request.UrlOptions, in
  * //usage as Promise
  * Relution.web.ajax(httpOptions)
  *  .then((resp) => console.log('posts', resp);)
- *  .catch((e:Error) => console.error(e.message, e))
+ *  .catch((e:Relution.web.HttpError) => console.error(e.message, e))
  *  .finally(() => console.log('loading complete!'));
  *
  * // as Observable
  * Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
  *  (resp: any) => console.log('posts', resp),
- *  (e:Error) => console.error(e.message, e);,
+ *  (e:Relution.web.HttpError) => console.error(e.message, e);,
  *  () => console.log('loading complete!')
  * )
  * ```
  * @param options of request, including target `url`.
- * @return {Q.Promise} of response body, in case of failure rejects to an Error object including
- *    `requestUrl`, `statusCode` and `statusMessage`.
+ * @return {Q.Promise} of response body, in case of failure rejects to an HttpError object
+ *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
 export declare function ajax(options: HttpOptions): Q.Promise<any>;
 /**

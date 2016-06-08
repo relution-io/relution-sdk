@@ -47,6 +47,8 @@
         "src/web/http.spec.ts",
         "src/web/http.ts",
         "src/web/index.ts",
+        "src/web/urls.spec.ts",
+        "src/web/urls.ts",
         "src/web/verb.ts"
     ]
 }
