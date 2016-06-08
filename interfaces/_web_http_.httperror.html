@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>DoubleRangeFilter | Relution-SDK</title>
+	<title>HttpError | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,27 +55,41 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_query_filter_.html">&quot;query/Filter&quot;</a>
+					<a href="../modules/_web_http_.html">&quot;web/http&quot;</a>
 				</li>
 				<li>
-					<a href="_query_filter_.doublerangefilter.html">DoubleRangeFilter</a>
+					<a href="_web_http_.httperror.html">HttpError</a>
 				</li>
 			</ul>
-			<h1>Interface DoubleRangeFilter</h1>
+			<h1>Interface HttpError</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>failure of an ajax request.</p>
+					</div>
+					<p>This type can be used as type annotation of the error the Promise returned by ajax is rejected
+					with.</p>
+					<dl class="tsd-comment-tags">
+						<dt>see</dt>
+						<dd><p>ajax</p>
+						</dd>
+					</dl>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="_query_filter_.numberrangefilter.html" class="tsd-signature-type">NumberRangeFilter</a>
+						<span class="tsd-signature-type">Error</span>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">DoubleRangeFilter</span>
+								<span class="target">HttpError</span>
 							</li>
 						</ul>
 					</li>
@@ -85,88 +99,157 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_query_filter_.doublerangefilter.html#fieldname" class="tsd-kind-icon">field<wbr>Name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_query_filter_.doublerangefilter.html#max" class="tsd-kind-icon">max</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_query_filter_.doublerangefilter.html#min" class="tsd-kind-icon">min</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_query_filter_.doublerangefilter.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httperror.html#error" class="tsd-kind-icon">Error</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httperror.html#message" class="tsd-kind-icon">message</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httperror.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httperror.html#rawrequest" class="tsd-kind-icon">raw<wbr>Request</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httperror.html#rawresponse" class="tsd-kind-icon">raw<wbr>Response</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httperror.html#requesturl" class="tsd-kind-icon">request<wbr>Url</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="_web_http_.httperror.html#stack" class="tsd-kind-icon">stack</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httperror.html#statuscode" class="tsd-kind-icon">status<wbr>Code</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_web_http_.httperror.html#statusmessage" class="tsd-kind-icon">status<wbr>Message</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="fieldname" class="tsd-anchor"></a>
-					<h3>field<wbr>Name</h3>
-					<div class="tsd-signature tsd-kind-icon">field<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="error" class="tsd-anchor"></a>
+					<h3>Error</h3>
+					<div class="tsd-signature tsd-kind-icon">Error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ErrorConstructor</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_query_filter_.fieldfilter.html">FieldFilter</a>.<a href="_query_filter_.fieldfilter.html#fieldname">fieldName</a></p>
 						<ul>
-							<li>Defined in query/Filter.ts:68</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:889</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="message" class="tsd-anchor"></a>
+					<h3>message</h3>
+					<div class="tsd-signature tsd-kind-icon">message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from Error.message</p>
+						<ul>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:880</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from Error.name</p>
+						<ul>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:879</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="rawrequest" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> raw<wbr>Request</h3>
+					<div class="tsd-signature tsd-kind-icon">raw<wbr>Request<span class="tsd-signature-symbol">:</span> <a href="../modules/_web_http_.html#httprequest" class="tsd-signature-type">HttpRequest</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:109</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>field expression identifying left hand side of the filter.</p>
+							<p>details of request failed.</p>
+						</div>
+						<p>This is a non-enumerable property and thus not part of the JSON representation of the failure.
+							It is provided for informal purposes as a debugging aid only. Client code should not rely on
+						this value.</p>
+						<dl class="tsd-comment-tags">
+							<dt>see</dt>
+							<dd><p>response</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="rawresponse" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> raw<wbr>Response</h3>
+					<div class="tsd-signature tsd-kind-icon">raw<wbr>Response<span class="tsd-signature-symbol">:</span> <a href="../modules/_web_http_.html#httpresponse" class="tsd-signature-type">HttpResponse</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:119</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>details of response failed.</p>
+						</div>
+						<p>This is a non-enumerable property and thus not part of the JSON representation of the failure.
+							It is provided for informal purposes as a debugging aid only. Client code should not rely on
+						this value.</p>
+						<dl class="tsd-comment-tags">
+							<dt>see</dt>
+							<dd><p>request</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="requesturl" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> request<wbr>Url</h3>
+					<div class="tsd-signature tsd-kind-icon">request<wbr>Url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:89</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>fully resolved url the request was sent to.</p>
 						</div>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="max" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> max</h3>
-					<div class="tsd-signature tsd-kind-icon">max<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<a name="stack" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> stack</h3>
+					<div class="tsd-signature tsd-kind-icon">stack<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_query_filter_.rangefilter.html">RangeFilter</a>.<a href="_query_filter_.rangefilter.html#max">max</a></p>
+						<p>Inherited from Error.stack</p>
 						<ul>
-							<li>Defined in query/Filter.ts:83</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/node/index.d.ts:4</li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="min" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> min</h3>
-					<div class="tsd-signature tsd-kind-icon">min<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="statuscode" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> status<wbr>Code</h3>
+					<div class="tsd-signature tsd-kind-icon">status<wbr>Code<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_query_filter_.rangefilter.html">RangeFilter</a>.<a href="_query_filter_.rangefilter.html#min">min</a></p>
 						<ul>
-							<li>Defined in query/Filter.ts:82</li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-					<a name="type" class="tsd-anchor"></a>
-					<h3>type</h3>
-					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="_query_filter_.filter.html">Filter</a>.<a href="_query_filter_.filter.html#type">type</a></p>
-						<ul>
-							<li>Defined in query/Filter.ts:42</li>
+							<li>Defined in web/http.ts:94</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>kind of Filter as defined by corresponding Java object model.</p>
+							<p>HTTP status code of failure.</p>
 						</div>
-						<p>
-							- boolean
-							- containsString
-							- dateRange
-							- doubleRange
-							- like
-							- logOp
-							- longEnum
-							- longRange
-							- stringEnum
-							- string
-							- stringMap
-							- stringRange
-							- null
-							- ...
-						</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="statusmessage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> status<wbr>Message</h3>
+					<div class="tsd-signature tsd-kind-icon">status<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in web/http.ts:98</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>HTTP status message of failure.</p>
+						</div>
 					</div>
 				</section>
 			</section>
@@ -204,7 +287,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_model_index_.html">"model/index"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
+					<li class=" tsd-kind-external-module">
 						<a href="../modules/_query_filter_.html">"query/<wbr>Filter"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -240,7 +323,7 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_security_server_.html">"security/server"</a>
 					</li>
-					<li class=" tsd-kind-external-module">
+					<li class="current tsd-kind-external-module">
 						<a href="../modules/_web_http_.html">"web/http"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -256,80 +339,71 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.booleanfilter.html" class="tsd-kind-icon">Boolean<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.containsstringfilter.html" class="tsd-kind-icon">Contains<wbr>String<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.daterangefilter.html" class="tsd-kind-icon">Date<wbr>Range<wbr>Filter</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_web_http_.httpcallback.html" class="tsd-kind-icon">Http<wbr>Callback</a>
 					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.doublerangefilter.html" class="tsd-kind-icon">Double<wbr>Range<wbr>Filter</a>
+						<a href="_web_http_.httperror.html" class="tsd-kind-icon">Http<wbr>Error</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="_query_filter_.doublerangefilter.html#fieldname" class="tsd-kind-icon">field<wbr>Name</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httperror.html#error" class="tsd-kind-icon">Error</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="_query_filter_.doublerangefilter.html#max" class="tsd-kind-icon">max</a>
+								<a href="_web_http_.httperror.html#message" class="tsd-kind-icon">message</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="_query_filter_.doublerangefilter.html#min" class="tsd-kind-icon">min</a>
+								<a href="_web_http_.httperror.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httperror.html#rawrequest" class="tsd-kind-icon">raw<wbr>Request</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httperror.html#rawresponse" class="tsd-kind-icon">raw<wbr>Response</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httperror.html#requesturl" class="tsd-kind-icon">request<wbr>Url</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
-								<a href="_query_filter_.doublerangefilter.html#type" class="tsd-kind-icon">type</a>
+								<a href="_web_http_.httperror.html#stack" class="tsd-kind-icon">stack</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httperror.html#statuscode" class="tsd-kind-icon">status<wbr>Code</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_web_http_.httperror.html#statusmessage" class="tsd-kind-icon">status<wbr>Message</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_query_filter_.enumfilter.html" class="tsd-kind-icon">Enum<wbr>Filter</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_web_http_.httpoptions.html" class="tsd-kind-icon">Http<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.fieldfilter.html" class="tsd-kind-icon">Field<wbr>Filter</a>
+						<a href="_web_http_.loginoptions.html" class="tsd-kind-icon">Login<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.filter.html" class="tsd-kind-icon">Filter</a>
+						<a href="_web_http_.logonoptions.html" class="tsd-kind-icon">Logon<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.likefilter.html" class="tsd-kind-icon">Like<wbr>Filter</a>
+						<a href="_web_http_.logoutoptions.html" class="tsd-kind-icon">Logout<wbr>Options</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.logopfilter.html" class="tsd-kind-icon">Log<wbr>OpFilter</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/_web_http_.html#httprequest" class="tsd-kind-icon">Http<wbr>Request</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.longenumfilter.html" class="tsd-kind-icon">Long<wbr>Enum<wbr>Filter</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.longrangefilter.html" class="tsd-kind-icon">Long<wbr>Range<wbr>Filter</a>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_web_http_.html#ajax" class="tsd-kind-icon">ajax</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.nullfilter.html" class="tsd-kind-icon">Null<wbr>Filter</a>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_web_http_.html#login" class="tsd-kind-icon">login</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.numberrangefilter.html" class="tsd-kind-icon">Number<wbr>Range<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_query_filter_.rangefilter.html" class="tsd-kind-icon">Range<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.stringenumfilter.html" class="tsd-kind-icon">String<wbr>Enum<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.stringfilter.html" class="tsd-kind-icon">String<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.stringmapfilter.html" class="tsd-kind-icon">String<wbr>Map<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_query_filter_.stringrangefilter.html" class="tsd-kind-icon">String<wbr>Range<wbr>Filter</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_query_filter_.valuefilter.html" class="tsd-kind-icon">Value<wbr>Filter</a>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_web_http_.html#logout" class="tsd-kind-icon">logout</a>
 					</li>
 				</ul>
 			</nav>

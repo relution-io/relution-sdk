@@ -73,6 +73,7 @@
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/_web_http_.httpcallback.html" class="tsd-kind-icon">Http<wbr>Callback</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.httperror.html" class="tsd-kind-icon">Http<wbr>Error</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-kind-icon">Http<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.loginoptions.html" class="tsd-kind-icon">Login<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.logonoptions.html" class="tsd-kind-icon">Logon<wbr>Options</a></li>
@@ -105,7 +106,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:53</li>
+							<li>Defined in web/http.ts:54</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -120,7 +121,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IncomingMessage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:57</li>
+							<li>Defined in web/http.ts:58</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -142,7 +143,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:120</li>
+									<li>Defined in web/http.ts:167</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -152,19 +153,20 @@
 								<p>Behavior of this method is simplified from most HTTP/AJAX implementations:</p>
 								<ul>
 									<li>When the HTTP request succeeds the resulting promise resolves to the response body.</li>
-									<li>In case of a network Error the promise resolves to an Error object providing <code>requestUrl</code>
+									<li>In case of a network Error the promise resolves to an HttpError object providing <code>requestUrl</code>
 									but neither <code>statusCode</code> nor <code>statusMessage</code>.</li>
-									<li>In case of HTTP failure the resulting promise is rejected to an Error-like object carrying
+									<li>In case of HTTP failure the resulting promise is rejected to an HttpError-like object carrying
 									the properties <code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</li>
-									<li>If the server responds a JSON, it is parsed and assumed to be an Error-like object. The object
-									is augmented by the properties as defined above.</li>
-									<li>Otherwise the body is stored as <code>message</code> of an Error object created. Again, the properties
+									<li>If the server responds a JSON, it is parsed and assumed to be an HttpError-like object. The
+									object is augmented by the properties as defined above.</li>
+									<li>Otherwise the body is stored as <code>message</code> of an HttpError object created. Again, the properties
 									above are provided.</li>
-									<li>Finally, in case of HTTP failure with the server not providing any response body, the Error
+									<li>Finally, in case of HTTP failure with the server not providing any response body, the HttpError
 									<code>message</code> is set to the <code>statusMessage</code>.</li>
 								</ul>
-								<p>Thus, to differentiate network failures from server-side failures the <code>statusCode</code> of the Error
-								rejection is to being used. For deeper inspection provide an [[options.responseCallback]].</p>
+								<p>Thus, to differentiate network failures from server-side failures the <code>statusCode</code> of the
+									HttpError rejection is to being used. For deeper inspection provide an
+								[[options.responseCallback]].</p>
 								<pre><code class="lang-javascript">Relution.init({
    serverUrl: <span class="hljs-string">'http://localhost:8080'</span>,
    organization: <span class="hljs-string">'myOrga'</span>
@@ -175,13 +177,13 @@
 <span class="hljs-comment">//usage as Promise</span>
 Relution.web.ajax(httpOptions)
  .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp);)
- .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
+ .catch((e:Relution.web.HttpError) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
  .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>));
 
 <span class="hljs-comment">// as Observable</span>
 Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
  (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp),
- (e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
+ (e:Relution.web.HttpError) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
  () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>)
 )
 </code></pre>
@@ -196,8 +198,8 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>of response body, in case of failure rejects to an Error object including
-							<code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
+							<p>of response body, in case of failure rejects to an HttpError object
+							including <code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
 						</li>
 					</ul>
 				</section>
@@ -211,7 +213,7 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:324</li>
+									<li>Defined in web/http.ts:384</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -275,7 +277,7 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:398</li>
+									<li>Defined in web/http.ts:458</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -388,6 +390,9 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 						<a href="_web_index_.html">"web/index"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
+						<a href="_web_urls_.html">"web/urls"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
 						<a href="_web_verb_.html">"web/verb"</a>
 					</li>
 				</ul>
@@ -396,6 +401,9 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 				<ul class="before-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="../interfaces/_web_http_.httpcallback.html" class="tsd-kind-icon">Http<wbr>Callback</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_web_http_.httperror.html" class="tsd-kind-icon">Http<wbr>Error</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_web_http_.httpoptions.html" class="tsd-kind-icon">Http<wbr>Options</a>
