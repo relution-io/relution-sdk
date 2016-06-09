@@ -2269,10 +2269,14 @@ function ajax(options) {
             var resp;
             var req;
             try {
+                if (options.clientCertificate) {
+                    // apply certificate options
+                    _.extend(options, options.clientCertificate);
+                }
                 req = requestWithDefaults(url, options, function (error, response, body) {
                     if (response === void 0) { response = resp; }
                     // node.js assigns response object as body for status codes not having body data
-                    if (response.statusCode === 202) {
+                    if (response && response.statusCode === 202) {
                         diag.debug.assert(body === http.STATUS_CODES[202], body);
                         body = undefined;
                     }
@@ -2306,7 +2310,12 @@ function ajax(options) {
                     if (!response) {
                         // network connectivity problem
                         diag.debug.assertIsError(error);
-                        rejectResponse(error); // will also rejectResult(error)
+                        if (promiseResponse) {
+                            rejectResponse(error); // will also rejectResult(error)
+                        }
+                        else {
+                            rejectResult(error); // promiseResponse not constructed yet
+                        }
                     }
                     else {
                         // logon session processing
@@ -2335,18 +2344,20 @@ function ajax(options) {
                         }
                     }
                     // completing the chain
-                    promiseResponse.then(function (responseResult) {
-                        diag.debug.assert(function () { return responseResult === resp; }, 'definition of behavior in case of ' +
-                            'proxying the original response is reserved for future extension!');
-                        if (error) {
-                            rejectResult(error);
-                        }
-                        else {
-                            resolveResult(body);
-                        }
-                    }, function (responseError) {
-                        rejectResult(responseError);
-                    }).done();
+                    if (promiseResponse) {
+                        promiseResponse.then(function (responseResult) {
+                            diag.debug.assert(function () { return responseResult === resp; }, 'definition of behavior in case ' +
+                                'of proxying the original response is reserved for future extension!');
+                            if (error) {
+                                rejectResult(error);
+                            }
+                            else {
+                                resolveResult(body);
+                            }
+                        }, function (responseError) {
+                            rejectResult(responseError);
+                        }).done();
+                    }
                 });
             }
             catch (error) {

@@ -216,9 +216,13 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
       let resp: http.IncomingMessage;
       let req: request.Request;
       try {
+        if (options.clientCertificate) {
+          // apply certificate options
+          _.extend(options, options.clientCertificate);
+        }
         req = requestWithDefaults(url, options, (error: HttpError, response = resp, body?: any) => {
           // node.js assigns response object as body for status codes not having body data
-          if (response.statusCode === 202) {
+          if (response && response.statusCode === 202) {
             diag.debug.assert(body === http.STATUS_CODES[202], body);
             body = undefined;
           }
@@ -252,7 +256,11 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
           if (!response) {
             // network connectivity problem
             diag.debug.assertIsError(error);
-            rejectResponse(error); // will also rejectResult(error)
+            if (promiseResponse) {
+              rejectResponse(error); // will also rejectResult(error)
+            } else {
+              rejectResult(error); // promiseResponse not constructed yet
+            }
           } else {
             // logon session processing
             let sessionUserUuid = resp.headers['x-gofer-user'];
@@ -280,18 +288,20 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
           }
 
           // completing the chain
-          promiseResponse.then((responseResult: http.IncomingMessage) => {
-            diag.debug.assert(() => responseResult === resp, 'definition of behavior in case of ' +
-              'proxying the original response is reserved for future extension!');
+          if (promiseResponse) {
+            promiseResponse.then((responseResult: http.IncomingMessage) => {
+              diag.debug.assert(() => responseResult === resp, 'definition of behavior in case ' +
+                'of proxying the original response is reserved for future extension!');
 
-            if (error) {
-              rejectResult(error);
-            } else {
-              resolveResult(body);
-            }
-          }, (responseError) => {
-            rejectResult(responseError);
-          }).done();
+              if (error) {
+                rejectResult(error);
+              } else {
+                resolveResult(body);
+              }
+            }, (responseError) => {
+              rejectResult(responseError);
+            }).done();
+          }
         });
       } catch (error) {
         // path taken when request.js throws

@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 
+import * as tls from 'tls';
 import * as _ from 'lodash';
 import * as Q from 'q';
 
@@ -108,10 +109,7 @@ export interface ServerInitOptions extends ServerUrlOptions, HttpAgentOptions {
   /**
    * when set, this is used as `pfx` for the requests to the server.
    */
-  clientCertificate?: {
-    cert?: Buffer;
-    passphrase?: string;
-  } | any;
+  clientCertificate?: tls.SecureContextOptions;
 }
 
 /**
