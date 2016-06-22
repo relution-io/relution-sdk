@@ -57,6 +57,11 @@ export interface HttpError extends Error {
      */
     statusMessage?: string;
     /**
+     * in many cases the Relution server reports here the fully qualified name of a Java Exception
+     * that may be used to further differentiate the error.
+     */
+    className?: string;
+    /**
      * details of request failed.
      *
      * This is a non-enumerable property and thus not part of the JSON representation of the failure.

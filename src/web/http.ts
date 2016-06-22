@@ -98,6 +98,12 @@ export interface HttpError extends Error {
   statusMessage?: string;
 
   /**
+   * in many cases the Relution server reports here the fully qualified name of a Java Exception
+   * that may be used to further differentiate the error.
+   */
+  className?: string;
+
+  /**
    * details of request failed.
    *
    * This is a non-enumerable property and thus not part of the JSON representation of the failure.
@@ -261,6 +267,16 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
             } else {
               rejectResult(error); // promiseResponse not constructed yet
             }
+          } else if (response.statusCode === 503 || response.statusCode === 500 &&
+            error.className === 'java.util.concurrentTimeoutException') {
+            // 503 (service unavailable) indicates the server is temporarily overloaded, and unable
+            // handling the request. This happens when async delegation timed out on the Java side,
+            // usually after about 2 minutes. In this case retry the request until we are done...
+            diag.debug.info('server overloaded, retrying request.');
+            // here promiseResponse must have been resolved already,
+            // we chain anyways because of error propagation
+            promiseResponse.thenResolve(ajax(options)).done(resolveResult, rejectResult);
+            return; // early exit as result is handled by done call above
           } else {
             // logon session processing
             let sessionUserUuid = resp.headers['x-gofer-user'];
@@ -282,12 +298,12 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
                   diag.debug.info('server session recovered.');
                   return ajax(options);
                 })).done(resolveResult, rejectResult);
-                return; // early exit
+                return; // early exit as result is handled by done call above
               }
             }
           }
 
-          // completing the chain
+          // completes the chain propagating results, must be skipped when request is retried above
           if (promiseResponse) {
             promiseResponse.then((responseResult: http.IncomingMessage) => {
               diag.debug.assert(() => responseResult === resp, 'definition of behavior in case ' +
