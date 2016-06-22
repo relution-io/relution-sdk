@@ -102,6 +102,11 @@ export interface HttpError extends Error {
    * that may be used to further differentiate the error.
    */
   className?: string;
+  /**
+   * may be set to some arbitrary value describing the cause of failure, mostly present when
+   * transporting Java Exception objects.
+   */
+  cause?: any;
 
   /**
    * details of request failed.
@@ -227,23 +232,39 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
           _.extend(options, options.clientCertificate);
         }
         req = requestWithDefaults(url, options, (error: HttpError, response = resp, body?: any) => {
-          // node.js assigns response object as body for status codes not having body data
+          // node.js assigns status string as body for status codes not having body data
           if (response && response.statusCode === 202) {
             diag.debug.assert(body === http.STATUS_CODES[202], body);
-            body = undefined;
+            body = undefined; // resolves promise to undefined below
           }
 
           // error processing
           if (!error && response && response.statusCode >= 400) {
-            if (!body) {
-              error = new Error(response.statusMessage);
-            } else if (_.isString(body)) {
-              error = new Error(body);
-            } else {
+            if (_.isError(body)) {
+              // correct but practically impossible
               error = body;
+            } else if (_.isString(body)) {
+              // use plain-text as Error message
+              error = new Error(body);
+            } else if (_.isObjectLike(body)) {
+              // body is object representation of server-side error or exception,
+              // converting to true Error object here
+              error = new Error(response.statusMessage);
+              diag.debug.assert(() => !_.isArray(body),
+                'kicks in for array responses as well, not sure if this is desirable');
+              _.extend(error, body);
+            } else {
+              // handles numbers, booleans, etc. assigning as cause of failure
+              error = new Error(response.statusMessage);
+              if (!_.isUndefined(body)) {
+                error.cause = body;
+              }
             }
+            // additional HttpError properties eventually set below
           }
           if (error) {
+            // completes HttpError construction
+            diag.debug.assertIsError(error, 'should operate true Error instances');
             error.requestUrl = url;
             if (response) {
               error.statusCode = response.statusCode;
@@ -268,7 +289,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
               rejectResult(error); // promiseResponse not constructed yet
             }
           } else if (response.statusCode === 503 || response.statusCode === 500 &&
-            error.className === 'java.util.concurrentTimeoutException') {
+            error.className === 'java.util.concurrent.TimeoutException') {
             // 503 (service unavailable) indicates the server is temporarily overloaded, and unable
             // handling the request. This happens when async delegation timed out on the Java side,
             // usually after about 2 minutes. In this case retry the request until we are done...

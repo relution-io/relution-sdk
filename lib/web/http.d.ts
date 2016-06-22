@@ -62,6 +62,11 @@ export interface HttpError extends Error {
      */
     className?: string;
     /**
+     * may be set to some arbitrary value describing the cause of failure, mostly present when
+     * transporting Java Exception objects.
+     */
+    cause?: any;
+    /**
      * details of request failed.
      *
      * This is a non-enumerable property and thus not part of the JSON representation of the failure.
