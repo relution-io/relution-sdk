@@ -1,0 +1,127 @@
+/**
+ * @file livedata/Collection.ts
+ * Relution SDK
+ *
+ * Created by M-Way on 27.06.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { Store } from './Store';
+import { ModelCtor } from './Model';
+import { SyncContext } from './SyncContext';
+import { SyncEndpoint } from './SyncEndpoint';
+import { _create, _design } from './Object';
+/**
+ * constructor function of Collection.
+ */
+export interface CollectionCtor {
+    /**
+     * @see Collection#constructor
+     */
+    new (models?: any, options?: any): Collection;
+}
+/**
+ * tests whether a given object is a Collection.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Collection.
+ */
+export declare function isCollection(object: any): object is Collection;
+/**
+ * extension of a backbone.js Collection.
+ *
+ * The Relution.livedata.Collection can be used like a Backbone Collection,
+ * but there are some enhancements to fetch, save and delete the
+ * contained models from or to other "data stores".
+ *
+ * see WebSqlStore or SyncStore for examples
+ */
+export declare class Collection extends Backbone.Collection {
+    _type: string;
+    isModel: boolean;
+    isCollection: boolean;
+    model: ModelCtor;
+    entity: string;
+    options: any;
+    store: Store;
+    syncContext: SyncContext;
+    credentials: any;
+    endpoint: SyncEndpoint;
+    channel: string;
+    static extend: typeof Backbone.Collection.extend;
+    static create: typeof _create;
+    static design: typeof _design;
+    constructor(models?: any, options?: any);
+    protected init(models?: any, options?: any): void;
+    modelId: (attrs: any) => any;
+    ajax(options: any): any;
+    sync(method: string, model: Backbone.ModelBase, options?: any): any;
+    entityFromUrl(url: any): string;
+    destroy(options?: any): void;
+    /**
+     * save all containing models
+     */
+    save(): void;
+    applyFilter(callback: any): void;
+    getUrlParams(url?: string): any;
+    getUrl(): string;
+    getUrlRoot(): string;
+    private _updateUrl();
+    /**
+     * reads an additional page of data into this collection.
+     *
+     * A fetch() must have been performed loading the initial set of data. This method is intended for infinite scrolling
+     * implementation.
+     *
+     * When async processing is done, a more attribute is set on the options object in case additional data might be
+     * available which can be loaded by calling this method again. Likewise an end attribute is set if the data is
+     * fully loaded.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see SyncContext#fetchMore()
+     */
+    fetchMore(options: any): PromiseLike<any>;
+    /**
+     * reads the next page of data into this collection.
+     *
+     * A fetch() must have been performed loading the initial set of data. This method is intended for paging
+     * implementation.
+     *
+     * When async processing is done, a next/prev attribute is set on the options object in case additional pages might be
+     * available which can be loaded by calling the corresponding method.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see SyncContext#fetchNext()
+     */
+    fetchNext(options: any): PromiseLike<any>;
+    /**
+     * reads the previous page of data into this collection.
+     *
+     * A fetch() must have been performed loading the initial set of data. This method is intended for paging
+     * implementation.
+     *
+     * When async processing is done, a next/prev attribute is set on the options object in case additional pages might be
+     * available which can be loaded by calling the corresponding method.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see SyncContext#fetchPrev()
+     */
+    fetchPrev(options: any): PromiseLike<any>;
+}
