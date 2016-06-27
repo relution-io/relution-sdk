@@ -98,11 +98,11 @@ export class Store {
     return _.isObject(model) ? model : null;
   }
 
-  initModel(model, options?:any): void {
+  initModel(model, options?: any): void {
     // may be overwritten
   }
 
-  initCollection(collection, options?:any): void {
+  initCollection(collection, options?: any): void {
     // may be overwritten
   }
 

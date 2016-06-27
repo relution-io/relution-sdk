@@ -22,8 +22,6 @@ import * as assert from 'assert';
 import * as web from './index';
 import {debug} from '../core/diag';
 
-import * as _ from 'lodash';
-
 import * as security from '../security';
 
 const credentials: security.LoginObject = {

@@ -87,7 +87,7 @@ export class SyncStore extends Store {
   public messages: Collection;
   public messagesPromise: Q.Promise<Collection>;
 
-  constructor(options?:any) {
+  constructor(options?: any) {
     super(options);
     if (this.credentials) {
       this.credentials = _.clone(this.credentials);
@@ -205,7 +205,7 @@ export class SyncStore extends Store {
       path = endpoint.socketPath;
       // remove leading /
       var resource = (path && path.indexOf('/') === 0) ? path.substr(1) : path;
-      var connectVo:any = {
+      var connectVo: any = {
         resource: resource
       };
 
@@ -644,7 +644,7 @@ export class SyncStore extends Store {
     }
 
     diag.debug.trace('ajaxMessage ' + msg.method + ' ' + url);
-    var opts:any = {
+    var opts: any = {
       // must not take arbitrary options as these won't be replayed on reconnect
       url: url,
       attrs: msg.data,
@@ -757,7 +757,7 @@ export class SyncStore extends Store {
           // as the callback will set the models again causing our sorting and filtering to be without effect.
           var response = [];
           let models = isCollection(model) ? model.models : [model];
-          for (let i = models.length; i-- > 0;) {
+          for (let i = models.length; i-- > 0; ) {
             var m = models[i];
             if (dataIds[m.id]) {
               response.push(m.attributes);
@@ -940,7 +940,7 @@ export class SyncStore extends Store {
       // just affect local store
       store: options.localStore
     };
-    let remoteOptions:any = {
+    let remoteOptions: any = {
       urlRoot: options.urlRoot,
       store: {} // really go to remote server
     };
@@ -1018,7 +1018,7 @@ export class SyncStore extends Store {
         entity: endpoint.entity
       });
       model.id = message.get('method') !== 'create' && message.get('id');
-      let remoteOptions:any = {
+      let remoteOptions: any = {
         urlRoot: endpoint.urlRoot,
         store: {} // really go to remote server
       };

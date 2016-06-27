@@ -38,27 +38,27 @@ export class SyncContext {
    *
    * @type {Relution.LiveData.GetQuery}
    */
-  private getQuery:GetQuery = new GetQuery();
+  private getQuery: GetQuery = new GetQuery();
 
   /**
    * limit of getQuery captured at construction time.
    */
-  private pageSize:number;
+  private pageSize: number;
 
   /**
    * used to speed up insertion point when doing consecutive insertions into sorted ranges.
    */
-  private lastInsertionPoint:number;
+  private lastInsertionPoint: number;
 
   /**
    * when set, defines sorting of collection.
    */
-  private compareFn:JsonCompareFn<any>;
+  private compareFn: JsonCompareFn<any>;
 
   /**
    * when set, defines filtering of collection.
    */
-  private filterFn:JsonFilterFn<any>;
+  private filterFn: JsonFilterFn<any>;
 
   /**
    * captures option values forming a GetQuery.
@@ -66,10 +66,10 @@ export class SyncContext {
    * @param options to merge.
    * @constructor
    */
-  public constructor(...options:{}[]) {
+  public constructor(...options: {}[]) {
     // merge options forming a GetQuery
     options.forEach((json) => {
-      if(json) {
+      if (json) {
         this.getQuery.merge(new GetQuery().fromJSON(json));
       }
     });
@@ -103,7 +103,7 @@ export class SyncContext {
       fields: getQuery.fields
     });
     // prepare a query for the next page of data to load
-    options.offset = (getQuery.offset|0) + collection.models.length;
+    options.offset = (getQuery.offset | 0) + collection.models.length;
     // this must be set in options to state we handle it
     options.syncContext = this;
 
@@ -296,7 +296,7 @@ export class SyncContext {
   public fetchNext(collection: Collection, options?) {
     options = options || {};
     options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
-    options.offset = (this.getQuery.offset|0) + collection.models.length;
+    options.offset = (this.getQuery.offset | 0) + collection.models.length;
     return this.fetchRange(collection, options);
   }
 
@@ -311,19 +311,19 @@ export class SyncContext {
   public fetchPrev(collection: Collection, options?) {
     options = options || {};
     options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
-    options.offset = (this.getQuery.offset|0) - options.limit;
+    options.offset = (this.getQuery.offset | 0) - options.limit;
     return this.fetchRange(collection, options);
   }
 
-  public filterAttributes<T>(attrs:T[], options?):T[] {
+  public filterAttributes<T>(attrs: T[], options?): T[] {
     return this.filterFn ? attrs.filter(this.filterFn) : attrs;
   }
 
-  public sortAttributes<T>(attrs:T[], options?):T[] {
+  public sortAttributes<T>(attrs: T[], options?): T[] {
     return this.compareFn ? attrs.sort(this.compareFn) : attrs;
   }
 
-  public rangeAttributes<T>(attrs:T[], options?):T[] {
+  public rangeAttributes<T>(attrs: T[], options?): T[] {
     var offset = options && options.offset || this.getQuery.offset;
     if (offset > 0) {
       attrs.splice(0, offset);
@@ -335,7 +335,7 @@ export class SyncContext {
     return attrs;
   }
 
-  public processAttributes<T>(attrs:T[], options?):T[] {
+  public processAttributes<T>(attrs: T[], options?): T[] {
     attrs = this.filterAttributes(attrs, options);
     attrs = this.sortAttributes(attrs, options);
     attrs = this.rangeAttributes(attrs, options);
@@ -353,8 +353,8 @@ export class SyncContext {
    * @param collection
    * @param msg
    */
-  public onMessage(store:Store, collection: Collection, msg: LiveDataMessage) {
-    var options:any = {
+  public onMessage(store: Store, collection: Collection, msg: LiveDataMessage) {
+    var options: any = {
       collection: collection,
       entity: collection.entity,
       merge: msg.method === 'patch',
@@ -397,7 +397,7 @@ export class SyncContext {
               /* jshint +W018 */
               collection.add(model, options);
               if (this.getQuery.limit && collection.models.length > this.getQuery.limit) {
-                collection.remove(collection.models[collection.models.length-1], options);
+                collection.remove(collection.models[collection.models.length - 1], options);
               }
             }
           }
@@ -443,7 +443,7 @@ export class SyncContext {
    * @param models sorted by compareFn.
    * @return {number} insertion point.
    */
-  private insertionPoint(attributes, models: Model[]):number {
+  private insertionPoint(attributes, models: Model[]): number {
     if (this.lastInsertionPoint !== undefined) {
       // following performs two comparisons at the last insertion point to take advantage of locality,
       // this means we don't subdivide evenly but check tiny interval at insertion position firstly...
@@ -452,12 +452,12 @@ export class SyncContext {
       if (end - start > 1) {
         // focus on (start;end] range speeding up binary searches by taking locality into account
         var point = this.insertionPointBinarySearch(attributes, models, start, end);
-        if(point >= end) {
+        if (point >= end) {
           // select upper interval
           if (point < models.length) {
             point = this.insertionPointBinarySearch(attributes, models, point, models.length);
           }
-        } else if(point < start) {
+        } else if (point < start) {
           // select lower interval
           if (point > 0) {
             point = this.insertionPointBinarySearch(attributes, models, 0, point);
@@ -483,7 +483,7 @@ export class SyncContext {
    * @param end exclusive index of search interval.
    * @return {number} insertion point.
    */
-  private insertionPointBinarySearch(attributes, models, start: number, end: number):number {
+  private insertionPointBinarySearch(attributes, models, start: number, end: number): number {
     var pivot = (start + end) >> 1;
     var delta = this.compareFn(attributes, models[pivot].attributes);
     if (end - start <= 1) {

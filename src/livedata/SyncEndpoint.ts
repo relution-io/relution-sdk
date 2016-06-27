@@ -55,7 +55,7 @@ export class SyncEndpoint {
   // timestamp of last SyncStore.fetchServerInfo, 0 while request is outstanding
   public timestampFetchingServerInfo: number;
 
-  constructor(options:{
+  constructor(options: {
     entity: string,
     modelType: ModelCtor,
     urlRoot: string,

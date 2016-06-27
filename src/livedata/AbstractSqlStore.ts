@@ -41,7 +41,7 @@ export class AbstractSqlStore extends Store {
     created?: boolean // tri-state as initial state is not known and thus undefined
   } } = {};
 
-  constructor(options?:any) {
+  constructor(options?: any) {
     super(options);
 
     if (options && options.entities) {
@@ -295,7 +295,7 @@ export class AbstractSqlStore extends Store {
       } else {
         options.models = [model];
       }
-      var stm:any = this._sqlSelect(options, entity);
+      var stm: any = this._sqlSelect(options, entity);
       var that = this;
       this.db.readTransaction(function (t) {
         var statement = stm.statement || stm;

@@ -49,7 +49,7 @@ export class CipherSqlStore extends AbstractSqlStore {
   // following are store-specific options, defaults stored in prototype at end of this file
   protected security: string;
 
-  constructor(options?:any) {
+  constructor(options?: any) {
     super(options);
 
     if (options && !options.security) {

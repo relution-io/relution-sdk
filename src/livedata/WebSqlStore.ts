@@ -42,7 +42,7 @@ import * as diag from '../core/diag';
  * });
  */
 export class WebSqlStore extends AbstractSqlStore {
-  constructor(options?:any) {
+  constructor(options?: any) {
     super(options);
 
     var that = this;
