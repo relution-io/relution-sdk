@@ -2,6 +2,15 @@
   "name": "relution-sdk",
   "version": "0.0.1",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
+  "keywords": [
+	"relution",
+    "livedata",
+    "backbone",
+    "framework",
+    "realtime",
+    "offline",
+    "mvc"
+  ],
   "main": "index.js",
   "scripts": {
     "precommit": "npm run tslint",
@@ -26,9 +35,11 @@
     "typescript": "^1.8.10"
   },
   "dependencies": {
+    "backbone": "~1.2.1",
     "lodash": "^4.0.0",
     "q": "^1.4.1",
     "request": "^2.69.0",
+    "socket.io-client": "~0.9.16",
     "JSONPath": "^0.11.2"
   }
 }

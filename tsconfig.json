@@ -29,6 +29,7 @@
         "src/core/index.ts",
         "src/core/init.ts",
         "src/index.ts",
+        "src/livedata/index.ts",
         "src/model/index.ts",
         "src/model/ModelContainer.ts",
         "src/query/Filter.ts",

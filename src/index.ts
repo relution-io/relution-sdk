@@ -39,3 +39,6 @@ export import web = require('./web');
 
 // connector module
 export import connector = require('./connector');
+
+// livedata module
+export import livedata = require('./livedata');

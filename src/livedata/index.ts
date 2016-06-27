@@ -1,8 +1,8 @@
 /**
- * @file index.ts
+ * @file livedata/index.ts
  * Relution SDK
  *
- * Created by Thomas Beckmann on 28.04.2016
+ * Created by Thomas Beckmann on 27.06.2016
  * Copyright 2016 M-Way Solutions GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { debug } from './core/diag';
-export { init } from './core/init';
-export import core = require('./core');
-export import model = require('./model');
-export import query = require('./query');
-export import security = require('./security');
-export import web = require('./web');
-export import connector = require('./connector');
-export import livedata = require('./livedata');
+
+export const not_implemented_yet = 'not implemented yet';
