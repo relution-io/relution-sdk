@@ -1,6 +1,8 @@
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
 
+import * as url from 'url';
+
 // Returns a unique identifier
 
 /*
@@ -14,9 +16,16 @@
  location.hash;     // => "#hash"
  location.search;   // => "?search=test"
  */
-export function getLocation(url) {
+export function getLocation(urlStr): any {
+  if (!('document' in global)) {
+    let result = url.parse(urlStr);
+    result.host = result.hostname || '';
+    result.toString = () => url.format(result);
+    return result;
+  }
+
   var location = document.createElement('a');
-  location.href = url || this.url;
+  location.href = urlStr || this.url;
   // IE doesn't populate all link properties when setting .href with a relative URL,
   // however .href will return an absolute URL which then can be used on itself
   // to populate these additional fields.
@@ -31,10 +40,13 @@ export function resolveLocation(str) {
 }
 
 export function hashLocation(str) {
-  return _hashCode(this.resolveLocation(str));
+  return hashCode(this.resolveLocation(str));
 }
 
-function _hashCode(...args: string[]) {
+/**
+ * @internal For library use only.
+ */
+export function hashCode(...args: string[]) {
   var hash = 0;
   for (var i = 0; i < args.length; ++i) {
     var str = args[i] || '';

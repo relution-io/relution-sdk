@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+import * as _ from 'lodash';
+
+import * as diag from '../core/diag';
+
 import {Store} from './Store';
 import {Model, ModelCtor} from './Model';
 import {SyncContext} from './SyncContext';
@@ -25,8 +29,6 @@ import {SyncEndpoint} from './SyncEndpoint';
 
 import {_Object, _create, _design} from './Object';
 import {ajax, sync} from './rest';
-
-import * as diag from '../core/diag';
 
 /**
  * constructor function of Collection.
@@ -45,7 +47,7 @@ export interface CollectionCtor {
  * @return {boolean} whether object is a Collection.
  */
 export function isCollection(object): object is Collection {
-  if (typeof object !== 'object') {
+  if (!object || typeof object !== 'object') {
     return false;
   } else if ('isCollection' in object) {
     diag.debug.assert(() => object.isCollection === Collection.prototype.isPrototypeOf(object));
@@ -288,7 +290,7 @@ export class Collection extends Backbone.Collection {
 }
 
 // mixins
-let collection = _.extend(Collection.prototype, _Object, {
+let collection = _.extend(Collection.prototype, _Object.prototype, {
   _type: 'Relution.LiveData.Collection',
   isModel: false,
   isCollection: true,

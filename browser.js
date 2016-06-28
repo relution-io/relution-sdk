@@ -455,6 +455,10 @@ exports.init = init;
  * limitations under the License.
  */
 "use strict";
+// version
+var pkgjson = require('../package.json');
+var version = pkgjson.version;
+exports.version = version;
 // aliases
 var diag_1 = require('./core/diag');
 exports.debug = diag_1.debug;
@@ -475,7 +479,7 @@ exports.connector = require('./connector');
 // livedata module
 exports.livedata = require('./livedata');
 
-},{"./connector":3,"./core":6,"./core/diag":4,"./core/init":7,"./livedata":21,"./model":26,"./query":33,"./security":35,"./web":39}],9:[function(require,module,exports){
+},{"../package.json":332,"./connector":3,"./core":6,"./core/diag":4,"./core/init":7,"./livedata":21,"./model":26,"./query":33,"./security":35,"./web":39}],9:[function(require,module,exports){
 /**
  * @file livedata/AbstractSqlStore.ts
  * Relution SDK
@@ -1047,10 +1051,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var _ = require('lodash');
+var diag = require('../core/diag');
 var Model_1 = require('./Model');
 var Object_1 = require('./Object');
 var rest_1 = require('./rest');
-var diag = require('../core/diag');
 /**
  * tests whether a given object is a Collection.
  *
@@ -1058,7 +1063,7 @@ var diag = require('../core/diag');
  * @return {boolean} whether object is a Collection.
  */
 function isCollection(object) {
-    if (typeof object !== 'object') {
+    if (!object || typeof object !== 'object') {
         return false;
     }
     else if ('isCollection' in object) {
@@ -1262,7 +1267,7 @@ var Collection = (function (_super) {
 }(Backbone.Collection));
 exports.Collection = Collection;
 // mixins
-var collection = _.extend(Collection.prototype, Object_1._Object, {
+var collection = _.extend(Collection.prototype, Object_1._Object.prototype, {
     _type: 'Relution.LiveData.Collection',
     isModel: false,
     isCollection: true,
@@ -1271,7 +1276,7 @@ var collection = _.extend(Collection.prototype, Object_1._Object, {
 });
 diag.debug.assert(function () { return isCollection(Object.create(collection)); });
 
-},{"../core/diag":4,"./Model":13,"./Object":14,"./rest":23}],12:[function(require,module,exports){
+},{"../core/diag":4,"./Model":13,"./Object":14,"./rest":23,"lodash":206}],12:[function(require,module,exports){
 /**
  * @file livedata/LiveDataMessage.ts
  * Relution SDK
@@ -1349,9 +1354,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var _ = require('lodash');
+var diag = require('../core/diag');
 var Object_1 = require('./Object');
 var rest_1 = require('./rest');
-var diag = require('../core/diag');
 /**
  * tests whether a given object is a Model.
  *
@@ -1359,7 +1365,7 @@ var diag = require('../core/diag');
  * @return {boolean} whether object is a Model.
  */
 function isModel(object) {
-    if (typeof object !== 'object') {
+    if (!object || typeof object !== 'object') {
         return false;
     }
     else if ('isModel' in object) {
@@ -1440,14 +1446,15 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
 }(Backbone.Model));
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
 // mixins
-var model = _.extend(Model.prototype, Object_1._Object, {
+var model = _.extend(Model.prototype, Object_1._Object.prototype, {
     _type: 'Relution.LiveData.Model',
     isModel: true,
     isCollection: false
 });
 diag.debug.assert(function () { return isModel(Object.create(model)); });
 
-},{"../core/diag":4,"./Object":14,"./rest":23}],14:[function(require,module,exports){
+},{"../core/diag":4,"./Object":14,"./rest":23,"lodash":206}],14:[function(require,module,exports){
+(function (global){
 /**
  * @file livedata/Object.ts
  * Relution SDK
@@ -1468,7 +1475,9 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
  * limitations under the License.
  */
 "use strict";
+var _ = require('lodash');
 var diag = require('../core/diag');
+global['Backbone'] = global['Backbone'] || require('backbone');
 function _create(args) {
     return new this(args);
 }
@@ -1481,12 +1490,6 @@ exports._design = _design;
 exports._extend = Backbone.Model.extend;
 var _Object = (function () {
     function _Object() {
-        /**
-         * The type of this object.
-         *
-         * @type String
-         */
-        this._type = 'Relution.LiveData._Object';
     }
     /**
      * Creates an object based on a passed prototype.
@@ -1568,8 +1571,14 @@ var _Object = (function () {
     return _Object;
 }());
 exports._Object = _Object;
+// mixins
+var _object = _.extend(_Object.prototype, {
+    _type: 'Relution.LiveData._Object'
+});
+diag.debug.assert(function () { return _Object.prototype.isPrototypeOf(Object.create(_object)); });
 
-},{"../core/diag":4}],15:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/diag":4,"backbone":undefined,"lodash":206}],15:[function(require,module,exports){
 /**
  * @file livedata/Store.ts
  * Relution SDK
@@ -1590,15 +1599,15 @@ exports._Object = _Object;
  * limitations under the License.
  */
 "use strict";
+var _ = require('lodash');
+var diag = require('../core/diag');
 var Collection_1 = require('./Collection');
 var Object_1 = require('./Object');
-var diag = require('../core/diag');
 /**
  * base class to build a custom data store.
  */
 var Store = (function () {
     function Store(options) {
-        diag.debug.trace('Store', options);
         if (options) {
             // copy options values into the object
             _.extend(this, options);
@@ -1720,7 +1729,7 @@ var Store = (function () {
 }());
 exports.Store = Store;
 // mixins
-var store = _.extend(Store.prototype, Backbone.Events, Object_1._Object, {
+var store = _.extend(Store.prototype, Backbone.Events, Object_1._Object.prototype, {
     _type: 'Relution.LiveData.Store',
     isModel: false,
     isCollection: false,
@@ -1728,7 +1737,7 @@ var store = _.extend(Store.prototype, Backbone.Events, Object_1._Object, {
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
-},{"../core/diag":4,"./Collection":11,"./Object":14}],16:[function(require,module,exports){
+},{"../core/diag":4,"./Collection":11,"./Object":14,"lodash":206}],16:[function(require,module,exports){
 /**
  * @file livedata/SyncContext.ts
  * Relution SDK
@@ -4028,9 +4037,11 @@ function sync(method, model, options) {
 exports.sync = sync;
 
 },{"../core/diag":4,"./base64":20,"q":242}],24:[function(require,module,exports){
+(function (global){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
 "use strict";
+var url = require('url');
 // Returns a unique identifier
 /*
  url = "http://example.com:3000/pathname/?search=test#hash";
@@ -4043,9 +4054,15 @@ exports.sync = sync;
  location.hash;     // => "#hash"
  location.search;   // => "?search=test"
  */
-function getLocation(url) {
+function getLocation(urlStr) {
+    if (!('document' in global)) {
+        var result_1 = url.parse(urlStr);
+        result_1.host = result_1.hostname || '';
+        result_1.toString = function () { return url.format(result_1); };
+        return result_1;
+    }
     var location = document.createElement('a');
-    location.href = url || this.url;
+    location.href = urlStr || this.url;
     // IE doesn't populate all link properties when setting .href with a relative URL,
     // however .href will return an absolute URL which then can be used on itself
     // to populate these additional fields.
@@ -4060,10 +4077,13 @@ function resolveLocation(str) {
 }
 exports.resolveLocation = resolveLocation;
 function hashLocation(str) {
-    return _hashCode(this.resolveLocation(str));
+    return hashCode(this.resolveLocation(str));
 }
 exports.hashLocation = hashLocation;
-function _hashCode() {
+/**
+ * @internal For library use only.
+ */
+function hashCode() {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         args[_i - 0] = arguments[_i];
@@ -4079,8 +4099,10 @@ function _hashCode() {
     }
     return hash;
 }
+exports.hashCode = hashCode;
 
-},{}],25:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"url":324}],25:[function(require,module,exports){
 /**
  * model/ModelContainer.ts
  * Relution SDK
@@ -5229,11 +5251,11 @@ function jsonCompare(arg, options) {
     var sortOrder;
     if (typeof arg === 'string') {
         sortOrder = new SortOrder_1.SortOrder();
-        sortOrder.fromJSON.apply(sortOrder, arguments);
+        sortOrder.fromJSON([arg]);
     }
     else if (_.isArray(arg)) {
         sortOrder = new SortOrder_1.SortOrder();
-        sortOrder.fromJSON.call(sortOrder, arg);
+        sortOrder.fromJSON(arg);
     }
     else {
         sortOrder = arg;
@@ -86928,6 +86950,53 @@ function extend() {
     }
 
     return target
+}
+
+},{}],332:[function(require,module,exports){
+module.exports={
+  "name": "relution-sdk",
+  "version": "0.0.1",
+  "description": "Relution Software Development Kit for TypeScript and JavaScript",
+  "keywords": [
+	"relution",
+    "livedata",
+    "backbone",
+    "framework",
+    "realtime",
+    "offline",
+    "mvc"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "precommit": "npm run tslint",
+    "tslint": "tslint src/**/*.ts",
+    "test": "npm run build && mocha lib/**/*.spec.js",
+    "build": "tsc -p .",
+    "api": "typedoc --options %CD%/typedoc.json",
+	"gh-pages": "git subtree push --prefix public/docs origin gh-pages",
+    "watch": "tsc -p . -w",
+    "postinstall": "typings install",
+	"browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore"	
+  },
+  "author": "Thomas Beckmann",
+  "license": "Apache License",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "sinon": "^1.16.0",
+    "tslint": "^3.8.1",
+    "typedoc": "sierrasoftworks/typedoc#v1.8.10",
+    "typescript": "^1.8.10"
+  },
+  "dependencies": {
+    "backbone": "~1.2.1",
+    "lodash": "^4.0.0",
+    "q": "^1.4.1",
+    "request": "^2.69.0",
+    "socket.io-client": "~0.9.16",
+    "JSONPath": "^0.11.2"
+  }
 }
 
 },{}]},{},[1]);

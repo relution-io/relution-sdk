@@ -18,7 +18,11 @@
  * limitations under the License.
  */
 
+import * as _ from 'lodash';
+
 import * as diag from '../core/diag';
+
+global['Backbone'] = global['Backbone'] || require('backbone');
 
 export function _create(args) {
   return new this(args);
@@ -37,7 +41,7 @@ export class _Object {
    *
    * @type String
    */
-  _type = 'Relution.LiveData._Object';
+  _type: string;
 
   /**
    * Creates an object based on a passed prototype.
@@ -122,3 +126,9 @@ export class _Object {
   }
 
 }
+
+// mixins
+let _object = _.extend(_Object.prototype, {
+  _type: 'Relution.LiveData._Object'
+});
+diag.debug.assert(() => _Object.prototype.isPrototypeOf(Object.create(_object)));

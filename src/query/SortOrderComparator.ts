@@ -54,14 +54,14 @@ export interface JsonCompareFn<T> {
  * @param json of SortOrder being compiled.
  * @return {function} a JsonCompareFn function compatible to Array.sort().
  */
-// export function jsonCompare<T>(...json: string[]): JsonCompareFn<T>;
+export function jsonCompare<T>(json: string, options?: JsonCompareOptions): JsonCompareFn<T>;
 /**
  * compiles a JsonCompareFn from a given SortOrder.
  *
  * @param json of SortOrder being compiled.
  * @return {function} a JsonCompareFn function compatible to Array.sort().
  */
-export function jsonCompare<T>(json: string[], options?:  JsonCompareOptions): JsonCompareFn<T>;
+export function jsonCompare<T>(json: string[], options?: JsonCompareOptions): JsonCompareFn<T>;
 /**
  * compiles a JsonCompareFn from a given SortOrder.
  *
@@ -76,15 +76,15 @@ export function jsonCompare<T>(sortOrder: SortOrder, options?: JsonCompareOption
  * @param arg defining the SortOrder being compiled.
  * @return {function} a JsonCompareFn function compatible to Array.sort().
  */
-export function jsonCompare<T>(arg: string[] | SortOrder, options?: JsonCompareOptions):
+export function jsonCompare<T>(arg: string | string[] | SortOrder, options?: JsonCompareOptions):
   JsonCompareFn<T> {
   var sortOrder: SortOrder;
   if (typeof arg === 'string') {
     sortOrder = new SortOrder();
-    sortOrder.fromJSON.apply(sortOrder, arguments);
+    sortOrder.fromJSON([ arg ]);
   } else if (_.isArray(arg)) {
     sortOrder = new SortOrder();
-    sortOrder.fromJSON.call(sortOrder, arg);
+    sortOrder.fromJSON(arg);
   } else {
     sortOrder = arg;
   }

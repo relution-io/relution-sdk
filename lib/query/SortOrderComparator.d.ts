@@ -28,6 +28,7 @@ export interface JsonCompareFn<T> {
  * @param json of SortOrder being compiled.
  * @return {function} a JsonCompareFn function compatible to Array.sort().
  */
+export declare function jsonCompare<T>(json: string, options?: JsonCompareOptions): JsonCompareFn<T>;
 /**
  * compiles a JsonCompareFn from a given SortOrder.
  *

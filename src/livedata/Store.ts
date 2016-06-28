@@ -18,12 +18,14 @@
  * limitations under the License.
  */
 
+import * as _ from 'lodash';
+
+import * as diag from '../core/diag';
+
 import {Model} from './Model';
 import {Collection, isCollection} from './Collection';
 
 import {_Object, _create, _design, _extend} from './Object';
-
-import * as diag from '../core/diag';
 
 /**
  * constructor function of Store.
@@ -51,7 +53,6 @@ export class Store {
   public endpoints: any;
 
   constructor(options?: any) {
-    diag.debug.trace('Store', options);
     if (options) {
       // copy options values into the object
       _.extend(this, options);
@@ -182,7 +183,7 @@ export class Store {
 }
 
 // mixins
-let store = _.extend(Store.prototype, Backbone.Events, _Object, {
+let store = _.extend(Store.prototype, Backbone.Events, _Object.prototype, {
   _type: 'Relution.LiveData.Store',
   isModel: false,
   isCollection: false,

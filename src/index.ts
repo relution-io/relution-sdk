@@ -18,6 +18,11 @@
  * limitations under the License.
  */
 
+// version
+const pkgjson = require('../package.json');
+const version = pkgjson.version;
+export {version};
+
 // aliases
 export {debug} from './core/diag';
 export {init} from './core/init';
