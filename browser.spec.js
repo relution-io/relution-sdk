@@ -1565,7 +1565,7 @@ describe(module.filename || __filename, function () {
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
-global['Backbone'] = global['Backbone'] || require('backbone');
+var backbone = global['Backbone'] || (global['Backbone'] = require('backbone'));
 function _create(args) {
     return new this(args);
 }
@@ -3681,7 +3681,6 @@ var SyncStore = (function (_super) {
         };
         if (model.id) {
             remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/') + model.id;
-            diag.debug.assert(function () { return model.url() === remoteOptions.url; });
         }
         else {
             // creation failed, just delete locally
@@ -3757,7 +3756,6 @@ var SyncStore = (function (_super) {
             };
             if (model.id) {
                 remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/') + model.id;
-                diag.debug.assert(function () { return model.url() === remoteOptions.url; });
             }
             diag.debug.info('sendMessage ' + model.id);
             var offlineOptions = {

@@ -22,7 +22,7 @@ import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
 
-global['Backbone'] = global['Backbone'] || require('backbone');
+const backbone = global['Backbone'] || (global['Backbone'] = require('backbone'));
 
 export function _create(args) {
   return new this(args);
