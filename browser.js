@@ -86963,7 +86963,6 @@ module.exports={
   "devDependencies": {
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
-    "jquery": "~2.1.0",
     "mocha": "^2.4.5",
     "node-localstorage": "^1.3.0",
     "sinon": "^1.16.0",
