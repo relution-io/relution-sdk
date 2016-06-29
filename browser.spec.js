@@ -18437,7 +18437,7 @@ var requestWithDefaults = request.defaults(requestDefaults);
  *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
 function ajax(options) {
-    var serverUrl = urls.resolveUrl('/', options);
+    var serverUrl = urls.resolveServer(options.url, options);
     var serverObj = server.Server.getInstance(serverUrl);
     if (!serverObj.sessionUserUuid && serverObj.credentials) {
         // not logged in
@@ -18463,6 +18463,7 @@ function ajax(options) {
     // resolve target url
     var url = urls.resolveUrl(options.url, currentOptions);
     diag.debug.debug(options.method + ' ' + url);
+    diag.debug.assert(function () { return url.substr(0, serverUrl.length) === serverUrl; });
     var requestCallback = options.requestCallback || _.identity;
     var responseCallback = options.responseCallback || _.identity;
     options = _.clone(options);
@@ -18667,7 +18668,7 @@ exports.ajax = ajax;
  */
 function login(credentials, loginOptions) {
     if (loginOptions === void 0) { loginOptions = {}; }
-    var serverUrl = urls.resolveUrl('/', loginOptions);
+    var serverUrl = urls.resolveServer('/', loginOptions);
     var serverObj = server.Server.getInstance(serverUrl);
     if (serverObj.sessionUserUuid) {
         // logged in already
@@ -18735,7 +18736,7 @@ exports.login = login;
  */
 function logout(logoutOptions) {
     if (logoutOptions === void 0) { logoutOptions = {}; }
-    var serverUrl = urls.resolveUrl('/', logoutOptions);
+    var serverUrl = urls.resolveServer('/', logoutOptions);
     var serverObj = server.Server.getInstance(serverUrl);
     // process options
     var currentOptions = serverObj.applyOptions({
@@ -18905,6 +18906,22 @@ var _ = require('lodash');
 var init = require('../core/init');
 var server = require('../security/server');
 /**
+ * computes a server url from a given path.
+ *
+ * @param path path to resolve, relative or absolute.
+ * @param options of server in effect.
+ * @return {string} absolute URL of server.
+ */
+function resolveServer(path, options) {
+    if (options === void 0) { options = {}; }
+    var serverUrl = options.serverUrl || init.initOptions.serverUrl;
+    if (serverUrl) {
+        path = url.resolve(serverUrl, path);
+    }
+    return url.resolve(path, '/');
+}
+exports.resolveServer = resolveServer;
+/**
  * computes a url from a given path.
  *
  * - absolute URLs are used as is, e.g.
@@ -18925,7 +18942,7 @@ var server = require('../security/server');
  */
 function resolveUrl(path, options) {
     if (options === void 0) { options = {}; }
-    var serverUrl = options.serverUrl || init.initOptions.serverUrl;
+    var serverUrl = resolveServer(path, options);
     if (!serverUrl) {
         return path;
     }

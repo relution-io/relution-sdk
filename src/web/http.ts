@@ -176,7 +176,7 @@ export interface HttpError extends Error {
  *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
 export function ajax(options: HttpOptions): Q.Promise<any> {
-  let serverUrl = urls.resolveUrl('/', options);
+  let serverUrl = urls.resolveServer(options.url, options);
   let serverObj = server.Server.getInstance(serverUrl);
   if (!serverObj.sessionUserUuid && serverObj.credentials) {
     // not logged in
@@ -204,6 +204,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   // resolve target url
   let url = urls.resolveUrl(options.url, currentOptions);
   diag.debug.debug(options.method + ' ' + url);
+  diag.debug.assert(() => url.substr(0, serverUrl.length) === serverUrl);
 
   let requestCallback = options.requestCallback || _.identity;
   let responseCallback = options.responseCallback || _.identity;
@@ -430,7 +431,7 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
  */
 export function login(credentials: auth.Credentials,
                       loginOptions: LoginOptions = {}): Q.Promise<any> {
-  let serverUrl = urls.resolveUrl('/', loginOptions);
+  let serverUrl = urls.resolveServer('/', loginOptions);
   let serverObj = server.Server.getInstance(serverUrl);
   if (serverObj.sessionUserUuid) {
     // logged in already
@@ -503,7 +504,7 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
  * @return {Q.Promise<any>} of logout response.
  */
 export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
-  let serverUrl = urls.resolveUrl('/', logoutOptions);
+  let serverUrl = urls.resolveServer('/', logoutOptions);
   let serverObj = server.Server.getInstance(serverUrl);
 
   // process options
