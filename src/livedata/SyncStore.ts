@@ -949,7 +949,7 @@ export class SyncStore extends Store {
     };
     if (model.id) {
       remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/' ) + model.id;
-      diag.debug.assert(() => model.url() === remoteOptions.url);
+      // diag.debug.assert(() => model.url() === remoteOptions.url);
     } else {
       // creation failed, just delete locally
       diag.debug.assert(() => message.get('method') === 'create');
@@ -1027,7 +1027,7 @@ export class SyncStore extends Store {
       };
       if (model.id) {
         remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/' ) + model.id;
-        diag.debug.assert(() => model.url() === remoteOptions.url);
+        // diag.debug.assert(() => model.url() === remoteOptions.url);
       }
       diag.debug.info('sendMessage ' + model.id);
       let offlineOptions = {
