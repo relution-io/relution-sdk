@@ -13,7 +13,6 @@ export declare const bareboneOptions: {
     sort: boolean;
     silent: boolean;
 };
-export declare const http: any;
 export declare function logon(options: any): any;
 export declare function ajax(options: any): any;
 export declare function sync(method: any, model: any, options: any): any;

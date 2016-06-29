@@ -18,6 +18,10 @@
  * limitations under the License.
  */
 
+import * as _ from 'lodash';
+
+import * as diag from '../core/diag';
+
 import {GetQuery} from '../query/GetQuery';
 import {jsonFilter, JsonFilterFn} from '../query/JsonFilterVisitor';
 import {jsonCompare, JsonCompareFn} from '../query/SortOrderComparator';
@@ -25,8 +29,6 @@ import {Store} from './Store';
 import {Model} from './Model';
 import {Collection} from './Collection';
 import {LiveDataMessage} from './LiveDataMessage';
-
-import * as diag from '../core/diag';
 
 /**
  * receives change messages and updates collections.

@@ -63,7 +63,7 @@ describe(module.filename || __filename, function() {
       };
       promise.then(function () {
         Object.keys(model.attributes).forEach(function (attr) {
-          assert.ok(assert.equal(model.get(attr), haveTobe[attr]), 'model has same ' + attr);
+          assert.equal(model.get(attr), haveTobe[attr], 'model has same ' + attr);
         });
       }).finally(done);
     }),

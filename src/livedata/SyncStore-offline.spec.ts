@@ -53,12 +53,7 @@ describe(module.filename || __filename, function() {
         password: 'admin'
       },
       ajax: function(requ) {
-        return Q.reject({
-          status: -1,
-          error: {
-            stack: 'Not Online'
-          }
-        });
+        return Q.reject(new Error('Not Online'));
       }
     });
 

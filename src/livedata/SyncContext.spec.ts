@@ -21,6 +21,8 @@
 import {assert} from 'chai';
 import {debug} from '../core/diag';
 
+import * as Q from 'q';
+
 import {Model} from './Model';
 import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
@@ -51,28 +53,22 @@ describe(module.filename || __filename, function() {
 
   // loads data using collection, returns promise on collection, collection is empty afterwards
   function loadCollection(collection, data) {
-    debug.info('A', collection);
     return collection.fetch().then(function () {
       // delete all before running tests
-      debug.info('B');
       return Q.all(collection.models.slice().map(function (model) {
-        debug.info('C');
         return model.destroy();
       })).then(function () {
-        debug.info('D');
         assert.equal(collection.models.length, 0, 'collection must be empty initially after destroy');
         return collection;
       });
     }).then(function (collection2) {
       // load sample data into fresh database
-      debug.info('E');
+      assert.equal(collection2, collection, 'same collection object');
       return Q.all(data.map(function (attrs) {
-        debug.info('F');
         return new TestModel(attrs, {
           collection: collection2
         }).save();
       })).then(function () {
-        debug.info('G');
         assert.equal(collection2.models.length, data.length, 'collection was updated by async events');
         return collection2;
       });

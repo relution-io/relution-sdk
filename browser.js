@@ -1480,7 +1480,7 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
-global['Backbone'] = global['Backbone'] || require('backbone');
+var backbone = global['Backbone'] || (global['Backbone'] = require('backbone'));
 function _create(args) {
     return new this(args);
 }
@@ -1761,10 +1761,11 @@ diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.crea
  * limitations under the License.
  */
 "use strict";
+var _ = require('lodash');
+var diag = require('../core/diag');
 var GetQuery_1 = require('../query/GetQuery');
 var JsonFilterVisitor_1 = require('../query/JsonFilterVisitor');
 var SortOrderComparator_1 = require('../query/SortOrderComparator');
-var diag = require('../core/diag');
 /**
  * receives change messages and updates collections.
  */
@@ -2205,7 +2206,7 @@ var SyncContext = (function () {
 }());
 exports.SyncContext = SyncContext;
 
-},{"../core/diag":4,"../query/GetQuery":28,"../query/JsonFilterVisitor":29,"../query/SortOrderComparator":32}],17:[function(require,module,exports){
+},{"../core/diag":4,"../query/GetQuery":28,"../query/JsonFilterVisitor":29,"../query/SortOrderComparator":32,"lodash":206}],17:[function(require,module,exports){
 /**
  * @file livedata/SyncEndpoint.ts
  * Relution SDK
@@ -2705,7 +2706,7 @@ var SyncStore = (function (_super) {
                         }, function (xhr) {
                             // trigger disconnection when disconnected
                             var result;
-                            if (!xhr.responseText && endpoint.isConnected) {
+                            if (!xhr.statusCode && endpoint.isConnected) {
                                 result = _this.onDisconnect(endpoint);
                             }
                             return result || resp;
@@ -2714,11 +2715,11 @@ var SyncStore = (function (_super) {
                     // load changes only (will happen AFTER success callback is invoked,
                     // but returned promise will resolve only after changes were processed.
                     return _this.fetchChanges(endpoint).catch(function (xhr) {
-                        if (!xhr.responseText && endpoint.isConnected) {
+                        if (!xhr.statusCode && endpoint.isConnected) {
                             return _this.onDisconnect(endpoint) || resp;
                         }
                         // can not do much about it...
-                        _this.trigger('error:' + channel, xhr.responseJSON || xhr.responseText, model);
+                        _this.trigger('error:' + channel, xhr, model);
                         return resp;
                     }).thenResolve(resp); // caller expects original XHR response as changes body data is NOT compatible
                 }, function () {
@@ -2794,19 +2795,19 @@ var SyncStore = (function (_super) {
             // following takes care of offline change store
             q = q.then(function (data) {
                 // success, remove message stored, if any
-                return _this.removeMessage(endpoint, msg, qMessage).then(data, function (error) {
+                return _this.removeMessage(endpoint, msg, qMessage).catch(function (error) {
                     _this.trigger('error:' + channel, error, model); // can not do much about it...
                     return data;
                 }).thenResolve(data); // resolve again yielding data
             }, function (xhr) {
                 // failure eventually caught by offline changes
-                if (!xhr) {
+                if (!xhr.statusCode && _this.useOfflineChanges) {
                     // this seams to be only a connection problem, so we keep the message and call success
                     return Q.resolve(msg.data);
                 }
                 else {
                     // remove message stored and keep rejection as is
-                    return _this.removeMessage(endpoint, msg, qMessage).then(xhr, function (error) {
+                    return _this.removeMessage(endpoint, msg, qMessage).catch(function (error) {
                         _this.trigger('error:' + channel, error, model); // can not do much about it...
                         return xhr;
                     }).thenReject(xhr);
@@ -2823,14 +2824,13 @@ var SyncStore = (function (_super) {
                 }
             }, function (xhr) {
                 // trigger disconnection when disconnected
-                if (!xhr && endpoint.isConnected) {
+                if (!xhr.statusCode && endpoint.isConnected) {
                     return _this.onDisconnect(endpoint);
                 }
             });
         });
     };
     SyncStore.prototype._ajaxMessage = function (endpoint, msg, options, model) {
-        var _this = this;
         options = options || {};
         var url = options.url;
         if (!url) {
@@ -2874,16 +2874,9 @@ var SyncStore = (function (_super) {
             error: options.error
         };
         delete options.xhr; // make sure not to use old value
-        return model.sync(msg.method, model, opts).then(function (data) {
+        return model.sync(msg.method, model, opts).finally(function () {
+            // take over xhr resolving the options copy
             options.xhr = opts.xhr.xhr || opts.xhr;
-            return data;
-        }, function (xhr) {
-            options.xhr = opts.xhr.xhr || opts.xhr;
-            if (!xhr.responseText && _this.useOfflineChanges) {
-                // this seams to be a connection problem
-                return Q.reject();
-            }
-            return Q.isPromise(xhr) ? xhr : Q.reject(xhr);
         });
     };
     SyncStore.prototype._applyResponse = function (qXHR, endpoint, msg, options, model) {
@@ -3154,7 +3147,6 @@ var SyncStore = (function (_super) {
         };
         if (model.id) {
             remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/') + model.id;
-            diag.debug.assert(function () { return model.url() === remoteOptions.url; });
         }
         else {
             // creation failed, just delete locally
@@ -3166,8 +3158,8 @@ var SyncStore = (function (_super) {
             return model.save(data, localOptions).finally(triggerError);
         }, function (fetchResp) {
             // original request failed and the code above tried to revert the local modifications by reloading the data, which failed as well...
-            var status = fetchResp && fetchResp.status;
-            switch (status) {
+            var statusCode = fetchResp && fetchResp.statusCode;
+            switch (statusCode) {
                 case 404: // NOT FOUND
                 case 401: // UNAUTHORIZED
                 case 410:
@@ -3230,7 +3222,6 @@ var SyncStore = (function (_super) {
             };
             if (model.id) {
                 remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/') + model.id;
-                diag.debug.assert(function () { return model.url() === remoteOptions.url; });
             }
             diag.debug.info('sendMessage ' + model.id);
             var offlineOptions = {
@@ -3243,7 +3234,7 @@ var SyncStore = (function (_super) {
                 // succeeded
                 return _this.processOfflineMessageResult(null, message, offlineOptions);
             }, function (error) {
-                if (error) {
+                if (error.statusCode) {
                     // remote failed
                     return Q(_this.processOfflineMessageResult(error, message, offlineOptions)).catch(function (error2) {
                         // explicitly disconnect due to error in endpoint
@@ -3253,7 +3244,7 @@ var SyncStore = (function (_super) {
                 }
                 else {
                     // connectivity issue, keep rejection
-                    return Q.reject();
+                    return Q.reject(error);
                 }
             }).then(function () {
                 // applying change succeeded or successfully recovered change
@@ -3921,6 +3912,7 @@ exports.ObjectID = ObjectID;
 var diag = require('../core/diag');
 var base64 = require('./base64');
 var Q = require('q');
+var web = require('../web');
 /**
  * options passed to Collection.fetch() preventing backbone.js from consuming the response.
  *
@@ -3940,9 +3932,9 @@ exports.bareboneOptions = Object.freeze({
     // omits events from being fired
     silent: true
 });
-exports.http = Backbone.ajax;
+var backboneAjax = Backbone.ajax;
 Backbone.ajax = function ajax(options) {
-    var superAjax = options && options.ajax || exports.http;
+    var superAjax = options && options.ajax || backboneAjax;
     return superAjax.apply(this, arguments);
 };
 function logon(options) {
@@ -3969,54 +3961,29 @@ function ajax(options) {
     delete options.success;
     var fnError = options.error;
     delete options.error;
-    options.method = options.type; // set method because some ajax libs need this
+    options.method = options.type;
+    options.body = options.data;
     var promise = logon.apply(this, arguments).then(function () {
-        var superAjax = that.super_ && that.super_.ajax || exports.http;
+        var superAjax = that.super_ && that.super_.ajax || web.ajax;
         var xhr = superAjax.apply(that, args);
         if (!xhr) {
             return Q.reject(new Error('ajax failed'));
         }
         promise.xhr = xhr;
         options.xhr = xhr;
-        if (Q.isPromiseAlike(xhr) && typeof xhr.catch === 'function') {
-            // promise-based XHR
-            return xhr.then(function onSuccess(response) {
-                // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
-                if (fnSuccess) {
-                    fnSuccess(response.data, response.status, response);
-                }
-                return Q.resolve(response.data);
-            }, function onError(response) {
-                // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
-                response.responseText = response.statusText; // jQuery compatibility
-                response.responseJSON = response.data; // jQuery compatibility
-                if (fnError) {
-                    fnError(response, response.statusText, response.data);
-                }
-                return Q.reject(response);
-            });
-        }
-        else {
-            // jQuery-based XHR
-            var q = Q.defer();
-            xhr.success(function onSuccess(data, textStatus, jqXHR) {
-                var result;
-                if (fnSuccess) {
-                    result = fnSuccess.apply(this, arguments);
-                }
-                q.resolve(data);
-                return result;
-            });
-            xhr.error(function onError(jqXHR, textStatus, errorThrown) {
-                var result;
-                if (fnError) {
-                    result = fnError.apply(this, arguments);
-                }
-                q.reject(jqXHR);
-                return result;
-            });
-            return q.promise;
-        }
+        return xhr.then(function onSuccess(response) {
+            // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
+            if (fnSuccess) {
+                fnSuccess(response);
+            }
+            return Q.resolve(response);
+        }, function onError(response) {
+            // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
+            if (fnError) {
+                fnError(response, response.statusMessage || response.message, response);
+            }
+            return Q.reject(response);
+        });
     });
     return promise;
 }
@@ -4036,13 +4003,19 @@ function sync(method, model, options) {
     else {
         // direct access (goes via Backbone)
         var superSync = this.super_ && this.super_.sync || Backbone.sync;
-        options.ajax = options.ajax || this.ajax || exports.http;
+        options.ajax = options.ajax || this.ajax;
+        if (options.ajax) {
+            // we must avoid backbone stringifying the body data as our ajax runs in
+            if (options.data == null && model && (method === 'create' || method === 'update' || method === 'patch')) {
+                options.data = options.attrs || model.toJSON(options);
+            }
+        }
         return superSync.apply(this, arguments);
     }
 }
 exports.sync = sync;
 
-},{"../core/diag":4,"./base64":20,"q":242}],24:[function(require,module,exports){
+},{"../core/diag":4,"../web":39,"./base64":20,"q":242}],24:[function(require,module,exports){
 (function (global){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt

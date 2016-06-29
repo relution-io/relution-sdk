@@ -22,6 +22,7 @@ import * as Q from 'q';
 import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
+import * as web from '../web';
 
 import {GetQuery} from '../query/GetQuery';
 import {Store, StoreCtor} from './Store';
@@ -476,10 +477,10 @@ export class SyncStore extends Store {
                 result = this.onConnect(endpoint);
               }
               return result || info;
-            }, (xhr) => {
+            }, (xhr: web.HttpError) => {
               // trigger disconnection when disconnected
               var result;
-              if (!xhr.responseText && endpoint.isConnected) {
+              if (!xhr.statusCode && endpoint.isConnected) {
                 result = this.onDisconnect(endpoint);
               }
               return result || resp;
@@ -488,13 +489,13 @@ export class SyncStore extends Store {
 
           // load changes only (will happen AFTER success callback is invoked,
           // but returned promise will resolve only after changes were processed.
-          return this.fetchChanges(endpoint).catch((xhr) => {
-            if (!xhr.responseText && endpoint.isConnected) {
+          return this.fetchChanges(endpoint).catch((xhr: web.HttpError) => {
+            if (!xhr.statusCode && endpoint.isConnected) {
               return this.onDisconnect(endpoint) || resp;
             }
 
             // can not do much about it...
-            this.trigger('error:' + channel, xhr.responseJSON || xhr.responseText, model);
+            this.trigger('error:' + channel, xhr, model);
             return resp;
           }).thenResolve(resp); // caller expects original XHR response as changes body data is NOT compatible
         }, () => {
@@ -575,18 +576,18 @@ export class SyncStore extends Store {
       // following takes care of offline change store
       q = q.then((data) => {
         // success, remove message stored, if any
-        return this.removeMessage(endpoint, msg, qMessage).then(data, (error) => {
+        return this.removeMessage(endpoint, msg, qMessage).catch((error: web.HttpError) => {
           this.trigger('error:' + channel, error, model); // can not do much about it...
           return data;
         }).thenResolve(data); // resolve again yielding data
-      }, (xhr) => {
+      }, (xhr: web.HttpError) => {
         // failure eventually caught by offline changes
-        if (!xhr) {
+        if (!xhr.statusCode && this.useOfflineChanges) {
           // this seams to be only a connection problem, so we keep the message and call success
           return Q.resolve(msg.data);
         } else {
           // remove message stored and keep rejection as is
-          return this.removeMessage(endpoint, msg, qMessage).then(xhr, (error) => {
+          return this.removeMessage(endpoint, msg, qMessage).catch((error: web.HttpError) => {
             this.trigger('error:' + channel, error, model); // can not do much about it...
             return xhr;
           }).thenReject(xhr);
@@ -603,9 +604,9 @@ export class SyncStore extends Store {
         if (!endpoint.isConnected) {
           return this.onConnect(endpoint);
         }
-      }, (xhr) => {
+      }, (xhr: web.HttpError) => {
         // trigger disconnection when disconnected
-        if (!xhr && endpoint.isConnected) {
+        if (!xhr.statusCode && endpoint.isConnected) {
           return this.onDisconnect(endpoint);
         }
       });
@@ -657,16 +658,9 @@ export class SyncStore extends Store {
       error: options.error
     };
     delete options.xhr; // make sure not to use old value
-    return model.sync(msg.method, model, opts).then((data) => {
+    return model.sync(msg.method, model, opts).finally(() => {
+      // take over xhr resolving the options copy
       options.xhr = opts.xhr.xhr || opts.xhr;
-      return data;
-    }, (xhr) => {
-      options.xhr = opts.xhr.xhr || opts.xhr;
-      if (!xhr.responseText && this.useOfflineChanges) {
-        // this seams to be a connection problem
-        return Q.reject();
-      }
-      return Q.isPromise(xhr) ? xhr : Q.reject(xhr);
     });
   }
 
@@ -780,7 +774,7 @@ export class SyncStore extends Store {
       }
       // invoke success callback, if any
       return this.handleSuccess(options, response) || response;
-    }, (error) => {
+    }, (error: web.HttpError) => {
       // invoke error callback, if any
       return this.handleError(options, error) || Q.reject(error);
     });
@@ -955,13 +949,13 @@ export class SyncStore extends Store {
       diag.debug.assert(() => message.get('method') === 'create');
       return model.destroy(localOptions).finally(triggerError);
     }
-    return model.fetch(remoteOptions).then((data) => {
+    return (<Q.Promise<any>><any>model.fetch(remoteOptions)).then((data) => {
       // original request failed and the code above reloaded the data to revert the local modifications, which succeeded...
       return model.save(data, localOptions).finally(triggerError);
-    }, (fetchResp) => {
+    }, (fetchResp: web.HttpError) => {
       // original request failed and the code above tried to revert the local modifications by reloading the data, which failed as well...
-      var status = fetchResp && fetchResp.status;
-      switch (status) {
+      const statusCode = fetchResp && fetchResp.statusCode;
+      switch (statusCode) {
         case 404: // NOT FOUND
         case 401: // UNAUTHORIZED
         case 410: // GONE*
@@ -1039,8 +1033,8 @@ export class SyncStore extends Store {
       return this._applyResponse(this._ajaxMessage(endpoint, msg, remoteOptions, model), endpoint, msg, remoteOptions, model).then(() => {
         // succeeded
         return this.processOfflineMessageResult(null, message, offlineOptions);
-      }, (error) => {
-        if (error) {
+      }, (error: web.HttpError) => {
+        if (error.statusCode) {
           // remote failed
           return Q(this.processOfflineMessageResult(error, message, offlineOptions)).catch((error2) => {
             // explicitly disconnect due to error in endpoint
@@ -1049,7 +1043,7 @@ export class SyncStore extends Store {
           });
         } else {
           // connectivity issue, keep rejection
-          return Q.reject();
+          return Q.reject(error);
         }
       }).then(() => {
         // applying change succeeded or successfully recovered change

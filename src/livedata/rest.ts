@@ -6,6 +6,8 @@ import * as base64 from './base64';
 
 import * as Q from 'q';
 
+import * as web from '../web';
+
 /**
  * options passed to Collection.fetch() preventing backbone.js from consuming the response.
  *
@@ -29,10 +31,10 @@ export const bareboneOptions = Object.freeze({
   silent: true
 });
 
-export const http = (<any>Backbone).ajax;
+const backboneAjax = (<any>Backbone).ajax;
 
 (<any>Backbone).ajax = function ajax(options) {
-  var superAjax = options && options.ajax || http;
+  var superAjax = options && options.ajax || backboneAjax;
   return superAjax.apply(this, arguments);
 };
 
@@ -63,54 +65,32 @@ export function ajax(options) {
   var fnError = options.error;
   delete options.error;
 
-  options.method = options.type;  // set method because some ajax libs need this
+  options.method = options.type;
+  options.body = options.data;
+
   var promise = logon.apply(this, arguments).then(function () {
-    var superAjax = that.super_ && that.super_.ajax || http;
-      var xhr = superAjax.apply(that, args);
-      if (!xhr) {
-        return Q.reject(new Error('ajax failed'));
-      }
+    var superAjax = that.super_ && that.super_.ajax || web.ajax;
+    var xhr = superAjax.apply(that, args);
+    if (!xhr) {
+      return Q.reject(new Error('ajax failed'));
+    }
 
     promise.xhr = xhr;
     options.xhr = xhr;
-    if (Q.isPromiseAlike(xhr) && typeof xhr.catch === 'function') {
-      // promise-based XHR
-      return xhr.then(function onSuccess (response) {
-        // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
-        if (fnSuccess) {
-          fnSuccess(response.data, response.status, response);
-        }
-        return Q.resolve(response.data);
-      }, function onError (response) {
-        // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
-        response.responseText = response.statusText;  // jQuery compatibility
-        response.responseJSON = response.data;        // jQuery compatibility
-        if (fnError) {
-          fnError(response, response.statusText, response.data);
-        }
-        return Q.reject(response);
-      });
-    } else {
-      // jQuery-based XHR
-      var q = Q.defer();
-      xhr.success(function onSuccess(data, textStatus, jqXHR) {
-        var result;
-        if (fnSuccess) {
-          result = fnSuccess.apply(this, arguments);
-        }
-        q.resolve(data);
-        return result;
-      });
-      xhr.error(function onError (jqXHR, textStatus, errorThrown) {
-        var result;
-        if (fnError) {
-          result = fnError.apply(this, arguments);
-        }
-        q.reject(jqXHR);
-        return result;
-      });
-      return q.promise;
-    }
+
+    return xhr.then(function onSuccess (response) {
+      // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
+      if (fnSuccess) {
+        fnSuccess(response);
+      }
+      return Q.resolve(response);
+    }, function onError (response: web.HttpError) {
+      // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
+      if (fnError) {
+        fnError(response, response.statusMessage || response.message, response);
+      }
+      return Q.reject(response);
+    });
   });
   return promise;
 }
@@ -130,7 +110,13 @@ export function sync(method, model, options) {
   } else {
     // direct access (goes via Backbone)
     var superSync = this.super_ && this.super_.sync || Backbone.sync;
-    options.ajax = options.ajax ||  this.ajax || http;
+    options.ajax = options.ajax || this.ajax;
+    if (options.ajax) {
+      // we must avoid backbone stringifying the body data as our ajax runs in
+      if (options.data == null && model && (method === 'create' || method === 'update' || method === 'patch')) {
+        options.data = options.attrs || model.toJSON(options);
+      }
+    }
     return superSync.apply(this, arguments);
   }
 }
