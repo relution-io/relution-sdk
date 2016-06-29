@@ -23,7 +23,7 @@ import * as assert from 'assert';
 import * as core from '../core';
 import * as urls from './urls';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('resolveUrl', () => {

@@ -20,7 +20,7 @@
 
 import {assert, expect} from 'chai';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('assert samples', () => {

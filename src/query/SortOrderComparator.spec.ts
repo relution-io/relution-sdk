@@ -26,7 +26,7 @@ import {SortOrder} from './SortOrder';
 import {jsonCompare} from './SortOrderComparator';
 import {makeMovies} from './movies.data';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('sort movies by id', () => {

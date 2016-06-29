@@ -18,13 +18,16 @@
  * limitations under the License.
  */
 
+import * as _ from 'lodash';
+import * as Q from 'q';
+
+import * as diag from '../core/diag';
+
 import {Store} from './Store';
 import {Model, isModel} from './Model';
 import {isCollection} from './Collection';
 
 import {ObjectID} from './objectid';
-
-import * as diag from '../core/diag';
 
 /**
  * stores LiveData into the WebSQL database.

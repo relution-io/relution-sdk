@@ -18,9 +18,11 @@
  * limitations under the License.
  */
 
-import {AbstractSqlStore} from './AbstractSqlStore';
+import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
+
+import {AbstractSqlStore} from './AbstractSqlStore';
 
 /**
  * stores LiveData into the WebSQL database.
@@ -77,7 +79,7 @@ export class WebSqlStore extends AbstractSqlStore {
       }
     }
     if (this.db) {
-      if (this.version && this.db.version !== this.version) {
+      if (this.version && this.db.version !== this.version && this.db.changeVersion) {
         this._updateDb(options);
       } else {
         this.handleSuccess(options, this.db);

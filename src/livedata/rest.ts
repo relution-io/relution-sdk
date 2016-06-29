@@ -66,10 +66,10 @@ export function ajax(options) {
   options.method = options.type;  // set method because some ajax libs need this
   var promise = logon.apply(this, arguments).then(function () {
     var superAjax = that.super_ && that.super_.ajax || http;
-    var xhr = superAjax.apply(that, args);
-    if (!xhr) {
-      return Q.reject(new Error('ajax failed'));
-    }
+      var xhr = superAjax.apply(that, args);
+      if (!xhr) {
+        return Q.reject(new Error('ajax failed'));
+      }
 
     promise.xhr = xhr;
     options.xhr = xhr;

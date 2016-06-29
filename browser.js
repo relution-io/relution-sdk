@@ -505,11 +505,13 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var _ = require('lodash');
+var Q = require('q');
+var diag = require('../core/diag');
 var Store_1 = require('./Store');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var objectid_1 = require('./objectid');
-var diag = require('../core/diag');
 /**
  * stores LiveData into the WebSQL database.
  */
@@ -865,7 +867,7 @@ var abstractSqlStore = _.extend(AbstractSqlStore.prototype, {
 });
 diag.debug.assert(function () { return AbstractSqlStore.prototype.isPrototypeOf(Object.create(abstractSqlStore)); });
 
-},{"../core/diag":4,"./Collection":11,"./Model":13,"./Store":15,"./objectid":22}],10:[function(require,module,exports){
+},{"../core/diag":4,"./Collection":11,"./Model":13,"./Store":15,"./objectid":22,"lodash":206,"q":242}],10:[function(require,module,exports){
 (function (global){
 /**
  * @file livedata/CipherSqlStore.ts
@@ -1302,6 +1304,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var _ = require('lodash');
 var Model_1 = require('./Model');
 var diag = require('../core/diag');
 /**
@@ -1328,7 +1331,7 @@ var msgmodel = _.extend(LiveDataMessageModel.prototype, {
 diag.debug.assert(function () { return LiveDataMessageModel.prototype.isPrototypeOf(Object.create(msgmodel)); });
 diag.debug.assert(function () { return new LiveDataMessageModel({ _id: 'check' }).id === 'check'; });
 
-},{"../core/diag":4,"./Model":13}],13:[function(require,module,exports){
+},{"../core/diag":4,"./Model":13,"lodash":206}],13:[function(require,module,exports){
 /**
  * @file livedata/Model.ts
  * Relution SDK
@@ -2287,6 +2290,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var Q = require('q');
+var _ = require('lodash');
+var diag = require('../core/diag');
 var GetQuery_1 = require('../query/GetQuery');
 var Store_1 = require('./Store');
 var WebSqlStore_1 = require('./WebSqlStore');
@@ -2297,7 +2303,6 @@ var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var objectid_1 = require('./objectid');
 var URLUtil = require('./url');
-var diag = require('../core/diag');
 /**
  * connects a Model/Collection to a Relution server.
  *
@@ -2356,7 +2361,7 @@ var SyncStore = (function (_super) {
             var credentials_1 = modelOrCollection.credentials || this.credentials;
             var endpoint = this.endpoints[entity];
             if (!endpoint) {
-                diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + name);
+                diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + entity);
                 endpoint = new SyncEndpoint_1.SyncEndpoint({
                     entity: entity,
                     modelType: modelType,
@@ -3365,7 +3370,7 @@ var syncStore = _.extend(SyncStore.prototype, {
 });
 diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.create(syncStore)); });
 
-},{"../core/diag":4,"../query/GetQuery":28,"./Collection":11,"./LiveDataMessage":12,"./Model":13,"./Store":15,"./SyncContext":16,"./SyncEndpoint":17,"./WebSqlStore":19,"./objectid":22,"./url":24}],19:[function(require,module,exports){
+},{"../core/diag":4,"../query/GetQuery":28,"./Collection":11,"./LiveDataMessage":12,"./Model":13,"./Store":15,"./SyncContext":16,"./SyncEndpoint":17,"./WebSqlStore":19,"./objectid":22,"./url":24,"lodash":206,"q":242}],19:[function(require,module,exports){
 (function (global){
 /**
  * @file livedata/WebSqlStore.ts
@@ -3392,8 +3397,9 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var AbstractSqlStore_1 = require('./AbstractSqlStore');
+var _ = require('lodash');
 var diag = require('../core/diag');
+var AbstractSqlStore_1 = require('./AbstractSqlStore');
 /**
  * stores LiveData into the WebSQL database.
  *
@@ -3450,7 +3456,7 @@ var WebSqlStore = (function (_super) {
             }
         }
         if (this.db) {
-            if (this.version && this.db.version !== this.version) {
+            if (this.version && this.db.version !== this.version && this.db.changeVersion) {
                 this._updateDb(options);
             }
             else {
@@ -3524,7 +3530,7 @@ var webSqlStore = _.extend(WebSqlStore.prototype, {
 diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Object.create(webSqlStore)); });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"./AbstractSqlStore":9}],20:[function(require,module,exports){
+},{"../core/diag":4,"./AbstractSqlStore":9,"lodash":206}],20:[function(require,module,exports){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
 "use strict";
@@ -86958,7 +86964,7 @@ module.exports={
   "version": "0.0.1",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
-	"relution",
+    "relution",
     "livedata",
     "backbone",
     "framework",
@@ -86973,21 +86979,26 @@ module.exports={
     "test": "npm run build && mocha lib/**/*.spec.js",
     "build": "tsc -p .",
     "api": "typedoc --options %CD%/typedoc.json",
-	"gh-pages": "git subtree push --prefix public/docs origin gh-pages",
+    "gh-pages": "git subtree push --prefix public/docs origin gh-pages",
     "watch": "tsc -p . -w",
     "postinstall": "typings install",
-	"browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore"	
+    "browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore",
+    "testify": "browserify ./lib/index.spec.js -o browser.spec.js -u backbone -u jquery -u underscore"
   },
   "author": "Thomas Beckmann",
   "license": "Apache License",
   "devDependencies": {
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
+    "jquery": "~2.1.0",
     "mocha": "^2.4.5",
+    "node-localstorage": "^1.3.0",
     "sinon": "^1.16.0",
     "tslint": "^3.8.1",
     "typedoc": "sierrasoftworks/typedoc#v1.8.10",
-    "typescript": "^1.8.10"
+    "typescript": "^1.8.10",
+    "underscore": "~1.8.3",
+    "websql": "^0.4.4"
   },
   "dependencies": {
     "backbone": "~1.2.1",

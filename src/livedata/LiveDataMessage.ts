@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+import * as _ from 'lodash';
+
 import {Model} from './Model';
 
 import * as diag from '../core/diag';

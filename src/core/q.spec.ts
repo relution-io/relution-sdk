@@ -22,7 +22,7 @@ import {assert} from 'chai';
 
 import * as Q from 'q';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('Q direct resolve', (done) => {

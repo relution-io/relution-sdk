@@ -24,7 +24,7 @@ import * as filters from './Filter';
 import {jsonFilter} from './JsonFilterVisitor';
 import {makeMovies} from './movies.data';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('filter movies by id', () => {

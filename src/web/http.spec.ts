@@ -29,7 +29,7 @@ const credentials: security.LoginObject = {
   password: 'mcap'
 };
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('login/logout', (done) => {

@@ -22,7 +22,7 @@ import {assert} from 'chai';
 
 import * as URLUtil from './url';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('URLUtil', () => {

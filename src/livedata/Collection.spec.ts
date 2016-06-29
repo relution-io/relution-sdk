@@ -54,7 +54,7 @@ TEST.data = [
   }
 ];
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('isCollection', () => {

@@ -24,7 +24,7 @@ import {Model, isModel} from './Model';
 import {Collection} from './Collection';
 import {Store} from './Store';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('isModel', () => {

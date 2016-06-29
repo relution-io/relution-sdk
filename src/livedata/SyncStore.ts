@@ -18,6 +18,11 @@
  * limitations under the License.
  */
 
+import * as Q from 'q';
+import * as _ from 'lodash';
+
+import * as diag from '../core/diag';
+
 import {GetQuery} from '../query/GetQuery';
 import {Store, StoreCtor} from './Store';
 import {WebSqlStore} from './WebSqlStore';
@@ -30,8 +35,6 @@ import {Collection, isCollection} from './Collection';
 import {ObjectID} from './objectid';
 
 import * as URLUtil from './url';
-
-import * as diag from '../core/diag';
 
 /**
  * connects a Model/Collection to a Relution server.
@@ -114,7 +117,7 @@ export class SyncStore extends Store {
       let credentials = modelOrCollection.credentials || this.credentials;
       var endpoint = this.endpoints[entity];
       if (!endpoint) {
-        diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + name);
+        diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + entity);
         endpoint = new SyncEndpoint({
           entity: entity,
           modelType: modelType,
@@ -683,7 +686,7 @@ export class SyncStore extends Store {
         var promises = [];
         var dataIds;
         if (msg.method !== 'read') {
-          promises.push(this.onMessage(endpoint, this._fixMessage(endpoint, data === msg.data ? msg : _.defaults({
+          promises.push(this.onMessage(endpoint, this._fixMessage(endpoint, data === msg.data ? msg : <LiveDataMessage>_.defaults({
             data: data // just accepts new data
           }, msg))));
         } else if (isCollection(model) && Array.isArray(data)) {

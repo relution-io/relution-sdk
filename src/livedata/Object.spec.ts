@@ -22,7 +22,7 @@ import {assert} from 'chai';
 
 import {_Object} from './Object';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('basic', () => {
