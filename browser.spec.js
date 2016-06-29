@@ -2810,6 +2810,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Q = require('q');
 var _ = require('lodash');
 var diag = require('../core/diag');
+var security = require('../security');
+var web = require('../web');
 var GetQuery_1 = require('../query/GetQuery');
 var Store_1 = require('./Store');
 var WebSqlStore_1 = require('./WebSqlStore');
@@ -2870,11 +2872,30 @@ var SyncStore = (function (_super) {
             this.useSocketNotify = false;
         }
     }
+    /**
+     * binds the store to a target server when the first endpoint is created.
+     *
+     * @param urlRoot used to resolve the server to operate.
+       */
+    SyncStore.prototype.initServer = function (urlRoot) {
+        var serverUrl = web.resolveServer(urlRoot, {
+            serverUrl: this.serverUrl
+        });
+        if (!this.serverUrl) {
+            var server = security.Server.getInstance(serverUrl);
+            this.serverUrl = serverUrl;
+            this.userUuid = server.authorization.name;
+        }
+        else if (serverUrl !== this.serverUrl) {
+            throw new Error('store is bound to server ' + this.serverUrl + ' already');
+        }
+    };
     SyncStore.prototype.initEndpoint = function (modelOrCollection, modelType) {
         var urlRoot = modelOrCollection.getUrlRoot();
         var entity = modelOrCollection.entity;
         if (urlRoot && entity) {
             // get or create endpoint for this url
+            this.initServer(urlRoot);
             var credentials_1 = modelOrCollection.credentials || this.credentials;
             var endpoint = this.endpoints[entity];
             if (!endpoint) {
@@ -3189,6 +3210,13 @@ var SyncStore = (function (_super) {
                 var error = new Error('target of sync is neither a model nor a collection!?!');
                 return Q.reject(this.handleError(options, error) || error);
             }
+            // at this point the target server is known, check making sure the correct server is being hit
+            var serverUrl = web.resolveServer(model.getUrlRoot(), {
+                serverUrl: this.serverUrl
+            });
+            if (serverUrl !== this.serverUrl) {
+                throw new Error('store is bound to server ' + this.serverUrl);
+            }
             var channel = endpoint.channel;
             var time = this.getLastMessageTime(channel);
             // only send read messages if no other store can do this or for initial load
@@ -3347,7 +3375,9 @@ var SyncStore = (function (_super) {
         });
     };
     SyncStore.prototype._ajaxMessage = function (endpoint, msg, options, model) {
+        var _this = this;
         options = options || {};
+        delete options.xhr; // make sure not to use old value
         var url = options.url;
         if (!url) {
             url = endpoint.urlRoot;
@@ -3379,7 +3409,8 @@ var SyncStore = (function (_super) {
                 }
             }
         }
-        diag.debug.trace('ajaxMessage ' + msg.method + ' ' + url);
+        // earliest point where target URL is known
+        diag.debug.debug('ajaxMessage ' + msg.method + ' ' + url);
         var opts = {
             // must not take arbitrary options as these won't be replayed on reconnect
             url: url,
@@ -3389,7 +3420,17 @@ var SyncStore = (function (_super) {
             // error propagation
             error: options.error
         };
-        delete options.xhr; // make sure not to use old value
+        // protect against wrong server and user identity
+        diag.debug.assert(function () { return web.resolveServer(url, {
+            serverUrl: _this.serverUrl
+        }) === _this.serverUrl; });
+        if (security.Server.getInstance(this.serverUrl).authorization.name !== this.userUuid) {
+            diag.debug.warn('user identity was changed, working offline until authorization is restored');
+            var error = new Error();
+            // invoke error callback, if any
+            return this.handleError(opts, error) || Q.reject(error);
+        }
+        // actual ajax request via backbone.js
         return model.sync(msg.method, model, opts).finally(function () {
             // take over xhr resolving the options copy
             options.xhr = opts.xhr.xhr || opts.xhr;
@@ -3877,7 +3918,7 @@ var syncStore = _.extend(SyncStore.prototype, {
 });
 diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.create(syncStore)); });
 
-},{"../core/diag":1,"../query/GetQuery":34,"./Collection":10,"./LiveDataMessage":12,"./Model":13,"./Store":17,"./SyncContext":18,"./SyncEndpoint":20,"./WebSqlStore":25,"./objectid":29,"./url":31,"lodash":257,"q":294}],24:[function(require,module,exports){
+},{"../core/diag":1,"../query/GetQuery":34,"../security":43,"../web":49,"./Collection":10,"./LiveDataMessage":12,"./Model":13,"./Store":17,"./SyncContext":18,"./SyncEndpoint":20,"./WebSqlStore":25,"./objectid":29,"./url":31,"lodash":257,"q":294}],24:[function(require,module,exports){
 (function (global,__filename){
 /**
  * @file livedata/SyncStore.spec.ts
@@ -18915,8 +18956,13 @@ var server = require('../security/server');
 function resolveServer(path, options) {
     if (options === void 0) { options = {}; }
     var serverUrl = options.serverUrl || init.initOptions.serverUrl;
-    if (serverUrl) {
-        path = url.resolve(serverUrl, path);
+    if (path) {
+        if (serverUrl) {
+            path = url.resolve(serverUrl, path);
+        }
+    }
+    else {
+        path = serverUrl;
     }
     return url.resolve(path, '/');
 }
@@ -19028,6 +19074,18 @@ var core = require('../core');
 var urls = require('./urls');
 describe(module.filename || __filename, function () {
     return [
+        it('resolveServer', function () {
+            core.init({
+                serverUrl: 'http://default:8080',
+            });
+            assert.equal(urls.resolveServer('http://localhost:8090/mway/myapp/api/v1/some_endpoint?A'), 'http://localhost:8090/');
+            assert.equal(urls.resolveServer('/mway/myapp/api/v1/some_endpoint?B'), 'http://default:8080/');
+            assert.equal(urls.resolveServer('api/v1/some_endpoint?C'), 'http://default:8080/');
+            assert.equal(urls.resolveServer('/'), 'http://default:8080/');
+            assert.equal(urls.resolveServer(''), 'http://default:8080/');
+            assert.equal(urls.resolveServer(null), 'http://default:8080/');
+            assert.equal(urls.resolveServer(undefined), 'http://default:8080/');
+        }),
         it('resolveUrl', function () {
             core.init({
                 serverUrl: 'http://192.168.0.10:8080',

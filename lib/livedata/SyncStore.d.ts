@@ -53,6 +53,20 @@ export declare class SyncStore extends Store {
     protected socketQuery: string;
     protected credentials: any;
     protected orderOfflineChanges: string[];
+    /**
+     * server associated with this store.
+     *
+     * The sync method will fail early when being applied to data of some other server.
+     */
+    protected serverUrl: string;
+    /**
+     * identity or user associated with this store.
+     *
+     * The ajax method will simulate an offline timeout when the user identity is changed. This is
+     * because just one session can be maintained per server and login/logout semantics must be well
+     * behaved.
+     */
+    protected userUuid: string;
     endpoints: {
         [entity: string]: SyncEndpoint;
     };
@@ -70,6 +84,12 @@ export declare class SyncStore extends Store {
     messages: Collection;
     messagesPromise: Q.Promise<Collection>;
     constructor(options?: any);
+    /**
+     * binds the store to a target server when the first endpoint is created.
+     *
+     * @param urlRoot used to resolve the server to operate.
+       */
+    private initServer(urlRoot);
     protected initEndpoint(modelOrCollection: Model | Collection, modelType: ModelCtor): SyncEndpoint;
     initModel(model: Model): void;
     initCollection(collection: Collection): void;

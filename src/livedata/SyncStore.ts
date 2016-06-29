@@ -22,6 +22,7 @@ import * as Q from 'q';
 import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
+import * as security from '../security';
 import * as web from '../web';
 
 import {GetQuery} from '../query/GetQuery';
@@ -70,6 +71,21 @@ export class SyncStore extends Store {
   protected credentials: any;
   protected orderOfflineChanges: string[];
 
+  /**
+   * server associated with this store.
+   *
+   * The sync method will fail early when being applied to data of some other server.
+   */
+  protected serverUrl: string;
+  /**
+   * identity or user associated with this store.
+   *
+   * The ajax method will simulate an offline timeout when the user identity is changed. This is
+   * because just one session can be maintained per server and login/logout semantics must be well
+   * behaved.
+   */
+  protected userUuid: string;
+
   public endpoints: {
     // map of entity to SyncEndpoint
     [entity: string]: SyncEndpoint;
@@ -110,11 +126,30 @@ export class SyncStore extends Store {
     }
   }
 
+  /**
+   * binds the store to a target server when the first endpoint is created.
+   *
+   * @param urlRoot used to resolve the server to operate.
+     */
+  private initServer(urlRoot: string) {
+    let serverUrl = web.resolveServer(urlRoot, {
+      serverUrl: this.serverUrl
+    });
+    if (!this.serverUrl) {
+      const server = security.Server.getInstance(serverUrl);
+      this.serverUrl = serverUrl;
+      this.userUuid = server.authorization.name;
+    } else if (serverUrl !== this.serverUrl) {
+      throw new Error('store is bound to server ' + this.serverUrl + ' already');
+    }
+  }
+
   protected initEndpoint(modelOrCollection: Model | Collection, modelType: ModelCtor): SyncEndpoint {
     var urlRoot = modelOrCollection.getUrlRoot();
     var entity = modelOrCollection.entity;
     if (urlRoot && entity) {
       // get or create endpoint for this url
+      this.initServer(urlRoot);
       let credentials = modelOrCollection.credentials || this.credentials;
       var endpoint = this.endpoints[entity];
       if (!endpoint) {
@@ -445,6 +480,14 @@ export class SyncStore extends Store {
         return Q.reject(this.handleError(options, error) || error);
       }
 
+      // at this point the target server is known, check making sure the correct server is being hit
+      const serverUrl = web.resolveServer(model.getUrlRoot(), {
+        serverUrl: this.serverUrl
+      });
+      if (serverUrl !== this.serverUrl) {
+        throw new Error('store is bound to server ' + this.serverUrl);
+      }
+
       var channel = endpoint.channel;
       var time = this.getLastMessageTime(channel);
       // only send read messages if no other store can do this or for initial load
@@ -615,6 +658,7 @@ export class SyncStore extends Store {
 
   private _ajaxMessage(endpoint: SyncEndpoint, msg: LiveDataMessage, options, model: Model | Collection): Q.Promise<any> {
     options = options || {};
+    delete options.xhr; // make sure not to use old value
 
     var url = options.url;
     if (!url) {
@@ -647,17 +691,30 @@ export class SyncStore extends Store {
       }
     }
 
-    diag.debug.trace('ajaxMessage ' + msg.method + ' ' + url);
+    // earliest point where target URL is known
+    diag.debug.debug('ajaxMessage ' + msg.method + ' ' + url);
     var opts: any = {
       // must not take arbitrary options as these won't be replayed on reconnect
       url: url,
       attrs: msg.data,
-      store: {},
+      store: {}, // ensures network is used
       credentials: options.credentials,
       // error propagation
       error: options.error
     };
-    delete options.xhr; // make sure not to use old value
+
+    // protect against wrong server and user identity
+    diag.debug.assert(() => web.resolveServer(url, {
+      serverUrl: this.serverUrl
+    }) === this.serverUrl);
+    if (security.Server.getInstance(this.serverUrl).authorization.name !== this.userUuid) {
+      diag.debug.warn('user identity was changed, working offline until authorization is restored');
+      const error: web.HttpError = new Error();
+      // invoke error callback, if any
+      return this.handleError(opts, error) || Q.reject(error);
+    }
+
+    // actual ajax request via backbone.js
     return model.sync(msg.method, model, opts).finally(() => {
       // take over xhr resolving the options copy
       options.xhr = opts.xhr.xhr || opts.xhr;
