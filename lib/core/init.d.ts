@@ -25,9 +25,12 @@ import * as Q from 'q';
  * The function may be executed multiple times, for example when the session times out. The purpose
  * of it is to call application-specific logons passing information such as credentials of 3rd-tier
  * backend servers.
+ *
+ * It is called only as part of online login. Any data returned is stored in
+ * `LoginResponse.logonInfos` and will be made available even on offline login.
  */
 export interface LogonCallback {
-    (): Q.Promise<any>;
+    (value: any): Q.Promise<any> | any;
 }
 /**
  * specifies additional options for the HTTP agent, advanced operation.
