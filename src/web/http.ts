@@ -544,7 +544,7 @@ export function login(credentials: auth.Credentials,
     // this is the earliest point at which library state reflects correct authorization, etc.
     // Thus, the logonCallback may execute here now, but only if we are online actually...
     if (!serverObj.sessionUserUuid) {
-      return response;
+      return response; // offline
     }
     // we have a session logged into this user
     diag.debug.assert(() => serverObj.sessionUserUuid === server.getCurrentAuthorization().name);
@@ -568,6 +568,17 @@ export function login(credentials: auth.Credentials,
           });
       }
       return response;
+    }, (error) => {
+      // logon callback failed, must logout to avoid making ajax calls in an unknown backend state
+      return logout({
+        serverUrl: serverUrl
+      }).catch((logoutError) => {
+        diag.debug.error('failed to logout after login failure', logoutError);
+        return Q.reject<LoginResponse>(error);
+      }).finally(() => {
+        // logout processing must leave us with no user session
+        diag.debug.assert(() => !serverObj.sessionUserUuid);
+      });
     });
   });
 }
