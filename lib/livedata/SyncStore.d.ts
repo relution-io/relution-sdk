@@ -90,6 +90,7 @@ export declare class SyncStore extends Store {
      * @param urlRoot used to resolve the server to operate.
        */
     private initServer(urlRoot);
+    private checkServer(url, options?);
     protected initEndpoint(modelOrCollection: Model | Collection, modelType: ModelCtor): SyncEndpoint;
     initModel(model: Model): void;
     initCollection(collection: Collection): void;

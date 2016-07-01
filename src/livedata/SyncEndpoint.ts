@@ -22,6 +22,7 @@ import {Store} from './Store';
 import {Model, ModelCtor} from './Model';
 import {Collection} from './Collection';
 
+import * as urls from '../web/urls';
 import * as URLUtil from './url';
 
 /**
@@ -33,7 +34,7 @@ export class SyncEndpoint {
   public modelType: ModelCtor;
   public urlRoot: string;
   public socketPath: string;
-  public credentials: any;
+  public userUuid: string;
 
   public host: string;
   public path: string;
@@ -60,22 +61,22 @@ export class SyncEndpoint {
     modelType: ModelCtor,
     urlRoot: string,
     socketPath: string,
-    credentials: any
+    userUuid: string
   }) {
     this.entity = options.entity;
     this.modelType = options.modelType;
     this.urlRoot = options.urlRoot;
     this.socketPath = options.socketPath;
-    this.credentials = options.credentials;
+    this.userUuid = options.userUuid;
 
     var href = URLUtil.getLocation(options.urlRoot);
     this.host = href.protocol + '//' + href.host;
     this.path = href.pathname;
 
+    var user = options.userUuid ? options.userUuid + '/' : '';
     var name = options.entity;
-    var user = options.credentials && options.credentials.username ? options.credentials.username : '';
-    var hash = URLUtil.hashLocation(options.urlRoot);
-    this.channel = name + user + hash;
+    var hash = URLUtil.hashLocation(urls.resolveServer(options.urlRoot, options));
+    this.channel = user + name + '/' + hash;
   }
 
   /**

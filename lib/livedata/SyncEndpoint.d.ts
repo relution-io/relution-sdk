@@ -28,7 +28,7 @@ export declare class SyncEndpoint {
     modelType: ModelCtor;
     urlRoot: string;
     socketPath: string;
-    credentials: any;
+    userUuid: string;
     host: string;
     path: string;
     channel: string;
@@ -46,7 +46,7 @@ export declare class SyncEndpoint {
         modelType: ModelCtor;
         urlRoot: string;
         socketPath: string;
-        credentials: any;
+        userUuid: string;
     });
     /**
      * close the endpoint explicit.

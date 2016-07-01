@@ -23,6 +23,8 @@
         "typings/index.d.ts",
         "src/connector/connector.ts",
         "src/connector/index.ts",
+        "src/core/cipher.spec.ts",
+        "src/core/cipher.ts",
         "src/core/diag.spec.ts",
         "src/core/diag.ts",
         "src/core/domain.ts",

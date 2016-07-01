@@ -28,7 +28,7 @@ if (!process || 'browser' in process) {
 }
 
 }).call(this,require('_process'))
-},{"./lib":8,"_process":235}],2:[function(require,module,exports){
+},{"./lib":9,"_process":235}],2:[function(require,module,exports){
 /**
  * @file connector/connector.ts
  * Relution SDK
@@ -122,6 +122,137 @@ function __export(m) {
 __export(require('./connector'));
 
 },{"./connector":2}],4:[function(require,module,exports){
+(function (Buffer){
+/**
+ * @file core/cipher.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 01.07.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var crypto = require('crypto');
+var Q = require('q');
+var _ = require('lodash');
+// key generation parameters
+var pbkdf2SaltLen = 64;
+var pbkdf2Iterations = 6911;
+var pbkdf2KeyLen = 192 / 8;
+var pbkdf2Digest = 'sha256';
+// see https://tools.ietf.org/html/rfc5084
+// console.log((<any>crypto).getCiphers());
+var cipherAlgorithm = 'aes-192-gcm';
+var cipherIvLen = 12;
+// promised variants
+var randomBytes = Q.denodeify(crypto.randomBytes);
+var pbkdf2 = Q.denodeify(crypto.pbkdf2);
+/**
+ * encrypts a JSON object using a user-provided password.
+ *
+ * This method is suitable for human-entered passwords and not appropriate for machine generated
+ * passwords. Make sure to read regarding pbkdf2.
+ *
+ * @param password of a human.
+ * @param json to encode.
+ * @return encoded json data.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function encryptJson(password, json) {
+    return Q.all([
+        randomBytes(pbkdf2SaltLen),
+        randomBytes(cipherIvLen)
+    ]).spread(function (salt, iv) {
+        return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
+            var cipher = crypto.createCipheriv(cipherAlgorithm, key, iv);
+            var value = cipher.update(JSON.stringify(json), 'utf8', 'base64');
+            value += cipher.final('base64');
+            var data = {
+                salt: salt.toString('base64'),
+                iv: iv.toString('base64'),
+                value: value
+            };
+            var tag = cipher.getAuthTag();
+            if (tag) {
+                data.tag = tag.toString('base64');
+            }
+            return data;
+        });
+    });
+}
+exports.encryptJson = encryptJson;
+/**
+ * decrypts some encoded json data.
+ *
+ * @param password of a human.
+ * @param data encoded json data.
+ * @return json to decoded.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function decryptJson(password, data) {
+    var salt = new Buffer(data.salt, 'base64');
+    return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
+        var iv = new Buffer(data.iv, 'base64');
+        var decipher = crypto.createDecipheriv(cipherAlgorithm, key, iv);
+        var tag = data.tag;
+        if (tag) {
+            decipher.setAuthTag(new Buffer(tag, 'base64'));
+        }
+        var value = decipher.update(data.value, 'base64', 'utf8');
+        value += decipher.final('utf8');
+        return value;
+    }).then(JSON.parse);
+}
+exports.decryptJson = decryptJson;
+/**
+ * computes a hash of some JSON object.
+ *
+ * @param data to hash.
+ * @param algorithm of choice.
+ * @return hash value.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function hashJson(data, algorithm) {
+    return Q(data).then(JSON.stringify).then(JSON.parse).then(function (obj) {
+        var hash = crypto.createHash(algorithm);
+        (function feed(val) {
+            var keys = _.keys(val).sort();
+            if (keys.length) {
+                hash.update(JSON.stringify(keys), 'utf8');
+                _.forEach(keys, function (key) {
+                    var value = val[key];
+                    if (!_.isUndefined(value)) {
+                        if (!_.isObject(value)) {
+                            hash.update(JSON.stringify(value), 'utf8');
+                        }
+                        else {
+                            feed(value);
+                        }
+                    }
+                });
+            }
+        })(obj);
+        return hash.digest();
+    });
+}
+exports.hashJson = hashJson;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":103,"crypto":114,"lodash":207,"q":243}],5:[function(require,module,exports){
 (function (process){
 /**
  * Created by Pascal Brewing
@@ -289,7 +420,7 @@ exports.Diagnostics = Diagnostics;
 exports.debug = new Diagnostics(true);
 
 }).call(this,require('_process'))
-},{"_process":235,"assert":65,"lodash":207}],5:[function(require,module,exports){
+},{"_process":235,"assert":65,"lodash":207}],6:[function(require,module,exports){
 /**
  * @file core/domain.ts
  * Relution SDK
@@ -333,7 +464,7 @@ function freeze(self) {
 }
 exports.freeze = freeze;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * @file core/index.ts
  * Relution SDK
@@ -361,7 +492,7 @@ __export(require('./diag'));
 __export(require('./init'));
 __export(require('./domain'));
 
-},{"./diag":4,"./domain":5,"./init":7}],7:[function(require,module,exports){
+},{"./diag":5,"./domain":6,"./init":8}],8:[function(require,module,exports){
 /**
  * @file core/init.ts
  * Relution SDK
@@ -434,7 +565,7 @@ function init(options) {
 }
 exports.init = init;
 
-},{"./diag":4,"lodash":207,"q":243}],8:[function(require,module,exports){
+},{"./diag":5,"lodash":207,"q":243}],9:[function(require,module,exports){
 /**
  * @file index.ts
  * Relution SDK
@@ -479,7 +610,7 @@ exports.connector = require('./connector');
 // livedata module
 exports.livedata = require('./livedata');
 
-},{"../package.json":333,"./connector":3,"./core":6,"./core/diag":4,"./core/init":7,"./livedata":21,"./model":26,"./query":33,"./security":35,"./web":39}],9:[function(require,module,exports){
+},{"../package.json":333,"./connector":3,"./core":7,"./core/diag":5,"./core/init":8,"./livedata":21,"./model":26,"./query":33,"./security":35,"./web":39}],10:[function(require,module,exports){
 /**
  * @file livedata/AbstractSqlStore.ts
  * Relution SDK
@@ -867,7 +998,7 @@ var abstractSqlStore = _.extend(AbstractSqlStore.prototype, {
 });
 diag.debug.assert(function () { return AbstractSqlStore.prototype.isPrototypeOf(Object.create(abstractSqlStore)); });
 
-},{"../core/diag":4,"./Collection":11,"./Model":13,"./Store":15,"./objectid":22,"lodash":207,"q":243}],10:[function(require,module,exports){
+},{"../core/diag":5,"./Collection":12,"./Model":14,"./Store":16,"./objectid":22,"lodash":207,"q":243}],11:[function(require,module,exports){
 (function (global){
 /**
  * @file livedata/CipherSqlStore.ts
@@ -1027,7 +1158,7 @@ var cipherSqlStore = _.extend(CipherSqlStore.prototype, {
 diag.debug.assert(function () { return CipherSqlStore.prototype.isPrototypeOf(Object.create(cipherSqlStore)); });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"./AbstractSqlStore":9}],11:[function(require,module,exports){
+},{"../core/diag":5,"./AbstractSqlStore":10}],12:[function(require,module,exports){
 /**
  * @file livedata/Collection.ts
  * Relution SDK
@@ -1278,7 +1409,7 @@ var collection = _.extend(Collection.prototype, Object_1._Object.prototype, {
 });
 diag.debug.assert(function () { return isCollection(Object.create(collection)); });
 
-},{"../core/diag":4,"./Model":13,"./Object":14,"./rest":23,"lodash":207}],12:[function(require,module,exports){
+},{"../core/diag":5,"./Model":14,"./Object":15,"./rest":23,"lodash":207}],13:[function(require,module,exports){
 /**
  * @file livedata/LiveDataMessage.ts
  * Relution SDK
@@ -1331,7 +1462,7 @@ var msgmodel = _.extend(LiveDataMessageModel.prototype, {
 diag.debug.assert(function () { return LiveDataMessageModel.prototype.isPrototypeOf(Object.create(msgmodel)); });
 diag.debug.assert(function () { return new LiveDataMessageModel({ _id: 'check' }).id === 'check'; });
 
-},{"../core/diag":4,"./Model":13,"lodash":207}],13:[function(require,module,exports){
+},{"../core/diag":5,"./Model":14,"lodash":207}],14:[function(require,module,exports){
 /**
  * @file livedata/Model.ts
  * Relution SDK
@@ -1456,7 +1587,7 @@ var model = _.extend(Model.prototype, Object_1._Object.prototype, {
 });
 diag.debug.assert(function () { return isModel(Object.create(model)); });
 
-},{"../core/diag":4,"./Object":14,"./rest":23,"lodash":207}],14:[function(require,module,exports){
+},{"../core/diag":5,"./Object":15,"./rest":23,"lodash":207}],15:[function(require,module,exports){
 (function (process,global){
 /**
  * @file livedata/Object.ts
@@ -1588,7 +1719,7 @@ var _object = _.extend(_Object.prototype, {
 diag.debug.assert(function () { return _Object.prototype.isPrototypeOf(Object.create(_object)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"_process":235,"backbone":undefined,"lodash":207}],15:[function(require,module,exports){
+},{"../core/diag":5,"_process":235,"backbone":undefined,"lodash":207}],16:[function(require,module,exports){
 /**
  * @file livedata/Store.ts
  * Relution SDK
@@ -1748,7 +1879,7 @@ var store = _.extend(Store.prototype, Object_1.Backbone.Events, Object_2._Object
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
-},{"../core/diag":4,"./Collection":11,"./Object":14,"lodash":207}],16:[function(require,module,exports){
+},{"../core/diag":5,"./Collection":12,"./Object":15,"lodash":207}],17:[function(require,module,exports){
 /**
  * @file livedata/SyncContext.ts
  * Relution SDK
@@ -2214,7 +2345,7 @@ var SyncContext = (function () {
 }());
 exports.SyncContext = SyncContext;
 
-},{"../core/diag":4,"../query/GetQuery":28,"../query/JsonFilterVisitor":29,"../query/SortOrderComparator":32,"lodash":207}],17:[function(require,module,exports){
+},{"../core/diag":5,"../query/GetQuery":28,"../query/JsonFilterVisitor":29,"../query/SortOrderComparator":32,"lodash":207}],18:[function(require,module,exports){
 /**
  * @file livedata/SyncEndpoint.ts
  * Relution SDK
@@ -2235,6 +2366,7 @@ exports.SyncContext = SyncContext;
  * limitations under the License.
  */
 "use strict";
+var urls = require('../web/urls');
 var URLUtil = require('./url');
 /**
  * manages connection of SyncStore to one entity.
@@ -2246,14 +2378,14 @@ var SyncEndpoint = (function () {
         this.modelType = options.modelType;
         this.urlRoot = options.urlRoot;
         this.socketPath = options.socketPath;
-        this.credentials = options.credentials;
+        this.userUuid = options.userUuid;
         var href = URLUtil.getLocation(options.urlRoot);
         this.host = href.protocol + '//' + href.host;
         this.path = href.pathname;
+        var user = options.userUuid ? options.userUuid + '/' : '';
         var name = options.entity;
-        var user = options.credentials && options.credentials.username ? options.credentials.username : '';
-        var hash = URLUtil.hashLocation(options.urlRoot);
-        this.channel = name + user + hash;
+        var hash = URLUtil.hashLocation(urls.resolveServer(options.urlRoot, options));
+        this.channel = user + name + '/' + hash;
     }
     /**
      * close the endpoint explicit.
@@ -2273,7 +2405,7 @@ var SyncEndpoint = (function () {
 }());
 exports.SyncEndpoint = SyncEndpoint;
 
-},{"./url":24}],18:[function(require,module,exports){
+},{"../web/urls":41,"./url":24}],19:[function(require,module,exports){
 (function (process,global){
 /**
  * @file livedata/SyncStore.ts
@@ -2386,18 +2518,37 @@ var SyncStore = (function (_super) {
             var server = security.Server.getInstance(serverUrl);
             this.serverUrl = serverUrl;
             this.userUuid = server.authorization.name;
+            if (this.localStoreOptions && this.localStoreOptions.security && !this.localStoreOptions.credentials) {
+                // capture credentials for use by crypto stores
+                this.localStoreOptions.credentials = _.defaults({
+                    userUuid: this.userUuid
+                }, server.credentials);
+            }
         }
         else if (serverUrl !== this.serverUrl) {
             throw new Error('store is bound to server ' + this.serverUrl + ' already');
         }
     };
+    SyncStore.prototype.checkServer = function (url, options) {
+        var _this = this;
+        diag.debug.assert(function () { return web.resolveServer(url, {
+            serverUrl: _this.serverUrl
+        }) === _this.serverUrl; });
+        if (security.Server.getInstance(this.serverUrl).authorization.name !== this.userUuid) {
+            diag.debug.warn('user identity was changed, working offline until authorization is restored');
+            var error = new Error();
+            // invoke error callback, if any
+            return options && this.handleError(options, error) || Q.reject(error);
+        }
+        return Q.resolve(url);
+    };
     SyncStore.prototype.initEndpoint = function (modelOrCollection, modelType) {
+        var _this = this;
         var urlRoot = modelOrCollection.getUrlRoot();
         var entity = modelOrCollection.entity;
         if (urlRoot && entity) {
             // get or create endpoint for this url
             this.initServer(urlRoot);
-            var credentials_1 = modelOrCollection.credentials || this.credentials;
             var endpoint = this.endpoints[entity];
             if (!endpoint) {
                 diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + entity);
@@ -2406,7 +2557,7 @@ var SyncStore = (function (_super) {
                     modelType: modelType,
                     urlRoot: urlRoot,
                     socketPath: this.socketPath,
-                    credentials: credentials_1
+                    userUuid: this.userUuid
                 });
                 this.endpoints[entity] = endpoint;
                 endpoint.localStore = this.createLocalStore(endpoint);
@@ -2418,7 +2569,7 @@ var SyncStore = (function (_super) {
             else {
                 // configuration can not change, must recreate store instead...
                 diag.debug.assert(function () { return endpoint.urlRoot === urlRoot; }, 'can not change urlRoot, must recreate store instead!');
-                diag.debug.assert(function () { return JSON.stringify(endpoint.credentials) === JSON.stringify(credentials_1); }, 'can not change credentials, must recreate store instead!');
+                diag.debug.assert(function () { return endpoint.userUuid === _this.userUuid; }, 'can not change user identity, must recreate store instead!');
             }
             return endpoint;
         }
@@ -2932,9 +3083,11 @@ var SyncStore = (function (_super) {
             return this.handleError(opts, error) || Q.reject(error);
         }
         // actual ajax request via backbone.js
-        return model.sync(msg.method, model, opts).finally(function () {
-            // take over xhr resolving the options copy
-            options.xhr = opts.xhr.xhr || opts.xhr;
+        return this.checkServer(url, opts).then(function () {
+            return model.sync(msg.method, model, opts).finally(function () {
+                // take over xhr resolving the options copy
+                options.xhr = opts.xhr.xhr || opts.xhr;
+            });
         });
     };
     SyncStore.prototype._applyResponse = function (qXHR, endpoint, msg, options, model) {
@@ -3077,24 +3230,25 @@ var SyncStore = (function (_super) {
         // initiate a new request for changes
         diag.debug.info(channel + ' initiating changes request...');
         var changes = new this.messages.constructor();
-        promise = Q(changes.fetch({
-            url: endpoint.urlRoot + 'changes/' + time,
-            credentials: endpoint.credentials,
-            store: {},
-            success: function (model, response, options) {
-                if (changes.models.length > 0) {
-                    changes.each(function (change) {
-                        var msg = change.attributes;
-                        _this.onMessage(endpoint, _this._fixMessage(endpoint, msg));
-                    });
+        promise = this.checkServer(endpoint.urlRoot + 'changes/' + time).then(function (url) {
+            return Q(changes.fetch({
+                url: url,
+                store: {},
+                success: function (model, response, options) {
+                    if (changes.models.length > 0) {
+                        changes.each(function (change) {
+                            var msg = change.attributes;
+                            _this.onMessage(endpoint, _this._fixMessage(endpoint, msg));
+                        });
+                    }
+                    else {
+                        // following should use server time!
+                        _this.setLastMessageTime(channel, now);
+                    }
+                    return response || options.xhr;
                 }
-                else {
-                    // following should use server time!
-                    _this.setLastMessageTime(channel, now);
-                }
-                return response || options.xhr;
-            }
-        })).thenResolve(changes);
+            })).thenResolve(changes);
+        });
         endpoint.promiseFetchingChanges = promise;
         endpoint.timestampFetchingChanges = now;
         return promise;
@@ -3117,24 +3271,25 @@ var SyncStore = (function (_super) {
             if (url.charAt((url.length - 1)) !== '/') {
                 url += '/';
             }
-            promise = Q(info.fetch(({
-                url: url + 'info',
-                success: function (model, response, options) {
-                    // @todo why we set a server time here ?
-                    if (!time && info.get('time')) {
-                        _this.setLastMessageTime(endpoint.channel, info.get('time'));
-                    }
-                    if (!endpoint.socketPath && info.get('socketPath')) {
-                        endpoint.socketPath = info.get('socketPath');
-                        var name = info.get('entity') || endpoint.entity;
-                        if (_this.useSocketNotify) {
-                            endpoint.socket = _this.createSocket(endpoint, name);
+            promise = this.checkServer(url + 'info').then(function (url) {
+                return Q(info.fetch(({
+                    url: url,
+                    success: function (model, response, options) {
+                        // @todo why we set a server time here ?
+                        if (!time && info.get('time')) {
+                            _this.setLastMessageTime(endpoint.channel, info.get('time'));
                         }
+                        if (!endpoint.socketPath && info.get('socketPath')) {
+                            endpoint.socketPath = info.get('socketPath');
+                            var name = info.get('entity') || endpoint.entity;
+                            if (_this.useSocketNotify) {
+                                endpoint.socket = _this.createSocket(endpoint, name);
+                            }
+                        }
+                        return response || options.xhr;
                     }
-                    return response || options.xhr;
-                },
-                credentials: endpoint.credentials
-            }))).thenResolve(info);
+                }))).thenResolve(info);
+            });
             endpoint.promiseFetchingServerInfo = promise;
             endpoint.timestampFetchingServerInfo = now;
             return promise;
@@ -3420,7 +3575,7 @@ var syncStore = _.extend(SyncStore.prototype, {
 diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.create(syncStore)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"../query/GetQuery":28,"../security":35,"../web":39,"./Collection":11,"./LiveDataMessage":12,"./Model":13,"./Store":15,"./SyncContext":16,"./SyncEndpoint":17,"./WebSqlStore":19,"./objectid":22,"./url":24,"_process":235,"lodash":207,"q":243,"socket.io-client":undefined}],19:[function(require,module,exports){
+},{"../core/diag":5,"../query/GetQuery":28,"../security":35,"../web":39,"./Collection":12,"./LiveDataMessage":13,"./Model":14,"./Store":16,"./SyncContext":17,"./SyncEndpoint":18,"./WebSqlStore":20,"./objectid":22,"./url":24,"_process":235,"lodash":207,"q":243,"socket.io-client":undefined}],20:[function(require,module,exports){
 (function (process,global){
 /**
  * @file livedata/WebSqlStore.ts
@@ -3589,221 +3744,7 @@ var webSqlStore = _.extend(WebSqlStore.prototype, {
 diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Object.create(webSqlStore)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"./AbstractSqlStore":9,"_process":235,"lodash":207,"websql":undefined}],20:[function(require,module,exports){
-// Copyright (c) 2013 M-Way Solutions GmbH
-// http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
-"use strict";
-/**
- * The key string for the base 64 decoding and encoding.
- *
- * @type String
- */
-var keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-/**
- * This method encodes a given binary input, using the base64 encoding.
- *
- * @param {String} input The binary to be encoded. (e.g. an requested image)
- * @returns {String} The base64 encoded string.
- */
-function encodeBinary(input) {
-    var output = '';
-    var bytebuffer;
-    var encodedCharIndexes = new Array(4);
-    var inx = 0;
-    var paddingBytes = 0;
-    while (inx < input.length) {
-        // Fill byte buffer array
-        bytebuffer = new Array(3);
-        for (var jnx = 0; jnx < bytebuffer.length; jnx++) {
-            if (inx < input.length) {
-                // throw away high-order byte, as documented at: https://developer.mozilla.org/En/Using_XMLHttpRequest#Handling_binary_data
-                bytebuffer[jnx] = input.charCodeAt(inx++) & 0xff;
-            }
-            else {
-                bytebuffer[jnx] = 0;
-            }
-        }
-        // Get each encoded character, 6 bits at a time
-        // index 1: first 6 bits
-        encodedCharIndexes[0] = bytebuffer[0] >> 2;
-        // index 2: second 6 bits (2 least significant bits from input byte 1 + 4 most significant bits from byte 2)
-        encodedCharIndexes[1] = ((bytebuffer[0] & 0x3) << 4) | (bytebuffer[1] >> 4);
-        // index 3: third 6 bits (4 least significant bits from input byte 2 + 2 most significant bits from byte 3)
-        encodedCharIndexes[2] = ((bytebuffer[1] & 0x0f) << 2) | (bytebuffer[2] >> 6);
-        // index 3: forth 6 bits (6 least significant bits from input byte 3)
-        encodedCharIndexes[3] = bytebuffer[2] & 0x3f;
-        // Determine whether padding happened, and adjust accordingly
-        paddingBytes = inx - (input.length - 1);
-        switch (paddingBytes) {
-            case 2:
-                // Set last 2 characters to padding char
-                encodedCharIndexes[3] = 64;
-                encodedCharIndexes[2] = 64;
-                break;
-            case 1:
-                // Set last character to padding char
-                encodedCharIndexes[3] = 64;
-                break;
-            default:
-                break; // No padding - proceed
-        }
-        // Now we will grab each appropriate character out of our keystring
-        // based on our index array and append it to the output string
-        for (jnx = 0; jnx < encodedCharIndexes.length; jnx++) {
-            output += keyStr.charAt(encodedCharIndexes[jnx]);
-        }
-    }
-    return output;
-}
-exports.encodeBinary = encodeBinary;
-/**
- * This method encodes a given input string, using the base64 encoding.
- *
- * @param {String} input The string to be encoded.
- * @returns {String} The base64 encoded string.
- */
-function encode(input) {
-    var output = '';
-    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-    var i = 0;
-    input = utf8Encode(input);
-    while (i < input.length) {
-        chr1 = input.charCodeAt(i++);
-        chr2 = input.charCodeAt(i++);
-        chr3 = input.charCodeAt(i++);
-        enc1 = chr1 >> 2;
-        enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-        enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-        enc4 = chr3 & 63;
-        if (isNaN(chr2)) {
-            enc3 = enc4 = 64;
-        }
-        else if (isNaN(chr3)) {
-            enc4 = 64;
-        }
-        output += keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) + keyStr.charAt(enc4);
-    }
-    return output;
-}
-exports.encode = encode;
-function binaryEncode(input) {
-    var output = '';
-    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
-    var i = 0;
-    while (i < input.length) {
-        chr1 = input.charCodeAt(i++);
-        chr2 = input.charCodeAt(i++);
-        chr3 = input.charCodeAt(i++);
-        enc1 = chr1 >> 2;
-        enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-        enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-        enc4 = chr3 & 63;
-        if (isNaN(chr2)) {
-            enc3 = enc4 = 64;
-        }
-        else if (isNaN(chr3)) {
-            enc4 = 64;
-        }
-        output += keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) + keyStr.charAt(enc4);
-    }
-    return output;
-}
-exports.binaryEncode = binaryEncode;
-/**
- * This method decodes a given input string, using the base64 decoding.
- *
- * @param {String} input The string to be decoded.
- * @returns {String} The base64 decoded string.
- */
-function decode(input) {
-    var output = '';
-    var chr1, chr2, chr3;
-    var enc1, enc2, enc3, enc4;
-    var i = 0;
-    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
-    while (i < input.length) {
-        enc1 = keyStr.indexOf(input.charAt(i++));
-        enc2 = keyStr.indexOf(input.charAt(i++));
-        enc3 = keyStr.indexOf(input.charAt(i++));
-        enc4 = keyStr.indexOf(input.charAt(i++));
-        chr1 = (enc1 << 2) | (enc2 >> 4);
-        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-        chr3 = ((enc3 & 3) << 6) | enc4;
-        output = output + String.fromCharCode(chr1);
-        if (enc3 !== 64) {
-            output = output + String.fromCharCode(chr2);
-        }
-        if (enc4 !== 64) {
-            output = output + String.fromCharCode(chr3);
-        }
-    }
-    return utf8Decode(output);
-}
-exports.decode = decode;
-/**
- * Private method for UTF-8 encoding
- *
- * @private
- * @param {String} s The string to be encoded.
- * @returns {String} The utf8 encoded string.
- */
-function utf8Encode(s) {
-    s = s.replace(/\r\n/g, '\n');
-    var utf8String = '';
-    for (var n = 0; n < s.length; n++) {
-        var c = s.charCodeAt(n);
-        if (c < 128) {
-            utf8String += String.fromCharCode(c);
-        }
-        else if ((c > 127) && (c < 2048)) {
-            utf8String += String.fromCharCode((c >> 6) | 192);
-            utf8String += String.fromCharCode((c & 63) | 128);
-        }
-        else {
-            utf8String += String.fromCharCode((c >> 12) | 224);
-            utf8String += String.fromCharCode(((c >> 6) & 63) | 128);
-            utf8String += String.fromCharCode((c & 63) | 128);
-        }
-    }
-    return utf8String;
-}
-/**
- * Private method for UTF-8 decoding
- *
- * @private
- * @param {String} utf8String The string to be decoded.
- * @returns {String} The utf8 decoded string.
- */
-function utf8Decode(utf8String) {
-    var s = '';
-    var i;
-    var c;
-    var c1;
-    var c2;
-    var c3;
-    i = c = c1 = c2 = 0;
-    while (i < utf8String.length) {
-        c = utf8String.charCodeAt(i);
-        if (c < 128) {
-            s += String.fromCharCode(c);
-            i++;
-        }
-        else if ((c > 191) && (c < 224)) {
-            c2 = utf8String.charCodeAt(i + 1);
-            s += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-            i += 2;
-        }
-        else {
-            c2 = utf8String.charCodeAt(i + 1);
-            c3 = utf8String.charCodeAt(i + 2);
-            s += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-            i += 3;
-        }
-    }
-    return s;
-}
-
-},{}],21:[function(require,module,exports){
+},{"../core/diag":5,"./AbstractSqlStore":10,"_process":235,"lodash":207,"websql":undefined}],21:[function(require,module,exports){
 /**
  * @file livedata/index.ts
  * Relution SDK
@@ -3839,7 +3780,7 @@ __export(require('./SyncEndpoint'));
 __export(require('./SyncStore'));
 __export(require('./WebSqlStore'));
 
-},{"./AbstractSqlStore":9,"./CipherSqlStore":10,"./Collection":11,"./LiveDataMessage":12,"./Model":13,"./Object":14,"./Store":15,"./SyncContext":16,"./SyncEndpoint":17,"./SyncStore":18,"./WebSqlStore":19}],22:[function(require,module,exports){
+},{"./AbstractSqlStore":10,"./CipherSqlStore":11,"./Collection":12,"./LiveDataMessage":13,"./Model":14,"./Object":15,"./Store":16,"./SyncContext":17,"./SyncEndpoint":18,"./SyncStore":19,"./WebSqlStore":20}],22:[function(require,module,exports){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
 "use strict";
@@ -3978,7 +3919,6 @@ exports.ObjectID = ObjectID;
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
 "use strict";
 var diag = require('../core/diag');
-var base64 = require('./base64');
 var Q = require('q');
 var web = require('../web');
 var Object_1 = require('./Object');
@@ -4006,23 +3946,6 @@ Object_1.Backbone.ajax = function ajax(options) {
     var superAjax = options && options.ajax || backboneAjax;
     return superAjax.apply(this, arguments);
 };
-function logon(options) {
-    var credentials = options && options.credentials;
-    var type = credentials && credentials.type;
-    var auth = type && logon[type];
-    return auth ? auth.apply(this, arguments) : Q.resolve(undefined);
-}
-exports.logon = logon;
-logon.basic = function basic(options) {
-    var credentials = options.credentials;
-    var auth = credentials.username && base64.encode(encodeURIComponent(credentials.username + ':' + (credentials.password || '')));
-    if (auth) {
-        options.beforeSend = function (xhr) {
-            xhr.setRequestHeader('Authorization', 'Basic ' + auth);
-        };
-    }
-    return Q.resolve(undefined);
-};
 function ajax(options) {
     var that = this;
     var args = arguments;
@@ -4032,28 +3955,26 @@ function ajax(options) {
     delete options.error;
     options.method = options.type;
     options.body = options.data;
-    var promise = logon.apply(this, arguments).then(function () {
-        var superAjax = that.super_ && that.super_.ajax || web.ajax;
-        var xhr = superAjax.apply(that, args);
-        if (!xhr) {
-            return Q.reject(new Error('ajax failed'));
+    var superAjax = that.super_ && that.super_.ajax || web.ajax;
+    var xhr = superAjax.apply(that, args);
+    if (!xhr) {
+        return Q.reject(new Error('ajax failed'));
+    }
+    options.xhr = xhr;
+    var promise = xhr.then(function onSuccess(response) {
+        // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
+        if (fnSuccess) {
+            fnSuccess(response);
         }
-        promise.xhr = xhr;
-        options.xhr = xhr;
-        return xhr.then(function onSuccess(response) {
-            // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
-            if (fnSuccess) {
-                fnSuccess(response);
-            }
-            return Q.resolve(response);
-        }, function onError(response) {
-            // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
-            if (fnError) {
-                fnError(response, response.statusMessage || response.message, response);
-            }
-            return Q.reject(response);
-        });
+        return Q.resolve(response);
+    }, function onError(response) {
+        // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
+        if (fnError) {
+            fnError(response, response.statusMessage || response.message, response);
+        }
+        return Q.reject(response);
     });
+    promise.xhr = xhr;
     return promise;
 }
 exports.ajax = ajax;
@@ -4084,7 +4005,7 @@ function sync(method, model, options) {
 }
 exports.sync = sync;
 
-},{"../core/diag":4,"../web":39,"./Object":14,"./base64":20,"q":243}],24:[function(require,module,exports){
+},{"../core/diag":5,"../web":39,"./Object":15,"q":243}],24:[function(require,module,exports){
 (function (global){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
@@ -4426,7 +4347,7 @@ var ModelFactory = (function () {
 }());
 exports.ModelFactory = ModelFactory;
 
-},{"../core/diag":4,"lodash":207}],26:[function(require,module,exports){
+},{"../core/diag":5,"lodash":207}],26:[function(require,module,exports){
 /**
  * @file model/index.ts
  * Relution SDK
@@ -5597,7 +5518,7 @@ function freezeUser(user) {
 }
 exports.freezeUser = freezeUser;
 
-},{"../core/domain":5}],37:[function(require,module,exports){
+},{"../core/domain":6}],37:[function(require,module,exports){
 /**
  * @file security/server.ts
  * Relution SDK
@@ -5815,7 +5736,7 @@ function getCurrentUser() {
 }
 exports.getCurrentUser = getCurrentUser;
 
-},{"../core/diag":4,"../core/init":7,"./auth":34,"./roles":36,"assert":65,"lodash":207}],38:[function(require,module,exports){
+},{"../core/diag":5,"../core/init":8,"./auth":34,"./roles":36,"assert":65,"lodash":207}],38:[function(require,module,exports){
 /**
  * @file web/http.ts
  * Relution SDK
@@ -6346,7 +6267,7 @@ function logout(logoutOptions) {
 }
 exports.logout = logout;
 
-},{"../core/diag":4,"../core/init":7,"../security/auth":34,"../security/server":37,"./offline":40,"./urls":41,"http":303,"lodash":207,"q":243,"request":262}],39:[function(require,module,exports){
+},{"../core/diag":5,"../core/init":8,"../security/auth":34,"../security/server":37,"./offline":40,"./urls":41,"http":303,"lodash":207,"q":243,"request":262}],39:[function(require,module,exports){
 /**
  * @file web/index.ts
  * Relution SDK
@@ -6375,7 +6296,7 @@ __export(require('./http'));
 __export(require('./verb'));
 
 },{"./http":38,"./urls":41,"./verb":42}],40:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename){
+(function (process,global,__filename){
 /**
  * @file web/offline.ts
  * Relution SDK
@@ -6396,8 +6317,8 @@ __export(require('./verb'));
  * limitations under the License.
  */
 "use strict";
-var crypto = require('crypto');
 var Q = require('q');
+var cipher = require('../core/cipher');
 /**
  * localStorage of browser or via require node-localstorage.
  *
@@ -6406,77 +6327,6 @@ var Q = require('q');
 exports.localStorage = global['localStorage'] ||
     process && !process['browser'] && (global['localStorage'] =
         new (require('node-localstorage').LocalStorage)('localStorage')); // required version
-// key generation parameters
-var pbkdf2SaltLen = 64;
-var pbkdf2Iterations = 36911;
-var pbkdf2KeyLen = 192 / 8;
-var pbkdf2Digest = 'sha256';
-// see https://tools.ietf.org/html/rfc5084
-// console.log((<any>crypto).getCiphers());
-var cipherAlgorithm = 'aes-192-gcm';
-var cipherIvLen = 12;
-// promised variants
-var randomBytes = Q.denodeify(crypto.randomBytes);
-var pbkdf2 = Q.denodeify(crypto.pbkdf2);
-/**
- * encrypts a JSON object using a user-provided password.
- *
- * This method is suitable for human-entered passwords and not appropriate for machine generated
- * passwords. Make sure to read regarding pbkdf2.
- *
- * @param password of a human.
- * @param json to encode.
- * @return encoded json data.
- *
- * @internal Not part of public API, exported for test only.
- */
-function encryptJson(password, json) {
-    return Q.all([
-        randomBytes(pbkdf2SaltLen),
-        randomBytes(cipherIvLen)
-    ]).spread(function (salt, iv) {
-        return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
-            var cipher = crypto.createCipheriv(cipherAlgorithm, key, iv);
-            var value = cipher.update(JSON.stringify(json), 'utf8', 'base64');
-            value += cipher.final('base64');
-            var data = {
-                salt: salt.toString('base64'),
-                iv: iv.toString('base64'),
-                value: value
-            };
-            var tag = cipher.getAuthTag();
-            if (tag) {
-                data.tag = tag.toString('base64');
-            }
-            return data;
-        });
-    });
-}
-exports.encryptJson = encryptJson;
-/**
- * decrypts some encoded json data.
- *
- * @param password of a human.
- * @param data encoded json data.
- * @return json to decoded.
- *
- * @internal Not part of public API, exported for test only.
- */
-function decryptJson(password, data) {
-    var salt = new Buffer(data.salt, 'base64');
-    return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
-        var iv = new Buffer(data.iv, 'base64');
-        var decipher = crypto.createDecipheriv(cipherAlgorithm, key, iv);
-        var tag = data.tag;
-        if (tag) {
-            decipher.setAuthTag(new Buffer(tag, 'base64'));
-        }
-        var value = decipher.update(data.value, 'base64', 'utf8');
-        value += decipher.final('utf8');
-        return value;
-    }).then(JSON.parse);
-}
-exports.decryptJson = decryptJson;
 /**
  * computes key of login response data for some server.
  *
@@ -6521,7 +6371,7 @@ exports.clearOfflineLogin = clearOfflineLogin;
  * @internal Not part of public API, for library use only.
  */
 function storeOfflineLogin(credentials, serverOptions, loginResponse) {
-    return encryptJson(credentials['password'], loginResponse).then(function (value) {
+    return cipher.encryptJson(credentials['password'], loginResponse).then(function (value) {
         exports.localStorage.setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
         return loginResponse;
     });
@@ -6546,7 +6396,7 @@ function fetchOfflineLogin(credentials, serverOptions) {
         if (!value) {
             return Q.resolve(undefined);
         }
-        return decryptJson(credentials['password'], JSON.parse(value));
+        return cipher.decryptJson(credentials['password'], JSON.parse(value));
     }
     catch (error) {
         return Q.reject(error);
@@ -6554,8 +6404,8 @@ function fetchOfflineLogin(credentials, serverOptions) {
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/lib\\web\\offline.js")
-},{"_process":235,"buffer":103,"crypto":114,"node-localstorage":undefined,"q":243}],41:[function(require,module,exports){
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
+},{"../core/cipher":4,"_process":235,"node-localstorage":undefined,"q":243}],41:[function(require,module,exports){
 /**
  * @file web/urls.ts
  * Relution SDK
@@ -6681,7 +6531,7 @@ function resolveApp(baseAliasOrNameOrApp, options) {
 }
 exports.resolveApp = resolveApp;
 
-},{"../core/init":7,"../security/server":37,"lodash":207,"url":325}],42:[function(require,module,exports){
+},{"../core/init":8,"../security/server":37,"lodash":207,"url":325}],42:[function(require,module,exports){
 /**
  * @file web/verb.ts
  * Relution SDK

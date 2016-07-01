@@ -2,7 +2,6 @@
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
 
 import * as diag from '../core/diag';
-import * as base64 from './base64';
 
 import * as Q from 'q';
 
@@ -40,24 +39,6 @@ Backbone.ajax = function ajax(options) {
   return superAjax.apply(this, arguments);
 };
 
-export function logon(options) {
-  var credentials = options && options.credentials;
-  var type = credentials && credentials.type;
-  var auth = type && logon[type];
-  return auth ? auth.apply(this, arguments) : Q.resolve(undefined);
-}
-
-(<any>logon).basic = function basic(options) {
-  var credentials = options.credentials;
-  var auth = credentials.username && base64.encode(encodeURIComponent(credentials.username + ':' + (credentials.password || '')));
-  if (auth) {
-    options.beforeSend = function (xhr) {
-      xhr.setRequestHeader('Authorization', 'Basic ' + auth);
-    };
-  }
-  return Q.resolve(undefined);
-};
-
 export function ajax(options) {
   var that = this;
   var args = arguments;
@@ -70,30 +51,27 @@ export function ajax(options) {
   options.method = options.type;
   options.body = options.data;
 
-  var promise = logon.apply(this, arguments).then(function () {
-    var superAjax = that.super_ && that.super_.ajax || web.ajax;
-    var xhr = superAjax.apply(that, args);
-    if (!xhr) {
-      return Q.reject(new Error('ajax failed'));
+  var superAjax = that.super_ && that.super_.ajax || web.ajax;
+  var xhr = superAjax.apply(that, args);
+  if (!xhr) {
+    return Q.reject(new Error('ajax failed'));
+  }
+  options.xhr = xhr;
+
+  let promise = xhr.then(function onSuccess (response) {
+    // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
+    if (fnSuccess) {
+      fnSuccess(response);
     }
-
-    promise.xhr = xhr;
-    options.xhr = xhr;
-
-    return xhr.then(function onSuccess (response) {
-      // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
-      if (fnSuccess) {
-        fnSuccess(response);
-      }
-      return Q.resolve(response);
-    }, function onError (response: web.HttpError) {
-      // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
-      if (fnError) {
-        fnError(response, response.statusMessage || response.message, response);
-      }
-      return Q.reject(response);
-    });
+    return Q.resolve(response);
+  }, function onError (response: web.HttpError) {
+    // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
+    if (fnError) {
+      fnError(response, response.statusMessage || response.message, response);
+    }
+    return Q.reject(response);
   });
+  promise.xhr = xhr;
   return promise;
 }
 

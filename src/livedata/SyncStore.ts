@@ -149,9 +149,28 @@ export class SyncStore extends Store {
       const server = security.Server.getInstance(serverUrl);
       this.serverUrl = serverUrl;
       this.userUuid = server.authorization.name;
+      if (this.localStoreOptions && this.localStoreOptions.security && !this.localStoreOptions.credentials) {
+        // capture credentials for use by crypto stores
+        this.localStoreOptions.credentials = _.defaults({
+          userUuid: this.userUuid
+        }, server.credentials);
+      }
     } else if (serverUrl !== this.serverUrl) {
       throw new Error('store is bound to server ' + this.serverUrl + ' already');
     }
+  }
+
+  private checkServer(url: string, options?): Q.Promise<string> {
+    diag.debug.assert(() => web.resolveServer(url, {
+      serverUrl: this.serverUrl
+    }) === this.serverUrl);
+    if (security.Server.getInstance(this.serverUrl).authorization.name !== this.userUuid) {
+      diag.debug.warn('user identity was changed, working offline until authorization is restored');
+      const error: web.HttpError = new Error();
+      // invoke error callback, if any
+      return options && this.handleError(options, error) || Q.reject<string>(error);
+    }
+    return Q.resolve(url);
   }
 
   protected initEndpoint(modelOrCollection: Model | Collection, modelType: ModelCtor): SyncEndpoint {
@@ -160,7 +179,6 @@ export class SyncStore extends Store {
     if (urlRoot && entity) {
       // get or create endpoint for this url
       this.initServer(urlRoot);
-      let credentials = modelOrCollection.credentials || this.credentials;
       var endpoint = this.endpoints[entity];
       if (!endpoint) {
         diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + entity);
@@ -169,7 +187,7 @@ export class SyncStore extends Store {
           modelType: modelType,
           urlRoot: urlRoot,
           socketPath: this.socketPath,
-          credentials: credentials
+          userUuid: this.userUuid
         });
         this.endpoints[entity] = endpoint;
 
@@ -181,7 +199,7 @@ export class SyncStore extends Store {
       } else {
         // configuration can not change, must recreate store instead...
         diag.debug.assert(() => endpoint.urlRoot === urlRoot, 'can not change urlRoot, must recreate store instead!');
-        diag.debug.assert(() => JSON.stringify(endpoint.credentials) === JSON.stringify(credentials), 'can not change credentials, must recreate store instead!');
+        diag.debug.assert(() => endpoint.userUuid === this.userUuid, 'can not change user identity, must recreate store instead!');
       }
       return endpoint;
     }
@@ -725,9 +743,11 @@ export class SyncStore extends Store {
     }
 
     // actual ajax request via backbone.js
-    return model.sync(msg.method, model, opts).finally(() => {
-      // take over xhr resolving the options copy
-      options.xhr = opts.xhr.xhr || opts.xhr;
+    return this.checkServer(url, opts).then(() => {
+      return model.sync(msg.method, model, opts).finally(() => {
+        // take over xhr resolving the options copy
+        options.xhr = opts.xhr.xhr || opts.xhr;
+      });
     });
   }
 
@@ -872,25 +892,25 @@ export class SyncStore extends Store {
     // initiate a new request for changes
     diag.debug.info(channel + ' initiating changes request...');
     let changes = new (<any>this.messages).constructor();
-    promise = Q(changes.fetch(<Backbone.CollectionFetchOptions>{
-      url: endpoint.urlRoot + 'changes/' + time,
-      credentials: endpoint.credentials,
-      store: {}, // really go to remote server
+    promise = this.checkServer(endpoint.urlRoot + 'changes/' + time).then((url) => {
+      return Q(changes.fetch(<Backbone.CollectionFetchOptions>{
+        url: url,
+        store: {}, // really go to remote server
 
-      success: (model, response, options) => {
-        if (changes.models.length > 0) {
-          changes.each((change) => {
-            let msg: LiveDataMessage = change.attributes;
-            this.onMessage(endpoint, this._fixMessage(endpoint, msg));
-          });
-        } else {
-          // following should use server time!
-          this.setLastMessageTime(channel, now);
+        success: (model, response, options) => {
+          if (changes.models.length > 0) {
+            changes.each((change) => {
+              let msg: LiveDataMessage = change.attributes;
+              this.onMessage(endpoint, this._fixMessage(endpoint, msg));
+            });
+          } else {
+            // following should use server time!
+            this.setLastMessageTime(channel, now);
+          }
+          return response || options.xhr;
         }
-        return response || options.xhr;
-      }
-    })).thenResolve(changes);
-
+      })).thenResolve(changes);
+    });
     endpoint.promiseFetchingChanges = promise;
     endpoint.timestampFetchingChanges = now;
     return promise;
@@ -914,24 +934,25 @@ export class SyncStore extends Store {
       if (url.charAt((url.length - 1)) !== '/') {
         url += '/';
       }
-      promise = Q(info.fetch(<Backbone.ModelFetchOptions>({
-        url: url + 'info',
-        success: (model, response, options) => {
-          // @todo why we set a server time here ?
-          if (!time && info.get('time')) {
-            this.setLastMessageTime(endpoint.channel, info.get('time'));
-          }
-          if (!endpoint.socketPath && info.get('socketPath')) {
-            endpoint.socketPath = info.get('socketPath');
-            var name = info.get('entity') || endpoint.entity;
-            if (this.useSocketNotify) {
-              endpoint.socket = this.createSocket(endpoint, name);
+      promise = this.checkServer(url + 'info').then((url) => {
+        return Q(info.fetch(<Backbone.ModelFetchOptions>({
+          url: url,
+          success: (model, response, options) => {
+            // @todo why we set a server time here ?
+            if (!time && info.get('time')) {
+              this.setLastMessageTime(endpoint.channel, info.get('time'));
             }
+            if (!endpoint.socketPath && info.get('socketPath')) {
+              endpoint.socketPath = info.get('socketPath');
+              var name = info.get('entity') || endpoint.entity;
+              if (this.useSocketNotify) {
+                endpoint.socket = this.createSocket(endpoint, name);
+              }
+            }
+            return response || options.xhr;
           }
-          return response || options.xhr;
-        },
-        credentials: endpoint.credentials
-      }))).thenResolve(info);
+        }))).thenResolve(info);
+      });
       endpoint.promiseFetchingServerInfo = promise;
       endpoint.timestampFetchingServerInfo = now;
       return promise;

@@ -55,7 +55,7 @@ describe(module.filename || __filename, function() {
         return model.destroy();
       })).then(function () {
         assert.equal(collection.models.length, 0, 'collection must be empty initially after destroy');
-        return collection;
+      return collection;
       });
     }).then(function (collection2) {
       // load sample data into fresh database
@@ -69,15 +69,6 @@ describe(module.filename || __filename, function() {
         return collection2;
       });
     });
-  }
-
-  // chains async done callback completing promise chain
-  function chainDone(promise, done) {
-    return promise.then(function () {
-      return done();
-    }, function (error) {
-      return done(error || new Error('no error given'));
-    }).done();
   }
 
   var qApprovals;
@@ -98,15 +89,15 @@ describe(module.filename || __filename, function() {
 
   return [
 
-    it('preloads sample data', (done) => {
-      return chainDone(loadApprovals(), done);
+    it('preloads sample data', () => {
+      return loadApprovals();
     }),
 
-    it('infinite scrolling', (done) => {
+    it('infinite scrolling', () => {
       var approvals;
       var collection = new TestCollection();
       var counter = 10;
-      return chainDone(loadApprovals().then(function (data) {
+      return loadApprovals().then(function (data) {
         approvals = data;
         var options = {
           limit: counter,
@@ -133,14 +124,14 @@ describe(module.filename || __filename, function() {
           }
           return options;
         }).then(scroll);
-      }), done);
+      });
     }),
 
-    it('next/prev paging', (done) => {
+    it('next/prev paging', () => {
       var approvals;
       var collection = new TestCollection();
       var i = 0;
-      return chainDone(loadApprovals().then(function (data) {
+      return loadApprovals().then(function (data) {
         approvals = data;
         var options = {
           limit: 1,
@@ -179,7 +170,7 @@ describe(module.filename || __filename, function() {
           --i;
           return options;
         }).then(prev);
-      }), done);
+      });
     })
 
   ];

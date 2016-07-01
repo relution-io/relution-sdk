@@ -24,6 +24,7 @@ export default [
   require('./core/mocha.spec'),
   require('./core/q.spec'),
   require('./core/diag.spec'),
+  require('./core/cipher.spec'),
 
   // security
   require('./security/server.spec'),
@@ -31,6 +32,7 @@ export default [
   // web
   require('./web/http.spec'),
   require('./web/urls.spec'),
+  require('./web/offline.spec'),
 
   // model
 
