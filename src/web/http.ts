@@ -29,6 +29,7 @@ import * as init from '../core/init';
 import * as auth from '../security/auth';
 import * as server from '../security/server';
 import * as urls from './urls';
+import * as offline from './offline';
 
 // require request.js to manage cookies for us
 let requestDefaults = {
@@ -175,7 +176,7 @@ export interface HttpError extends Error {
  * @return {Q.Promise} of response body, in case of failure rejects to an HttpError object
  *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
-export function ajax(options: HttpOptions): Q.Promise<any> {
+export function ajax<T>(options: HttpOptions): Q.Promise<T> {
   let serverUrl = urls.resolveServer(options.url, options);
   let serverObj = server.Server.getInstance(serverUrl);
   if (!serverObj.sessionUserUuid && serverObj.credentials) {
@@ -187,7 +188,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
     }).then(() => {
       diag.debug.assert(() => !!serverObj.sessionUserUuid);
       diag.debug.assert(() => serverObj.credentials == credentials);
-      return ajax(options); // repeat after login
+      return ajax<T>(options); // repeat after login
     });
   }
 
@@ -223,7 +224,7 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
   if (!_.isEmpty(headers)) {
     options.headers = _.defaults(headers, options.headers);
   }
-  return Q.Promise((resolveResult, rejectResult) => {
+  return Q.Promise<T>((resolveResult, rejectResult) => {
     let promiseResponse = Q.Promise((resolveResponse, rejectResponse) => {
       let resp: http.IncomingMessage;
       let req: request.Request;
@@ -366,6 +367,23 @@ export function ajax(options: HttpOptions): Q.Promise<any> {
 }
 
 /**
+ * response data of login endpoints.
+ *
+ * This is equivalent to UserInfoWrapper in Java code.
+ */
+export interface LoginResponse {
+  user: any;
+  roles: any;
+  organization: any;
+  licenseInfos: any;
+
+  /**
+   * eventually returned data of the LogonCallback is stored here.
+   */
+  logonInfos?: any;
+}
+
+/**
  * options for use by both [[login]] and [[logout]].
  */
 export interface LogonOptions extends init.ServerUrlOptions {
@@ -383,7 +401,7 @@ export interface LogonOptions extends init.ServerUrlOptions {
    * On [[logout]] set to `true` to ultimately erase the response from offline storage as well,
    * after having it stored using the mechanism described above.
    */
-  offlineCapable?: boolean; // future extension not implemented yet
+  offlineCapable?: boolean;
 
 };
 
@@ -396,7 +414,18 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
 /**
  * logs into a Relution server.
  *
+ * Notice, specifying `offlineCapable=true` in the options will store the login response locally on
+ * the device when online and the login succeeded. When offline, the option will reuse the stored
+ * response. Data encryption is used guaranteeing both secrecy of login data and verification of
+ * the credentials provided.
+ *
+ * @param credentials to use.
+ * @param loginOptions overwriting [[init]] defaults.
+ * @return {Q.Promise<LoginResponse>} of login response.
+ *
+ * @example
  * ```javascript
+ *
  * import * as Relution from 'relution-sdk';
  * //config
  * Relution.init({
@@ -423,14 +452,10 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
  *  () => console.log('complete')
  * )
  * ```
- *
- * @param credentials to use.
- * @param loginOptions overwriting [[init]] defaults.
- *
- * @return {Q.Promise<any>} of login response.
  */
 export function login(credentials: auth.Credentials,
-                      loginOptions: LoginOptions = {}): Q.Promise<any> {
+                      loginOptions: LoginOptions = {}): Q.Promise<LoginResponse> {
+  let wasOfflineLogin = false;
   let serverUrl = urls.resolveServer('/', loginOptions);
   let serverObj = server.Server.getInstance(serverUrl);
   if (serverObj.sessionUserUuid) {
@@ -441,6 +466,9 @@ export function login(credentials: auth.Credentials,
       diag.debug.assert(() => !serverObj.sessionUserUuid);
       return login(credentials, loginOptions); // repeat after logout
     });
+  } else if (serverObj.credentials) {
+    // had credentials but no session, so we were logged in offline
+    wasOfflineLogin = true;
   }
 
   // process options
@@ -451,19 +479,59 @@ export function login(credentials: auth.Credentials,
     // options taking effect at login time
     clientApp: loginOptions.clientApp || init.initOptions.clientApp,
     logonCallback: loginOptions.logonCallback || init.initOptions.logonCallback,
-    clientCertificate: loginOptions.clientCertificate || init.initOptions.clientCertificate,
+    clientCertificate: loginOptions.clientCertificate || init.initOptions.clientCertificate
   });
-  return ajax(_.defaults<HttpOptions>({
+  let logonCallback = currentOptions.logonCallback || _.identity;
+  return ajax<LoginResponse>(_.defaults<HttpOptions>({
     serverUrl: serverUrl,
     method: 'POST',
     url: '/gofer/security/rest/auth/login',
     body: credentials
   }, currentOptions)).then((response) => {
-    // switch current server
+    // real physical logon, ajax call sets sessionUserUuid
     if (!serverObj.sessionUserUuid) {
       diag.debug.warn('BUG: Relution did not set X-Gofer-User response header');
       serverObj.sessionUserUuid = response.user.uuid;
     }
+    diag.debug.assert(() => serverObj.sessionUserUuid === response.user.uuid);
+    return response;
+  }, (error: HttpError) => {
+    // offline login response
+    if (!error.statusCode && loginOptions.offlineCapable) {
+      // ajax timeout -> offline login attempt
+      diag.debug.assert(() => !serverObj.sessionUserUuid,
+        'no physical login, as otherwise logonCallback would be executed');
+      return offline.fetchOfflineLogin(credentials, currentOptions).then((loginResponse) => {
+        if (!loginResponse) {
+          // when there is no persistent data available, aka. this is the initial login attempt,
+          // keep saying the server is offline...
+          return Q.reject<LoginResponse>(error);
+        }
+        return loginResponse;
+      }, (offlineError) => {
+        // most likely the password entered was incorrect,
+        // make sure the offlineError indicates the server is unavailable as well
+        diag.debug.assert(() => !offlineError.statusCode);
+        diag.debug.assert(() => !offlineError.requestUrl);
+        offlineError.requestUrl = error.requestUrl;
+        diag.debug.assert(() => !offlineError.cause);
+        offlineError.cause = error;
+        // we rethrow the annotated error of decoding the stored response,
+        // because the network error just indicates we are offline and does
+        // not mention the credentials being incorrect as this one does...
+        return Q.reject<LoginResponse>(offlineError);
+      });
+    } else if (error.statusCode && wasOfflineLogin) {
+      // server side rejection, clear login data so that subsequent offline logins fail as well
+      return offline.clearOfflineLogin(credentials, currentOptions).catch((offlineError) => {
+        // this is bad but we can not do much about it
+        diag.debug.warn('failed erasing offline login data', offlineError);
+        return Q.reject<LoginResponse>(error);
+      });
+    }
+    return Q.reject<LoginResponse>(error);
+  }).then((response) => {
+    // switch current server
     serverObj.authorization = {
       name: response.user.uuid,
       roles: _.map(response.roles.roles, (role: any) => role.uuid)
@@ -471,9 +539,48 @@ export function login(credentials: auth.Credentials,
     serverObj.organization = response.organization;
     serverObj.user = response.user;
     serverObj.credentials = credentials;
-    diag.debug.assert(() => serverObj.sessionUserUuid === serverObj.authorization.name);
     server.setCurrentServer(serverObj);
     return response;
+  }).then((response) => {
+    // this is the earliest point at which library state reflects correct authorization, etc.
+    // Thus, the logonCallback may execute here now, but only if we are online actually...
+    if (!serverObj.sessionUserUuid) {
+      return response; // offline
+    }
+    // we have a session logged into this user
+    diag.debug.assert(() => serverObj.sessionUserUuid === server.getCurrentAuthorization().name);
+
+    // run logonCallback on response data and eventually store resultant object for offline login,
+    // because this way the callback may add information to the response object that will also be
+    // persisted and made available again when offline!
+    return Q(logonCallback(response)).then((logonInfos = response) => {
+      if (logonInfos && logonInfos !== response) {
+        // any data returned by the logonCallback may be stored here
+        response.logonInfos = logonInfos;
+      }
+
+      // store offline login response
+      if (loginOptions.offlineCapable || wasOfflineLogin) {
+        // initial store or update of login data
+        return offline.storeOfflineLogin(credentials, currentOptions, response).catch(
+          (offlineError) => {
+            diag.debug.warn('offline login store failed', offlineError);
+            return response;
+  });
+      }
+      return response;
+    }, (error) => {
+      // logon callback failed, must logout to avoid making ajax calls in an unknown backend state
+      return logout({
+        serverUrl: serverUrl
+      }).catch((logoutError) => {
+        diag.debug.error('failed to logout after login failure', logoutError);
+        return Q.reject<LoginResponse>(error);
+      }).finally(() => {
+        // logout processing must leave us with no user session
+        diag.debug.assert(() => !serverObj.sessionUserUuid);
+      });
+    });
   });
 }
 
@@ -486,7 +593,14 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
 /**
  * logs out of a Relution server.
  *
+ * For explicit logouts (trigger by app user pressing a logout button, for example) specifying
+ * `offlineCapable = true` will drop any persisted offline login data for the server logging out
+ * of.
+ *
  * @param logoutOptions overwriting [[init]] defaults.
+ * @return {Q.Promise<void>} of logout response.
+ *
+ * @example
  * ```javascript
  *
  * Relution.web.logout()
@@ -501,9 +615,8 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
  *  () => console.log('bye bye')
  * )
  * ```
- * @return {Q.Promise<any>} of logout response.
  */
-export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
+export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<void> {
   let serverUrl = urls.resolveServer('/', logoutOptions);
   let serverObj = server.Server.getInstance(serverUrl);
 
@@ -519,21 +632,40 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<any> {
     method: 'POST',
     url: '/gofer/security/rest/auth/logout',
     body: {}
-  }, currentOptions)).catch((error) => {
+  }, currentOptions)).catch((error: HttpError) => {
+    if (error.statusCode === 422) {
     // REST-based logout URL currently is broken reporting a 422 in all cases
-    return ajax(_.defaults<HttpOptions>({
+      return ajax<void>(_.defaults<HttpOptions>({
       serverUrl: serverUrl,
       method: 'GET',
       url: '/gofer/security-logout'
     }, currentOptions)).then((result) => {
-      diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed: ', error);
+        diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed:',
+          error);
       return result;
-    }, (error2) => {
-      error.suppressed = error.suppressed || [];
-      error.suppressed.push(error2);
-      throw error;
+      }, (error2: HttpError) => {
+        return Q.reject<void>(error2.statusCode === 422 ? error : error2);
     });
+    }
+    return Q.reject<void>(error);
+  }).catch((error: HttpError) => {
+    // ignore network failures on timeout, server forgets on session timeout anyways
+    if (!error.statusCode) {
+      return Q.resolve<void>(undefined);
+    }
+    return Q.reject<void>(error);
   }).finally(() => {
+    // eventually erase offline login data
+    if (logoutOptions.offlineCapable) {
+      // requested to erase login data
+      return offline.clearOfflineLogin(serverObj.credentials, currentOptions).catch(
+        (offlineError) => {
+        diag.debug.warn('failed erasing offline login data', offlineError);
+        return Q.resolve<void>(undefined);
+      });
+    }
+  }).finally(() => {
+    // forget everything about it
     serverObj.credentials = null;
     serverObj.authorization = auth.ANONYMOUS_AUTHORIZATION;
     serverObj.organization = null;

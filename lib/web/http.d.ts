@@ -132,7 +132,22 @@ export interface HttpError extends Error {
  * @return {Q.Promise} of response body, in case of failure rejects to an HttpError object
  *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
-export declare function ajax(options: HttpOptions): Q.Promise<any>;
+export declare function ajax<T>(options: HttpOptions): Q.Promise<T>;
+/**
+ * response data of login endpoints.
+ *
+ * This is equivalent to UserInfoWrapper in Java code.
+ */
+export interface LoginResponse {
+    user: any;
+    roles: any;
+    organization: any;
+    licenseInfos: any;
+    /**
+     * eventually returned data of the LogonCallback is stored here.
+     */
+    logonInfos?: any;
+}
 /**
  * options for use by both [[login]] and [[logout]].
  */
@@ -160,7 +175,18 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
 /**
  * logs into a Relution server.
  *
+ * Notice, specifying `offlineCapable=true` in the options will store the login response locally on
+ * the device when online and the login succeeded. When offline, the option will reuse the stored
+ * response. Data encryption is used guaranteeing both secrecy of login data and verification of
+ * the credentials provided.
+ *
+ * @param credentials to use.
+ * @param loginOptions overwriting [[init]] defaults.
+ * @return {Q.Promise<LoginResponse>} of login response.
+ *
+ * @example
  * ```javascript
+ *
  * import * as Relution from 'relution-sdk';
  * //config
  * Relution.init({
@@ -187,13 +213,8 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
  *  () => console.log('complete')
  * )
  * ```
- *
- * @param credentials to use.
- * @param loginOptions overwriting [[init]] defaults.
- *
- * @return {Q.Promise<any>} of login response.
  */
-export declare function login(credentials: auth.Credentials, loginOptions?: LoginOptions): Q.Promise<any>;
+export declare function login(credentials: auth.Credentials, loginOptions?: LoginOptions): Q.Promise<LoginResponse>;
 /**
  * options specific to [[logout]] function.
  */
@@ -202,7 +223,14 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
 /**
  * logs out of a Relution server.
  *
+ * For explicit logouts (trigger by app user pressing a logout button, for example) specifying
+ * `offlineCapable = true` will drop any persisted offline login data for the server logging out
+ * of.
+ *
  * @param logoutOptions overwriting [[init]] defaults.
+ * @return {Q.Promise<void>} of logout response.
+ *
+ * @example
  * ```javascript
  *
  * Relution.web.logout()
@@ -217,6 +245,5 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
  *  () => console.log('bye bye')
  * )
  * ```
- * @return {Q.Promise<any>} of logout response.
  */
-export declare function logout(logoutOptions?: LogoutOptions): Q.Promise<any>;
+export declare function logout(logoutOptions?: LogoutOptions): Q.Promise<void>;
