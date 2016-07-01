@@ -1,6 +1,6 @@
 export declare function _create(args: any): any;
 export declare function _design(obj: any): any;
-export declare const _extend: typeof Backbone.Model.extend;
+export declare const _extend: any;
 export declare class _Object {
     /**
      * The type of this object.

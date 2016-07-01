@@ -22,7 +22,14 @@ import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
 
-const backbone = global['Backbone'] || (global['Backbone'] = require('backbone'));
+/**
+ * Backbone of browser via script tag or via require backbone.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+export const Backbone = global['Backbone'] || // native implementation
+  process && !process['browser'] &&           // or when not in browser
+  (global['Backbone'] = require('backbone')); // required version
 
 export function _create(args) {
   return new this(args);

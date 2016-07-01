@@ -24,8 +24,6 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {WebSqlStore} from './WebSqlStore';
 
-const openDatabase = global['openDatabase'] || (global['openDatabase'] = require('websql'));
-
 function backbone_error(done) {
   return function (model, error) {
     done(error instanceof Error ? error : new Error(JSON.stringify(error)));

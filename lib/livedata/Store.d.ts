@@ -21,7 +21,7 @@ export declare class Store {
     protected entities: any;
     endpoints: any;
     constructor(options?: any);
-    static extend: typeof Backbone.Model.extend;
+    static extend: any;
     static create: typeof _create;
     static design: typeof _design;
     protected trigger: any;

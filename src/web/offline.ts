@@ -25,9 +25,14 @@ import * as init from '../core/init';
 import * as auth from '../security/auth';
 import * as http from './http';
 
-// localStorage of browser or via node-localstorage
-const localStorage = global['localStorage'] ||
-  (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+/**
+ * localStorage of browser or via require node-localstorage.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+export const localStorage = global['localStorage'] ||                 // native implementation
+  process && !process['browser'] && (global['localStorage'] =         // or when not in browser
+    new (require('node-localstorage').LocalStorage)('localStorage')); // required version
 
 // key generation parameters
 const pbkdf2SaltLen = 64;

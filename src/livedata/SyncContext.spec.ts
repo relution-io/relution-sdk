@@ -29,10 +29,6 @@ import {SyncStore} from './SyncStore';
 
 import {makeApprovals} from './approvals.data';
 
-const localStorage = global['localStorage'] || (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
-const openDatabase = global['openDatabase'] || (global['openDatabase'] = require('websql'));
-const io = global['io'] || (global['io'] = require('socket.io-client'));
-
 var serverUrl = "http://localhost:8200";
 
 describe(module.filename || __filename, function() {

@@ -18,14 +18,12 @@
  * limitations under the License.
  */
 
+import * as Q from 'q';
 import {assert} from 'chai';
 
 import {Model} from './Model';
 import {SyncStore} from './SyncStore';
-
-const localStorage = global['localStorage'] || (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
-const openDatabase = global['openDatabase'] || (global['openDatabase'] = require('websql'));
-const io = global['io'] || (global['io'] = require('socket.io-client'));
+import {openDatabase} from './WebSqlStore';
 
 var serverUrl = "http://localhost:8200";
 
@@ -34,7 +32,6 @@ describe(module.filename || __filename, function() {
   var model = null;
   var Store = null
   var modelType = null;
-  var db = null;
   var promise = null;
 
   beforeEach(function () {
@@ -50,59 +47,76 @@ describe(module.filename || __filename, function() {
       urlRoot: serverUrl + '/relution/livedata/user/'
     });
     model = new modelType({ id: '12312' });
-    promise = model.fetch();
+    promise = model.fetch().thenResolve(model);
   });
 
   return [
 
-    it('fetch model sync to server', (done) => {
+    it('fetch model sync to server', () => {
       var haveTobe = {
         username: 'message-offline-test',
         password: 'admin',
         id: '12312'
       };
-      promise.then(function () {
+      return promise.then(() => {
         Object.keys(model.attributes).forEach(function (attr) {
           assert.equal(model.get(attr), haveTobe[attr], 'model has same ' + attr);
         });
-      }).finally(done);
-    }),
-
-    it('on sync check __msg__ table', (done) => {
-      promise.then(function () {
-        var db = openDatabase('relution-livedata', '', '', 1024 * 1024);
-        var query = 'SELECT * FROM \'__msg__\' WHERE id = ?';
-        db.transaction (
-          function (tx) {
-            tx.executeSql(query, [model.entity + '~' + model.get('id')], function (tx, table) {
-              assert.equal(table.rows.length, 0);
-              done();
-            });
-          },
-          function (error) {
-            done(new Error(error.message));
-          }
-        );
+        return true;
       });
     }),
 
-    it('delete model from db', (done) => {
-      model.destroy().then(function () {
-        var db = openDatabase('relution-livedata', '', '', 1024 * 1024);
-        var channel = model.store.getEndpoint(model).channel;
+    it('on sync check __msg__ table', () => {
+      const query = 'SELECT * FROM \'__msg__\' WHERE id = ?';
+      return promise.then(() => {
+        return openDatabase('relution-livedata', '', '', 1024 * 1024);
+      }).then((db) => {
+        return Q.Promise((resolve, reject) => {
+          return db.transaction((tx) => {
+            try {
+              return tx.executeSql(query, [model.entity + '~' + model.get('id')], (tx1, table) => {
+                try {
+                  assert.equal(table.rows.length, 0);
+                  resolve(true);
+                } catch (error) {
+                  reject(error);
+                }
+              });
+            } catch (error) {
+              reject(error);
+            }
+          }, reject);
+        });
+      });
+    }),
+
+    it('delete model from db', () => {
+      return promise.then(() => {
+        const channel = model.store.getEndpoint(model).channel;
+        return model.destroy().thenResolve(channel);
+      }).then((channel) => {
         var query = 'SELECT * FROM \'' + channel + '\' WHERE id =?';
 
-        db.transaction (
-          function (tx) {
-            tx.executeSql(query, [model.get('id')], function (tx, table) {
-              assert.equal(table.rows.length, 0);
-              done();
-            });
-          },
-          function (error) {
-            done(new Error(error.message));
-          }
-        );
+        return promise.then(() => {
+          return openDatabase('relution-livedata', '', '', 1024 * 1024);
+        }).then((db) => {
+          return Q.Promise((resolve, reject) => {
+            return db.transaction((tx) => {
+              try {
+                return tx.executeSql(query, [model.entity + '~' + model.get('id')], (tx1, table) => {
+                  try {
+                    assert.equal(table.rows.length, 0);
+                    resolve(true);
+                  } catch (error) {
+                    reject(error);
+                  }
+                });
+              } catch (error) {
+                reject(error);
+              }
+            }, reject);
+          });
+        });
       });
     })
 

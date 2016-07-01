@@ -22,6 +22,7 @@ import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
 
+import {Backbone} from './Object';
 import {Model} from './Model';
 import {Collection, isCollection} from './Collection';
 

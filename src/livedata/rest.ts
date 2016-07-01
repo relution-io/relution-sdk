@@ -8,6 +8,8 @@ import * as Q from 'q';
 
 import * as web from '../web';
 
+import {Backbone} from './Object';
+
 /**
  * options passed to Collection.fetch() preventing backbone.js from consuming the response.
  *
@@ -31,9 +33,9 @@ export const bareboneOptions = Object.freeze({
   silent: true
 });
 
-const backboneAjax = (<any>Backbone).ajax;
+const backboneAjax = Backbone.ajax;
 
-(<any>Backbone).ajax = function ajax(options) {
+Backbone.ajax = function ajax(options) {
   var superAjax = options && options.ajax || backboneAjax;
   return superAjax.apply(this, arguments);
 };

@@ -25,6 +25,16 @@ import * as diag from '../core/diag';
 import {AbstractSqlStore} from './AbstractSqlStore';
 
 /**
+ * openDatabase of browser or via require websql.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+export const openDatabase = global['openDatabase'] && // native implementation
+  global['openDatabase'].bind(global) ||              // must be bound
+  process && !process['browser'] &&                   // or when not in browser
+  (global['openDatabase'] = require('websql'));       // required version
+
+/**
  * stores LiveData into the WebSQL database.
  *
  * @example
@@ -64,10 +74,10 @@ export class WebSqlStore extends AbstractSqlStore {
     /* openDatabase(db_name, version, description, estimated_size, callback) */
     if (!this.db) {
       try {
-        if (!(<any>global).openDatabase) {
+        if (!openDatabase) {
           error = 'Your browser does not support WebSQL databases.';
         } else {
-          this.db = (<any>global).openDatabase(this.name, '', '', this.size);
+          this.db = openDatabase(this.name, '', '', this.size);
           if (this.entities) {
             for (var entity in this.entities) {
               this._createTable({ entity: entity });
@@ -101,7 +111,7 @@ export class WebSqlStore extends AbstractSqlStore {
     var that = this;
     try {
       if (!this.db) {
-        this.db = (<any>global).openDatabase(this.name, '', '', this.size);
+        this.db = openDatabase(this.name, '', '', this.size);
       }
       try {
         var arSql = this._sqlUpdateDatabase(this.db.version, this.version);

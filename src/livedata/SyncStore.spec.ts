@@ -25,10 +25,6 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
-const localStorage = global['localStorage'] || (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
-const openDatabase = global['openDatabase'] || (global['openDatabase'] = require('websql'));
-const io = global['io'] || (global['io'] = require('socket.io-client'));
-
 var serverUrl = "http://localhost:8200";
 
 function backbone_error(done) {
