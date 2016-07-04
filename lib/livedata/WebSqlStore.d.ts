@@ -25,5 +25,4 @@ export declare class WebSqlStore extends AbstractSqlStore {
      */
     private _openDb(options);
     private _updateDb(options);
-    close(): void;
 }

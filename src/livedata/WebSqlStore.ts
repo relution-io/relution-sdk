@@ -22,17 +22,67 @@ import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
 
+import * as cipher from '../core/cipher';
 import {AbstractSqlStore} from './AbstractSqlStore';
+
+interface WebSqlOptions {
+  name: string;
+  description?: string;
+  version?: string;
+
+  size?: number;
+  location?: number;
+
+  key?: string;
+  security?: string;
+  credentials?: any;
+}
 
 /**
  * openDatabase of browser or via require websql.
  *
  * @internal Not public API, exported for testing purposes only!
  */
-export const openDatabase = global['openDatabase'] && // native implementation
-  global['openDatabase'].bind(global) ||              // must be bound
-  process && !process['browser'] &&                   // or when not in browser
-  (global['openDatabase'] = require('websql'));       // required version
+export function openDatabase(options: WebSqlOptions) {
+  let db;
+  if (global['sqlitePlugin']) {
+    // device implementation
+    options = _.clone(options);
+    if (!options.key) {
+      if (options.security) {
+        options.key = options.security;
+        delete options.security;
+      } else if (options.credentials) {
+        options.key = cipher.hashJsonSync(options.credentials, 'sha256').toString('hex');
+        delete options.credentials;
+      }
+    }
+    if (!options.location) {
+      options.location = 2;
+    }
+    db = global['sqllitePlugin'].openDatabase(options);
+  } else if (global['openDatabase']) {
+    // native implementation
+    db = global['openDatabase'](options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
+  } else if (process && !process['browser']) {
+    // node.js implementation
+    let websql;
+    try {
+      websql = require('websql');
+    } catch (error) {
+      diag.debug.warn(error);
+    }
+    if (websql) {
+      db = websql(options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
+    }
+  }
+
+  if (!db) {
+    // when this is reached no supported implementation is present
+    throw new Error('WebSQL implementation is not available');
+  }
+  return db;
+}
 
 /**
  * stores LiveData into the WebSQL database.
@@ -58,50 +108,48 @@ export class WebSqlStore extends AbstractSqlStore {
     super(options);
 
     var that = this;
-    this._openDb({
+    this._openDb(_.defaults({
+      name: this.name,
       error: function (error) {
         diag.debug.error(error);
         that.trigger('error', error);
       }
-    });
+    }, options));
   }
 
   /**
    * @private
    */
   private _openDb(options) {
-    var error, dbError;
-    /* openDatabase(db_name, version, description, estimated_size, callback) */
+    var error;
     if (!this.db) {
       try {
-        if (!openDatabase) {
-          error = 'Your browser does not support WebSQL databases.';
-        } else {
-          this.db = openDatabase(this.name, '', '', this.size);
-          if (this.entities) {
-            for (var entity in this.entities) {
-              this._createTable({ entity: entity });
-            }
+        this.db = openDatabase(options);
+        if (this.entities) {
+          for (var entity in this.entities) {
+            this._createTable({
+              entity: entity
+            });
           }
         }
       } catch (e) {
-        dbError = e;
+        error = e;
       }
     }
+
     if (this.db) {
       if (this.version && this.db.version !== this.version && this.db.changeVersion) {
         this._updateDb(options);
       } else {
         this.handleSuccess(options, this.db);
       }
-    } else if (dbError === 2 || dbError === '2') {
+    } else if (error === 2 || error === '2') {
       // Version number mismatch.
       this._updateDb(options);
+    } else if (error) {
+      this.handleError(options, error);
     } else {
-      if (!error && dbError) {
-        error = dbError;
-      }
-      this.handleSuccess(options, error);
+      this.handleSuccess(options, this.db);
     }
   }
 
@@ -111,7 +159,7 @@ export class WebSqlStore extends AbstractSqlStore {
     var that = this;
     try {
       if (!this.db) {
-        this.db = openDatabase(this.name, '', '', this.size);
+        this.db = openDatabase(options);
       }
       try {
         var arSql = this._sqlUpdateDatabase(this.db.version, this.version);
@@ -140,13 +188,6 @@ export class WebSqlStore extends AbstractSqlStore {
     }
     if (error) {
       this.handleError(options, error);
-    }
-  }
-
-  public close() {
-    diag.debug.info('WebSQL Store close');
-    if (this.db) {
-      this.db = null;
     }
   }
 }

@@ -14,6 +14,10 @@ export declare class AbstractSqlStore extends Store {
         };
     };
     constructor(options?: any);
+    /**
+     * closes the database.
+     */
+    close(): void;
     sync(method: any, model: any, options: any): Q.Promise<{}>;
     protected select(options: any): void;
     protected drop(options: any): void;

@@ -149,7 +149,7 @@ export class SyncStore extends Store {
       const server = security.Server.getInstance(serverUrl);
       this.serverUrl = serverUrl;
       this.userUuid = server.authorization.name;
-      if (this.localStoreOptions && this.localStoreOptions.security && !this.localStoreOptions.credentials) {
+      if (this.localStoreOptions && !this.localStoreOptions.credentials) {
         // capture credentials for use by crypto stores
         this.localStoreOptions.credentials = _.defaults({
           userUuid: this.userUuid

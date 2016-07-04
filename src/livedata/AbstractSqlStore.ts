@@ -56,6 +56,22 @@ export class AbstractSqlStore extends Store {
     }
   }
 
+  /**
+   * closes the database.
+   */
+  public close() {
+    diag.debug.info('Store close');
+    if (this.db) {
+      try {
+        if (this.db.close) {
+          this.db.close();
+        }
+      } finally {
+        this.db = null;
+      }
+    }
+  }
+
   public sync(method, model, options) {
     options = options || {};
     var that = this;

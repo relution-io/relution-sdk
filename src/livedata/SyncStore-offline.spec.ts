@@ -70,7 +70,9 @@ describe(module.filename || __filename, function() {
       var username = 'offline';
 
       return model.save({ username: username }).then(() => {
-        return openDatabase('relution-livedata', '', '', 1024 * 1024);
+        return openDatabase({
+          name: 'relution-livedata'
+        });
       }).then((db) => {
         var channel = model.store.getEndpoint(model).channel;
         var query = 'SELECT * FROM \'' + channel + '\' WHERE id =?';
@@ -103,7 +105,9 @@ describe(module.filename || __filename, function() {
       var username = 'message-offline-test';
 
       return model.save({ username: username }).then(() => {
-        return openDatabase('relution-livedata', '', '', 1024 * 1024);
+        return openDatabase({
+          name: 'relution-livedata'
+        });
       }).then((db) => {
         var query = 'SELECT * FROM \'__msg__\' WHERE id =?';
 

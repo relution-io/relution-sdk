@@ -133,15 +133,6 @@ export class CipherSqlStore extends AbstractSqlStore {
       this.handleError(options, error);
     }
   }
-
-  /**
-   * @description close the exist database
-   */
-  public close() {
-    if (this.db) {
-      this.db.close();
-    }
-  }
 }
 
 // mixins

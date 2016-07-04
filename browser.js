@@ -218,7 +218,40 @@ function decryptJson(password, data) {
 }
 exports.decryptJson = decryptJson;
 /**
- * computes a hash of some JSON object.
+ * computes a hash of some JSON object synchronously.
+ *
+ * Prefer the async variant if possible.
+ *
+ * @param data to hash.
+ * @param algorithm of choice.
+ * @return hash value.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function hashJsonSync(data, algorithm) {
+    var hash = crypto.createHash(algorithm);
+    (function feed(val) {
+        var keys = _.keys(val).sort();
+        if (keys.length) {
+            hash.update(JSON.stringify(keys), 'utf8');
+            _.forEach(keys, function (key) {
+                var value = val[key];
+                if (!_.isUndefined(value)) {
+                    if (!_.isObject(value)) {
+                        hash.update(JSON.stringify(value), 'utf8');
+                    }
+                    else {
+                        feed(value);
+                    }
+                }
+            });
+        }
+    })(JSON.parse(JSON.stringify(data)));
+    return hash.digest();
+}
+exports.hashJsonSync = hashJsonSync;
+/**
+ * computes a hash of some JSON object synchronously.
  *
  * @param data to hash.
  * @param algorithm of choice.
@@ -227,26 +260,13 @@ exports.decryptJson = decryptJson;
  * @internal Not part of public API, exported for library use only.
  */
 function hashJson(data, algorithm) {
-    return Q(data).then(JSON.stringify).then(JSON.parse).then(function (obj) {
-        var hash = crypto.createHash(algorithm);
-        (function feed(val) {
-            var keys = _.keys(val).sort();
-            if (keys.length) {
-                hash.update(JSON.stringify(keys), 'utf8');
-                _.forEach(keys, function (key) {
-                    var value = val[key];
-                    if (!_.isUndefined(value)) {
-                        if (!_.isObject(value)) {
-                            hash.update(JSON.stringify(value), 'utf8');
-                        }
-                        else {
-                            feed(value);
-                        }
-                    }
-                });
-            }
-        })(obj);
-        return hash.digest();
+    return Q.Promise(function (resolve, reject) {
+        try {
+            resolve(hashJsonSync(data, algorithm));
+        }
+        catch (error) {
+            reject(error);
+        }
     });
 }
 exports.hashJson = hashJson;
@@ -661,6 +681,22 @@ var AbstractSqlStore = (function (_super) {
             }
         }
     }
+    /**
+     * closes the database.
+     */
+    AbstractSqlStore.prototype.close = function () {
+        diag.debug.info('Store close');
+        if (this.db) {
+            try {
+                if (this.db.close) {
+                    this.db.close();
+                }
+            }
+            finally {
+                this.db = null;
+            }
+        }
+    };
     AbstractSqlStore.prototype.sync = function (method, model, options) {
         options = options || {};
         var that = this;
@@ -1137,14 +1173,6 @@ var CipherSqlStore = (function (_super) {
         }
         if (error) {
             this.handleError(options, error);
-        }
-    };
-    /**
-     * @description close the exist database
-     */
-    CipherSqlStore.prototype.close = function () {
-        if (this.db) {
-            this.db.close();
         }
     };
     return CipherSqlStore;
@@ -2518,7 +2546,7 @@ var SyncStore = (function (_super) {
             var server = security.Server.getInstance(serverUrl);
             this.serverUrl = serverUrl;
             this.userUuid = server.authorization.name;
-            if (this.localStoreOptions && this.localStoreOptions.security && !this.localStoreOptions.credentials) {
+            if (this.localStoreOptions && !this.localStoreOptions.credentials) {
                 // capture credentials for use by crypto stores
                 this.localStoreOptions.credentials = _.defaults({
                     userUuid: this.userUuid
@@ -3604,16 +3632,57 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var _ = require('lodash');
 var diag = require('../core/diag');
+var cipher = require('../core/cipher');
 var AbstractSqlStore_1 = require('./AbstractSqlStore');
 /**
  * openDatabase of browser or via require websql.
  *
  * @internal Not public API, exported for testing purposes only!
  */
-exports.openDatabase = global['openDatabase'] &&
-    global['openDatabase'].bind(global) ||
-    process && !process['browser'] &&
-        (global['openDatabase'] = require('websql')); // required version
+function openDatabase(options) {
+    var db;
+    if (global['sqlitePlugin']) {
+        // device implementation
+        options = _.clone(options);
+        if (!options.key) {
+            if (options.security) {
+                options.key = options.security;
+                delete options.security;
+            }
+            else if (options.credentials) {
+                options.key = cipher.hashJsonSync(options.credentials, 'sha256').toString('hex');
+                delete options.credentials;
+            }
+        }
+        if (!options.location) {
+            options.location = 2;
+        }
+        db = global['sqllitePlugin'].openDatabase(options);
+    }
+    else if (global['openDatabase']) {
+        // native implementation
+        db = global['openDatabase'](options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
+    }
+    else if (process && !process['browser']) {
+        // node.js implementation
+        var websql = void 0;
+        try {
+            websql = require('websql');
+        }
+        catch (error) {
+            diag.debug.warn(error);
+        }
+        if (websql) {
+            db = websql(options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
+        }
+    }
+    if (!db) {
+        // when this is reached no supported implementation is present
+        throw new Error('WebSQL implementation is not available');
+    }
+    return db;
+}
+exports.openDatabase = openDatabase;
 /**
  * stores LiveData into the WebSQL database.
  *
@@ -3638,35 +3707,32 @@ var WebSqlStore = (function (_super) {
     function WebSqlStore(options) {
         _super.call(this, options);
         var that = this;
-        this._openDb({
+        this._openDb(_.defaults({
+            name: this.name,
             error: function (error) {
                 diag.debug.error(error);
                 that.trigger('error', error);
             }
-        });
+        }, options));
     }
     /**
      * @private
      */
     WebSqlStore.prototype._openDb = function (options) {
-        var error, dbError;
-        /* openDatabase(db_name, version, description, estimated_size, callback) */
+        var error;
         if (!this.db) {
             try {
-                if (!exports.openDatabase) {
-                    error = 'Your browser does not support WebSQL databases.';
-                }
-                else {
-                    this.db = exports.openDatabase(this.name, '', '', this.size);
-                    if (this.entities) {
-                        for (var entity in this.entities) {
-                            this._createTable({ entity: entity });
-                        }
+                this.db = openDatabase(options);
+                if (this.entities) {
+                    for (var entity in this.entities) {
+                        this._createTable({
+                            entity: entity
+                        });
                     }
                 }
             }
             catch (e) {
-                dbError = e;
+                error = e;
             }
         }
         if (this.db) {
@@ -3677,15 +3743,15 @@ var WebSqlStore = (function (_super) {
                 this.handleSuccess(options, this.db);
             }
         }
-        else if (dbError === 2 || dbError === '2') {
+        else if (error === 2 || error === '2') {
             // Version number mismatch.
             this._updateDb(options);
         }
+        else if (error) {
+            this.handleError(options, error);
+        }
         else {
-            if (!error && dbError) {
-                error = dbError;
-            }
-            this.handleSuccess(options, error);
+            this.handleSuccess(options, this.db);
         }
     };
     WebSqlStore.prototype._updateDb = function (options) {
@@ -3694,7 +3760,7 @@ var WebSqlStore = (function (_super) {
         var that = this;
         try {
             if (!this.db) {
-                this.db = exports.openDatabase(this.name, '', '', this.size);
+                this.db = openDatabase(options);
             }
             try {
                 var arSql = this._sqlUpdateDatabase(this.db.version, this.version);
@@ -3728,12 +3794,6 @@ var WebSqlStore = (function (_super) {
             this.handleError(options, error);
         }
     };
-    WebSqlStore.prototype.close = function () {
-        diag.debug.info('WebSQL Store close');
-        if (this.db) {
-            this.db = null;
-        }
-    };
     return WebSqlStore;
 }(AbstractSqlStore_1.AbstractSqlStore));
 exports.WebSqlStore = WebSqlStore;
@@ -3744,7 +3804,7 @@ var webSqlStore = _.extend(WebSqlStore.prototype, {
 diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Object.create(webSqlStore)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":5,"./AbstractSqlStore":10,"_process":235,"lodash":207,"websql":undefined}],21:[function(require,module,exports){
+},{"../core/cipher":4,"../core/diag":5,"./AbstractSqlStore":10,"_process":235,"lodash":207,"websql":undefined}],21:[function(require,module,exports){
 /**
  * @file livedata/index.ts
  * Relution SDK

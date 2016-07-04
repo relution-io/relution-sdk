@@ -54,8 +54,4 @@ export declare class CipherSqlStore extends AbstractSqlStore {
      */
     private _openDb(errorCallback);
     private _updateDb(options);
-    /**
-     * @description close the exist database
-     */
-    close(): void;
 }

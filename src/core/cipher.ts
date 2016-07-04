@@ -109,7 +109,39 @@ export function decryptJson<T>(password: string, data: EncryptedJson<T>): Q.Prom
 }
 
 /**
- * computes a hash of some JSON object.
+ * computes a hash of some JSON object synchronously.
+ *
+ * Prefer the async variant if possible.
+ *
+ * @param data to hash.
+ * @param algorithm of choice.
+ * @return hash value.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+export function hashJsonSync(data: any, algorithm: string): Buffer {
+  const hash = crypto.createHash(algorithm);
+  (function feed(val) {
+    const keys = _.keys(val).sort();
+    if (keys.length) {
+      hash.update(JSON.stringify(keys), 'utf8');
+      _.forEach(keys, (key) => {
+        const value = val[key];
+        if (!_.isUndefined(value)) {
+          if (!_.isObject(value)) {
+            hash.update(JSON.stringify(value), 'utf8');
+          } else {
+            feed(value);
+          }
+        }
+      });
+    }
+  })(JSON.parse(JSON.stringify(data)));
+  return hash.digest();
+}
+
+/**
+ * computes a hash of some JSON object synchronously.
  *
  * @param data to hash.
  * @param algorithm of choice.
@@ -118,24 +150,11 @@ export function decryptJson<T>(password: string, data: EncryptedJson<T>): Q.Prom
  * @internal Not part of public API, exported for library use only.
  */
 export function hashJson(data: any, algorithm: string): Q.Promise<Buffer> {
-  return Q(data).then(JSON.stringify).then(JSON.parse).then((obj) => {
-    const hash = crypto.createHash(algorithm);
-    (function feed(val) {
-      const keys = _.keys(val).sort();
-      if (keys.length) {
-        hash.update(JSON.stringify(keys), 'utf8');
-        _.forEach(keys, (key) => {
-          const value = val[key];
-          if (!_.isUndefined(value)) {
-            if (!_.isObject(value)) {
-              hash.update(JSON.stringify(value), 'utf8');
-            } else {
-              feed(value);
-            }
-          }
-        });
-      }
-    })(obj);
-    return hash.digest();
+  return Q.Promise<Buffer>((resolve, reject) => {
+    try {
+      resolve(hashJsonSync(data, algorithm));
+    } catch (error) {
+      reject(error);
+    }
   });
 }

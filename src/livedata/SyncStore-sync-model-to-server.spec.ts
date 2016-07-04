@@ -69,7 +69,9 @@ describe(module.filename || __filename, function() {
     it('on sync check __msg__ table', () => {
       const query = 'SELECT * FROM \'__msg__\' WHERE id = ?';
       return promise.then(() => {
-        return openDatabase('relution-livedata', '', '', 1024 * 1024);
+        return openDatabase({
+          name: 'relution-livedata'
+        });
       }).then((db) => {
         return Q.Promise((resolve, reject) => {
           return db.transaction((tx) => {
@@ -98,7 +100,9 @@ describe(module.filename || __filename, function() {
         var query = 'SELECT * FROM \'' + channel + '\' WHERE id =?';
 
         return promise.then(() => {
-          return openDatabase('relution-livedata', '', '', 1024 * 1024);
+          return openDatabase({
+            name: 'relution-livedata'
+          });
         }).then((db) => {
           return Q.Promise((resolve, reject) => {
             return db.transaction((tx) => {
