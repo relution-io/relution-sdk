@@ -17,8 +17,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from './AbstractSqlStore';
-export * from './CipherSqlStore';
 export * from './Collection';
 export * from './LiveDataMessage';
 export * from './Model';
