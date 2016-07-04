@@ -36,8 +36,6 @@ import {Backbone} from './Object';
 import {Model, ModelCtor, isModel} from './Model';
 import {Collection, isCollection} from './Collection';
 
-import * as URLUtil from './url';
-
 /**
  * io of browser via script tag or via require socket.io-client.
  *
@@ -257,28 +255,17 @@ export class SyncStore extends Store {
     if (this.useSocketNotify && endpoint && endpoint.socketPath) {
       diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
 
-      var url = endpoint.host;
-      var path = endpoint.path;
-      var href = URLUtil.getLocation(url);
-      if (href.port === '') {
-        if (href.protocol === 'https:') {
-          url += ':443';
-        } else if (href.protocol === 'http:') {
-          url += ':80';
-        }
-      }
-
-      path = endpoint.socketPath;
-      // remove leading /
-      var resource = (path && path.indexOf('/') === 0) ? path.substr(1) : path;
-      var connectVo: any = {
-        resource: resource
+      // resource
+      let connectVo: any = {
       };
-
+      let resource = endpoint.socketPath; // remove leading /
+      connectVo.resource = (resource && resource.indexOf('/') === 0) ? resource.substr(1) : resource;
       if (this.socketQuery) {
         connectVo.query = this.socketQuery;
       }
-      endpoint.socket = io.connect(url, connectVo);
+
+      // socket
+      endpoint.socket = io.connect(endpoint.host, connectVo);
       endpoint.socket.on('connect', () => {
         this._bindChannel(endpoint, name);
         return this.onConnect(endpoint).done();

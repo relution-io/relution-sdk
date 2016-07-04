@@ -43,11 +43,11 @@ export default [
   // connector
 
   // livedata
-  require('./livedata/url.spec'),
   require('./livedata/Object.spec'),
   require('./livedata/Model.spec'),
   require('./livedata/Collection.spec'),
   require('./livedata/WebSqlStore.spec'),
+  require('./livedata/SyncEndpoint.spec'),
   require('./livedata/SyncStore.spec'),
   require('./livedata/SyncStore-offline.spec'),
   require('./livedata/SyncStore-sync-model-to-server.spec'),

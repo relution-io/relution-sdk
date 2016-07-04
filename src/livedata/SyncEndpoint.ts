@@ -18,12 +18,29 @@
  * limitations under the License.
  */
 
+import * as url from 'url';
+
 import {Store} from './Store';
 import {Model, ModelCtor} from './Model';
 import {Collection} from './Collection';
 
-import * as urls from '../web/urls';
-import * as URLUtil from './url';
+/**
+ * very simple hash coding implementation.
+ *
+ * @internal For library use only.
+ */
+export function hashCode(...args: string[]) {
+  var hash = 0;
+  for (var i = 0; i < args.length; ++i) {
+    var str = args[i] || '';
+    for (var j = 0, l = str.length; j < l; ++j) {
+      var char = str.charCodeAt(j);
+      hash = ((hash << 5) - hash) + char;
+      hash |= 0; // Convert to 32bit integer
+    }
+  }
+  return hash;
+}
 
 /**
  * manages connection of SyncStore to one entity.
@@ -69,13 +86,21 @@ export class SyncEndpoint {
     this.socketPath = options.socketPath;
     this.userUuid = options.userUuid;
 
-    var href = URLUtil.getLocation(options.urlRoot);
-    this.host = href.protocol + '//' + href.host;
+    var href = url.parse(options.urlRoot);
+    this.host = href.protocol + '//' + href.hostname;
+    if (!href.port) {
+      // socket.io needs port event for standard protocols
+      if (href.protocol === 'https:') {
+        this.host += ':443';
+      } else if (href.protocol === 'http:') {
+        this.host += ':80';
+      }
+    }
     this.path = href.pathname;
 
     var user = options.userUuid ? options.userUuid + '/' : '';
     var name = options.entity;
-    var hash = URLUtil.hashLocation(urls.resolveServer(options.urlRoot, options));
+    var hash = hashCode(this.host);
     this.channel = user + name + '/' + hash;
   }
 
