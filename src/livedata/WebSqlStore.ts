@@ -22,13 +22,12 @@ import * as _ from 'lodash';
 import * as Q from 'q';
 
 import * as diag from '../core/diag';
+import * as objectid from '../core/objectid';
 import * as cipher from '../core/cipher';
 
 import {Store} from './Store';
 import {Model, isModel} from './Model';
 import {isCollection} from './Collection';
-
-import {ObjectID} from './objectid';
 
 interface WebSqlOptions {
   name: string;
@@ -444,7 +443,7 @@ export class WebSqlStore extends Store {
         var amodel = models[i];
         var statement = ''; // the actual sql insert string with values
         if (!amodel.id) {
-          amodel.set(amodel.idAttribute, new ObjectID().toHexString());
+          amodel.set(amodel.idAttribute, objectid.makeObjectID());
         }
         var value = options.attrs || amodel.attributes;
         var keys = [ 'id', 'data' ];

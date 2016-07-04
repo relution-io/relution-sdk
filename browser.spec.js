@@ -669,6 +669,46 @@ describe(module.filename || __filename, function () {
 
 }).call(this,"/lib\\core\\mocha.spec.js")
 },{"chai":119}],9:[function(require,module,exports){
+/**
+ * @file core/objectid.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 04.07.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var machineId = parseInt('' + (Math.random() * Math.pow(16, 6)));
+var processId = parseInt('' + (Math.random() * Math.pow(16, 4)));
+var counter = parseInt('' + (Math.random() * Math.pow(16, 6)));
+function hexString(len, num) {
+    var str = num.toString(16);
+    while (str.length < len) {
+        str = '0' + str;
+    }
+    return str.substr(0, len);
+}
+// random-based impl of Mongo ObjectID
+function makeObjectID() {
+    return hexString(8, Date.now() / 1000) +
+        hexString(6, machineId) +
+        hexString(4, processId) +
+        hexString(6, counter++); // a 3-byte counter, starting with a random value.
+}
+exports.makeObjectID = makeObjectID;
+
+},{}],10:[function(require,module,exports){
 (function (__filename){
 /**
  * @file core/q.spec.ts
@@ -720,7 +760,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\core\\q.spec.js")
-},{"chai":119,"q":289}],10:[function(require,module,exports){
+},{"chai":119,"q":289}],11:[function(require,module,exports){
 /**
  * @file index.ts
  * Relution SDK
@@ -771,7 +811,7 @@ exports.default = [
     require('./livedata/SyncContext.spec')
 ];
 
-},{"./core/cipher.spec":2,"./core/diag.spec":4,"./core/mocha.spec":8,"./core/q.spec":9,"./livedata/Collection.spec":12,"./livedata/Model.spec":15,"./livedata/Object.spec":17,"./livedata/SyncContext.spec":20,"./livedata/SyncStore-offline.spec":22,"./livedata/SyncStore-sync-model-to-server.spec":23,"./livedata/SyncStore.spec":25,"./livedata/WebSqlStore.spec":27,"./livedata/url.spec":32,"./query/JsonFilterVisitor.spec":36,"./query/SortOrderComparator.spec":40,"./security/server.spec":46,"./web/http.spec":48,"./web/offline.spec":51,"./web/urls.spec":53}],11:[function(require,module,exports){
+},{"./core/cipher.spec":2,"./core/diag.spec":4,"./core/mocha.spec":8,"./core/q.spec":10,"./livedata/Collection.spec":13,"./livedata/Model.spec":16,"./livedata/Object.spec":18,"./livedata/SyncContext.spec":21,"./livedata/SyncStore-offline.spec":23,"./livedata/SyncStore-sync-model-to-server.spec":24,"./livedata/SyncStore.spec":26,"./livedata/WebSqlStore.spec":28,"./livedata/url.spec":32,"./query/JsonFilterVisitor.spec":36,"./query/SortOrderComparator.spec":40,"./security/server.spec":46,"./web/http.spec":48,"./web/offline.spec":51,"./web/urls.spec":53}],12:[function(require,module,exports){
 /**
  * @file livedata/Collection.ts
  * Relution SDK
@@ -1022,7 +1062,7 @@ var collection = _.extend(Collection.prototype, Object_1._Object.prototype, {
 });
 diag.debug.assert(function () { return isCollection(Object.create(collection)); });
 
-},{"../core/diag":3,"./Model":14,"./Object":16,"./rest":30,"lodash":253}],12:[function(require,module,exports){
+},{"../core/diag":3,"./Model":15,"./Object":17,"./rest":30,"lodash":253}],13:[function(require,module,exports){
 (function (global,__filename){
 /**
  * @file livedata/Collection.spec.ts
@@ -1160,7 +1200,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\livedata\\Collection.spec.js")
-},{"./Collection":11,"./Model":14,"./Store":18,"chai":119}],13:[function(require,module,exports){
+},{"./Collection":12,"./Model":15,"./Store":19,"chai":119}],14:[function(require,module,exports){
 /**
  * @file livedata/LiveDataMessage.ts
  * Relution SDK
@@ -1213,7 +1253,7 @@ var msgmodel = _.extend(LiveDataMessageModel.prototype, {
 diag.debug.assert(function () { return LiveDataMessageModel.prototype.isPrototypeOf(Object.create(msgmodel)); });
 diag.debug.assert(function () { return new LiveDataMessageModel({ _id: 'check' }).id === 'check'; });
 
-},{"../core/diag":3,"./Model":14,"lodash":253}],14:[function(require,module,exports){
+},{"../core/diag":3,"./Model":15,"lodash":253}],15:[function(require,module,exports){
 /**
  * @file livedata/Model.ts
  * Relution SDK
@@ -1338,7 +1378,7 @@ var model = _.extend(Model.prototype, Object_1._Object.prototype, {
 });
 diag.debug.assert(function () { return isModel(Object.create(model)); });
 
-},{"../core/diag":3,"./Object":16,"./rest":30,"lodash":253}],15:[function(require,module,exports){
+},{"../core/diag":3,"./Object":17,"./rest":30,"lodash":253}],16:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/Model.spec.ts
@@ -1426,7 +1466,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\Model.spec.js")
-},{"./Collection":11,"./Model":14,"./Store":18,"chai":119}],16:[function(require,module,exports){
+},{"./Collection":12,"./Model":15,"./Store":19,"chai":119}],17:[function(require,module,exports){
 (function (process,global){
 /**
  * @file livedata/Object.ts
@@ -1558,7 +1598,7 @@ var _object = _.extend(_Object.prototype, {
 diag.debug.assert(function () { return _Object.prototype.isPrototypeOf(Object.create(_object)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":3,"_process":281,"backbone":undefined,"lodash":253}],17:[function(require,module,exports){
+},{"../core/diag":3,"_process":281,"backbone":undefined,"lodash":253}],18:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/Model.spec.ts
@@ -1605,7 +1645,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\Object.spec.js")
-},{"./Object":16,"chai":119}],18:[function(require,module,exports){
+},{"./Object":17,"chai":119}],19:[function(require,module,exports){
 /**
  * @file livedata/Store.ts
  * Relution SDK
@@ -1765,7 +1805,7 @@ var store = _.extend(Store.prototype, Object_1.Backbone.Events, Object_2._Object
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
-},{"../core/diag":3,"./Collection":11,"./Object":16,"lodash":253}],19:[function(require,module,exports){
+},{"../core/diag":3,"./Collection":12,"./Object":17,"lodash":253}],20:[function(require,module,exports){
 /**
  * @file livedata/SyncContext.ts
  * Relution SDK
@@ -2231,7 +2271,7 @@ var SyncContext = (function () {
 }());
 exports.SyncContext = SyncContext;
 
-},{"../core/diag":3,"../query/GetQuery":34,"../query/JsonFilterVisitor":35,"../query/SortOrderComparator":39,"lodash":253}],20:[function(require,module,exports){
+},{"../core/diag":3,"../query/GetQuery":34,"../query/JsonFilterVisitor":35,"../query/SortOrderComparator":39,"lodash":253}],21:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/SyncContext.spec.ts
@@ -2397,7 +2437,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncContext.spec.js")
-},{"./Collection":11,"./Model":14,"./SyncStore":24,"./approvals.data":28,"chai":119,"q":289}],21:[function(require,module,exports){
+},{"./Collection":12,"./Model":15,"./SyncStore":25,"./approvals.data":29,"chai":119,"q":289}],22:[function(require,module,exports){
 /**
  * @file livedata/SyncEndpoint.ts
  * Relution SDK
@@ -2457,7 +2497,7 @@ var SyncEndpoint = (function () {
 }());
 exports.SyncEndpoint = SyncEndpoint;
 
-},{"../web/urls":52,"./url":31}],22:[function(require,module,exports){
+},{"../web/urls":52,"./url":31}],23:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/SyncStore-offline.spec.ts
@@ -2588,7 +2628,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncStore-offline.spec.js")
-},{"../core/diag":3,"./Model":14,"./SyncStore":24,"./WebSqlStore":26,"chai":119,"q":289}],23:[function(require,module,exports){
+},{"../core/diag":3,"./Model":15,"./SyncStore":25,"./WebSqlStore":27,"chai":119,"q":289}],24:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/SyncStore-sync-model-to-server.spec.ts
@@ -2713,7 +2753,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncStore-sync-model-to-server.spec.js")
-},{"./Model":14,"./SyncStore":24,"./WebSqlStore":26,"chai":119,"q":289}],24:[function(require,module,exports){
+},{"./Model":15,"./SyncStore":25,"./WebSqlStore":27,"chai":119,"q":289}],25:[function(require,module,exports){
 (function (process,global){
 /**
  * @file livedata/SyncStore.ts
@@ -2743,6 +2783,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var Q = require('q');
 var _ = require('lodash');
 var diag = require('../core/diag');
+var objectid = require('../core/objectid');
 var security = require('../security');
 var web = require('../web');
 var GetQuery_1 = require('../query/GetQuery');
@@ -2753,7 +2794,6 @@ var SyncEndpoint_1 = require('./SyncEndpoint');
 var LiveDataMessage_1 = require('./LiveDataMessage');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
-var objectid_1 = require('./objectid');
 var URLUtil = require('./url');
 /**
  * io of browser via script tag or via require socket.io-client.
@@ -3157,7 +3197,7 @@ var SyncStore = (function (_super) {
                 // offline capability requires IDs for data
                 if (!model.id) {
                     if (method === 'create') {
-                        model.set(model.idAttribute, new objectid_1.ObjectID().toHexString());
+                        model.set(model.idAttribute, objectid.makeObjectID());
                     }
                     else {
                         var error = new Error('no (valid) id: ' + model.id);
@@ -3883,7 +3923,7 @@ var syncStore = _.extend(SyncStore.prototype, {
 diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.create(syncStore)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":3,"../query/GetQuery":34,"../security":43,"../web":49,"./Collection":11,"./LiveDataMessage":13,"./Model":14,"./Store":18,"./SyncContext":19,"./SyncEndpoint":21,"./WebSqlStore":26,"./objectid":29,"./url":31,"_process":281,"lodash":253,"q":289,"socket.io-client":undefined}],25:[function(require,module,exports){
+},{"../core/diag":3,"../core/objectid":9,"../query/GetQuery":34,"../security":43,"../web":49,"./Collection":12,"./LiveDataMessage":14,"./Model":15,"./Store":19,"./SyncContext":20,"./SyncEndpoint":22,"./WebSqlStore":27,"./url":31,"_process":281,"lodash":253,"q":289,"socket.io-client":undefined}],26:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/SyncStore.spec.ts
@@ -4161,7 +4201,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncStore.spec.js")
-},{"./Collection":11,"./Model":14,"./SyncStore":24,"chai":119,"lodash":253}],26:[function(require,module,exports){
+},{"./Collection":12,"./Model":15,"./SyncStore":25,"chai":119,"lodash":253}],27:[function(require,module,exports){
 (function (process,global){
 /**
  * @file livedata/WebSqlStore.ts
@@ -4191,11 +4231,11 @@ var __extends = (this && this.__extends) || function (d, b) {
 var _ = require('lodash');
 var Q = require('q');
 var diag = require('../core/diag');
+var objectid = require('../core/objectid');
 var cipher = require('../core/cipher');
 var Store_1 = require('./Store');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
-var objectid_1 = require('./objectid');
 /**
  * openDatabase of browser or via require websql.
  *
@@ -4573,7 +4613,7 @@ var WebSqlStore = (function (_super) {
                 var amodel = models[i];
                 var statement = ''; // the actual sql insert string with values
                 if (!amodel.id) {
-                    amodel.set(amodel.idAttribute, new objectid_1.ObjectID().toHexString());
+                    amodel.set(amodel.idAttribute, objectid.makeObjectID());
                 }
                 var value = options.attrs || amodel.attributes;
                 var keys = ['id', 'data'];
@@ -4722,7 +4762,7 @@ var webSqlStore = _.extend(WebSqlStore.prototype, {
 diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Object.create(webSqlStore)); });
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/cipher":1,"../core/diag":3,"./Collection":11,"./Model":14,"./Store":18,"./objectid":29,"_process":281,"lodash":253,"q":289,"websql":undefined}],27:[function(require,module,exports){
+},{"../core/cipher":1,"../core/diag":3,"../core/objectid":9,"./Collection":12,"./Model":15,"./Store":19,"_process":281,"lodash":253,"q":289,"websql":undefined}],28:[function(require,module,exports){
 (function (global,__filename){
 /**
  * @file livedata/WebSqlStore.spec.ts
@@ -4944,7 +4984,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\livedata\\WebSqlStore.spec.js")
-},{"./Collection":11,"./Model":14,"./WebSqlStore":26,"chai":119}],28:[function(require,module,exports){
+},{"./Collection":12,"./Model":15,"./WebSqlStore":27,"chai":119}],29:[function(require,module,exports){
 /**
  * @file livedata/approvals.data.ts
  * Relution SDK
@@ -13252,140 +13292,6 @@ function makeApprovals() {
 }
 exports.makeApprovals = makeApprovals;
 
-},{}],29:[function(require,module,exports){
-// Copyright (c) 2013 M-Way Solutions GmbH
-// http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
-"use strict";
-// ===========================================================================
-//
-// Relution.LiveData.ObjectId uses code from meteor.js
-// https://github.com/meteor/meteor/blob/master/packages/minimongo
-//
-// Thanks for sharing!
-//
-// ===========================================================================
-// m_require('core/foundation/object.js');
-/**
- * @internal For implementation use only!
- */
-var ObjectID = (function () {
-    function ObjectID(hexString) {
-        // random-based impl of Mongo ObjectID
-        if (hexString) {
-            hexString = hexString.toLowerCase();
-            if (!ObjectID._looksLikeObjectID(hexString)) {
-                throw new Error('Invalid hexadecimal string for creating an ObjectID');
-            }
-            // meant to work with _.isEqual(), which relies on structural equality
-            this._str = hexString;
-        }
-        else {
-            this._str =
-                this._hexString(8, new Date().getTime() / 1000) +
-                    this._hexString(6, ObjectID.machineId) +
-                    this._hexString(4, ObjectID.processId) +
-                    this._hexString(6, ObjectID.counter++); // a 3-byte counter, starting with a random value.
-        }
-    }
-    ObjectID._looksLikeObjectID = function (str) {
-        return str.length === 24 && str.match(/^[0-9a-f]*$/);
-    };
-    ObjectID.prototype._hexString = function (len, num) {
-        num = num || parseInt('' + (Math.random() * Math.pow(16, len)));
-        var str = num.toString(16);
-        while (str.length < len) {
-            str = '0' + str;
-        }
-        return str.substr(0, len);
-    };
-    ObjectID.prototype.toString = function () {
-        return 'ObjectID(\'' + this._str + '\')';
-    };
-    ObjectID.prototype.equals = function (other) {
-        return other instanceof ObjectID && this.valueOf() === other.valueOf();
-    };
-    ObjectID.prototype.clone = function () {
-        return new ObjectID(this._str);
-    };
-    ObjectID.prototype.typeName = function () {
-        return 'oid';
-    };
-    ObjectID.prototype.getTimestamp = function () {
-        return parseInt(this._str.substr(0, 8), 16) * 1000;
-    };
-    ObjectID.prototype.getMachineId = function () {
-        return parseInt(this._str.substr(8, 6), 16);
-    };
-    ObjectID.prototype.getProcessId = function () {
-        return parseInt(this._str.substr(14, 4), 16);
-    };
-    ObjectID.prototype.getCounter = function () {
-        return parseInt(this._str.substr(18, 6), 16);
-    };
-    ObjectID.prototype.valueOf = function () {
-        return this._str;
-    };
-    ObjectID.prototype.toJSON = function () {
-        return this._str;
-    };
-    ObjectID.prototype.toHexString = function () {
-        return this._str;
-    };
-    // Is this selector just shorthand for lookup by _id?
-    ObjectID.prototype._selectorIsId = function (selector) {
-        return (typeof selector === 'string') ||
-            (typeof selector === 'number') ||
-            selector instanceof ObjectID;
-    };
-    // Is the selector just lookup by _id (shorthand or not)?
-    ObjectID.prototype._selectorIsIdPerhapsAsObject = function (selector) {
-        return this._selectorIsId(selector) || (selector && typeof selector === 'object' && selector._id && this._selectorIsId(selector._id) && _.size(selector) === 1);
-    };
-    // If this is a selector which explicitly constrains the match by ID to a finite
-    // number of documents, returns a list of their IDs.  Otherwise returns
-    // null. Note that the selector may have other restrictions so it may not even
-    // match those document!  We care about $in and $and since those are generated
-    // access-controlled update and remove.
-    ObjectID.prototype._idsMatchedBySelector = function (selector) {
-        // Is the selector just an ID?
-        if (this._selectorIsId(selector)) {
-            return [selector];
-        }
-        if (!selector) {
-            return null;
-        }
-        // Do we have an _id clause?
-        if (_.has(selector, '_id')) {
-            // Is the _id clause just an ID?
-            if (this._selectorIsId(selector._id)) {
-                return [selector._id];
-            }
-            // Is the _id clause {_id: {$in: ["x", "y", "z"]}}?
-            if (selector._id && selector._id.$in && _.isArray(selector._id.$in) && !_.isEmpty(selector._id.$in) && _.all(selector._id.$in, this._selectorIsId)) {
-                return selector._id.$in;
-            }
-            return null;
-        }
-        // If this is a top-level $and, and any of the clauses constrain their
-        // documents, then the whole selector is constrained by any one clause's
-        // constraint. (Well, by their intersection, but that seems unlikely.)
-        if (selector.$and && _.isArray(selector.$and)) {
-            for (var i = 0; i < selector.$and.length; ++i) {
-                var subIds = this._idsMatchedBySelector(selector.$and[i]);
-                if (subIds) {
-                    return subIds;
-                }
-            }
-        }
-        return null;
-    };
-    ObjectID.counter = parseInt('' + (Math.random() * Math.pow(16, 6)));
-    ObjectID.machineId = parseInt('' + (Math.random() * Math.pow(16, 6)));
-    ObjectID.processId = parseInt('' + (Math.random() * Math.pow(16, 4)));
-    return ObjectID;
-}());
-exports.ObjectID = ObjectID;
-
 },{}],30:[function(require,module,exports){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
@@ -13477,7 +13383,7 @@ function sync(method, model, options) {
 }
 exports.sync = sync;
 
-},{"../core/diag":3,"../web":49,"./Object":16,"q":289}],31:[function(require,module,exports){
+},{"../core/diag":3,"../web":49,"./Object":17,"q":289}],31:[function(require,module,exports){
 (function (global){
 // Copyright (c) 2013 M-Way Solutions GmbH
 // http://github.com/mwaylabs/The-M-Project/blob/absinthe/MIT-LICENSE.txt
@@ -106694,4 +106600,4 @@ function extend() {
     return target
 }
 
-},{}]},{},[10]);
+},{}]},{},[11]);

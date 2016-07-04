@@ -22,6 +22,7 @@ import * as Q from 'q';
 import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
+import * as objectid from '../core/objectid';
 import * as security from '../security';
 import * as web from '../web';
 
@@ -34,8 +35,6 @@ import {LiveDataMessage, LiveDataMessageModel} from './LiveDataMessage';
 import {Backbone} from './Object';
 import {Model, ModelCtor, isModel} from './Model';
 import {Collection, isCollection} from './Collection';
-
-import {ObjectID} from './objectid';
 
 import * as URLUtil from './url';
 
@@ -496,7 +495,7 @@ export class SyncStore extends Store {
         // offline capability requires IDs for data
         if (!model.id) {
           if (method === 'create') {
-            model.set(model.idAttribute, new ObjectID().toHexString());
+            model.set(model.idAttribute, objectid.makeObjectID());
           } else {
             let error = new Error('no (valid) id: ' + model.id);
             return Q.reject(this.handleError(options, error) || error);
