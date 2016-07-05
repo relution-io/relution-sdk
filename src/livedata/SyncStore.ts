@@ -253,7 +253,7 @@ export class SyncStore extends Store {
 
   createSocket(endpoint: SyncEndpoint, name: string) {
     if (this.useSocketNotify && endpoint && endpoint.socketPath) {
-      diag.debug.trace('Relution.LiveData.SyncStore._createSocket: ' + name);
+      diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
 
       // resource
       let connectVo: any = {

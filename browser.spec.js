@@ -3043,7 +3043,7 @@ var SyncStore = (function (_super) {
     SyncStore.prototype.createSocket = function (endpoint, name) {
         var _this = this;
         if (this.useSocketNotify && endpoint && endpoint.socketPath) {
-            diag.debug.trace('Relution.LiveData.SyncStore._createSocket: ' + name);
+            diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
             // resource
             var connectVo = {};
             var resource = endpoint.socketPath; // remove leading /
