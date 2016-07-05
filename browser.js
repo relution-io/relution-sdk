@@ -2721,8 +2721,10 @@ __export(require('./verb'));
 var crypto = require('crypto');
 var Q = require('q');
 // localStorage of browser or via node-localstorage
-var localStorage = global['localStorage'] ||
-    (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+function localStorage() {
+    return global['localStorage'] ||
+        (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+}
 // key generation parameters
 var pbkdf2SaltLen = 64;
 var pbkdf2Iterations = 36911;
@@ -2819,7 +2821,7 @@ function clearOfflineLogin(credentials, serverOptions) {
     // so that the credentials parameter is irrelevant, but provided for the
     // sake of completeness...
     try {
-        localStorage.removeItem(computeLocalStorageKey(serverOptions));
+        localStorage().removeItem(computeLocalStorageKey(serverOptions));
         return Q.resolve(undefined);
     }
     catch (error) {
@@ -2839,7 +2841,7 @@ exports.clearOfflineLogin = clearOfflineLogin;
  */
 function storeOfflineLogin(credentials, serverOptions, loginResponse) {
     return encryptJson(credentials['password'], loginResponse).then(function (value) {
-        localStorage.setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
+        localStorage().setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
         return loginResponse;
     });
 }
@@ -2859,7 +2861,7 @@ exports.storeOfflineLogin = storeOfflineLogin;
  */
 function fetchOfflineLogin(credentials, serverOptions) {
     try {
-        var value = localStorage.getItem(computeLocalStorageKey(serverOptions));
+        var value = localStorage().getItem(computeLocalStorageKey(serverOptions));
         if (!value) {
             return Q.resolve(undefined);
         }
