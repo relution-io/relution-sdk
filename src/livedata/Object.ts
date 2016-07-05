@@ -36,7 +36,7 @@ export function _create(args) {
 }
 
 export function _design(obj) {
-  var O = this.extend(obj || {});
+  var O = this._extend(obj || {});
   return new O();
 }
 
@@ -82,7 +82,7 @@ export class _Object {
    *
    * @param {Object} properties The properties to be included into the given object.
    */
-  design(properties) {
+  _design(properties) {
     // create the new object
     var obj = this._create(this);
 

@@ -55,7 +55,7 @@ export const io = global['io'] ||               // native implementation
  * // The default configuration will save the complete model data as a json,
  * // and the offline change log to a local WebSql database, synchronize it
  * // trough REST calls with the server and receive live updates via a socket.io connection.
- * var MyCollection = Relution.livedata.Collection.extend({
+ * var MyCollection = Relution.livedata.Collection._extend({
  *      model: MyModel,
  *      url: 'http://myServer.io/myOrga/myApplication/myCollection',
  *      store: new Relution.livedata.SyncStore( {
@@ -243,7 +243,7 @@ export class SyncStore extends Store {
    */
   createMsgCollection(): Collection {
     if (this.useOfflineChanges && !this.messages) {
-      this.messages = Collection.design({
+      this.messages = Collection._design({
         model: LiveDataMessageModel,
         store: new this.localStore(this.localStoreOptions)
       });
@@ -253,7 +253,7 @@ export class SyncStore extends Store {
 
   createSocket(endpoint: SyncEndpoint, name: string) {
     if (this.useSocketNotify && endpoint && endpoint.socketPath) {
-      diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
+      diag.debug.trace('Relution.LiveData.SyncStore._createSocket: ' + name);
 
       // resource
       let connectVo: any = {

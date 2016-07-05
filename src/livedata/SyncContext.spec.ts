@@ -37,11 +37,11 @@ describe(module.filename || __filename, function() {
   // prepare model/collection types
   var store = new SyncStore({
   });
-  var TestModel = Model.extend({
+  var TestModel = Model._extend({
     idAttribute: 'id',
     entity: 'approval'
   });
-  var TestCollection = Collection.extend({
+  var TestCollection = Collection._extend({
     model: TestModel,
     store: store,
     url: serverUrl + '/relution/livedata/approvals/'

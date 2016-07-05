@@ -27,7 +27,7 @@ export declare class _Object {
      *
      * @param {Object} properties The properties to be included into the given object.
      */
-    design(properties: any): any;
+    _design(properties: any): any;
     /**
      * Binds a method to its caller, so it is always executed within the right scope.
      *

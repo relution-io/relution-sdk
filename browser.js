@@ -905,9 +905,9 @@ var Collection = (function (_super) {
         }
         return this.syncContext.fetchPrev(this, options);
     };
-    Collection.extend = Backbone.Collection.extend;
-    Collection.create = Object_1._create;
-    Collection.design = Object_1._design;
+    Collection._extend = Backbone.Collection.extend;
+    Collection._create = Object_1._create;
+    Collection._design = Object_1._design;
     return Collection;
 }(Backbone.Collection));
 exports.Collection = Collection;
@@ -1030,7 +1030,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
     __extends(Model /*<AttributesType extends Object>*/, _super);
     function Model /*<AttributesType extends Object>*/(attributes, options) {
         _super.call(this, attributes, options);
-        this.defaults = {};
         this.changedSinceSync = {};
         if (this.urlRoot && typeof this.urlRoot === 'string') {
             if (this.urlRoot.charAt(this.urlRoot.length - 1) !== '/') {
@@ -1085,9 +1084,9 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
             return url;
         }
     };
-    Model /*<AttributesType extends Object>*/.extend = Backbone.Model.extend;
-    Model /*<AttributesType extends Object>*/.create = Object_1._create;
-    Model /*<AttributesType extends Object>*/.design = Object_1._design;
+    Model /*<AttributesType extends Object>*/._extend = Backbone.Model.extend;
+    Model /*<AttributesType extends Object>*/._create = Object_1._create;
+    Model /*<AttributesType extends Object>*/._design = Object_1._design;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
@@ -1136,7 +1135,7 @@ function _create(args) {
 }
 exports._create = _create;
 function _design(obj) {
-    var O = this.extend(obj || {});
+    var O = this._extend(obj || {});
     return new O();
 }
 exports._design = _design;
@@ -1175,7 +1174,7 @@ var _Object = (function () {
      *
      * @param {Object} properties The properties to be included into the given object.
      */
-    _Object.prototype.design = function (properties) {
+    _Object.prototype._design = function (properties) {
         // create the new object
         var obj = this._create(this);
         // assign the properties passed with the arguments array
@@ -1321,7 +1320,7 @@ var Store = (function () {
     };
     Store.prototype.create = function (collection, model, options) {
         var opts = _.extend({}, options || {}, { store: this });
-        return collection.create(model, opts);
+        return collection._create(model, opts);
     };
     Store.prototype.save = function (model, attr, options) {
         var opts = _.extend({}, options || {}, { store: this });
@@ -1369,9 +1368,9 @@ var Store = (function () {
     Store.prototype.close = function () {
         // nothing to do
     };
-    Store.extend = Object_2._extend;
-    Store.create = Object_2._create;
-    Store.design = Object_2._design;
+    Store._extend = Object_2._extend;
+    Store._create = Object_2._create;
+    Store._design = Object_2._design;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
         ERROR_LOAD_DATA: 'Error while loading data from store. ',
@@ -2006,7 +2005,7 @@ exports.io = global['io'] ||
  * // The default configuration will save the complete model data as a json,
  * // and the offline change log to a local WebSql database, synchronize it
  * // trough REST calls with the server and receive live updates via a socket.io connection.
- * var MyCollection = Relution.livedata.Collection.extend({
+ * var MyCollection = Relution.livedata.Collection._extend({
  *      model: MyModel,
  *      url: 'http://myServer.io/myOrga/myApplication/myCollection',
  *      store: new Relution.livedata.SyncStore( {
@@ -2152,7 +2151,7 @@ var SyncStore = (function (_super) {
      */
     SyncStore.prototype.createMsgCollection = function () {
         if (this.useOfflineChanges && !this.messages) {
-            this.messages = Collection_1.Collection.design({
+            this.messages = Collection_1.Collection._design({
                 model: LiveDataMessage_1.LiveDataMessageModel,
                 store: new this.localStore(this.localStoreOptions)
             });
@@ -2162,7 +2161,7 @@ var SyncStore = (function (_super) {
     SyncStore.prototype.createSocket = function (endpoint, name) {
         var _this = this;
         if (this.useSocketNotify && endpoint && endpoint.socketPath) {
-            diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
+            diag.debug.trace('Relution.LiveData.SyncStore._createSocket: ' + name);
             // resource
             var connectVo = {};
             var resource = endpoint.socketPath; // remove leading /
@@ -3195,7 +3194,7 @@ exports.openDatabase = openDatabase;
  *
  * // The default configuration will save the complete model data as json
  * // into a database column with the name "data"
- * var MyCollection = Relution.livedata.Collection.extend({
+ * var MyCollection = Relution.livedata.Collection._extend({
  *      model: MyModel,
  *      entity: 'MyTableName',
  *      store: new Relution.livedata.WebSqlStore()
@@ -3203,7 +3202,7 @@ exports.openDatabase = openDatabase;
  *
  * // If you want to use specific columns you can specify the fields
  * // in the entity of your model like this:
- * var MyModel = Relution.livedata.Model.extend({
+ * var MyModel = Relution.livedata.Model._extend({
  *      idAttribute: 'id'
  * });
  */

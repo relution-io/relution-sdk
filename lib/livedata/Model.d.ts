@@ -26,15 +26,14 @@ export declare class Model extends Backbone.Model {
     isModel: boolean;
     isCollection: boolean;
     entity: string;
-    defaults: {};
     changedSinceSync: {};
     collection: Collection;
     store: Store;
     credentials: any;
     endpoint: SyncEndpoint;
-    static extend: typeof Backbone.Model.extend;
-    static create: typeof _create;
-    static design: typeof _design;
+    static _extend: any;
+    static _create: typeof _create;
+    static _design: typeof _design;
     constructor(attributes?: any, options?: any);
     protected init(attributes?: any, options?: any): void;
     ajax(options: any): any;

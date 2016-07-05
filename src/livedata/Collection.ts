@@ -66,7 +66,7 @@ export function isCollection(object): object is Collection {
  *
  * see WebSqlStore or SyncStore for examples
  */
-export class Collection extends Backbone.Collection {
+export class Collection extends Backbone.Collection<Model> {
 
   public _type: string;         // constant 'Relution.LiveData.Collection' on prototype
   public isModel: boolean;      // constant false on prototype
@@ -83,9 +83,9 @@ export class Collection extends Backbone.Collection {
   public endpoint: SyncEndpoint;
   public channel: string;
 
-  public static extend = Backbone.Collection.extend;
-  public static create = _create;
-  public static design = _design;
+  public static _extend = (<any>Backbone.Collection).extend;
+  public static _create = _create;
+  public static _design = _design;
 
   public constructor(models?: any, options?: any) {
     super(models, options);

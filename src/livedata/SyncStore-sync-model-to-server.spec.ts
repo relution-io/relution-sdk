@@ -40,7 +40,7 @@ describe(module.filename || __filename, function() {
       useSocketNotify: false
     });
 
-    modelType = Model.extend({
+    modelType = Model._extend({
       idAttribute: 'id',
       entity: 'User',
       store: Store,

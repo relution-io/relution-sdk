@@ -66,7 +66,6 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
   public isCollection: boolean; // constant false on prototype
 
   public entity: string;
-  public defaults = {};
   public changedSinceSync = {};
 
   public collection: Collection;
@@ -75,9 +74,9 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
 
   public endpoint: SyncEndpoint;
 
-  public static extend = Backbone.Model.extend;
-  public static create = _create;
-  public static design = _design;
+  public static _extend = (<any>Backbone.Model).extend;
+  public static _create = _create;
+  public static _design = _design;
 
   public constructor(attributes?: any, options?: any) {
     super(attributes, options);

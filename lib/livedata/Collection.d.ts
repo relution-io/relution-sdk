@@ -1,5 +1,5 @@
 import { Store } from './Store';
-import { ModelCtor } from './Model';
+import { Model, ModelCtor } from './Model';
 import { SyncContext } from './SyncContext';
 import { SyncEndpoint } from './SyncEndpoint';
 import { _create, _design } from './Object';
@@ -28,7 +28,7 @@ export declare function isCollection(object: any): object is Collection;
  *
  * see WebSqlStore or SyncStore for examples
  */
-export declare class Collection extends Backbone.Collection {
+export declare class Collection extends Backbone.Collection<Model> {
     _type: string;
     isModel: boolean;
     isCollection: boolean;
@@ -40,9 +40,9 @@ export declare class Collection extends Backbone.Collection {
     credentials: any;
     endpoint: SyncEndpoint;
     channel: string;
-    static extend: typeof Backbone.Collection.extend;
-    static create: typeof _create;
-    static design: typeof _design;
+    static _extend: any;
+    static _create: typeof _create;
+    static _design: typeof _design;
     constructor(models?: any, options?: any);
     protected init(models?: any, options?: any): void;
     modelId: (attrs: any) => any;

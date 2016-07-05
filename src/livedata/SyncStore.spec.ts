@@ -51,7 +51,7 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(SyncStore, 'SyncStore is defined');
 
-      TEST.store = SyncStore.design({
+      TEST.store = SyncStore._design({
         useLocalStore: true,
         useSocketNotify: false
       });
@@ -62,7 +62,7 @@ describe(module.filename || __filename, function() {
     it('creating collection', () => {
       assert.isFunction(Collection, 'Collection is defined');
 
-      TEST.TestModel = Model.extend({
+      TEST.TestModel = Model._extend({
         idAttribute: '_id',
         entity: 'test'
       });
@@ -71,7 +71,7 @@ describe(module.filename || __filename, function() {
 
       TEST.url = serverUrl + '/relution/livedata/test/';
 
-      TEST.TestsModelCollection = Collection.extend({
+      TEST.TestsModelCollection = Collection._extend({
         model: TEST.TestModel,
         url: TEST.url,
         store: TEST.store,
@@ -84,7 +84,7 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
 
-      TEST.Tests = TEST.TestsModelCollection.create();
+      TEST.Tests = TEST.TestsModelCollection._create();
 
       assert.isObject(TEST.Tests, 'Test collection successfully created.');
 
@@ -135,7 +135,7 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', (done) => {
 
-      TEST.TestModel2 = Model.extend({
+      TEST.TestModel2 = Model._extend({
         url: TEST.url,
         idAttribute: '_id',
         store: TEST.store,
@@ -143,7 +143,7 @@ describe(module.filename || __filename, function() {
       });
 
       var data = { _id: TEST.id };
-      var model = TEST.TestModel2.create(data);
+      var model = TEST.TestModel2._create(data);
 
       assert.isObject(model, "new model created");
 
@@ -163,14 +163,14 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with no id using callbacks', (done) => {
-      TEST.TestModel2 = Model.extend({
+      TEST.TestModel2 = Model._extend({
         url: TEST.url,
         idAttribute: '_id',
         store: TEST.store,
         entity: 'test'
       });
 
-      var model = TEST.TestModel2.create({});
+      var model = TEST.TestModel2._create({});
       model.fetch({
         success: function(model) {
           backbone_error(done)(model, new Error('this should have failed!'));
@@ -182,14 +182,14 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with empty-string id using promises', (done) => {
-      TEST.TestModel2 = Model.extend({
+      TEST.TestModel2 = Model._extend({
         url: TEST.url,
         idAttribute: '_id',
         store: TEST.store,
         entity: 'test'
       });
 
-      var model = TEST.TestModel2.create({
+      var model = TEST.TestModel2._create({
         _id: ''
       });
       model.fetch().then(function() {
@@ -249,7 +249,7 @@ describe(module.filename || __filename, function() {
       var oldId = model.id;
       var newId = '4711-' + oldId;
 
-      var TestModel = Model.extend({
+      var TestModel = Model._extend({
         url: TEST.url,
         idAttribute: '_id',
         store: TEST.store,

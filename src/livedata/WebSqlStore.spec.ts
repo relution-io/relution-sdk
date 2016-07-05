@@ -58,7 +58,7 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(WebSqlStore, 'function', 'WebSqlStore is defined');
 
-      TEST.store = WebSqlStore.design(undefined);
+      TEST.store = WebSqlStore._design(undefined);
 
       assert.typeOf(TEST.store, 'object', 'store successfully created.');
 
@@ -68,13 +68,13 @@ describe(module.filename || __filename, function() {
 
     it('simple websql store', function (done) {
 
-      TEST.SimpleModel = Model.extend({
+      TEST.SimpleModel = Model._extend({
         idAttribute: 'key'
       });
 
       assert.typeOf(TEST.SimpleModel, 'function', 'SimpleModel model successfully extended.');
 
-      TEST.SimpleModelCollection = Collection.extend({
+      TEST.SimpleModelCollection = Collection._extend({
         model: TEST.SimpleModel,
         store: new WebSqlStore(),
         entity: 'test'
@@ -82,7 +82,7 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
 
-      TEST.Simple = TEST.SimpleModelCollection.create();
+      TEST.Simple = TEST.SimpleModelCollection._create();
 
       assert.typeOf(TEST.Simple, 'object', 'Simple collection successfully created.');
 
@@ -109,21 +109,21 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
-      TEST.TestModel = Model.extend({
+      TEST.TestModel = Model._extend({
         idAttribute: 'key',
         entity: 'test'
       });
 
       assert.typeOf(TEST.TestModel, 'function', 'TestModel model successfully extended.');
 
-      TEST.TestModelCollection = Collection.extend({
+      TEST.TestModelCollection = Collection._extend({
         model: TEST.TestModel,
         store: TEST.store
       });
 
       assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
 
-      TEST.Tests = TEST.TestModelCollection.create();
+      TEST.Tests = TEST.TestModelCollection._create();
 
       assert.typeOf(TEST.Tests, 'object', 'Test collection successfully created.');
 
@@ -180,13 +180,13 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', function (done) {
 
-      TEST.TestModel2 = Model.extend({
+      TEST.TestModel2 = Model._extend({
         idAttribute: 'key',
         store: TEST.store,
         entity: 'test'
       });
 
-      var model = TEST.TestModel2.create({key: TEST.key});
+      var model = TEST.TestModel2._create({key: TEST.key});
 
       assert.isObject(model, "new model created");
 
@@ -248,20 +248,20 @@ describe(module.filename || __filename, function() {
     it('create record (no schema)', function (done) {
 
       // recreate store type to drop schema information
-      TEST.store = WebSqlStore.design(undefined);
+      TEST.store = WebSqlStore._design(undefined);
 
-      TEST.TestModel2 = Model.extend({
+      TEST.TestModel2 = Model._extend({
         idAttribute: 'key',
         store: TEST.store,
         entity: 'test'
       });
 
-      TEST.Tests2 = Collection.design({
+      TEST.Tests2 = Collection._design({
         model: TEST.TestModel2,
         store: TEST.store
       });
 
-      assert.isObject(TEST.Tests2, "Collection.design created a new collection");
+      assert.isObject(TEST.Tests2, "Collection._design created a new collection");
 
       TEST.data = {
         firstName: 'Max',

@@ -60,9 +60,9 @@ export class Store {
     }
   }
 
-  public static extend = _extend;
-  public static create = _create;
-  public static design = _design;
+  public static _extend = _extend;
+  public static _create = _create;
+  public static _design = _design;
 
   protected trigger;
 
@@ -125,7 +125,7 @@ export class Store {
 
   create(collection, model, options) {
     var opts = _.extend({}, options || {}, { store: this });
-    return collection.create(model, opts);
+    return collection._create(model, opts);
   }
 
   save(model, attr, options) {

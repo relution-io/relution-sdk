@@ -33,7 +33,7 @@ import { Collection } from './Collection';
  * // The default configuration will save the complete model data as a json,
  * // and the offline change log to a local WebSql database, synchronize it
  * // trough REST calls with the server and receive live updates via a socket.io connection.
- * var MyCollection = Relution.livedata.Collection.extend({
+ * var MyCollection = Relution.livedata.Collection._extend({
  *      model: MyModel,
  *      url: 'http://myServer.io/myOrga/myApplication/myCollection',
  *      store: new Relution.livedata.SyncStore( {

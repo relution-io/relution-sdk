@@ -66,28 +66,28 @@ describe(module.filename || __filename, function() {
       assert.isFalse(isCollection({}));
       assert.isFalse(isCollection([]));
       assert.isFalse(isCollection(Collection));
-      assert.isTrue(isCollection(Collection.create(undefined)));
-      assert.isTrue(isCollection(Collection.extend(undefined).create(undefined)));
+      assert.isTrue(isCollection(Collection._create(undefined)));
+      assert.isTrue(isCollection(Collection._extend(undefined)._create(undefined)));
       assert.isFalse(isCollection(Model));
-      assert.isFalse(isCollection(Model.create(undefined)));
-      assert.isFalse(isCollection(Model.extend(undefined).create(undefined)));
+      assert.isFalse(isCollection(Model._create(undefined)));
+      assert.isFalse(isCollection(Model._extend(undefined)._create(undefined)));
       assert.isFalse(isCollection(Store));
-      assert.isFalse(isCollection(Store.create(undefined)));
-      assert.isFalse(isCollection(Store.extend(undefined).create(undefined)));
+      assert.isFalse(isCollection(Store._create(undefined)));
+      assert.isFalse(isCollection(Store._extend(undefined)._create(undefined)));
     }),
 
     it('basic', function () {
       assert.isDefined(Collection);
-      assert.isDefined(Collection.design);
-      assert.isDefined(Collection.create);
-      assert.isDefined(Collection.extend);
+      assert.isDefined(Collection._design);
+      assert.isDefined(Collection._create);
+      assert.isDefined(Collection._extend);
 
       assert.isFunction(Collection);
-      assert.isFunction(Collection.design);
-      assert.isFunction(Collection.create);
-      assert.isFunction(Collection.extend);
+      assert.isFunction(Collection._design);
+      assert.isFunction(Collection._create);
+      assert.isFunction(Collection._extend);
 
-      var instance = Collection.create(undefined);
+      var instance = Collection._create(undefined);
       assert.isDefined(instance);
       assert.isObject(instance);
       assert.isDefined(instance._type);
@@ -99,14 +99,14 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
-      TEST.Developer = Model.extend({
+      TEST.Developer = Model._extend({
         idAttribute: '_id',
         entity: 'Developer'
       });
 
       assert.ok(typeof TEST.Developer === 'function', 'Developer model successfully extended.');
 
-      TEST.DeveloperCollection = Collection.extend({
+      TEST.DeveloperCollection = Collection._extend({
         url: TEST.url,
         model: TEST.Developer
       });

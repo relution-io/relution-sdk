@@ -7,7 +7,7 @@ import { Store } from './Store';
  *
  * // The default configuration will save the complete model data as json
  * // into a database column with the name "data"
- * var MyCollection = Relution.livedata.Collection.extend({
+ * var MyCollection = Relution.livedata.Collection._extend({
  *      model: MyModel,
  *      entity: 'MyTableName',
  *      store: new Relution.livedata.WebSqlStore()
@@ -15,7 +15,7 @@ import { Store } from './Store';
  *
  * // If you want to use specific columns you can specify the fields
  * // in the entity of your model like this:
- * var MyModel = Relution.livedata.Model.extend({
+ * var MyModel = Relution.livedata.Model._extend({
  *      idAttribute: 'id'
  * });
  */
