@@ -45,6 +45,7 @@ export default [
   // livedata
   require('./livedata/Model.spec'),
   require('./livedata/Collection.spec'),
+  require('./livedata/Store.spec'),
   require('./livedata/WebSqlStore.spec'),
   require('./livedata/SyncEndpoint.spec'),
   require('./livedata/SyncStore.spec'),

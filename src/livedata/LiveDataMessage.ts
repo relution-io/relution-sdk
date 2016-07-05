@@ -90,7 +90,7 @@ export interface LiveDataMessage {
 /**
  * message packed into a Model.
  *
- * @module Relution.LiveData.LiveDataMessage
+ * @module Relution.livedata.LiveDataMessage
  *
  * @type {*}
  */
@@ -105,7 +105,7 @@ export class LiveDataMessageModel extends Model/*<LiveDataMessage>*/ {
 
 // mixins
 let msgmodel = _.extend(LiveDataMessageModel.prototype, {
-  _type: 'Relution.LiveData.LiveDataMessageModel',
+  _type: 'Relution.livedata.LiveDataMessageModel',
   entity: '__msg__',
   idAttribute: '_id'
 });

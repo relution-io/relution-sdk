@@ -59,7 +59,7 @@ export interface LiveDataMessage {
 /**
  * message packed into a Model.
  *
- * @module Relution.LiveData.LiveDataMessage
+ * @module Relution.livedata.LiveDataMessage
  *
  * @type {*}
  */

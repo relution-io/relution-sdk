@@ -19,7 +19,7 @@ export declare class SortOrder {
      * parses a JSON literal such as ['-rating', '+date', 'id'] into this instance.
      *
      * @param json data, such as ['-rating', '+date'].
-     * @return {Relution.LiveData.SortOrder} this instance.
+     * @return {SortOrder} this instance.
      */
     fromJSON(json: string[]): SortOrder;
     /**
@@ -61,7 +61,7 @@ export declare class SortField {
      * parses a JSON literal such as '-rating' into this instance.
      *
      * @param json data, such as '-rating'.
-     * @return {Relution.LiveData.SortOrder} this instance.
+     * @return {SortField} this instance.
      */
     fromJSON(json: string): SortField;
     /**

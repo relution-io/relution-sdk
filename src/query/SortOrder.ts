@@ -45,7 +45,7 @@ export class SortOrder {
    * parses a JSON literal such as ['-rating', '+date', 'id'] into this instance.
    *
    * @param json data, such as ['-rating', '+date'].
-   * @return {Relution.LiveData.SortOrder} this instance.
+   * @return {SortOrder} this instance.
    */
   public fromJSON(json: string[]): SortOrder {
     this.sortFields = new Array<SortField>(json.length);
@@ -120,13 +120,12 @@ export class SortField {
    * parses a JSON literal such as '-rating' into this instance.
    *
    * @param json data, such as '-rating'.
-   * @return {Relution.LiveData.SortOrder} this instance.
+   * @return {SortField} this instance.
    */
   public fromJSON(json: string): SortField {
     var order = json.length > 0 && json.charAt(0);
     this.name = order === '+' || order === '-' ? json.substring(1) : json;
     this.ascending = order !== '-';
-
     return this;
   }
 

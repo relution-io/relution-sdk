@@ -10,12 +10,20 @@ export interface StoreCtor {
     new (options?: any): Store;
 }
 /**
+ * tests whether a given object is a Store.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Store.
+ */
+export declare function isStore(object: any): object is Store;
+/**
  * base class to build a custom data store.
  */
 export declare class Store {
     _type: string;
     isModel: boolean;
     isCollection: boolean;
+    isStore: boolean;
     protected name: string;
     protected entities: any;
     endpoints: any;

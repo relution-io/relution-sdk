@@ -903,9 +903,10 @@ var Collection = (function (_super) {
 exports.Collection = Collection;
 // mixins
 var collection = _.extend(Collection.prototype, {
-    _type: 'Relution.LiveData.Collection',
+    _type: 'Relution.livedata.Collection',
     isModel: false,
     isCollection: true,
+    isStore: false,
     // default model type unless overwritten
     model: Model_1.Model
 });
@@ -943,7 +944,7 @@ var diag = require('../core/diag');
 /**
  * message packed into a Model.
  *
- * @module Relution.LiveData.LiveDataMessage
+ * @module Relution.livedata.LiveDataMessage
  *
  * @type {*}
  */
@@ -957,7 +958,7 @@ var LiveDataMessageModel = (function (_super) {
 exports.LiveDataMessageModel = LiveDataMessageModel;
 // mixins
 var msgmodel = _.extend(LiveDataMessageModel.prototype, {
-    _type: 'Relution.LiveData.LiveDataMessageModel',
+    _type: 'Relution.livedata.LiveDataMessageModel',
     entity: '__msg__',
     idAttribute: '_id'
 });
@@ -1078,9 +1079,10 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
 // mixins
 var model = _.extend(Model.prototype, {
-    _type: 'Relution.LiveData.Model',
+    _type: 'Relution.livedata.Model',
     isModel: true,
-    isCollection: false
+    isCollection: false,
+    isStore: false
 });
 diag.debug.assert(function () { return isModel(Object.create(model)); });
 
@@ -1107,6 +1109,25 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
+/**
+ * tests whether a given object is a Store.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Store.
+ */
+function isStore(object) {
+    if (!object || typeof object !== 'object') {
+        return false;
+    }
+    else if ('isStore' in object) {
+        diag.debug.assert(function () { return object.isStore === Store.prototype.isPrototypeOf(object); });
+        return object.isStore;
+    }
+    else {
+        return Store.prototype.isPrototypeOf(object);
+    }
+}
+exports.isStore = isStore;
 /**
  * base class to build a custom data store.
  */
@@ -1166,9 +1187,10 @@ var Store = (function () {
 exports.Store = Store;
 // mixins
 var store = _.extend(Store.prototype, Backbone.Events, {
-    _type: 'Relution.LiveData.Store',
+    _type: 'Relution.livedata.Store',
     isModel: false,
     isCollection: false,
+    isStore: true,
     name: 'relution-livedata'
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
@@ -1218,7 +1240,7 @@ var SyncContext = (function () {
         /**
          * relevant parameters for paging, filtering and sorting.
          *
-         * @type {Relution.LiveData.GetQuery}
+         * @type {Relution.livedata.GetQuery}
          */
         this.getQuery = new GetQuery_1.GetQuery();
         // merge options forming a GetQuery
@@ -1861,7 +1883,7 @@ var SyncStore = (function (_super) {
             this.initServer(urlRoot);
             var endpoint = this.endpoints[entity];
             if (!endpoint) {
-                diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + entity);
+                diag.debug.info('Relution.livedata.SyncStore.initEndpoint: ' + entity);
                 endpoint = new SyncEndpoint_1.SyncEndpoint({
                     entity: entity,
                     modelType: modelType,
@@ -1931,7 +1953,7 @@ var SyncStore = (function (_super) {
     SyncStore.prototype.createSocket = function (endpoint, name) {
         var _this = this;
         if (this.useSocketNotify && endpoint && endpoint.socketPath) {
-            diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
+            diag.debug.trace('Relution.livedata.SyncStore.createSocket: ' + name);
             // resource
             var connectVo = {};
             var resource = endpoint.socketPath; // remove leading /
@@ -1957,7 +1979,7 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype._bindChannel = function (endpoint, name) {
         if (endpoint && endpoint.socket) {
-            diag.debug.trace('Relution.LiveData.SyncStore._bindChannel: ' + name);
+            diag.debug.trace('Relution.livedata.SyncStore._bindChannel: ' + name);
             var channel = endpoint.channel;
             var socket = endpoint.socket;
             var time = this.getLastMessageTime(channel);
@@ -2114,7 +2136,7 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype.sync = function (method, model, options) {
         var _this = this;
-        diag.debug.trace('Relution.LiveData.SyncStore.sync');
+        diag.debug.trace('Relution.livedata.SyncStore.sync');
         options = options || {};
         try {
             var endpoint = model.endpoint || this.getEndpoint(model);
@@ -2643,7 +2665,7 @@ var SyncStore = (function (_super) {
         var triggerError = function () {
             // inform client application of the offline changes error
             var channel = message.get('channel');
-            diag.debug.error('Relution.LiveData.SyncStore.processOfflineMessageResult: triggering error for channel ' + channel + ' on store', error);
+            diag.debug.error('Relution.livedata.SyncStore.processOfflineMessageResult: triggering error for channel ' + channel + ' on store', error);
             if (!options.silent) {
                 _this.trigger('error:' + channel, error, model);
             }
@@ -2762,7 +2784,7 @@ var SyncStore = (function (_super) {
                 return message.destroy();
             }).then(nextMessage);
         };
-        diag.debug.info('Relution.LiveData.SyncStore._sendMessages');
+        diag.debug.info('Relution.livedata.SyncStore._sendMessages');
         var q = this.messagesPromise;
         if (!q) {
             // initially fetch all messages
@@ -2863,7 +2885,7 @@ var SyncStore = (function (_super) {
 exports.SyncStore = SyncStore;
 // mixins
 var syncStore = _.extend(SyncStore.prototype, {
-    _type: 'Relution.LiveData.SyncStore',
+    _type: 'Relution.livedata.SyncStore',
     localStore: WebSqlStore_1.WebSqlStore,
     useLocalStore: true,
     useSocketNotify: true,
@@ -3448,7 +3470,7 @@ var WebSqlStore = (function (_super) {
 exports.WebSqlStore = WebSqlStore;
 // mixins
 var webSqlStore = _.extend(WebSqlStore.prototype, {
-    _type: 'Relution.LiveData.WebSqlStore',
+    _type: 'Relution.livedata.WebSqlStore',
     size: 1024 * 1024,
     version: '1.0'
 });
@@ -3564,7 +3586,7 @@ function sync(method, model, options) {
     options = options || {};
     var store = options.store || this.store;
     options.credentials = options.credentials || this.credentials || store && store.options && store.options.credentials;
-    diag.debug.info('Relution.LiveData.sync ' + method + ' ' + model.id);
+    diag.debug.info('Relution.livedata.sync ' + method + ' ' + model.id);
     if (store && store.sync) {
         // store access (this is redundant model argument)
         var storeAjax = store.ajax && _.bind(store.ajax, store);
@@ -4612,7 +4634,7 @@ var SortOrder = (function () {
      * parses a JSON literal such as ['-rating', '+date', 'id'] into this instance.
      *
      * @param json data, such as ['-rating', '+date'].
-     * @return {Relution.LiveData.SortOrder} this instance.
+     * @return {SortOrder} this instance.
      */
     SortOrder.prototype.fromJSON = function (json) {
         this.sortFields = new Array(json.length);
@@ -4675,7 +4697,7 @@ var SortField = (function () {
      * parses a JSON literal such as '-rating' into this instance.
      *
      * @param json data, such as '-rating'.
-     * @return {Relution.LiveData.SortOrder} this instance.
+     * @return {SortField} this instance.
      */
     SortField.prototype.fromJSON = function (json) {
         var order = json.length > 0 && json.charAt(0);

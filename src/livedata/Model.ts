@@ -60,9 +60,10 @@ export function isModel(object): object is Model {
  */
 export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
 
-  public _type: string;         // constant 'Relution.LiveData.Model' on prototype
+  public _type: string;         // constant 'Relution.livedata.Model' on prototype
   public isModel: boolean;      // constant true on prototype
   public isCollection: boolean; // constant false on prototype
+  public isStore: boolean;      // constant false on prototype
 
   public entity: string;
   public changedSinceSync = {};
@@ -139,8 +140,9 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
 
 // mixins
 let model = _.extend(Model.prototype, {
-  _type: 'Relution.LiveData.Model',
+  _type: 'Relution.livedata.Model',
   isModel: true,
-  isCollection: false
+  isCollection: false,
+  isStore: false
 });
 diag.debug.assert(() => isModel(Object.create(model)));

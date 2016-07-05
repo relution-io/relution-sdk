@@ -87,7 +87,7 @@ export function sync(method, model, options) {
   var store = options.store || this.store;
   options.credentials = options.credentials || this.credentials || store && store.options && store.options.credentials;
 
-  diag.debug.info('Relution.LiveData.sync ' + method + ' ' + model.id);
+  diag.debug.info('Relution.livedata.sync ' + method + ' ' + model.id);
   if (store && store.sync) {
     // store access (this is redundant model argument)
     var storeAjax = store.ajax && _.bind(store.ajax, store);

@@ -619,7 +619,7 @@ export class WebSqlStore extends Store {
 
 // mixins
 let webSqlStore = _.extend(WebSqlStore.prototype, {
-  _type: 'Relution.LiveData.WebSqlStore',
+  _type: 'Relution.livedata.WebSqlStore',
 
   size: 1024 * 1024, // 1 MB
   version: '1.0'

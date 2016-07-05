@@ -24,6 +24,7 @@ export declare class Model extends Backbone.Model {
     _type: string;
     isModel: boolean;
     isCollection: boolean;
+    isStore: boolean;
     entity: string;
     changedSinceSync: {};
     collection: Collection;

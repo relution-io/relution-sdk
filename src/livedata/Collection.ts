@@ -68,9 +68,10 @@ export function isCollection(object): object is Collection {
  */
 export class Collection extends Backbone.Collection<Model> {
 
-  public _type: string;         // constant 'Relution.LiveData.Collection' on prototype
+  public _type: string;         // constant 'Relution.livedata.Collection' on prototype
   public isModel: boolean;      // constant false on prototype
   public isCollection: boolean; // constant true on prototype
+  public isStore: boolean;      // constant false on prototype
 
   public model: ModelCtor;
   public entity: string;
@@ -281,9 +282,10 @@ export class Collection extends Backbone.Collection<Model> {
 
 // mixins
 let collection = _.extend(Collection.prototype, {
-  _type: 'Relution.LiveData.Collection',
+  _type: 'Relution.livedata.Collection',
   isModel: false,
   isCollection: true,
+  isStore: false,
 
   // default model type unless overwritten
   model: Model

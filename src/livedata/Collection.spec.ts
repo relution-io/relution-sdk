@@ -79,7 +79,7 @@ describe(module.filename || __filename, function() {
       assert.isObject(instance);
       assert.isDefined(instance._type);
       assert.isString(instance._type);
-      assert.equal(instance._type, 'Relution.LiveData.Collection');
+      assert.equal(instance._type, 'Relution.livedata.Collection');
     }),
 
     it('creating collection', function () {

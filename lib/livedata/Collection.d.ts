@@ -31,6 +31,7 @@ export declare class Collection extends Backbone.Collection<Model> {
     _type: string;
     isModel: boolean;
     isCollection: boolean;
+    isStore: boolean;
     model: ModelCtor;
     entity: string;
     options: any;

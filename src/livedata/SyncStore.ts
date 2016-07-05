@@ -176,7 +176,7 @@ export class SyncStore extends Store {
       this.initServer(urlRoot);
       var endpoint = this.endpoints[entity];
       if (!endpoint) {
-        diag.debug.info('Relution.LiveData.SyncStore.initEndpoint: ' + entity);
+        diag.debug.info('Relution.livedata.SyncStore.initEndpoint: ' + entity);
         endpoint = new SyncEndpoint({
           entity: entity,
           modelType: modelType,
@@ -251,7 +251,7 @@ export class SyncStore extends Store {
 
   createSocket(endpoint: SyncEndpoint, name: string) {
     if (this.useSocketNotify && endpoint && endpoint.socketPath) {
-      diag.debug.trace('Relution.LiveData.SyncStore.createSocket: ' + name);
+      diag.debug.trace('Relution.livedata.SyncStore.createSocket: ' + name);
 
       // resource
       let connectVo: any = {
@@ -281,7 +281,7 @@ export class SyncStore extends Store {
 
   _bindChannel(endpoint: SyncEndpoint, name) {
     if (endpoint && endpoint.socket) {
-      diag.debug.trace('Relution.LiveData.SyncStore._bindChannel: ' + name);
+      diag.debug.trace('Relution.livedata.SyncStore._bindChannel: ' + name);
 
       var channel = endpoint.channel;
       var socket = endpoint.socket;
@@ -446,7 +446,7 @@ export class SyncStore extends Store {
   }
 
   public sync(method: string, model: Model | Collection, options?) {
-    diag.debug.trace('Relution.LiveData.SyncStore.sync');
+    diag.debug.trace('Relution.livedata.SyncStore.sync');
     options = options || {};
     try {
       var endpoint: SyncEndpoint = model.endpoint || this.getEndpoint(model);
@@ -1000,7 +1000,7 @@ export class SyncStore extends Store {
     let triggerError = () => {
       // inform client application of the offline changes error
       let channel = message.get('channel');
-      diag.debug.error('Relution.LiveData.SyncStore.processOfflineMessageResult: triggering error for channel ' + channel + ' on store', error);
+      diag.debug.error('Relution.livedata.SyncStore.processOfflineMessageResult: triggering error for channel ' + channel + ' on store', error);
       if (!options.silent) {
         this.trigger('error:' + channel, error, model);
       }
@@ -1123,7 +1123,7 @@ export class SyncStore extends Store {
       }).then(nextMessage);
     };
 
-    diag.debug.info('Relution.LiveData.SyncStore._sendMessages');
+    diag.debug.info('Relution.livedata.SyncStore._sendMessages');
     let q = this.messagesPromise;
     if (!q) {
       // initially fetch all messages
@@ -1226,7 +1226,7 @@ export class SyncStore extends Store {
 
 // mixins
 let syncStore = _.extend(SyncStore.prototype, {
-  _type: 'Relution.LiveData.SyncStore',
+  _type: 'Relution.livedata.SyncStore',
 
   localStore: WebSqlStore,
   useLocalStore: true,

@@ -8,7 +8,7 @@ export declare class SyncContext {
     /**
      * relevant parameters for paging, filtering and sorting.
      *
-     * @type {Relution.LiveData.GetQuery}
+     * @type {Relution.livedata.GetQuery}
      */
     private getQuery;
     /**

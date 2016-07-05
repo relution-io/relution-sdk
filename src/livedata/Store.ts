@@ -36,13 +36,31 @@ export interface StoreCtor {
 }
 
 /**
+ * tests whether a given object is a Store.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Store.
+ */
+export function isStore(object): object is Store {
+  if (!object || typeof object !== 'object') {
+    return false;
+  } else if ('isStore' in object) {
+    diag.debug.assert(() => object.isStore === Store.prototype.isPrototypeOf(object));
+    return object.isStore;
+  } else {
+    return Store.prototype.isPrototypeOf(object);
+  }
+}
+
+/**
  * base class to build a custom data store.
  */
 export class Store {
 
-  public _type: string;         // constant 'Relution.LiveData.Store' on prototype
+  public _type: string;         // constant 'Relution.livedata.Store' on prototype
   public isModel: boolean;      // constant false on prototype
   public isCollection: boolean; // constant false on prototype
+  public isStore: boolean;      // constant true on prototype
 
   // following are store-specific options, defaults stored in prototype at end of this file
   protected name: string;
@@ -116,9 +134,10 @@ export class Store {
 
 // mixins
 let store = _.extend(Store.prototype, Backbone.Events, {
-  _type: 'Relution.LiveData.Store',
+  _type: 'Relution.livedata.Store',
   isModel: false,
   isCollection: false,
+  isStore: true,
 
   name: 'relution-livedata'
 });

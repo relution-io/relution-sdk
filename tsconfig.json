@@ -43,6 +43,7 @@
         "src/livedata/Model.spec.ts",
         "src/livedata/Model.ts",
         "src/livedata/rest.ts",
+        "src/livedata/Store.spec.ts",
         "src/livedata/Store.ts",
         "src/livedata/SyncContext.spec.ts",
         "src/livedata/SyncContext.ts",

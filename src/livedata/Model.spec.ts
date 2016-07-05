@@ -52,7 +52,7 @@ describe(module.filename || __filename, function() {
       assert.isObject(instance);
       assert.isDefined(instance._type);
       assert.isString(instance._type);
-      assert.equal(instance._type, 'Relution.LiveData.Model');
+      assert.equal(instance._type, 'Relution.livedata.Model');
     }),
 
     it('creating model', function () {
