@@ -32,7 +32,8 @@ import * as http from './http';
  */
 export function localStorage() {
   return global['localStorage'] ||
-    (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+    process && !process['browser'] && (global['localStorage'] =
+      new (require('node-localstorage').LocalStorage)('localStorage')); // required version
 }
 
 /**

@@ -6015,7 +6015,7 @@ __export(require('./http'));
 __export(require('./verb'));
 
 },{"./http":35,"./urls":38,"./verb":39}],37:[function(require,module,exports){
-(function (global,__filename){
+(function (process,global,__filename){
 /**
  * @file web/offline.ts
  * Relution SDK
@@ -6045,7 +6045,8 @@ var cipher = require('../core/cipher');
  */
 function localStorage() {
     return global['localStorage'] ||
-        (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+        process && !process['browser'] && (global['localStorage'] =
+            new (require('node-localstorage').LocalStorage)('localStorage')); // required version
 }
 exports.localStorage = localStorage;
 /**
@@ -6125,8 +6126,8 @@ function fetchOfflineLogin(credentials, serverOptions) {
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
-},{"../core/cipher":4,"node-localstorage":undefined,"q":240}],38:[function(require,module,exports){
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
+},{"../core/cipher":4,"_process":232,"node-localstorage":undefined,"q":240}],38:[function(require,module,exports){
 /**
  * @file web/urls.ts
  * Relution SDK

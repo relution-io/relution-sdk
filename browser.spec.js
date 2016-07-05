@@ -19053,9 +19053,12 @@ var cipher = require('../core/cipher');
  *
  * @internal Not public API, exported for testing purposes only!
  */
-exports.localStorage = global['localStorage'] ||
-    process && !process['browser'] && (global['localStorage'] =
-        new (require('node-localstorage').LocalStorage)('localStorage')); // required version
+function localStorage() {
+    return global['localStorage'] ||
+        process && !process['browser'] && (global['localStorage'] =
+            new (require('node-localstorage').LocalStorage)('localStorage')); // required version
+}
+exports.localStorage = localStorage;
 /**
  * computes key of login response data for some server.
  *
@@ -19081,7 +19084,7 @@ function clearOfflineLogin(credentials, serverOptions) {
     // so that the credentials parameter is irrelevant, but provided for the
     // sake of completeness...
     try {
-        exports.localStorage.removeItem(computeLocalStorageKey(serverOptions));
+        localStorage().removeItem(computeLocalStorageKey(serverOptions));
         return Q.resolve(undefined);
     }
     catch (error) {
@@ -19101,7 +19104,7 @@ exports.clearOfflineLogin = clearOfflineLogin;
  */
 function storeOfflineLogin(credentials, serverOptions, loginResponse) {
     return cipher.encryptJson(credentials['password'], loginResponse).then(function (value) {
-        exports.localStorage.setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
+        localStorage().setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
         return loginResponse;
     });
 }
@@ -19121,7 +19124,7 @@ exports.storeOfflineLogin = storeOfflineLogin;
  */
 function fetchOfflineLogin(credentials, serverOptions) {
     try {
-        var value = exports.localStorage.getItem(computeLocalStorageKey(serverOptions));
+        var value = localStorage().getItem(computeLocalStorageKey(serverOptions));
         if (!value) {
             return Q.resolve(undefined);
         }
