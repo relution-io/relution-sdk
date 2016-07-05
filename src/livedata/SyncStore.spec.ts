@@ -85,7 +85,7 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
 
-      TEST.Tests = TEST.TestsModelCollection._create();
+      TEST.Tests = new TEST.TestsModelCollection();
 
       assert.isObject(TEST.Tests, 'Test collection successfully created.');
 
@@ -144,7 +144,7 @@ describe(module.filename || __filename, function() {
       TEST.TestModel2 = TestModel2;
 
       var data = { _id: TEST.id };
-      var model = TEST.TestModel2._create(data);
+      var model = new TEST.TestModel2(data);
 
       assert.isObject(model, "new model created");
 
@@ -171,7 +171,7 @@ describe(module.filename || __filename, function() {
       TestModel2.prototype.entity = 'test';
       TEST.TestModel2 = TestModel2;
 
-      var model = TEST.TestModel2._create({});
+      var model = new TEST.TestModel2({});
       model.fetch({
         success: function(model) {
           backbone_error(done)(model, new Error('this should have failed!'));
@@ -190,7 +190,7 @@ describe(module.filename || __filename, function() {
       TestModel2.prototype.entity =  'test';
       TEST.TestModel2 = TestModel2;
 
-      var model = TEST.TestModel2._create({
+      var model = new TEST.TestModel2({
         _id: ''
       });
       model.fetch().then(function() {

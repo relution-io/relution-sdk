@@ -66,21 +66,15 @@ describe(module.filename || __filename, function() {
       assert.isFalse(isCollection({}));
       assert.isFalse(isCollection([]));
       assert.isFalse(isCollection(Collection));
-      assert.isTrue(isCollection(Collection._create(undefined)));
       assert.isFalse(isCollection(Model));
-      assert.isFalse(isCollection(Model._create(undefined)));
       assert.isFalse(isCollection(Store));
-      assert.isFalse(isCollection(Store._create(undefined)));
     }),
 
     it('basic', function () {
       assert.isDefined(Collection);
-      assert.isDefined(Collection._create);
-
       assert.isFunction(Collection);
-      assert.isFunction(Collection._create);
 
-      var instance = Collection._create(undefined);
+      var instance = new Collection();
       assert.isDefined(instance);
       assert.isObject(instance);
       assert.isDefined(instance._type);
@@ -89,7 +83,6 @@ describe(module.filename || __filename, function() {
     }),
 
     it('creating collection', function () {
-
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
       class Developer extends Model {};

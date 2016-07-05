@@ -82,7 +82,7 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
 
-      TEST.Simple = TEST.SimpleModelCollection._create();
+      TEST.Simple = new TEST.SimpleModelCollection();
 
       assert.typeOf(TEST.Simple, 'object', 'Simple collection successfully created.');
 
@@ -123,7 +123,7 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
 
-      TEST.Tests = TEST.TestModelCollection._create();
+      TEST.Tests = new TEST.TestModelCollection();
 
       assert.typeOf(TEST.Tests, 'object', 'Test collection successfully created.');
 
@@ -186,7 +186,9 @@ describe(module.filename || __filename, function() {
       TestModel2.prototype.entity = 'test';
       TEST.TestModel2 = TestModel2;
 
-      var model = TEST.TestModel2._create({key: TEST.key});
+      var model = new TEST.TestModel2({
+        key: TEST.key
+      });
 
       assert.isObject(model, "new model created");
 

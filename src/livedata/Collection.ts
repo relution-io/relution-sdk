@@ -27,7 +27,7 @@ import {Model, ModelCtor} from './Model';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
 
-import {_Object, _create} from './Object';
+import {_Object} from './Object';
 import {ajax, sync} from './rest';
 
 /**
@@ -82,8 +82,6 @@ export class Collection extends Backbone.Collection<Model> {
 
   public endpoint: SyncEndpoint;
   public channel: string;
-
-  public static _create = _create;
 
   public constructor(models?: any, options?: any) {
     super(models, options);

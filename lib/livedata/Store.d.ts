@@ -1,6 +1,5 @@
 import { Model } from './Model';
 import { Collection } from './Collection';
-import { _create } from './Object';
 /**
  * constructor function of Store.
  */
@@ -21,7 +20,6 @@ export declare class Store {
     protected entities: any;
     endpoints: any;
     constructor(options?: any);
-    static _create: typeof _create;
     protected trigger: any;
     getArray(data: any): any;
     getDataArray(data: any): any[];
@@ -35,7 +33,7 @@ export declare class Store {
      * @param options
      */
     fetch(collection: any, options: any): any;
-    create(collection: any, model: any, options: any): any;
+    create(collection: any, models: any, options: any): any;
     save(model: any, attr: any, options: any): any;
     destroy(model: any, options: any): void;
     _checkData(obj: any, data: any): boolean;

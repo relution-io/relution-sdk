@@ -26,7 +26,7 @@ import {Backbone} from './Object';
 import {Model} from './Model';
 import {Collection, isCollection} from './Collection';
 
-import {_Object, _create} from './Object';
+import {_Object} from './Object';
 
 /**
  * constructor function of Store.
@@ -59,8 +59,6 @@ export class Store {
       _.extend(this, options);
     }
   }
-
-  public static _create = _create;
 
   protected trigger;
 
@@ -121,9 +119,9 @@ export class Store {
     return collection.fetch(opts);
   }
 
-  create(collection, model, options) {
+  create(collection, models, options) {
     var opts = _.extend({}, options || {}, { store: this });
-    return collection._create(model, opts);
+    return new collection(models, opts);
   }
 
   save(model, attr, options) {

@@ -905,7 +905,6 @@ var Collection = (function (_super) {
         }
         return this.syncContext.fetchPrev(this, options);
     };
-    Collection._create = Object_1._create;
     return Collection;
 }(Backbone.Collection));
 exports.Collection = Collection;
@@ -1082,7 +1081,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
             return url;
         }
     };
-    Model /*<AttributesType extends Object>*/._create = Object_1._create;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
@@ -1126,24 +1124,9 @@ var diag = require('../core/diag');
 exports.Backbone = global['Backbone'] ||
     process && !process['browser'] &&
         (global['Backbone'] = require('backbone')); // required version
-function _create(args) {
-    return new this(args);
-}
-exports._create = _create;
 var _Object = (function () {
     function _Object() {
     }
-    /**
-     * Creates an object based on a passed prototype.
-     *
-     * @param {Object} proto The prototype of the new object.
-     */
-    _Object.prototype._create = function (proto) {
-        var F = function () {
-        };
-        F.prototype = proto;
-        return new F();
-    };
     /**
      * Includes passed properties into a given object.
      *
@@ -1293,9 +1276,9 @@ var Store = (function () {
         var opts = _.extend({}, options || {}, { store: this });
         return collection.fetch(opts);
     };
-    Store.prototype.create = function (collection, model, options) {
+    Store.prototype.create = function (collection, models, options) {
         var opts = _.extend({}, options || {}, { store: this });
-        return collection._create(model, opts);
+        return new collection(models, opts);
     };
     Store.prototype.save = function (model, attr, options) {
         var opts = _.extend({}, options || {}, { store: this });
@@ -1343,7 +1326,6 @@ var Store = (function () {
     Store.prototype.close = function () {
         // nothing to do
     };
-    Store._create = Object_2._create;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
         ERROR_LOAD_DATA: 'Error while loading data from store. ',

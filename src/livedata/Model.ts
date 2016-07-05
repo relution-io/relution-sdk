@@ -26,7 +26,7 @@ import {Store} from './Store';
 import {Collection} from './Collection';
 import {SyncEndpoint} from './SyncEndpoint';
 
-import {_Object, _create} from './Object';
+import {_Object} from './Object';
 import {ajax, sync} from './rest';
 
 /**
@@ -73,8 +73,6 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
   public credentials: any;
 
   public endpoint: SyncEndpoint;
-
-  public static _create = _create;
 
   public constructor(attributes?: any, options?: any) {
     super(attributes, options);

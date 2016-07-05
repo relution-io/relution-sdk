@@ -1046,7 +1046,6 @@ var Collection = (function (_super) {
         }
         return this.syncContext.fetchPrev(this, options);
     };
-    Collection._create = Object_1._create;
     return Collection;
 }(Backbone.Collection));
 exports.Collection = Collection;
@@ -1131,18 +1130,13 @@ describe(module.filename || __filename, function () {
             chai_1.assert.isFalse(Collection_1.isCollection({}));
             chai_1.assert.isFalse(Collection_1.isCollection([]));
             chai_1.assert.isFalse(Collection_1.isCollection(Collection_1.Collection));
-            chai_1.assert.isTrue(Collection_1.isCollection(Collection_1.Collection._create(undefined)));
             chai_1.assert.isFalse(Collection_1.isCollection(Model_1.Model));
-            chai_1.assert.isFalse(Collection_1.isCollection(Model_1.Model._create(undefined)));
             chai_1.assert.isFalse(Collection_1.isCollection(Store_1.Store));
-            chai_1.assert.isFalse(Collection_1.isCollection(Store_1.Store._create(undefined)));
         }),
         it('basic', function () {
             chai_1.assert.isDefined(Collection_1.Collection);
-            chai_1.assert.isDefined(Collection_1.Collection._create);
             chai_1.assert.isFunction(Collection_1.Collection);
-            chai_1.assert.isFunction(Collection_1.Collection._create);
-            var instance = Collection_1.Collection._create(undefined);
+            var instance = new Collection_1.Collection();
             chai_1.assert.isDefined(instance);
             chai_1.assert.isObject(instance);
             chai_1.assert.isDefined(instance._type);
@@ -1373,7 +1367,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
             return url;
         }
     };
-    Model /*<AttributesType extends Object>*/._create = Object_1._create;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
@@ -1427,17 +1420,16 @@ describe(module.filename || __filename, function () {
             chai_1.assert.isFalse(Model_1.isModel({}));
             chai_1.assert.isFalse(Model_1.isModel([]));
             chai_1.assert.isFalse(Model_1.isModel(Model_1.Model));
-            chai_1.assert.isTrue(Model_1.isModel(Model_1.Model._create(undefined)));
+            chai_1.assert.isTrue(Model_1.isModel(new Model_1.Model()));
             chai_1.assert.isFalse(Model_1.isModel(Collection_1.Collection));
-            chai_1.assert.isFalse(Model_1.isModel(Collection_1.Collection._create(undefined)));
+            chai_1.assert.isFalse(Model_1.isModel(new Collection_1.Collection()));
             chai_1.assert.isFalse(Model_1.isModel(Store_1.Store));
-            chai_1.assert.isFalse(Model_1.isModel(Store_1.Store._create(undefined)));
+            chai_1.assert.isFalse(Model_1.isModel(new Store_1.Store()));
         }),
         it('basic', function () {
             chai_1.assert.isDefined(Model_1.Model);
-            chai_1.assert.isDefined(Model_1.Model._create);
-            chai_1.assert.isFunction(Model_1.Model._create);
-            var instance = Model_1.Model._create(undefined);
+            chai_1.assert.isFunction(Model_1.Model);
+            var instance = new Model_1.Model();
             chai_1.assert.isDefined(instance);
             chai_1.assert.isObject(instance);
             chai_1.assert.isDefined(instance._type);
@@ -1460,8 +1452,8 @@ describe(module.filename || __filename, function () {
             };
             Person.prototype.entity = 'person';
             chai_1.assert.typeOf(Person, 'function', 'person model could be extended.');
-            chai_1.assert.typeOf(Person._create(undefined), 'object', 'empty person model could be created.');
-            var p = Person._create({
+            chai_1.assert.typeOf(new Person(), 'object', 'empty person model could be created.');
+            var p = new Person({
                 firstName: 'Max',
                 sureName: 'Mustermann',
                 notes: 'Notes to this person',
@@ -1511,24 +1503,9 @@ var diag = require('../core/diag');
 exports.Backbone = global['Backbone'] ||
     process && !process['browser'] &&
         (global['Backbone'] = require('backbone')); // required version
-function _create(args) {
-    return new this(args);
-}
-exports._create = _create;
 var _Object = (function () {
     function _Object() {
     }
-    /**
-     * Creates an object based on a passed prototype.
-     *
-     * @param {Object} proto The prototype of the new object.
-     */
-    _Object.prototype._create = function (proto) {
-        var F = function () {
-        };
-        F.prototype = proto;
-        return new F();
-    };
     /**
      * Includes passed properties into a given object.
      *
@@ -1624,10 +1601,8 @@ describe(module.filename || __filename, function () {
             chai_1.assert.equal(Object_1._Object.prototype._type, 'Relution.LiveData._Object');
         }),
         it('methods', function () {
-            chai_1.assert.isDefined(Object_1._Object.prototype._create);
             chai_1.assert.isDefined(Object_1._Object.prototype.bindToCaller);
             chai_1.assert.isDefined(Object_1._Object.prototype.handleCallback);
-            chai_1.assert.isFunction(Object_1._Object.prototype._create);
             chai_1.assert.isFunction(Object_1._Object.prototype.bindToCaller);
             chai_1.assert.isFunction(Object_1._Object.prototype.handleCallback);
         })
@@ -1723,9 +1698,9 @@ var Store = (function () {
         var opts = _.extend({}, options || {}, { store: this });
         return collection.fetch(opts);
     };
-    Store.prototype.create = function (collection, model, options) {
+    Store.prototype.create = function (collection, models, options) {
         var opts = _.extend({}, options || {}, { store: this });
-        return collection._create(model, opts);
+        return new collection(models, opts);
     };
     Store.prototype.save = function (model, attr, options) {
         var opts = _.extend({}, options || {}, { store: this });
@@ -1773,7 +1748,6 @@ var Store = (function () {
     Store.prototype.close = function () {
         // nothing to do
     };
-    Store._create = Object_2._create;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
         ERROR_LOAD_DATA: 'Error while loading data from store. ',
@@ -4106,7 +4080,7 @@ describe(module.filename || __filename, function () {
             };
             TEST.TestsModelCollection = TestsModelCollection;
             chai_1.assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
-            TEST.Tests = TEST.TestsModelCollection._create();
+            TEST.Tests = new TEST.TestsModelCollection();
             chai_1.assert.isObject(TEST.Tests, 'Test collection successfully created.');
             chai_1.assert.equal(TEST.Tests.store, TEST.store, 'Test collection has the correct store.');
             var url = TEST.Tests.getUrl();
@@ -4151,7 +4125,7 @@ describe(module.filename || __filename, function () {
             TestModel2.prototype.entity = 'test';
             TEST.TestModel2 = TestModel2;
             var data = { _id: TEST.id };
-            var model = TEST.TestModel2._create(data);
+            var model = new TEST.TestModel2(data);
             chai_1.assert.isObject(model, "new model created");
             chai_1.assert.ok(_.isEqual(model.attributes, data), "new model holds correct data attributes");
             model.fetch({
@@ -4180,7 +4154,7 @@ describe(module.filename || __filename, function () {
             TestModel2.prototype.store = TEST.store;
             TestModel2.prototype.entity = 'test';
             TEST.TestModel2 = TestModel2;
-            var model = TEST.TestModel2._create({});
+            var model = new TEST.TestModel2({});
             model.fetch({
                 success: function (model) {
                     backbone_error(done)(model, new Error('this should have failed!'));
@@ -4204,7 +4178,7 @@ describe(module.filename || __filename, function () {
             TestModel2.prototype.store = TEST.store;
             TestModel2.prototype.entity = 'test';
             TEST.TestModel2 = TestModel2;
-            var model = TEST.TestModel2._create({
+            var model = new TEST.TestModel2({
                 _id: ''
             });
             model.fetch().then(function () {
@@ -4986,7 +4960,7 @@ describe(module.filename || __filename, function () {
             SimpleModelCollection.prototype.entity = 'test';
             TEST.SimpleModelCollection = SimpleModelCollection;
             chai_1.assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
-            TEST.Simple = TEST.SimpleModelCollection._create();
+            TEST.Simple = new TEST.SimpleModelCollection();
             chai_1.assert.typeOf(TEST.Simple, 'object', 'Simple collection successfully created.');
             TEST.Simple.create(TEST.data, {
                 success: function (model) {
@@ -5025,7 +4999,7 @@ describe(module.filename || __filename, function () {
             TestModelCollection.prototype.store = TEST.store;
             TEST.TestModelCollection = TestModelCollection;
             chai_1.assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
-            TEST.Tests = TEST.TestModelCollection._create();
+            TEST.Tests = new TEST.TestModelCollection();
             chai_1.assert.typeOf(TEST.Tests, 'object', 'Test collection successfully created.');
             chai_1.assert.ok(TEST.Tests.store === TEST.store, 'Test collection has the correct store.');
         }),
@@ -5071,7 +5045,9 @@ describe(module.filename || __filename, function () {
             TestModel2.prototype.store = TEST.store;
             TestModel2.prototype.entity = 'test';
             TEST.TestModel2 = TestModel2;
-            var model = TEST.TestModel2._create({ key: TEST.key });
+            var model = new TEST.TestModel2({
+                key: TEST.key
+            });
             chai_1.assert.isObject(model, "new model created");
             model.fetch({
                 success: function () {

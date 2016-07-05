@@ -31,10 +31,6 @@ export const Backbone = global['Backbone'] || // native implementation
   process && !process['browser'] &&           // or when not in browser
   (global['Backbone'] = require('backbone')); // required version
 
-export function _create(args) {
-  return new this(args);
-}
-
 export class _Object {
   /**
    * The type of this object.
@@ -42,18 +38,6 @@ export class _Object {
    * @type String
    */
   _type: string;
-
-  /**
-   * Creates an object based on a passed prototype.
-   *
-   * @param {Object} proto The prototype of the new object.
-   */
-  _create(proto) {
-    var F = function () {
-    };
-    F.prototype = proto;
-    return new F();
-  }
 
   /**
    * Includes passed properties into a given object.

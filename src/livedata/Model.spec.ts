@@ -36,20 +36,18 @@ describe(module.filename || __filename, function() {
       assert.isFalse(isModel({}));
       assert.isFalse(isModel([]));
       assert.isFalse(isModel(Model));
-      assert.isTrue(isModel(Model._create(undefined)));
+      assert.isTrue(isModel(new Model()));
       assert.isFalse(isModel(Collection));
-      assert.isFalse(isModel(Collection._create(undefined)));
+      assert.isFalse(isModel(new Collection()));
       assert.isFalse(isModel(Store));
-      assert.isFalse(isModel(Store._create(undefined)));
+      assert.isFalse(isModel(new Store()));
     }),
 
     it('basic', function () {
       assert.isDefined(Model);
-      assert.isDefined(Model._create);
+      assert.isFunction(Model);
 
-      assert.isFunction(Model._create);
-
-      var instance = Model._create(undefined);
+      var instance = new Model();
       assert.isDefined(instance);
       assert.isObject(instance);
       assert.isDefined(instance._type);
@@ -66,9 +64,9 @@ describe(module.filename || __filename, function() {
       };
       Person.prototype.entity = 'person';
       assert.typeOf(Person, 'function', 'person model could be extended.');
-      assert.typeOf(Person._create(undefined), 'object', 'empty person model could be created.');
+      assert.typeOf(new Person(), 'object', 'empty person model could be created.');
 
-      var p = Person._create({
+      var p = new Person({
         firstName: 'Max',
         sureName: 'Mustermann',
         notes: 'Notes to this person',

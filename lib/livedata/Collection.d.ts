@@ -2,7 +2,6 @@ import { Store } from './Store';
 import { Model, ModelCtor } from './Model';
 import { SyncContext } from './SyncContext';
 import { SyncEndpoint } from './SyncEndpoint';
-import { _create } from './Object';
 /**
  * constructor function of Collection.
  */
@@ -40,7 +39,6 @@ export declare class Collection extends Backbone.Collection<Model> {
     credentials: any;
     endpoint: SyncEndpoint;
     channel: string;
-    static _create: typeof _create;
     constructor(models?: any, options?: any);
     protected init(models?: any, options?: any): void;
     modelId: (attrs: any) => any;

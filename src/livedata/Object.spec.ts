@@ -35,11 +35,9 @@ describe(module.filename || __filename, function() {
     }),
 
     it('methods', () => {
-      assert.isDefined(_Object.prototype._create);
       assert.isDefined(_Object.prototype.bindToCaller);
       assert.isDefined(_Object.prototype.handleCallback);
 
-      assert.isFunction(_Object.prototype._create);
       assert.isFunction(_Object.prototype.bindToCaller);
       assert.isFunction(_Object.prototype.handleCallback);
     })

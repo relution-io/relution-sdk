@@ -1,4 +1,3 @@
-export declare function _create(args: any): any;
 export declare class _Object {
     /**
      * The type of this object.
@@ -6,12 +5,6 @@ export declare class _Object {
      * @type String
      */
     _type: string;
-    /**
-     * Creates an object based on a passed prototype.
-     *
-     * @param {Object} proto The prototype of the new object.
-     */
-    _create(proto: any): any;
     /**
      * Includes passed properties into a given object.
      *
