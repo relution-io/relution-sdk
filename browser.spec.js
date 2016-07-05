@@ -837,6 +837,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var _ = require('lodash');
+var url = require('url');
 var diag = require('../core/diag');
 var Model_1 = require('./Model');
 var rest_1 = require('./rest');
@@ -882,7 +883,7 @@ var Collection = (function (_super) {
         this.store = options.store || this.store || (this.model ? this.model.prototype.store : null);
         this.entity = options.entity || this.entity || (this.model ? this.model.prototype.entity : null);
         this.options = options.options || this.options;
-        this.entity = this.entity || this.entityFromUrl(this.url);
+        this.entity = this.entity || this._entityFromUrl(this.getUrl());
         this._updateUrl();
         if (this.store && _.isFunction(this.store.initCollection)) {
             this.store.initCollection(this, options);
@@ -894,18 +895,11 @@ var Collection = (function (_super) {
     Collection.prototype.sync = function (method, model, options) {
         return rest_1.sync.apply(this, arguments);
     };
-    Collection.prototype.entityFromUrl = function (url) {
-        if (url) {
-            var location = document.createElement('a');
-            location.href = url || this.url;
-            // IE doesn't populate all link properties when setting .href with a relative URL,
-            // however .href will return an absolute URL which then can be used on itself
-            // to populate these additional fields.
-            if (location.host === '') {
-                location.href = location.href;
-            }
+    Collection.prototype._entityFromUrl = function (urlStr) {
+        if (urlStr) {
+            var urlObj = url.parse(urlStr);
             // extract last path part as entity name
-            var parts = location.pathname.match(/([^\/]+)\/?$/);
+            var parts = urlObj.pathname.match(/([^\/]+)\/?$/);
             if (parts && parts.length > 1) {
                 return parts[-1];
             }
@@ -1057,7 +1051,7 @@ var collection = _.extend(Collection.prototype, {
 });
 diag.debug.assert(function () { return isCollection(Object.create(collection)); });
 
-},{"../core/diag":3,"./Model":15,"./rest":29,"lodash":250}],13:[function(require,module,exports){
+},{"../core/diag":3,"./Model":15,"./rest":29,"lodash":250,"url":370}],13:[function(require,module,exports){
 (function (global,__filename){
 /**
  * @file livedata/Collection.spec.ts
@@ -1491,7 +1485,6 @@ describe(module.filename || __filename, function () {
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
-var Collection_1 = require('./Collection');
 /**
  * base class to build a custom data store.
  */
@@ -1504,39 +1497,6 @@ var Store = (function () {
     }
     Store.prototype.close = function () {
         // nothing to do
-    };
-    Store.prototype.getArray = function (data) {
-        if (_.isArray(data)) {
-            return data;
-        }
-        else if (Collection_1.isCollection(data)) {
-            return data.models;
-        }
-        return _.isObject(data) ? [data] : [];
-    };
-    Store.prototype.getDataArray = function (data) {
-        var array = [];
-        if (_.isArray(data) || Backbone.Collection.prototype.isPrototypeOf(data)) {
-            _.each(data, function (d) {
-                var attrs = this.getAttributes(d);
-                if (attrs) {
-                    array.push(attrs);
-                }
-            });
-        }
-        else {
-            var attrs = this.getAttributes(data);
-            if (attrs) {
-                array.push(this.getAttributes(attrs));
-            }
-        }
-        return array;
-    };
-    Store.prototype.getAttributes = function (model) {
-        if (Backbone.Model.prototype.isPrototypeOf(model)) {
-            return model.attributes;
-        }
-        return _.isObject(model) ? model : null;
     };
     Store.prototype.initModel = function (model, options) {
         // may be overwritten
@@ -1566,19 +1526,8 @@ var Store = (function () {
         return model.save(attr, opts);
     };
     Store.prototype.destroy = function (model, options) {
-        if (model && model.destroy) {
-            var opts = _.extend({}, options || {}, { store: this });
-            model.destroy(opts);
-        }
-    };
-    Store.prototype._checkData = function (options, data) {
-        if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
-            var error = new Error('no data.');
-            diag.debug.error(error.message);
-            this.handleError(options, error);
-            return false;
-        }
-        return true;
+        var opts = _.extend({}, options || {}, { store: this });
+        model.destroy(opts);
     };
     Store.prototype.handleSuccess = function (options, result) {
         if (options.success) {
@@ -1602,7 +1551,7 @@ var store = _.extend(Store.prototype, Backbone.Events, {
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
-},{"../core/diag":3,"./Collection":12,"lodash":250}],18:[function(require,module,exports){
+},{"../core/diag":3,"lodash":250}],18:[function(require,module,exports){
 /**
  * @file livedata/SyncContext.ts
  * Relution SDK
@@ -4692,6 +4641,15 @@ var WebSqlStore = (function (_super) {
         // has to be initialized first
         if (!this.db) {
             var error = new Error('db handler not initialized.');
+            diag.debug.error(error.message);
+            this.handleError(options, error);
+            return false;
+        }
+        return true;
+    };
+    WebSqlStore.prototype._checkData = function (options, data) {
+        if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
+            var error = new Error('no data.');
             diag.debug.error(error.message);
             this.handleError(options, error);
             return false;

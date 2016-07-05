@@ -75,4 +75,5 @@ export declare class WebSqlStore extends Store {
     private transactionPromise;
     protected _executeTransaction(options: any, statements: any, result?: any): void;
     protected _checkDb(options: any): boolean;
+    protected _checkData(options: any, data: any): boolean;
 }

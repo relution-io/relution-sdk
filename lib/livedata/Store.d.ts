@@ -21,10 +21,6 @@ export declare class Store {
     endpoints: any;
     constructor(options?: any);
     close(): void;
-    protected trigger: typeof Backbone.Events.prototype.trigger;
-    getArray(data: any): any;
-    getDataArray(data: any): any[];
-    getAttributes(model: any): any;
     initModel(model: any, options?: any): void;
     initCollection(collection: any, options?: any): void;
     sync(method: string, model: Model | Collection, options?: any): PromiseLike<any>;
@@ -37,7 +33,7 @@ export declare class Store {
     create(collection: any, models: any, options: any): any;
     save(model: any, attr: any, options: any): any;
     destroy(model: any, options: any): void;
-    _checkData(options: any, data: any): boolean;
+    protected trigger: typeof Backbone.Events.prototype.trigger;
     protected handleSuccess(options: any, result: any): any;
     protected handleError(options: any, error: Error): any;
 }

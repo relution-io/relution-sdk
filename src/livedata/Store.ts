@@ -23,7 +23,7 @@ import * as _ from 'lodash';
 import * as diag from '../core/diag';
 
 import {Model} from './Model';
-import {Collection, isCollection} from './Collection';
+import {Collection} from './Collection';
 
 /**
  * constructor function of Store.
@@ -61,42 +61,6 @@ export class Store {
     // nothing to do
   }
 
-  protected trigger: typeof Backbone.Events.prototype.trigger;
-
-  getArray(data) {
-    if (_.isArray(data)) {
-      return data;
-    } else if (isCollection(data)) {
-      return data.models;
-    }
-    return _.isObject(data) ? [data] : [];
-  }
-
-  getDataArray(data) {
-    var array = [];
-    if (_.isArray(data) || Backbone.Collection.prototype.isPrototypeOf(data)) {
-      _.each(data, function(d) {
-        var attrs = this.getAttributes(d);
-        if (attrs) {
-          array.push(attrs);
-        }
-      });
-    } else {
-      var attrs = this.getAttributes(data);
-      if (attrs) {
-        array.push(this.getAttributes(attrs));
-      }
-    }
-    return array;
-  }
-
-  getAttributes(model) {
-    if (Backbone.Model.prototype.isPrototypeOf(model)) {
-      return model.attributes;
-    }
-    return _.isObject(model) ? model : null;
-  }
-
   initModel(model, options?: any): void {
     // may be overwritten
   }
@@ -131,21 +95,11 @@ export class Store {
   }
 
   destroy(model, options) {
-    if (model && model.destroy) {
-      var opts = _.extend({}, options || {}, { store: this });
-      model.destroy(opts);
-    }
+    var opts = _.extend({}, options || {}, { store: this });
+    model.destroy(opts);
   }
 
-  _checkData(options, data) {
-    if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
-      var error = new Error('no data.');
-      diag.debug.error(error.message);
-      this.handleError(options, error);
-      return false;
-    }
-    return true;
-  }
+  protected trigger: typeof Backbone.Events.prototype.trigger;
 
   protected handleSuccess(options, result: any): any {
     if (options.success) {

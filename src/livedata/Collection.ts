@@ -19,6 +19,7 @@
  */
 
 import * as _ from 'lodash';
+import * as url from 'url';
 
 import * as diag from '../core/diag';
 
@@ -98,7 +99,7 @@ export class Collection extends Backbone.Collection<Model> {
     this.entity = options.entity || this.entity || (this.model ? this.model.prototype.entity : null);
     this.options = options.options || this.options;
 
-    this.entity = this.entity || this.entityFromUrl(this.url);
+    this.entity = this.entity || this._entityFromUrl(this.getUrl());
     this._updateUrl();
 
     if (this.store && _.isFunction(this.store.initCollection)) {
@@ -112,23 +113,17 @@ export class Collection extends Backbone.Collection<Model> {
   public ajax(options: any) {
     return ajax.apply(this, arguments);
   }
+
   public sync(method: string, model: Backbone.ModelBase, options?: any) {
     return sync.apply(this, arguments);
   }
 
-  public entityFromUrl(url) {
-    if (url) {
-      var location = document.createElement('a');
-      location.href = url || this.url;
-      // IE doesn't populate all link properties when setting .href with a relative URL,
-      // however .href will return an absolute URL which then can be used on itself
-      // to populate these additional fields.
-      if (location.host === '') {
-        location.href = location.href;
-      }
+  private _entityFromUrl(urlStr: string) {
+    if (urlStr) {
+      let urlObj = url.parse(urlStr);
 
       // extract last path part as entity name
-      var parts = location.pathname.match(/([^\/]+)\/?$/);
+      var parts = urlObj.pathname.match(/([^\/]+)\/?$/);
       if (parts && parts.length > 1) {
         return parts[-1];
       }

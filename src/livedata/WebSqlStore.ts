@@ -604,6 +604,17 @@ export class WebSqlStore extends Store {
     }
     return true;
   }
+
+  protected _checkData(options, data) {
+    if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
+      var error = new Error('no data.');
+      diag.debug.error(error.message);
+      this.handleError(options, error);
+      return false;
+    }
+    return true;
+  }
+
 }
 
 // mixins

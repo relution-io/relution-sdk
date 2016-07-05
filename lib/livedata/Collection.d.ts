@@ -44,7 +44,7 @@ export declare class Collection extends Backbone.Collection<Model> {
     modelId: (attrs: any) => any;
     ajax(options: any): any;
     sync(method: string, model: Backbone.ModelBase, options?: any): any;
-    entityFromUrl(url: any): string;
+    private _entityFromUrl(urlStr);
     destroy(options?: any): void;
     /**
      * save all containing models
