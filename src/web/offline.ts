@@ -30,9 +30,10 @@ import * as http from './http';
  *
  * @internal Not public API, exported for testing purposes only!
  */
-export const localStorage = global['localStorage'] ||                 // native implementation
-  process && !process['browser'] && (global['localStorage'] =         // or when not in browser
-    new (require('node-localstorage').LocalStorage)('localStorage')); // required version
+export function localStorage() {
+  return global['localStorage'] ||
+    (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+}
 
 /**
  * computes key of login response data for some server.
@@ -61,7 +62,7 @@ export function clearOfflineLogin(credentials: auth.Credentials,
   // so that the credentials parameter is irrelevant, but provided for the
   // sake of completeness...
   try {
-    localStorage.removeItem(computeLocalStorageKey(serverOptions));
+    localStorage().removeItem(computeLocalStorageKey(serverOptions));
     return Q.resolve<void>(undefined);
   } catch (error) {
     return Q.reject<void>(error);
@@ -83,7 +84,7 @@ export function storeOfflineLogin(credentials: auth.Credentials,
                                   loginResponse: http.LoginResponse):
 Q.Promise<http.LoginResponse> {
   return cipher.encryptJson(credentials['password'], loginResponse).then((value) => {
-    localStorage.setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
+    localStorage().setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
     return loginResponse;
   });
 }
@@ -105,7 +106,7 @@ export function fetchOfflineLogin(credentials: auth.Credentials,
                                   serverOptions: init.ServerUrlOptions):
 Q.Promise<http.LoginResponse> {
   try {
-    let value = localStorage.getItem(computeLocalStorageKey(serverOptions));
+    let value = localStorage().getItem(computeLocalStorageKey(serverOptions));
     if (!value) {
       return Q.resolve<http.LoginResponse>(undefined);
     }

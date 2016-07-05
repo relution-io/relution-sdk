@@ -6015,7 +6015,7 @@ __export(require('./http'));
 __export(require('./verb'));
 
 },{"./http":35,"./urls":38,"./verb":39}],37:[function(require,module,exports){
-(function (process,global,__filename){
+(function (global,__filename){
 /**
  * @file web/offline.ts
  * Relution SDK
@@ -6043,9 +6043,11 @@ var cipher = require('../core/cipher');
  *
  * @internal Not public API, exported for testing purposes only!
  */
-exports.localStorage = global['localStorage'] ||
-    process && !process['browser'] && (global['localStorage'] =
-        new (require('node-localstorage').LocalStorage)('localStorage')); // required version
+function localStorage() {
+    return global['localStorage'] ||
+        (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+}
+exports.localStorage = localStorage;
 /**
  * computes key of login response data for some server.
  *
@@ -6071,7 +6073,7 @@ function clearOfflineLogin(credentials, serverOptions) {
     // so that the credentials parameter is irrelevant, but provided for the
     // sake of completeness...
     try {
-        exports.localStorage.removeItem(computeLocalStorageKey(serverOptions));
+        localStorage().removeItem(computeLocalStorageKey(serverOptions));
         return Q.resolve(undefined);
     }
     catch (error) {
@@ -6091,7 +6093,7 @@ exports.clearOfflineLogin = clearOfflineLogin;
  */
 function storeOfflineLogin(credentials, serverOptions, loginResponse) {
     return cipher.encryptJson(credentials['password'], loginResponse).then(function (value) {
-        exports.localStorage.setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
+        localStorage().setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
         return loginResponse;
     });
 }
@@ -6111,7 +6113,7 @@ exports.storeOfflineLogin = storeOfflineLogin;
  */
 function fetchOfflineLogin(credentials, serverOptions) {
     try {
-        var value = exports.localStorage.getItem(computeLocalStorageKey(serverOptions));
+        var value = localStorage().getItem(computeLocalStorageKey(serverOptions));
         if (!value) {
             return Q.resolve(undefined);
         }
@@ -6123,8 +6125,8 @@ function fetchOfflineLogin(credentials, serverOptions) {
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
-},{"../core/cipher":4,"_process":232,"node-localstorage":undefined,"q":240}],38:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
+},{"../core/cipher":4,"node-localstorage":undefined,"q":240}],38:[function(require,module,exports){
 /**
  * @file web/urls.ts
  * Relution SDK
