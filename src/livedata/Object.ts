@@ -35,8 +35,6 @@ export function _create(args) {
   return new this(args);
 }
 
-export const _extend = Backbone.Model.extend;
-
 export class _Object {
   /**
    * The type of this object.

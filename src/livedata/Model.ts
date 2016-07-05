@@ -74,7 +74,6 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
 
   public endpoint: SyncEndpoint;
 
-  public static _extend = (<any>Backbone.Model).extend;
   public static _create = _create;
 
   public constructor(attributes?: any, options?: any) {

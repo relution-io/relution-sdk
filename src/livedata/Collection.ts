@@ -83,7 +83,6 @@ export class Collection extends Backbone.Collection<Model> {
   public endpoint: SyncEndpoint;
   public channel: string;
 
-  public static _extend = (<any>Backbone.Collection).extend;
   public static _create = _create;
 
   public constructor(models?: any, options?: any) {

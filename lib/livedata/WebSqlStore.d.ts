@@ -7,17 +7,15 @@ import { Store } from './Store';
  *
  * // The default configuration will save the complete model data as json
  * // into a database column with the name "data"
- * var MyCollection = Relution.livedata.Collection._extend({
- *      model: MyModel,
- *      entity: 'MyTableName',
- *      store: new Relution.livedata.WebSqlStore()
- * });
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.entity = 'MyTableName';
+ * MyCollection.prototype.store = new Relution.livedata.WebSqlStore();
  *
  * // If you want to use specific columns you can specify the fields
  * // in the entity of your model like this:
- * var MyModel = Relution.livedata.Model._extend({
- *      idAttribute: 'id'
- * });
+ * class MyModel extends Relution.livedata.Model {};
+ * MyModel.prototype.idAttribute = 'id';
  */
 export declare class WebSqlStore extends Store {
     protected size: number;

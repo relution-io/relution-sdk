@@ -40,7 +40,6 @@ export declare class Collection extends Backbone.Collection<Model> {
     credentials: any;
     endpoint: SyncEndpoint;
     channel: string;
-    static _extend: any;
     static _create: typeof _create;
     constructor(models?: any, options?: any);
     protected init(models?: any, options?: any): void;

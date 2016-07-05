@@ -40,20 +40,21 @@ describe(module.filename || __filename, function() {
       useSocketNotify: false
     });
 
-    modelType = Model._extend({
-      idAttribute: 'id',
-      entity: 'User',
-      store: Store,
-      urlRoot: serverUrl + '/relution/livedata/user/',
-      defaults: {
-        username: 'admin',
-        password: 'admin'
-      },
-      ajax: function(requ) {
+    class ModelType extends Model {
+      ajax(requ) {
         debug.info('offline');
         return Q.reject(new Error('Not Online'));
       }
-    });
+    };
+    ModelType.prototype.idAttribute = 'id';
+    ModelType.prototype.entity = 'User';
+    ModelType.prototype.store = Store;
+    ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
+    ModelType.prototype.defaults = <any>{
+      username: 'admin',
+      password: 'admin'
+    };
+    modelType = ModelType;
 
     model = new modelType({ id: '12312' });
   });

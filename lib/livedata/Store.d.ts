@@ -21,7 +21,6 @@ export declare class Store {
     protected entities: any;
     endpoints: any;
     constructor(options?: any);
-    static _extend: any;
     static _create: typeof _create;
     protected trigger: any;
     getArray(data: any): any;

@@ -67,23 +67,18 @@ describe(module.filename || __filename, function() {
       assert.isFalse(isCollection([]));
       assert.isFalse(isCollection(Collection));
       assert.isTrue(isCollection(Collection._create(undefined)));
-      assert.isTrue(isCollection(Collection._extend(undefined)._create(undefined)));
       assert.isFalse(isCollection(Model));
       assert.isFalse(isCollection(Model._create(undefined)));
-      assert.isFalse(isCollection(Model._extend(undefined)._create(undefined)));
       assert.isFalse(isCollection(Store));
       assert.isFalse(isCollection(Store._create(undefined)));
-      assert.isFalse(isCollection(Store._extend(undefined)._create(undefined)));
     }),
 
     it('basic', function () {
       assert.isDefined(Collection);
       assert.isDefined(Collection._create);
-      assert.isDefined(Collection._extend);
 
       assert.isFunction(Collection);
       assert.isFunction(Collection._create);
-      assert.isFunction(Collection._extend);
 
       var instance = Collection._create(undefined);
       assert.isDefined(instance);
@@ -97,17 +92,17 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
-      TEST.Developer = Model._extend({
-        idAttribute: '_id',
-        entity: 'Developer'
-      });
+      class Developer extends Model {};
+      Developer.prototype.idAttribute = '_id';
+      Developer.prototype.entity = 'Developer';
+      TEST.Developer = Developer;
 
       assert.ok(typeof TEST.Developer === 'function', 'Developer model successfully extended.');
 
-      TEST.DeveloperCollection = Collection._extend({
-        url: TEST.url,
-        model: TEST.Developer
-      });
+      class DeveloperCollection extends Collection {};
+      DeveloperCollection.prototype.url = TEST.url;
+      DeveloperCollection.prototype.model = TEST.Developer;
+      TEST.DeveloperCollection = DeveloperCollection;
 
       assert.ok(typeof TEST.DeveloperCollection === 'function', 'Developer collection successfully extended.');
 

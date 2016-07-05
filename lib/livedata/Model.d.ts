@@ -31,7 +31,6 @@ export declare class Model extends Backbone.Model {
     store: Store;
     credentials: any;
     endpoint: SyncEndpoint;
-    static _extend: any;
     static _create: typeof _create;
     constructor(attributes?: any, options?: any);
     protected init(attributes?: any, options?: any): void;

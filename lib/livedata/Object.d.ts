@@ -1,5 +1,4 @@
 export declare function _create(args: any): any;
-export declare const _extend: any;
 export declare class _Object {
     /**
      * The type of this object.

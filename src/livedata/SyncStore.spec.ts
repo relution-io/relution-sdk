@@ -63,25 +63,25 @@ describe(module.filename || __filename, function() {
     it('creating collection', () => {
       assert.isFunction(Collection, 'Collection is defined');
 
-      TEST.TestModel = Model._extend({
-        idAttribute: '_id',
-        entity: 'test'
-      });
+      class TestModel extends Model {};
+      TestModel.prototype.idAttribute = '_id';
+      TestModel.prototype.entity = 'test';
+      TEST.TestModel = TestModel;
 
       assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
 
       TEST.url = serverUrl + '/relution/livedata/test/';
 
-      TEST.TestsModelCollection = Collection._extend({
-        model: TEST.TestModel,
-        url: TEST.url,
-        store: TEST.store,
-        options: {
-          sort: { sureName: 1 },
-          fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
-          query: { age: { $gte: 25 } }
-        }
-      });
+      class TestsModelCollection extends Collection {};
+      TestsModelCollection.prototype.model = TEST.TestModel;
+      TestsModelCollection.prototype.url = TEST.url;
+      TestsModelCollection.prototype.store = TEST.store;
+      TestsModelCollection.prototype.options = {
+        sort: { sureName: 1 },
+        fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
+        query: { age: { $gte: 25 } }
+      };
+      TEST.TestsModelCollection = TestsModelCollection;
 
       assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
 
@@ -136,12 +136,12 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', (done) => {
 
-      TEST.TestModel2 = Model._extend({
-        url: TEST.url,
-        idAttribute: '_id',
-        store: TEST.store,
-        entity: 'test'
-      });
+      class TestModel2 extends Model {};
+      TestModel2.prototype.url = TEST.url;
+      TestModel2.prototype.idAttribute = '_id';
+      TestModel2.prototype.store = TEST.store;
+      TestModel2.prototype.entity = 'test';
+      TEST.TestModel2 = TestModel2;
 
       var data = { _id: TEST.id };
       var model = TEST.TestModel2._create(data);
@@ -164,12 +164,12 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with no id using callbacks', (done) => {
-      TEST.TestModel2 = Model._extend({
-        url: TEST.url,
-        idAttribute: '_id',
-        store: TEST.store,
-        entity: 'test'
-      });
+      class TestModel2 extends Model {};
+      TestModel2.prototype.url = TEST.url;
+      TestModel2.prototype.idAttribute = '_id';
+      TestModel2.prototype.store = TEST.store;
+      TestModel2.prototype.entity = 'test';
+      TEST.TestModel2 = TestModel2;
 
       var model = TEST.TestModel2._create({});
       model.fetch({
@@ -183,12 +183,12 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with empty-string id using promises', (done) => {
-      TEST.TestModel2 = Model._extend({
-        url: TEST.url,
-        idAttribute: '_id',
-        store: TEST.store,
-        entity: 'test'
-      });
+      class TestModel2 extends Model {};
+      TestModel2.prototype.url = TEST.url;
+      TestModel2.prototype.idAttribute = '_id';
+      TestModel2.prototype.store = TEST.store;
+      TestModel2.prototype.entity =  'test';
+      TEST.TestModel2 = TestModel2;
 
       var model = TEST.TestModel2._create({
         _id: ''
@@ -250,13 +250,8 @@ describe(module.filename || __filename, function() {
       var oldId = model.id;
       var newId = '4711-' + oldId;
 
-      var TestModel = Model._extend({
-        url: TEST.url,
-        idAttribute: '_id',
-        store: TEST.store,
-        entity: 'test',
-
-        ajax: function(options) {
+      class TestModel extends Model {
+        ajax(options) {
           // following simulates server reassigning ID value
           return Model.prototype.ajax.apply(this, arguments).then(function(response) {
             if (response._id === oldId) {
@@ -267,7 +262,12 @@ describe(module.filename || __filename, function() {
             return response;
           });
         }
-      });
+      };
+      TestModel.prototype.url = TEST.url;
+      TestModel.prototype.idAttribute = '_id';
+      TestModel.prototype.store = TEST.store;
+      TestModel.prototype.entity = 'test';
+
       var testModel = new TestModel(model.attributes);
 
       var options = {

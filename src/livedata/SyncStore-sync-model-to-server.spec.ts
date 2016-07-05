@@ -40,12 +40,12 @@ describe(module.filename || __filename, function() {
       useSocketNotify: false
     });
 
-    modelType = Model._extend({
-      idAttribute: 'id',
-      entity: 'User',
-      store: Store,
-      urlRoot: serverUrl + '/relution/livedata/user/'
-    });
+    class ModelType extends Model {};
+    ModelType.prototype.idAttribute = 'id';
+    ModelType.prototype.entity = 'User';
+    ModelType.prototype.store = Store;
+    ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
+    modelType = ModelType;
     model = new modelType({ id: '12312' });
     promise = model.fetch().thenResolve(model);
   });

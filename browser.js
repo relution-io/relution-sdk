@@ -905,7 +905,6 @@ var Collection = (function (_super) {
         }
         return this.syncContext.fetchPrev(this, options);
     };
-    Collection._extend = Backbone.Collection.extend;
     Collection._create = Object_1._create;
     return Collection;
 }(Backbone.Collection));
@@ -1083,7 +1082,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
             return url;
         }
     };
-    Model /*<AttributesType extends Object>*/._extend = Backbone.Model.extend;
     Model /*<AttributesType extends Object>*/._create = Object_1._create;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
@@ -1132,7 +1130,6 @@ function _create(args) {
     return new this(args);
 }
 exports._create = _create;
-exports._extend = exports.Backbone.Model.extend;
 var _Object = (function () {
     function _Object() {
     }
@@ -1346,7 +1343,6 @@ var Store = (function () {
     Store.prototype.close = function () {
         // nothing to do
     };
-    Store._extend = Object_2._extend;
     Store._create = Object_2._create;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
@@ -1982,14 +1978,13 @@ exports.io = global['io'] ||
  * // The default configuration will save the complete model data as a json,
  * // and the offline change log to a local WebSql database, synchronize it
  * // trough REST calls with the server and receive live updates via a socket.io connection.
- * var MyCollection = Relution.livedata.Collection._extend({
- *      model: MyModel,
- *      url: 'http://myServer.io/myOrga/myApplication/myCollection',
- *      store: new Relution.livedata.SyncStore( {
- *          useLocalStore:   true, // (default) store the data for offline use
- *          useSocketNotify: true, // (default) register at the server for live updates
- *          useOfflineChanges: true // (default) allow changes to the offline data
- *      })
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.url = 'http://myServer.io/myOrga/myApplication/myCollection';
+ * MyCollection.prototype.store = new Relution.livedata.SyncStore({
+ *   useLocalStore: true,     // (default) store the data for offline use
+ *   useSocketNotify: true,   // (default) register at the server for live updates
+ *   useOfflineChanges: true  // (default) allow changes to the offline data
  * });
  */
 var SyncStore = (function (_super) {
@@ -3171,17 +3166,15 @@ exports.openDatabase = openDatabase;
  *
  * // The default configuration will save the complete model data as json
  * // into a database column with the name "data"
- * var MyCollection = Relution.livedata.Collection._extend({
- *      model: MyModel,
- *      entity: 'MyTableName',
- *      store: new Relution.livedata.WebSqlStore()
- * });
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.entity = 'MyTableName';
+ * MyCollection.prototype.store = new Relution.livedata.WebSqlStore();
  *
  * // If you want to use specific columns you can specify the fields
  * // in the entity of your model like this:
- * var MyModel = Relution.livedata.Model._extend({
- *      idAttribute: 'id'
- * });
+ * class MyModel extends Relution.livedata.Model {};
+ * MyModel.prototype.idAttribute = 'id';
  */
 var WebSqlStore = (function (_super) {
     __extends(WebSqlStore, _super);

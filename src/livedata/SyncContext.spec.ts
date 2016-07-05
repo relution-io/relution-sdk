@@ -37,15 +37,15 @@ describe(module.filename || __filename, function() {
   // prepare model/collection types
   var store = new SyncStore({
   });
-  var TestModel = Model._extend({
-    idAttribute: 'id',
-    entity: 'approval'
-  });
-  var TestCollection = Collection._extend({
-    model: TestModel,
-    store: store,
-    url: serverUrl + '/relution/livedata/approvals/'
-  });
+
+  class TestModel extends Model {};
+  TestModel.prototype.idAttribute = 'id';
+  TestModel.prototype.entity = 'approval';
+
+  class TestCollection extends Collection {};
+  TestCollection.prototype.model = TestModel;
+  TestCollection.prototype.store = store;
+  TestCollection.prototype.url = serverUrl + '/relution/livedata/approvals/';
 
   // loads data using collection, returns promise on collection, collection is empty afterwards
   function loadCollection(collection, data) {
@@ -103,7 +103,7 @@ describe(module.filename || __filename, function() {
           limit: counter,
           sortOrder: [ 'id' ]
         };
-        return collection.fetch(options).thenResolve(options);
+        return (<any>collection.fetch(options)).thenResolve(options);
       }).then(function scroll(options) {
         assert.equal(collection.models.length, counter, 'number of models retrieved so far');
         assert.deepEqual(collection.models.map(function (x) {
@@ -137,7 +137,7 @@ describe(module.filename || __filename, function() {
           limit: 1,
           sortOrder: [ 'id' ]
         };
-        return collection.fetch(options).thenResolve(options);
+        return (<any>collection.fetch(options)).thenResolve(options);
       }).then(function next(options) {
         assert.equal(collection.models.length, 1, 'number of models retrieved so far');
         assert.deepEqual(collection.models.map(function (x) {

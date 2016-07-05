@@ -37,22 +37,17 @@ describe(module.filename || __filename, function() {
       assert.isFalse(isModel([]));
       assert.isFalse(isModel(Model));
       assert.isTrue(isModel(Model._create(undefined)));
-      assert.isTrue(isModel(Model._extend(undefined)._create(undefined)));
       assert.isFalse(isModel(Collection));
       assert.isFalse(isModel(Collection._create(undefined)));
-      assert.isFalse(isModel(Collection._extend(undefined)._create(undefined)));
       assert.isFalse(isModel(Store));
       assert.isFalse(isModel(Store._create(undefined)));
-      assert.isFalse(isModel(Store._extend(undefined)._create(undefined)));
     }),
 
     it('basic', function () {
       assert.isDefined(Model);
       assert.isDefined(Model._create);
-      assert.isDefined(Model._extend);
 
       assert.isFunction(Model._create);
-      assert.isFunction(Model._extend);
 
       var instance = Model._create(undefined);
       assert.isDefined(instance);
@@ -64,13 +59,14 @@ describe(module.filename || __filename, function() {
 
     it('creating model', function () {
       assert.typeOf(Model, 'function', 'Model is defined.');
-      var Person = Model._extend({
-        idAttribute: 'id',
-        defaults: {bmi: 0.0},
-        entity: 'person'
-      });
+      class Person extends Model {};
+      Person.prototype.idAttribute = 'id';
+      Person.prototype.defaults = <any>{
+        bmi: 0.0
+      };
+      Person.prototype.entity = 'person';
       assert.typeOf(Person, 'function', 'person model could be extended.');
-      assert.typeOf(Person._create(), 'object', 'empty person model could be created.');
+      assert.typeOf(Person._create(undefined), 'object', 'empty person model could be created.');
 
       var p = Person._create({
         firstName: 'Max',

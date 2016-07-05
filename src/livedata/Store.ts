@@ -26,7 +26,7 @@ import {Backbone} from './Object';
 import {Model} from './Model';
 import {Collection, isCollection} from './Collection';
 
-import {_Object, _create, _extend} from './Object';
+import {_Object, _create} from './Object';
 
 /**
  * constructor function of Store.
@@ -60,7 +60,6 @@ export class Store {
     }
   }
 
-  public static _extend = _extend;
   public static _create = _create;
 
   protected trigger;

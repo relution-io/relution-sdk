@@ -1046,7 +1046,6 @@ var Collection = (function (_super) {
         }
         return this.syncContext.fetchPrev(this, options);
     };
-    Collection._extend = Backbone.Collection.extend;
     Collection._create = Object_1._create;
     return Collection;
 }(Backbone.Collection));
@@ -1083,6 +1082,11 @@ diag.debug.assert(function () { return isCollection(Object.create(collection)); 
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
@@ -1128,21 +1132,16 @@ describe(module.filename || __filename, function () {
             chai_1.assert.isFalse(Collection_1.isCollection([]));
             chai_1.assert.isFalse(Collection_1.isCollection(Collection_1.Collection));
             chai_1.assert.isTrue(Collection_1.isCollection(Collection_1.Collection._create(undefined)));
-            chai_1.assert.isTrue(Collection_1.isCollection(Collection_1.Collection._extend(undefined)._create(undefined)));
             chai_1.assert.isFalse(Collection_1.isCollection(Model_1.Model));
             chai_1.assert.isFalse(Collection_1.isCollection(Model_1.Model._create(undefined)));
-            chai_1.assert.isFalse(Collection_1.isCollection(Model_1.Model._extend(undefined)._create(undefined)));
             chai_1.assert.isFalse(Collection_1.isCollection(Store_1.Store));
             chai_1.assert.isFalse(Collection_1.isCollection(Store_1.Store._create(undefined)));
-            chai_1.assert.isFalse(Collection_1.isCollection(Store_1.Store._extend(undefined)._create(undefined)));
         }),
         it('basic', function () {
             chai_1.assert.isDefined(Collection_1.Collection);
             chai_1.assert.isDefined(Collection_1.Collection._create);
-            chai_1.assert.isDefined(Collection_1.Collection._extend);
             chai_1.assert.isFunction(Collection_1.Collection);
             chai_1.assert.isFunction(Collection_1.Collection._create);
-            chai_1.assert.isFunction(Collection_1.Collection._extend);
             var instance = Collection_1.Collection._create(undefined);
             chai_1.assert.isDefined(instance);
             chai_1.assert.isObject(instance);
@@ -1152,15 +1151,29 @@ describe(module.filename || __filename, function () {
         }),
         it('creating collection', function () {
             chai_1.assert.typeOf(Collection_1.Collection, 'function', 'Collection is defined');
-            TEST.Developer = Model_1.Model._extend({
-                idAttribute: '_id',
-                entity: 'Developer'
-            });
+            var Developer = (function (_super) {
+                __extends(Developer, _super);
+                function Developer() {
+                    _super.apply(this, arguments);
+                }
+                return Developer;
+            }(Model_1.Model));
+            ;
+            Developer.prototype.idAttribute = '_id';
+            Developer.prototype.entity = 'Developer';
+            TEST.Developer = Developer;
             chai_1.assert.ok(typeof TEST.Developer === 'function', 'Developer model successfully extended.');
-            TEST.DeveloperCollection = Collection_1.Collection._extend({
-                url: TEST.url,
-                model: TEST.Developer
-            });
+            var DeveloperCollection = (function (_super) {
+                __extends(DeveloperCollection, _super);
+                function DeveloperCollection() {
+                    _super.apply(this, arguments);
+                }
+                return DeveloperCollection;
+            }(Collection_1.Collection));
+            ;
+            DeveloperCollection.prototype.url = TEST.url;
+            DeveloperCollection.prototype.model = TEST.Developer;
+            TEST.DeveloperCollection = DeveloperCollection;
             chai_1.assert.ok(typeof TEST.DeveloperCollection === 'function', 'Developer collection successfully extended.');
             TEST.Developers = new TEST.DeveloperCollection();
             chai_1.assert.ok(typeof TEST.Developers === 'object', 'Developer collection successfully created.');
@@ -1360,7 +1373,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
             return url;
         }
     };
-    Model /*<AttributesType extends Object>*/._extend = Backbone.Model.extend;
     Model /*<AttributesType extends Object>*/._create = Object_1._create;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
@@ -1395,6 +1407,11 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
@@ -1411,20 +1428,15 @@ describe(module.filename || __filename, function () {
             chai_1.assert.isFalse(Model_1.isModel([]));
             chai_1.assert.isFalse(Model_1.isModel(Model_1.Model));
             chai_1.assert.isTrue(Model_1.isModel(Model_1.Model._create(undefined)));
-            chai_1.assert.isTrue(Model_1.isModel(Model_1.Model._extend(undefined)._create(undefined)));
             chai_1.assert.isFalse(Model_1.isModel(Collection_1.Collection));
             chai_1.assert.isFalse(Model_1.isModel(Collection_1.Collection._create(undefined)));
-            chai_1.assert.isFalse(Model_1.isModel(Collection_1.Collection._extend(undefined)._create(undefined)));
             chai_1.assert.isFalse(Model_1.isModel(Store_1.Store));
             chai_1.assert.isFalse(Model_1.isModel(Store_1.Store._create(undefined)));
-            chai_1.assert.isFalse(Model_1.isModel(Store_1.Store._extend(undefined)._create(undefined)));
         }),
         it('basic', function () {
             chai_1.assert.isDefined(Model_1.Model);
             chai_1.assert.isDefined(Model_1.Model._create);
-            chai_1.assert.isDefined(Model_1.Model._extend);
             chai_1.assert.isFunction(Model_1.Model._create);
-            chai_1.assert.isFunction(Model_1.Model._extend);
             var instance = Model_1.Model._create(undefined);
             chai_1.assert.isDefined(instance);
             chai_1.assert.isObject(instance);
@@ -1434,13 +1446,21 @@ describe(module.filename || __filename, function () {
         }),
         it('creating model', function () {
             chai_1.assert.typeOf(Model_1.Model, 'function', 'Model is defined.');
-            var Person = Model_1.Model._extend({
-                idAttribute: 'id',
-                defaults: { bmi: 0.0 },
-                entity: 'person'
-            });
+            var Person = (function (_super) {
+                __extends(Person, _super);
+                function Person() {
+                    _super.apply(this, arguments);
+                }
+                return Person;
+            }(Model_1.Model));
+            ;
+            Person.prototype.idAttribute = 'id';
+            Person.prototype.defaults = {
+                bmi: 0.0
+            };
+            Person.prototype.entity = 'person';
             chai_1.assert.typeOf(Person, 'function', 'person model could be extended.');
-            chai_1.assert.typeOf(Person._create(), 'object', 'empty person model could be created.');
+            chai_1.assert.typeOf(Person._create(undefined), 'object', 'empty person model could be created.');
             var p = Person._create({
                 firstName: 'Max',
                 sureName: 'Mustermann',
@@ -1495,7 +1515,6 @@ function _create(args) {
     return new this(args);
 }
 exports._create = _create;
-exports._extend = exports.Backbone.Model.extend;
 var _Object = (function () {
     function _Object() {
     }
@@ -1754,7 +1773,6 @@ var Store = (function () {
     Store.prototype.close = function () {
         // nothing to do
     };
-    Store._extend = Object_2._extend;
     Store._create = Object_2._create;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
@@ -2263,6 +2281,11 @@ exports.SyncContext = SyncContext;
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var chai_1 = require('chai');
 var Q = require('q');
 var Model_1 = require('./Model');
@@ -2274,15 +2297,27 @@ describe(module.filename || __filename, function () {
     this.timeout(60000);
     // prepare model/collection types
     var store = new SyncStore_1.SyncStore({});
-    var TestModel = Model_1.Model._extend({
-        idAttribute: 'id',
-        entity: 'approval'
-    });
-    var TestCollection = Collection_1.Collection._extend({
-        model: TestModel,
-        store: store,
-        url: serverUrl + '/relution/livedata/approvals/'
-    });
+    var TestModel = (function (_super) {
+        __extends(TestModel, _super);
+        function TestModel() {
+            _super.apply(this, arguments);
+        }
+        return TestModel;
+    }(Model_1.Model));
+    ;
+    TestModel.prototype.idAttribute = 'id';
+    TestModel.prototype.entity = 'approval';
+    var TestCollection = (function (_super) {
+        __extends(TestCollection, _super);
+        function TestCollection() {
+            _super.apply(this, arguments);
+        }
+        return TestCollection;
+    }(Collection_1.Collection));
+    ;
+    TestCollection.prototype.model = TestModel;
+    TestCollection.prototype.store = store;
+    TestCollection.prototype.url = serverUrl + '/relution/livedata/approvals/';
     // loads data using collection, returns promise on collection, collection is empty afterwards
     function loadCollection(collection, data) {
         return collection.fetch().then(function () {
@@ -2565,6 +2600,11 @@ describe(module.filename || __filename, function () {
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Q = require('q');
 var chai_1 = require('chai');
 var diag_1 = require('../core/diag');
@@ -2582,20 +2622,27 @@ describe(module.filename || __filename, function () {
             useLocalStore: true,
             useSocketNotify: false
         });
-        modelType = Model_1.Model._extend({
-            idAttribute: 'id',
-            entity: 'User',
-            store: Store,
-            urlRoot: serverUrl + '/relution/livedata/user/',
-            defaults: {
-                username: 'admin',
-                password: 'admin'
-            },
-            ajax: function (requ) {
+        var ModelType = (function (_super) {
+            __extends(ModelType, _super);
+            function ModelType() {
+                _super.apply(this, arguments);
+            }
+            ModelType.prototype.ajax = function (requ) {
                 diag_1.debug.info('offline');
                 return Q.reject(new Error('Not Online'));
-            }
-        });
+            };
+            return ModelType;
+        }(Model_1.Model));
+        ;
+        ModelType.prototype.idAttribute = 'id';
+        ModelType.prototype.entity = 'User';
+        ModelType.prototype.store = Store;
+        ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
+        ModelType.prototype.defaults = {
+            username: 'admin',
+            password: 'admin'
+        };
+        modelType = ModelType;
         model = new modelType({ id: '12312' });
     });
     return [
@@ -2696,6 +2743,11 @@ describe(module.filename || __filename, function () {
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Q = require('q');
 var chai_1 = require('chai');
 var Model_1 = require('./Model');
@@ -2713,12 +2765,19 @@ describe(module.filename || __filename, function () {
             useLocalStore: true,
             useSocketNotify: false
         });
-        modelType = Model_1.Model._extend({
-            idAttribute: 'id',
-            entity: 'User',
-            store: Store,
-            urlRoot: serverUrl + '/relution/livedata/user/'
-        });
+        var ModelType = (function (_super) {
+            __extends(ModelType, _super);
+            function ModelType() {
+                _super.apply(this, arguments);
+            }
+            return ModelType;
+        }(Model_1.Model));
+        ;
+        ModelType.prototype.idAttribute = 'id';
+        ModelType.prototype.entity = 'User';
+        ModelType.prototype.store = Store;
+        ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
+        modelType = ModelType;
         model = new modelType({ id: '12312' });
         promise = model.fetch().thenResolve(model);
     });
@@ -2858,14 +2917,13 @@ exports.io = global['io'] ||
  * // The default configuration will save the complete model data as a json,
  * // and the offline change log to a local WebSql database, synchronize it
  * // trough REST calls with the server and receive live updates via a socket.io connection.
- * var MyCollection = Relution.livedata.Collection._extend({
- *      model: MyModel,
- *      url: 'http://myServer.io/myOrga/myApplication/myCollection',
- *      store: new Relution.livedata.SyncStore( {
- *          useLocalStore:   true, // (default) store the data for offline use
- *          useSocketNotify: true, // (default) register at the server for live updates
- *          useOfflineChanges: true // (default) allow changes to the offline data
- *      })
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.url = 'http://myServer.io/myOrga/myApplication/myCollection';
+ * MyCollection.prototype.store = new Relution.livedata.SyncStore({
+ *   useLocalStore: true,     // (default) store the data for offline use
+ *   useSocketNotify: true,   // (default) register at the server for live updates
+ *   useOfflineChanges: true  // (default) allow changes to the offline data
  * });
  */
 var SyncStore = (function (_super) {
@@ -3978,6 +4036,11 @@ diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var _ = require('lodash');
 var chai_1 = require('chai');
 var Model_1 = require('./Model');
@@ -4012,22 +4075,36 @@ describe(module.filename || __filename, function () {
         }),
         it('creating collection', function () {
             chai_1.assert.isFunction(Collection_1.Collection, 'Collection is defined');
-            TEST.TestModel = Model_1.Model._extend({
-                idAttribute: '_id',
-                entity: 'test'
-            });
+            var TestModel = (function (_super) {
+                __extends(TestModel, _super);
+                function TestModel() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel;
+            }(Model_1.Model));
+            ;
+            TestModel.prototype.idAttribute = '_id';
+            TestModel.prototype.entity = 'test';
+            TEST.TestModel = TestModel;
             chai_1.assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
             TEST.url = serverUrl + '/relution/livedata/test/';
-            TEST.TestsModelCollection = Collection_1.Collection._extend({
-                model: TEST.TestModel,
-                url: TEST.url,
-                store: TEST.store,
-                options: {
-                    sort: { sureName: 1 },
-                    fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
-                    query: { age: { $gte: 25 } }
+            var TestsModelCollection = (function (_super) {
+                __extends(TestsModelCollection, _super);
+                function TestsModelCollection() {
+                    _super.apply(this, arguments);
                 }
-            });
+                return TestsModelCollection;
+            }(Collection_1.Collection));
+            ;
+            TestsModelCollection.prototype.model = TEST.TestModel;
+            TestsModelCollection.prototype.url = TEST.url;
+            TestsModelCollection.prototype.store = TEST.store;
+            TestsModelCollection.prototype.options = {
+                sort: { sureName: 1 },
+                fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
+                query: { age: { $gte: 25 } }
+            };
+            TEST.TestsModelCollection = TestsModelCollection;
             chai_1.assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
             TEST.Tests = TEST.TestsModelCollection._create();
             chai_1.assert.isObject(TEST.Tests, 'Test collection successfully created.');
@@ -4060,12 +4137,19 @@ describe(module.filename || __filename, function () {
             chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
         }),
         it('fetching data with new model', function (done) {
-            TEST.TestModel2 = Model_1.Model._extend({
-                url: TEST.url,
-                idAttribute: '_id',
-                store: TEST.store,
-                entity: 'test'
-            });
+            var TestModel2 = (function (_super) {
+                __extends(TestModel2, _super);
+                function TestModel2() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel2;
+            }(Model_1.Model));
+            ;
+            TestModel2.prototype.url = TEST.url;
+            TestModel2.prototype.idAttribute = '_id';
+            TestModel2.prototype.store = TEST.store;
+            TestModel2.prototype.entity = 'test';
+            TEST.TestModel2 = TestModel2;
             var data = { _id: TEST.id };
             var model = TEST.TestModel2._create(data);
             chai_1.assert.isObject(model, "new model created");
@@ -4083,12 +4167,19 @@ describe(module.filename || __filename, function () {
             });
         }),
         it('fetching model with no id using callbacks', function (done) {
-            TEST.TestModel2 = Model_1.Model._extend({
-                url: TEST.url,
-                idAttribute: '_id',
-                store: TEST.store,
-                entity: 'test'
-            });
+            var TestModel2 = (function (_super) {
+                __extends(TestModel2, _super);
+                function TestModel2() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel2;
+            }(Model_1.Model));
+            ;
+            TestModel2.prototype.url = TEST.url;
+            TestModel2.prototype.idAttribute = '_id';
+            TestModel2.prototype.store = TEST.store;
+            TestModel2.prototype.entity = 'test';
+            TEST.TestModel2 = TestModel2;
             var model = TEST.TestModel2._create({});
             model.fetch({
                 success: function (model) {
@@ -4100,12 +4191,19 @@ describe(module.filename || __filename, function () {
             });
         }),
         it('fetching model with empty-string id using promises', function (done) {
-            TEST.TestModel2 = Model_1.Model._extend({
-                url: TEST.url,
-                idAttribute: '_id',
-                store: TEST.store,
-                entity: 'test'
-            });
+            var TestModel2 = (function (_super) {
+                __extends(TestModel2, _super);
+                function TestModel2() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel2;
+            }(Model_1.Model));
+            ;
+            TestModel2.prototype.url = TEST.url;
+            TestModel2.prototype.idAttribute = '_id';
+            TestModel2.prototype.store = TEST.store;
+            TestModel2.prototype.entity = 'test';
+            TEST.TestModel2 = TestModel2;
             var model = TEST.TestModel2._create({
                 _id: ''
             });
@@ -4157,12 +4255,12 @@ describe(module.filename || __filename, function () {
             chai_1.assert.ok(model, 'record found');
             var oldId = model.id;
             var newId = '4711-' + oldId;
-            var TestModel = Model_1.Model._extend({
-                url: TEST.url,
-                idAttribute: '_id',
-                store: TEST.store,
-                entity: 'test',
-                ajax: function (options) {
+            var TestModel = (function (_super) {
+                __extends(TestModel, _super);
+                function TestModel() {
+                    _super.apply(this, arguments);
+                }
+                TestModel.prototype.ajax = function (options) {
                     // following simulates server reassigning ID value
                     return Model_1.Model.prototype.ajax.apply(this, arguments).then(function (response) {
                         if (response._id === oldId) {
@@ -4173,8 +4271,14 @@ describe(module.filename || __filename, function () {
                         }
                         return response;
                     });
-                }
-            });
+                };
+                return TestModel;
+            }(Model_1.Model));
+            ;
+            TestModel.prototype.url = TEST.url;
+            TestModel.prototype.idAttribute = '_id';
+            TestModel.prototype.store = TEST.store;
+            TestModel.prototype.entity = 'test';
             var testModel = new TestModel(model.attributes);
             var options = {
                 wait: true
@@ -4327,17 +4431,15 @@ exports.openDatabase = openDatabase;
  *
  * // The default configuration will save the complete model data as json
  * // into a database column with the name "data"
- * var MyCollection = Relution.livedata.Collection._extend({
- *      model: MyModel,
- *      entity: 'MyTableName',
- *      store: new Relution.livedata.WebSqlStore()
- * });
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.entity = 'MyTableName';
+ * MyCollection.prototype.store = new Relution.livedata.WebSqlStore();
  *
  * // If you want to use specific columns you can specify the fields
  * // in the entity of your model like this:
- * var MyModel = Relution.livedata.Model._extend({
- *      idAttribute: 'id'
- * });
+ * class MyModel extends Relution.livedata.Model {};
+ * MyModel.prototype.idAttribute = 'id';
  */
 var WebSqlStore = (function (_super) {
     __extends(WebSqlStore, _super);
@@ -4819,6 +4921,11 @@ diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Objec
  * limitations under the License.
  */
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
@@ -4855,15 +4962,29 @@ describe(module.filename || __filename, function () {
         }),
         it('drop table', TEST.dropTableTest),
         it('simple websql store', function (done) {
-            TEST.SimpleModel = Model_1.Model._extend({
-                idAttribute: 'key'
-            });
+            var SimpleModel = (function (_super) {
+                __extends(SimpleModel, _super);
+                function SimpleModel() {
+                    _super.apply(this, arguments);
+                }
+                return SimpleModel;
+            }(Model_1.Model));
+            ;
+            SimpleModel.prototype.idAttribute = 'key';
+            TEST.SimpleModel = SimpleModel;
             chai_1.assert.typeOf(TEST.SimpleModel, 'function', 'SimpleModel model successfully extended.');
-            TEST.SimpleModelCollection = Collection_1.Collection._extend({
-                model: TEST.SimpleModel,
-                store: new WebSqlStore_1.WebSqlStore(),
-                entity: 'test'
-            });
+            var SimpleModelCollection = (function (_super) {
+                __extends(SimpleModelCollection, _super);
+                function SimpleModelCollection() {
+                    _super.apply(this, arguments);
+                }
+                return SimpleModelCollection;
+            }(Collection_1.Collection));
+            ;
+            SimpleModelCollection.prototype.model = TEST.SimpleModel;
+            SimpleModelCollection.prototype.store = new WebSqlStore_1.WebSqlStore();
+            SimpleModelCollection.prototype.entity = 'test';
+            TEST.SimpleModelCollection = SimpleModelCollection;
             chai_1.assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
             TEST.Simple = TEST.SimpleModelCollection._create();
             chai_1.assert.typeOf(TEST.Simple, 'object', 'Simple collection successfully created.');
@@ -4880,15 +5001,29 @@ describe(module.filename || __filename, function () {
         it('drop table', TEST.dropTableTest),
         it('creating collection', function () {
             chai_1.assert.typeOf(Collection_1.Collection, 'function', 'Collection is defined');
-            TEST.TestModel = Model_1.Model._extend({
-                idAttribute: 'key',
-                entity: 'test'
-            });
+            var TestModel = (function (_super) {
+                __extends(TestModel, _super);
+                function TestModel() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel;
+            }(Model_1.Model));
+            ;
+            TestModel.prototype.idAttribute = 'key';
+            TestModel.prototype.entity = 'test';
+            TEST.TestModel = TestModel;
             chai_1.assert.typeOf(TEST.TestModel, 'function', 'TestModel model successfully extended.');
-            TEST.TestModelCollection = Collection_1.Collection._extend({
-                model: TEST.TestModel,
-                store: TEST.store
-            });
+            var TestModelCollection = (function (_super) {
+                __extends(TestModelCollection, _super);
+                function TestModelCollection() {
+                    _super.apply(this, arguments);
+                }
+                return TestModelCollection;
+            }(Collection_1.Collection));
+            ;
+            TestModelCollection.prototype.model = TEST.TestModel;
+            TestModelCollection.prototype.store = TEST.store;
+            TEST.TestModelCollection = TestModelCollection;
             chai_1.assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
             TEST.Tests = TEST.TestModelCollection._create();
             chai_1.assert.typeOf(TEST.Tests, 'object', 'Test collection successfully created.');
@@ -4924,11 +5059,18 @@ describe(module.filename || __filename, function () {
             chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
         }),
         it('fetching data with new model', function (done) {
-            TEST.TestModel2 = Model_1.Model._extend({
-                idAttribute: 'key',
-                store: TEST.store,
-                entity: 'test'
-            });
+            var TestModel2 = (function (_super) {
+                __extends(TestModel2, _super);
+                function TestModel2() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel2;
+            }(Model_1.Model));
+            ;
+            TestModel2.prototype.idAttribute = 'key';
+            TestModel2.prototype.store = TEST.store;
+            TestModel2.prototype.entity = 'test';
+            TEST.TestModel2 = TestModel2;
             var model = TEST.TestModel2._create({ key: TEST.key });
             chai_1.assert.isObject(model, "new model created");
             model.fetch({
@@ -4982,11 +5124,18 @@ describe(module.filename || __filename, function () {
         it('create record (no schema)', function (done) {
             // recreate store type to drop schema information
             TEST.store = new WebSqlStore_1.WebSqlStore(undefined);
-            TEST.TestModel2 = Model_1.Model._extend({
-                idAttribute: 'key',
-                store: TEST.store,
-                entity: 'test'
-            });
+            var TestModel2 = (function (_super) {
+                __extends(TestModel2, _super);
+                function TestModel2() {
+                    _super.apply(this, arguments);
+                }
+                return TestModel2;
+            }(Model_1.Model));
+            ;
+            TestModel2.prototype.idAttribute = 'key';
+            TestModel2.prototype.store = TEST.store;
+            TestModel2.prototype.entity = 'test';
+            TEST.TestModel2 = TestModel2;
             TEST.Tests2 = new Collection_1.Collection(undefined, {
                 model: TEST.TestModel2,
                 store: TEST.store
