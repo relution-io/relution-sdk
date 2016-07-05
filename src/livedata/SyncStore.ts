@@ -243,7 +243,7 @@ export class SyncStore extends Store {
    */
   createMsgCollection(): Collection {
     if (this.useOfflineChanges && !this.messages) {
-      this.messages = Collection._design({
+      this.messages = new Collection(undefined, {
         model: LiveDataMessageModel,
         store: new this.localStore(this.localStoreOptions)
       });

@@ -94,7 +94,7 @@ export class Collection extends Backbone.Collection<Model> {
       this.url += '/';
     }
 
-    this.init(options);
+    this.init(models, options);
   }
 
   protected init(models?: any, options?: any) {

@@ -877,7 +877,7 @@ var Collection = (function (_super) {
         if (this.url && this.url.charAt(this.url.length - 1) !== '/') {
             this.url += '/';
         }
-        this.init(options);
+        this.init(models, options);
     }
     Collection.prototype.init = function (models, options) {
         options = options || {};
@@ -3033,7 +3033,7 @@ var SyncStore = (function (_super) {
      */
     SyncStore.prototype.createMsgCollection = function () {
         if (this.useOfflineChanges && !this.messages) {
-            this.messages = Collection_1.Collection._design({
+            this.messages = new Collection_1.Collection(undefined, {
                 model: LiveDataMessage_1.LiveDataMessageModel,
                 store: new this.localStore(this.localStoreOptions)
             });
