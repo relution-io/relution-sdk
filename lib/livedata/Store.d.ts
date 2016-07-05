@@ -1,6 +1,6 @@
 import { Model } from './Model';
 import { Collection } from './Collection';
-import { _create, _design } from './Object';
+import { _create } from './Object';
 /**
  * constructor function of Store.
  */
@@ -23,7 +23,6 @@ export declare class Store {
     constructor(options?: any);
     static _extend: any;
     static _create: typeof _create;
-    static _design: typeof _design;
     protected trigger: any;
     getArray(data: any): any;
     getDataArray(data: any): any[];

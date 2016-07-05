@@ -78,12 +78,10 @@ describe(module.filename || __filename, function() {
 
     it('basic', function () {
       assert.isDefined(Collection);
-      assert.isDefined(Collection._design);
       assert.isDefined(Collection._create);
       assert.isDefined(Collection._extend);
 
       assert.isFunction(Collection);
-      assert.isFunction(Collection._design);
       assert.isFunction(Collection._create);
       assert.isFunction(Collection._extend);
 

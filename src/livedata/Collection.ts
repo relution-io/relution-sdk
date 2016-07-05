@@ -27,7 +27,7 @@ import {Model, ModelCtor} from './Model';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
 
-import {_Object, _create, _design} from './Object';
+import {_Object, _create} from './Object';
 import {ajax, sync} from './rest';
 
 /**
@@ -85,7 +85,6 @@ export class Collection extends Backbone.Collection<Model> {
 
   public static _extend = (<any>Backbone.Collection).extend;
   public static _create = _create;
-  public static _design = _design;
 
   public constructor(models?: any, options?: any) {
     super(models, options);

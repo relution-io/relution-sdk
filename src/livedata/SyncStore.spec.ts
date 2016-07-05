@@ -51,12 +51,13 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(SyncStore, 'SyncStore is defined');
 
-      TEST.store = SyncStore._design({
+      TEST.store = new SyncStore({
         useLocalStore: true,
         useSocketNotify: false
       });
-
       assert.isObject(TEST.store, 'store successfully created.');
+      assert.ok(TEST.store.useLocalStore);
+      assert.ok(!TEST.store.useSocketNotify);
     }),
 
     it('creating collection', () => {

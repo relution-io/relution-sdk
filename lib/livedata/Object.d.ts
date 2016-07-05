@@ -1,5 +1,4 @@
 export declare function _create(args: any): any;
-export declare function _design(obj: any): any;
 export declare const _extend: any;
 export declare class _Object {
     /**
@@ -20,14 +19,6 @@ export declare class _Object {
      * @param {Object} properties The properties to be included into the given object.
      */
     include(properties: any): this;
-    /**
-     * Creates a new class and extends it with all functions of the defined super class
-     * The function takes multiple input arguments. Each argument serves as additional
-     * super classes - see mixins.
-     *
-     * @param {Object} properties The properties to be included into the given object.
-     */
-    _design(properties: any): any;
     /**
      * Binds a method to its caller, so it is always executed within the right scope.
      *

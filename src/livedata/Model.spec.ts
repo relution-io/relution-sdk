@@ -48,11 +48,9 @@ describe(module.filename || __filename, function() {
 
     it('basic', function () {
       assert.isDefined(Model);
-      assert.isDefined(Model._design);
       assert.isDefined(Model._create);
       assert.isDefined(Model._extend);
 
-      assert.isFunction(Model._design);
       assert.isFunction(Model._create);
       assert.isFunction(Model._extend);
 

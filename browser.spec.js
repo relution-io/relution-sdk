@@ -1048,7 +1048,6 @@ var Collection = (function (_super) {
     };
     Collection._extend = Backbone.Collection.extend;
     Collection._create = Object_1._create;
-    Collection._design = Object_1._design;
     return Collection;
 }(Backbone.Collection));
 exports.Collection = Collection;
@@ -1139,11 +1138,9 @@ describe(module.filename || __filename, function () {
         }),
         it('basic', function () {
             chai_1.assert.isDefined(Collection_1.Collection);
-            chai_1.assert.isDefined(Collection_1.Collection._design);
             chai_1.assert.isDefined(Collection_1.Collection._create);
             chai_1.assert.isDefined(Collection_1.Collection._extend);
             chai_1.assert.isFunction(Collection_1.Collection);
-            chai_1.assert.isFunction(Collection_1.Collection._design);
             chai_1.assert.isFunction(Collection_1.Collection._create);
             chai_1.assert.isFunction(Collection_1.Collection._extend);
             var instance = Collection_1.Collection._create(undefined);
@@ -1365,7 +1362,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
     };
     Model /*<AttributesType extends Object>*/._extend = Backbone.Model.extend;
     Model /*<AttributesType extends Object>*/._create = Object_1._create;
-    Model /*<AttributesType extends Object>*/._design = Object_1._design;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
@@ -1425,10 +1421,8 @@ describe(module.filename || __filename, function () {
         }),
         it('basic', function () {
             chai_1.assert.isDefined(Model_1.Model);
-            chai_1.assert.isDefined(Model_1.Model._design);
             chai_1.assert.isDefined(Model_1.Model._create);
             chai_1.assert.isDefined(Model_1.Model._extend);
-            chai_1.assert.isFunction(Model_1.Model._design);
             chai_1.assert.isFunction(Model_1.Model._create);
             chai_1.assert.isFunction(Model_1.Model._extend);
             var instance = Model_1.Model._create(undefined);
@@ -1501,11 +1495,6 @@ function _create(args) {
     return new this(args);
 }
 exports._create = _create;
-function _design(obj) {
-    var O = this._extend(obj || {});
-    return new O();
-}
-exports._design = _design;
 exports._extend = exports.Backbone.Model.extend;
 var _Object = (function () {
     function _Object() {
@@ -1533,21 +1522,6 @@ var _Object = (function () {
             this[prop] = properties[prop];
         }
         return this;
-    };
-    /**
-     * Creates a new class and extends it with all functions of the defined super class
-     * The function takes multiple input arguments. Each argument serves as additional
-     * super classes - see mixins.
-     *
-     * @param {Object} properties The properties to be included into the given object.
-     */
-    _Object.prototype._design = function (properties) {
-        // create the new object
-        var obj = this._create(this);
-        // assign the properties passed with the arguments array
-        obj.include(properties);
-        // return the new object
-        return obj;
     };
     /**
      * Binds a method to its caller, so it is always executed within the right scope.
@@ -1632,11 +1606,9 @@ describe(module.filename || __filename, function () {
         }),
         it('methods', function () {
             chai_1.assert.isDefined(Object_1._Object.prototype._create);
-            chai_1.assert.isDefined(Object_1._Object.prototype._design);
             chai_1.assert.isDefined(Object_1._Object.prototype.bindToCaller);
             chai_1.assert.isDefined(Object_1._Object.prototype.handleCallback);
             chai_1.assert.isFunction(Object_1._Object.prototype._create);
-            chai_1.assert.isFunction(Object_1._Object.prototype._design);
             chai_1.assert.isFunction(Object_1._Object.prototype.bindToCaller);
             chai_1.assert.isFunction(Object_1._Object.prototype.handleCallback);
         })
@@ -1784,7 +1756,6 @@ var Store = (function () {
     };
     Store._extend = Object_2._extend;
     Store._create = Object_2._create;
-    Store._design = Object_2._design;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
         ERROR_LOAD_DATA: 'Error while loading data from store. ',
@@ -4031,11 +4002,13 @@ describe(module.filename || __filename, function () {
         it('creating store', function () {
             chai_1.assert.isString(serverUrl, 'Server url is defined.');
             chai_1.assert.isFunction(SyncStore_1.SyncStore, 'SyncStore is defined');
-            TEST.store = SyncStore_1.SyncStore._design({
+            TEST.store = new SyncStore_1.SyncStore({
                 useLocalStore: true,
                 useSocketNotify: false
             });
             chai_1.assert.isObject(TEST.store, 'store successfully created.');
+            chai_1.assert.ok(TEST.store.useLocalStore);
+            chai_1.assert.ok(!TEST.store.useSocketNotify);
         }),
         it('creating collection', function () {
             chai_1.assert.isFunction(Collection_1.Collection, 'Collection is defined');
@@ -4877,7 +4850,7 @@ describe(module.filename || __filename, function () {
         it('creating websql store', function () {
             chai_1.assert.typeOf(global.openDatabase, 'function', 'Browser supports WebSql');
             chai_1.assert.typeOf(WebSqlStore_1.WebSqlStore, 'function', 'WebSqlStore is defined');
-            TEST.store = WebSqlStore_1.WebSqlStore._design(undefined);
+            TEST.store = new WebSqlStore_1.WebSqlStore();
             chai_1.assert.typeOf(TEST.store, 'object', 'store successfully created.');
         }),
         it('drop table', TEST.dropTableTest),
@@ -5008,17 +4981,17 @@ describe(module.filename || __filename, function () {
         it('drop table', TEST.dropTableTest),
         it('create record (no schema)', function (done) {
             // recreate store type to drop schema information
-            TEST.store = WebSqlStore_1.WebSqlStore._design(undefined);
+            TEST.store = new WebSqlStore_1.WebSqlStore(undefined);
             TEST.TestModel2 = Model_1.Model._extend({
                 idAttribute: 'key',
                 store: TEST.store,
                 entity: 'test'
             });
-            TEST.Tests2 = Collection_1.Collection._design({
+            TEST.Tests2 = new Collection_1.Collection(undefined, {
                 model: TEST.TestModel2,
                 store: TEST.store
             });
-            chai_1.assert.isObject(TEST.Tests2, "Collection._design created a new collection");
+            chai_1.assert.isObject(TEST.Tests2, "Collection created");
             TEST.data = {
                 firstName: 'Max',
                 sureName: 'Mustermann',

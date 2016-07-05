@@ -58,7 +58,7 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(WebSqlStore, 'function', 'WebSqlStore is defined');
 
-      TEST.store = WebSqlStore._design(undefined);
+      TEST.store = new WebSqlStore();
 
       assert.typeOf(TEST.store, 'object', 'store successfully created.');
 
@@ -248,7 +248,7 @@ describe(module.filename || __filename, function() {
     it('create record (no schema)', function (done) {
 
       // recreate store type to drop schema information
-      TEST.store = WebSqlStore._design(undefined);
+      TEST.store = new WebSqlStore(undefined);
 
       TEST.TestModel2 = Model._extend({
         idAttribute: 'key',
@@ -256,12 +256,11 @@ describe(module.filename || __filename, function() {
         entity: 'test'
       });
 
-      TEST.Tests2 = Collection._design({
+      TEST.Tests2 = new Collection(undefined, {
         model: TEST.TestModel2,
         store: TEST.store
       });
-
-      assert.isObject(TEST.Tests2, "Collection._design created a new collection");
+      assert.isObject(TEST.Tests2, "Collection created");
 
       TEST.data = {
         firstName: 'Max',

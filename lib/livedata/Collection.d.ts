@@ -2,7 +2,7 @@ import { Store } from './Store';
 import { Model, ModelCtor } from './Model';
 import { SyncContext } from './SyncContext';
 import { SyncEndpoint } from './SyncEndpoint';
-import { _create, _design } from './Object';
+import { _create } from './Object';
 /**
  * constructor function of Collection.
  */
@@ -42,7 +42,6 @@ export declare class Collection extends Backbone.Collection<Model> {
     channel: string;
     static _extend: any;
     static _create: typeof _create;
-    static _design: typeof _design;
     constructor(models?: any, options?: any);
     protected init(models?: any, options?: any): void;
     modelId: (attrs: any) => any;

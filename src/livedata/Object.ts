@@ -35,11 +35,6 @@ export function _create(args) {
   return new this(args);
 }
 
-export function _design(obj) {
-  var O = this._extend(obj || {});
-  return new O();
-}
-
 export const _extend = Backbone.Model.extend;
 
 export class _Object {
@@ -73,24 +68,6 @@ export class _Object {
       this[prop] = properties[prop];
     }
     return this;
-  }
-
-  /**
-   * Creates a new class and extends it with all functions of the defined super class
-   * The function takes multiple input arguments. Each argument serves as additional
-   * super classes - see mixins.
-   *
-   * @param {Object} properties The properties to be included into the given object.
-   */
-  _design(properties) {
-    // create the new object
-    var obj = this._create(this);
-
-    // assign the properties passed with the arguments array
-    obj.include(properties);
-
-    // return the new object
-    return obj;
   }
 
   /**

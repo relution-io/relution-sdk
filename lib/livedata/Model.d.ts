@@ -1,7 +1,7 @@
 import { Store } from './Store';
 import { Collection } from './Collection';
 import { SyncEndpoint } from './SyncEndpoint';
-import { _create, _design } from './Object';
+import { _create } from './Object';
 /**
  * constructor function of Model.
  */
@@ -33,7 +33,6 @@ export declare class Model extends Backbone.Model {
     endpoint: SyncEndpoint;
     static _extend: any;
     static _create: typeof _create;
-    static _design: typeof _design;
     constructor(attributes?: any, options?: any);
     protected init(attributes?: any, options?: any): void;
     ajax(options: any): any;

@@ -907,7 +907,6 @@ var Collection = (function (_super) {
     };
     Collection._extend = Backbone.Collection.extend;
     Collection._create = Object_1._create;
-    Collection._design = Object_1._design;
     return Collection;
 }(Backbone.Collection));
 exports.Collection = Collection;
@@ -1086,7 +1085,6 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
     };
     Model /*<AttributesType extends Object>*/._extend = Backbone.Model.extend;
     Model /*<AttributesType extends Object>*/._create = Object_1._create;
-    Model /*<AttributesType extends Object>*/._design = Object_1._design;
     return Model /*<AttributesType extends Object>*/;
 }(Backbone.Model));
 exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
@@ -1134,11 +1132,6 @@ function _create(args) {
     return new this(args);
 }
 exports._create = _create;
-function _design(obj) {
-    var O = this._extend(obj || {});
-    return new O();
-}
-exports._design = _design;
 exports._extend = exports.Backbone.Model.extend;
 var _Object = (function () {
     function _Object() {
@@ -1166,21 +1159,6 @@ var _Object = (function () {
             this[prop] = properties[prop];
         }
         return this;
-    };
-    /**
-     * Creates a new class and extends it with all functions of the defined super class
-     * The function takes multiple input arguments. Each argument serves as additional
-     * super classes - see mixins.
-     *
-     * @param {Object} properties The properties to be included into the given object.
-     */
-    _Object.prototype._design = function (properties) {
-        // create the new object
-        var obj = this._create(this);
-        // assign the properties passed with the arguments array
-        obj.include(properties);
-        // return the new object
-        return obj;
     };
     /**
      * Binds a method to its caller, so it is always executed within the right scope.
@@ -1370,7 +1348,6 @@ var Store = (function () {
     };
     Store._extend = Object_2._extend;
     Store._create = Object_2._create;
-    Store._design = Object_2._design;
     Store.CONST = {
         ERROR_NO_DATA: 'No data passed. ',
         ERROR_LOAD_DATA: 'Error while loading data from store. ',
