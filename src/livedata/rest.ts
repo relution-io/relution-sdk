@@ -7,7 +7,14 @@ import * as Q from 'q';
 
 import * as web from '../web';
 
-import {Backbone} from './Object';
+/**
+ * Backbone of browser via script tag or via require backbone.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+export const Backbone = global['Backbone'] || // native implementation
+  process && !process['browser'] &&           // or when not in browser
+  (global['Backbone'] = require('backbone')); // required version
 
 /**
  * options passed to Collection.fetch() preventing backbone.js from consuming the response.

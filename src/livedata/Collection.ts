@@ -27,7 +27,6 @@ import {Model, ModelCtor} from './Model';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
 
-import {_Object} from './Object';
 import {ajax, sync} from './rest';
 
 /**
@@ -286,7 +285,7 @@ export class Collection extends Backbone.Collection<Model> {
 }
 
 // mixins
-let collection = _.extend(Collection.prototype, _Object.prototype, {
+let collection = _.extend(Collection.prototype, {
   _type: 'Relution.LiveData.Collection',
   isModel: false,
   isCollection: true,

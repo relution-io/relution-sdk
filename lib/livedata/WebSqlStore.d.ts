@@ -1,5 +1,21 @@
 import * as Q from 'q';
 import { Store } from './Store';
+export interface WebSqlOptions {
+    name: string;
+    description?: string;
+    version?: string;
+    size?: number;
+    location?: number;
+    key?: string;
+    security?: string;
+    credentials?: any;
+}
+export interface WebSqlError extends Error {
+    /**
+     * eventually contains last recently executed SQL causing the error.
+     */
+    sql?: string;
+}
 /**
  * stores LiveData into the WebSQL database.
  *

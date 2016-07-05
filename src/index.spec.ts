@@ -43,7 +43,6 @@ export default [
   // connector
 
   // livedata
-  require('./livedata/Object.spec'),
   require('./livedata/Model.spec'),
   require('./livedata/Collection.spec'),
   require('./livedata/WebSqlStore.spec'),

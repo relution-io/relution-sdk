@@ -32,7 +32,6 @@ import {WebSqlStore} from './WebSqlStore';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
 import {LiveDataMessage, LiveDataMessageModel} from './LiveDataMessage';
-import {Backbone} from './Object';
 import {Model, ModelCtor, isModel} from './Model';
 import {Collection, isCollection} from './Collection';
 

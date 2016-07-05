@@ -42,8 +42,6 @@
         "src/livedata/LiveDataMessage.ts",
         "src/livedata/Model.spec.ts",
         "src/livedata/Model.ts",
-        "src/livedata/Object.spec.ts",
-        "src/livedata/Object.ts",
         "src/livedata/rest.ts",
         "src/livedata/Store.ts",
         "src/livedata/SyncContext.spec.ts",

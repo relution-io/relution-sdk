@@ -22,11 +22,8 @@ import * as _ from 'lodash';
 
 import * as diag from '../core/diag';
 
-import {Backbone} from './Object';
 import {Model} from './Model';
 import {Collection, isCollection} from './Collection';
-
-import {_Object} from './Object';
 
 /**
  * constructor function of Store.
@@ -60,7 +57,11 @@ export class Store {
     }
   }
 
-  protected trigger;
+  public close() {
+    // nothing to do
+  }
+
+  protected trigger: typeof Backbone.Events.prototype.trigger;
 
   getArray(data) {
     if (_.isArray(data)) {
@@ -111,7 +112,7 @@ export class Store {
 
   /**
    *
-   * @param collection usally a collection, but can also be a model
+   * @param collection usually a collection, but can also be a model
    * @param options
    */
   fetch(collection, options) {
@@ -136,51 +137,31 @@ export class Store {
     }
   }
 
-  _checkData(obj, data) {
+  _checkData(options, data) {
     if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
-      var error = Store.CONST.ERROR_NO_DATA;
-      diag.debug.error(error);
-      this.handleError(obj, error);
+      var error = new Error('no data.');
+      diag.debug.error(error.message);
+      this.handleError(options, error);
       return false;
     }
     return true;
   }
 
-  private handleCallback; // mixed in via _Object
-
-  protected handleSuccess(obj, ...args): any {
-    if (obj.success) {
-      this.handleCallback.apply(this, [obj.success].concat(args));
-    }
-    if (obj.finish) {
-      this.handleCallback.apply(this, [obj.finish].concat(args));
+  protected handleSuccess(options, result: any): any {
+    if (options.success) {
+      return options.success.call(this, result);
     }
   }
 
-  protected handleError(obj, ...args): any {
-    if (obj.error) {
-      this.handleCallback.apply(this, [obj.error].concat(args));
+  protected handleError(options, error: Error): any {
+    if (options.error) {
+      return options.error.call(this, error);
     }
-    if (obj.finish) {
-      this.handleCallback.apply(this, [obj.finish].concat(args));
-    }
-  }
-
-  static CONST = {
-    ERROR_NO_DATA: 'No data passed. ',
-    ERROR_LOAD_DATA: 'Error while loading data from store. ',
-    ERROR_SAVE_DATA: 'Error while saving data to the store. ',
-    ERROR_LOAD_IDS: 'Error while loading ids from store. ',
-    ERROR_SAVE_IDS: 'Error while saving ids to the store. '
-  };
-
-  public close() {
-    // nothing to do
   }
 }
 
 // mixins
-let store = _.extend(Store.prototype, Backbone.Events, _Object.prototype, {
+let store = _.extend(Store.prototype, Backbone.Events, {
   _type: 'Relution.LiveData.Store',
   isModel: false,
   isCollection: false,

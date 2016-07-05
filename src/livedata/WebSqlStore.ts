@@ -29,7 +29,7 @@ import {Store} from './Store';
 import {Model, isModel} from './Model';
 import {isCollection} from './Collection';
 
-interface WebSqlOptions {
+export interface WebSqlOptions {
   name: string;
   description?: string;
   version?: string;
@@ -40,6 +40,13 @@ interface WebSqlOptions {
   key?: string;
   security?: string;
   credentials?: any;
+}
+
+export interface WebSqlError extends Error {
+  /**
+   * eventually contains last recently executed SQL causing the error.
+   */
+  sql?: string;
 }
 
 /**
@@ -134,6 +141,7 @@ export class WebSqlStore extends Store {
 
       error: (error) => {
         diag.debug.error(error);
+        this.handleError(options, error);
         this.trigger('error', error);
       }
     }, options));
@@ -212,17 +220,20 @@ export class WebSqlStore extends Store {
             // not a real error, concurrent migration attempt completed already
             that.handleSuccess(options, that.db);
           } else {
-            that.handleError(options, err.message, lastSql);
+            if (lastSql) {
+              err.sql = lastSql;
+            }
+            that.handleError(options, err);
           }
         }, function () {
           that.handleSuccess(options, that.db);
         });
       } catch (e) {
-        error = e.message;
+        error = e;
         diag.debug.error('webSql change version failed, DB-Version: ' + this.db.version);
       }
     } catch (e) {
-      error = e.message;
+      error = e;
     }
     if (error) {
       this.handleError(options, error);
@@ -392,7 +403,7 @@ export class WebSqlStore extends Store {
       }
     } else {
       // no need dropping as table was not created
-      this.handleSuccess(options);
+      this.handleSuccess(options, undefined);
     }
   }
 
@@ -504,8 +515,11 @@ export class WebSqlStore extends Store {
           diag.debug.error('webSql error: ' + e.message);
         });
       }, function (sqlError) { // errorCallback
+        if (lastStatement) {
+          sqlError.sql = lastStatement;
+        }
         diag.debug.error('WebSql Syntax Error: ' + sqlError.message);
-        that.handleError(options, sqlError.message, lastStatement);
+        that.handleError(options, sqlError);
       }, function () { // voidCallback (success)
         if (result) {
           if (options.syncContext) {
@@ -513,7 +527,11 @@ export class WebSqlStore extends Store {
           }
           that.handleSuccess(options, result);
         } else {
-          that.handleError(options, 'no result');
+          let error: WebSqlError = new Error('no result');
+          if (lastStatement) {
+            error.sql = lastStatement;
+          }
+          that.handleError(options, error);
         }
       });
     }
@@ -567,8 +585,11 @@ export class WebSqlStore extends Store {
       }).then(() => {
         return this.handleSuccess(options, result) || null;
       }, (error) => {
+        if (lastStatement) {
+          error.sql = lastStatement;
+        }
         diag.debug.error(error.message);
-        return this.handleError(options, error, lastStatement) || null;
+        return this.handleError(options, error) || null;
       });
     });
   }
@@ -576,8 +597,8 @@ export class WebSqlStore extends Store {
   protected _checkDb(options) {
     // has to be initialized first
     if (!this.db) {
-      var error = 'db handler not initialized.';
-      diag.debug.error(error);
+      var error = new Error('db handler not initialized.');
+      diag.debug.error(error.message);
       this.handleError(options, error);
       return false;
     }

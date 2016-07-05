@@ -159,9 +159,6 @@ export class SyncContext {
       if (options.success) {
         models = options.success.call(this, collection, models, options) || models;
       }
-      if (options.finish) {
-        models = options.finish.call(this, collection, models, options) || models;
-      }
       return models;
     };
     options.error = function fetchMoreError(error) {
@@ -175,9 +172,6 @@ export class SyncContext {
       // call user error callback
       if (options.error) {
         error = options.error.call(this, collection, error, options) || error;
-      }
-      if (options.finish) {
-        error = options.finish.call(this, collection, error, options) || error;
       }
       return error;
     };
@@ -256,9 +250,6 @@ export class SyncContext {
       if (options.success) {
         models = options.success.call(this, collection, models, options) || models;
       }
-      if (options.finish) {
-        models = options.finish.call(this, collection, models, options) || models;
-      }
       return models;
     };
     options.error = function fetchMoreError(error) {
@@ -275,9 +266,6 @@ export class SyncContext {
       // call user error callback
       if (options.error) {
         error = options.error.call(this, collection, error, options) || error;
-      }
-      if (options.finish) {
-        error = options.finish.call(this, collection, error, options) || error;
       }
       return error;
     };

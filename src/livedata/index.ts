@@ -21,7 +21,6 @@
 export * from './Collection';
 export * from './LiveDataMessage';
 export * from './Model';
-export * from './Object';
 export * from './Store';
 export * from './SyncContext';
 export * from './SyncEndpoint';
