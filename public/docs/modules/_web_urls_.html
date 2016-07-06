@@ -73,6 +73,7 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_urls_.html#resolveapp" class="tsd-kind-icon">resolve<wbr>App</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_urls_.html#resolveserver" class="tsd-kind-icon">resolve<wbr>Server</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_urls_.html#resolveurl" class="tsd-kind-icon">resolve<wbr>Url</a></li>
 							</ul>
 						</section>
@@ -91,7 +92,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/urls.ts:86</li>
+									<li>Defined in web/urls.ts:105</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -121,6 +122,44 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="resolveserver" class="tsd-anchor"></a>
+					<h3>resolve<wbr>Server</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">resolve<wbr>Server<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_core_init_.serverurloptions.html" class="tsd-signature-type">ServerUrlOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in web/urls.ts:34</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>computes a server url from a given path.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>path: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>path to resolve, relative or absolute.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_core_init_.serverurloptions.html" class="tsd-signature-type">ServerUrlOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of server in effect.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>absolute URL of server.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
 					<a name="resolveurl" class="tsd-anchor"></a>
 					<h3>resolve<wbr>Url</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
@@ -130,7 +169,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/urls.ts:46</li>
+									<li>Defined in web/urls.ts:65</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -179,80 +218,8 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_connector_connector_.html">"connector/connector"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_connector_index_.html">"connector/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_diag_.html">"core/diag"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_domain_.html">"core/domain"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_index_.html">"core/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_init_.html">"core/init"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_index_.html">"index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_model_modelcontainer_.html">"model/<wbr>Model<wbr>Container"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_model_index_.html">"model/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_filter_.html">"query/<wbr>Filter"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_filtervisitor_.html">"query/<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_getquery_.html">"query/<wbr>Get<wbr>Query"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_jsonfiltervisitor_.html">"query/<wbr>Json<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_sortordercomparator_.html">"query/<wbr>Sort<wbr>Order<wbr>Comparator"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_index_.html">"query/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_auth_.html">"security/auth"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_index_.html">"security/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_roles_.html">"security/roles"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_server_.html">"security/server"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_http_.html">"web/http"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_index_.html">"web/index"</a>
-					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_web_urls_.html">"web/urls"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_verb_.html">"web/verb"</a>
 					</li>
 				</ul>
 			</nav>
@@ -260,6 +227,9 @@
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_web_urls_.html#resolveapp" class="tsd-kind-icon">resolve<wbr>App</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_web_urls_.html#resolveserver" class="tsd-kind-icon">resolve<wbr>Server</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_web_urls_.html#resolveurl" class="tsd-kind-icon">resolve<wbr>Url</a>
