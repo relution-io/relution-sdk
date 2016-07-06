@@ -486,7 +486,7 @@ export class SyncContext {
       }
     } else {
       // exact match
-      return pivot;
     }
+    return pivot;
   }
 }

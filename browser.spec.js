@@ -2078,9 +2078,8 @@ var SyncContext = (function () {
             }
         }
         else {
-            // exact match
-            return pivot;
         }
+        return pivot;
     };
     return SyncContext;
 }());
@@ -3150,11 +3149,7 @@ var SyncStore = (function (_super) {
                     }
                     // when we are disconnected, try to connect now
                     if (!endpoint.isConnected) {
-                        var qInfo = _this.fetchServerInfo(endpoint);
-                        if (!qInfo) {
-                            return resp;
-                        }
-                        return qInfo.then(function (info) {
+                        return _this.fetchServerInfo(endpoint).then(function (info) {
                             // trigger reconnection when disconnected
                             var result;
                             if (!endpoint.isConnected) {
@@ -3169,7 +3164,7 @@ var SyncStore = (function (_super) {
                             }
                             return result || resp;
                         }).thenResolve(resp);
-                    }
+                    } // else...
                     // load changes only (will happen AFTER success callback is invoked,
                     // but returned promise will resolve only after changes were processed.
                     return _this.fetchChanges(endpoint).catch(function (xhr) {
@@ -3194,57 +3189,55 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype._addMessage = function (method, model, options, endpoint) {
         var _this = this;
-        if (method && model) {
-            var changes = model.changedSinceSync;
-            var data = null;
-            var storeMsg = true;
-            switch (method) {
-                case 'update':
-                case 'create':
-                    data = options.attrs || model.toJSON();
-                    break;
-                case 'patch':
-                    if (_.isEmpty(changes)) {
-                        return;
-                    }
-                    data = model.toJSON({
-                        attrs: changes
-                    });
-                    break;
-                case 'delete':
-                    break;
-                default:
-                    diag.debug.assert(function () { return method === 'read'; }, 'unknown method: ' + method);
-                    storeMsg = false;
-                    break;
-            }
-            var entity_1 = model.entity || endpoint.entity;
-            diag.debug.assert(function () { return model.entity === endpoint.entity; });
-            diag.debug.assert(function () { return entity_1.indexOf('~') < 0; }, 'entity name must not contain a ~ character!');
-            var msg = {
-                _id: entity_1 + '~' + model.id,
-                id: model.id,
-                method: method,
-                data: data,
-                // channel: endpoint.channel, // channel is hacked in by storeMessage(), we don't want to use this anymore
-                priority: endpoint.priority,
-                time: Date.now()
-            };
-            var q = Q.resolve(msg);
-            var qMessage;
-            if (storeMsg) {
-                // store and potentially merge message
-                qMessage = this.storeMessage(endpoint, q);
-                q = qMessage.then(function (message) {
-                    // in case of merging, this result could be different
-                    return message.attributes;
+        var changes = model.changedSinceSync;
+        var data = null;
+        var storeMsg = true;
+        switch (method) {
+            case 'update':
+            case 'create':
+                data = options.attrs || model.toJSON();
+                break;
+            case 'patch':
+                if (_.isEmpty(changes)) {
+                    return;
+                }
+                data = model.toJSON({
+                    attrs: changes
                 });
-            }
-            return q.then(function (msg2) {
-                // pass in qMessage so that deletion of stored message can be scheduled
-                return _this._emitMessage(endpoint, msg2, options, model, qMessage);
+                break;
+            case 'delete':
+                break;
+            default:
+                diag.debug.assert(function () { return method === 'read'; }, 'unknown method: ' + method);
+                storeMsg = false;
+                break;
+        }
+        var entity = model.entity || endpoint.entity;
+        diag.debug.assert(function () { return model.entity === endpoint.entity; });
+        diag.debug.assert(function () { return entity.indexOf('~') < 0; }, 'entity name must not contain a ~ character!');
+        var msg = {
+            _id: entity + '~' + model.id,
+            id: model.id,
+            method: method,
+            data: data,
+            // channel: endpoint.channel, // channel is hacked in by storeMessage(), we don't want to use this anymore
+            priority: endpoint.priority,
+            time: Date.now()
+        };
+        var q = Q.resolve(msg);
+        var qMessage;
+        if (storeMsg) {
+            // store and potentially merge message
+            qMessage = this.storeMessage(endpoint, q);
+            q = qMessage.then(function (message) {
+                // in case of merging, this result could be different
+                return message.attributes;
             });
         }
+        return q.then(function (msg2) {
+            // pass in qMessage so that deletion of stored message can be scheduled
+            return _this._emitMessage(endpoint, msg2, options, model, qMessage);
+        });
     };
     SyncStore.prototype._emitMessage = function (endpoint, msg, options, model, qMessage) {
         var _this = this;
@@ -3520,45 +3513,43 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype.fetchServerInfo = function (endpoint) {
         var _this = this;
-        if (endpoint && endpoint.urlRoot) {
-            var now = Date.now();
-            var promise = endpoint.promiseFetchingServerInfo;
-            if (promise) {
-                if (promise.isPending() || now - endpoint.timestampFetchingServerInfo < 1000) {
-                    // reuse existing eventually completed request for changes
-                    diag.debug.warning(endpoint.channel + ' skipping info request...');
-                    return promise;
-                }
+        var now = Date.now();
+        var promise = endpoint.promiseFetchingServerInfo;
+        if (promise) {
+            if (promise.isPending() || now - endpoint.timestampFetchingServerInfo < 1000) {
+                // reuse existing eventually completed request for changes
+                diag.debug.warning(endpoint.channel + ' skipping info request...');
+                return promise;
             }
-            var info = new Model_1.Model();
-            var time = this.getLastMessageTime(endpoint.channel);
-            var url = endpoint.urlRoot;
-            if (url.charAt((url.length - 1)) !== '/') {
-                url += '/';
-            }
-            promise = this.checkServer(url + 'info').then(function (url) {
-                return Q(info.fetch(({
-                    url: url,
-                    success: function (model, response, options) {
-                        // @todo why we set a server time here ?
-                        if (!time && info.get('time')) {
-                            _this.setLastMessageTime(endpoint.channel, info.get('time'));
-                        }
-                        if (!endpoint.socketPath && info.get('socketPath')) {
-                            endpoint.socketPath = info.get('socketPath');
-                            var name = info.get('entity') || endpoint.entity;
-                            if (_this.useSocketNotify) {
-                                endpoint.socket = _this.createSocket(endpoint, name);
-                            }
-                        }
-                        return response || options.xhr;
-                    }
-                }))).thenResolve(info);
-            });
-            endpoint.promiseFetchingServerInfo = promise;
-            endpoint.timestampFetchingServerInfo = now;
-            return promise;
         }
+        var info = new Model_1.Model();
+        var time = this.getLastMessageTime(endpoint.channel);
+        var url = endpoint.urlRoot;
+        if (url.charAt((url.length - 1)) !== '/') {
+            url += '/';
+        }
+        promise = this.checkServer(url + 'info').then(function (url) {
+            return Q(info.fetch(({
+                url: url,
+                success: function (model, response, options) {
+                    // @todo why we set a server time here ?
+                    if (!time && info.get('time')) {
+                        _this.setLastMessageTime(endpoint.channel, info.get('time'));
+                    }
+                    if (!endpoint.socketPath && info.get('socketPath')) {
+                        endpoint.socketPath = info.get('socketPath');
+                        var name = info.get('entity') || endpoint.entity;
+                        if (_this.useSocketNotify) {
+                            endpoint.socket = _this.createSocket(endpoint, name);
+                        }
+                    }
+                    return response || options.xhr;
+                }
+            }))).thenResolve(info);
+        });
+        endpoint.promiseFetchingServerInfo = promise;
+        endpoint.timestampFetchingServerInfo = now;
+        return promise;
     };
     /**
      * called when an offline change was sent to the remote server.

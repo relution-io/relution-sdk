@@ -519,12 +519,7 @@ export class SyncStore extends Store {
 
           // when we are disconnected, try to connect now
           if (!endpoint.isConnected) {
-            var qInfo = this.fetchServerInfo(endpoint);
-            if (!qInfo) {
-              return resp;
-            }
-
-            return qInfo.then((info): any => {
+            return this.fetchServerInfo(endpoint).then((info): any => {
               // trigger reconnection when disconnected
               var result: Q.Promise<void>;
               if (!endpoint.isConnected) {
@@ -539,7 +534,7 @@ export class SyncStore extends Store {
               }
               return result || resp;
             }).thenResolve(resp);
-          }
+          } // else...
 
           // load changes only (will happen AFTER success callback is invoked,
           // but returned promise will resolve only after changes were processed.
@@ -567,61 +562,59 @@ export class SyncStore extends Store {
 
   private _addMessage(method: string, model: Model | Collection, options: any,
                       endpoint: SyncEndpoint): Q.Promise<any> {
-    if (method && model) {
-      var changes = (<Model>model).changedSinceSync;
-      var data: any = null;
-      var storeMsg = true;
-      switch (method) {
-        case 'update':
-        case 'create':
-          data = options.attrs || model.toJSON();
-          break;
+    var changes = (<Model>model).changedSinceSync;
+    var data: any = null;
+    var storeMsg = true;
+    switch (method) {
+      case 'update':
+      case 'create':
+        data = options.attrs || model.toJSON();
+        break;
 
-        case 'patch':
-          if (_.isEmpty(changes)) {
-            return;
-          }
-          data = model.toJSON({
-            attrs: changes
-          });
-          break;
-
-        case 'delete':
-          break;
-
-        default:
-          diag.debug.assert (() => method === 'read', 'unknown method: ' + method);
-          storeMsg = false;
-          break;
-      }
-      let entity = model.entity || endpoint.entity;
-      diag.debug.assert(() => model.entity === endpoint.entity);
-      diag.debug.assert(() => entity.indexOf('~') < 0, 'entity name must not contain a ~ character!');
-      var msg: LiveDataMessage = {
-        _id: entity + '~' + (<Model>model).id,
-        id: (<Model>model).id,
-        method: method,
-        data: data,
-        // channel: endpoint.channel, // channel is hacked in by storeMessage(), we don't want to use this anymore
-        priority: endpoint.priority,
-        time: Date.now()
-      };
-
-      var q = Q.resolve(msg);
-      var qMessage: Q.Promise<LiveDataMessageModel>;
-      if (storeMsg) {
-        // store and potentially merge message
-        qMessage = this.storeMessage(endpoint, q);
-        q = qMessage.then((message: LiveDataMessageModel) => {
-          // in case of merging, this result could be different
-          return message.attributes;
+      case 'patch':
+        if (_.isEmpty(changes)) {
+          return;
+        }
+        data = model.toJSON({
+          attrs: changes
         });
-      }
-      return q.then((msg2: LiveDataMessage) => {
-        // pass in qMessage so that deletion of stored message can be scheduled
-        return this._emitMessage(endpoint, msg2, options, model, qMessage);
+        break;
+
+      case 'delete':
+        break;
+
+      default:
+        diag.debug.assert (() => method === 'read', 'unknown method: ' + method);
+        storeMsg = false;
+        break;
+    }
+    let entity = model.entity || endpoint.entity;
+    diag.debug.assert(() => model.entity === endpoint.entity);
+    diag.debug.assert(() => entity.indexOf('~') < 0, 'entity name must not contain a ~ character!');
+    var msg: LiveDataMessage = {
+      _id: entity + '~' + (<Model>model).id,
+      id: (<Model>model).id,
+      method: method,
+      data: data,
+      // channel: endpoint.channel, // channel is hacked in by storeMessage(), we don't want to use this anymore
+      priority: endpoint.priority,
+      time: Date.now()
+    };
+
+    var q = Q.resolve(msg);
+    var qMessage: Q.Promise<LiveDataMessageModel>;
+    if (storeMsg) {
+      // store and potentially merge message
+      qMessage = this.storeMessage(endpoint, q);
+      q = qMessage.then((message: LiveDataMessageModel) => {
+        // in case of merging, this result could be different
+        return message.attributes;
       });
     }
+    return q.then((msg2: LiveDataMessage) => {
+      // pass in qMessage so that deletion of stored message can be scheduled
+      return this._emitMessage(endpoint, msg2, options, model, qMessage);
+    });
   }
 
   private _emitMessage(endpoint: SyncEndpoint, msg: LiveDataMessage, options: any,
@@ -907,46 +900,44 @@ export class SyncStore extends Store {
   }
 
   private fetchServerInfo(endpoint: SyncEndpoint): Q.Promise<Model> {
-    if (endpoint && endpoint.urlRoot) {
-      var now = Date.now();
-      var promise = endpoint.promiseFetchingServerInfo;
-      if (promise) {
-        if (promise.isPending() || now - endpoint.timestampFetchingServerInfo < 1000) {
-          // reuse existing eventually completed request for changes
-          diag.debug.warning(endpoint.channel + ' skipping info request...');
-          return promise;
-        }
+    var now = Date.now();
+    var promise = endpoint.promiseFetchingServerInfo;
+    if (promise) {
+      if (promise.isPending() || now - endpoint.timestampFetchingServerInfo < 1000) {
+        // reuse existing eventually completed request for changes
+        diag.debug.warning(endpoint.channel + ' skipping info request...');
+        return promise;
       }
-
-      var info = new Model();
-      var time = this.getLastMessageTime(endpoint.channel);
-      var url = endpoint.urlRoot;
-      if (url.charAt((url.length - 1)) !== '/') {
-        url += '/';
-      }
-      promise = this.checkServer(url + 'info').then((url) => {
-        return Q(info.fetch(<Backbone.ModelFetchOptions>({
-          url: url,
-          success: (model, response, options) => {
-            // @todo why we set a server time here ?
-            if (!time && info.get('time')) {
-              this.setLastMessageTime(endpoint.channel, info.get('time'));
-            }
-            if (!endpoint.socketPath && info.get('socketPath')) {
-              endpoint.socketPath = info.get('socketPath');
-              var name = info.get('entity') || endpoint.entity;
-              if (this.useSocketNotify) {
-                endpoint.socket = this.createSocket(endpoint, name);
-              }
-            }
-            return response || options.xhr;
-          }
-        }))).thenResolve(info);
-      });
-      endpoint.promiseFetchingServerInfo = promise;
-      endpoint.timestampFetchingServerInfo = now;
-      return promise;
     }
+
+    var info = new Model();
+    var time = this.getLastMessageTime(endpoint.channel);
+    var url = endpoint.urlRoot;
+    if (url.charAt((url.length - 1)) !== '/') {
+      url += '/';
+    }
+    promise = this.checkServer(url + 'info').then((url) => {
+      return Q(info.fetch(<Backbone.ModelFetchOptions>({
+        url: url,
+        success: (model, response, options) => {
+          // @todo why we set a server time here ?
+          if (!time && info.get('time')) {
+            this.setLastMessageTime(endpoint.channel, info.get('time'));
+          }
+          if (!endpoint.socketPath && info.get('socketPath')) {
+            endpoint.socketPath = info.get('socketPath');
+            var name = info.get('entity') || endpoint.entity;
+            if (this.useSocketNotify) {
+              endpoint.socket = this.createSocket(endpoint, name);
+            }
+          }
+          return response || options.xhr;
+        }
+      }))).thenResolve(info);
+    });
+    endpoint.promiseFetchingServerInfo = promise;
+    endpoint.timestampFetchingServerInfo = now;
+    return promise;
   }
 
   /**
