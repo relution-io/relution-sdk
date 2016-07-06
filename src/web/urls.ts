@@ -25,6 +25,25 @@ import * as init from '../core/init';
 import * as server from '../security/server';
 
 /**
+ * computes a server url from a given path.
+ *
+ * @param path path to resolve, relative or absolute.
+ * @param options of server in effect.
+ * @return {string} absolute URL of server.
+ */
+export function resolveServer(path: string, options: init.ServerUrlOptions = {}): string {
+  let serverUrl = options.serverUrl || init.initOptions.serverUrl;
+  if (path) {
+    if (serverUrl) {
+      path = url.resolve(serverUrl, path);
+    }
+  } else {
+    path = serverUrl;
+  }
+  return url.resolve(path, '/');
+}
+
+/**
  * computes a url from a given path.
  *
  * - absolute URLs are used as is, e.g.
@@ -44,7 +63,7 @@ import * as server from '../security/server';
  * @return {string} absolute URL of path on current server.
  */
 export function resolveUrl(path: string, options: init.ServerUrlOptions = {}): string {
-  let serverUrl = options.serverUrl || init.initOptions.serverUrl;
+  let serverUrl = resolveServer(path, options);
   if (!serverUrl) {
     return path;
   }

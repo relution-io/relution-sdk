@@ -22,8 +22,6 @@ import * as assert from 'assert';
 import * as web from './index';
 import {debug} from '../core/diag';
 
-import * as _ from 'lodash';
-
 import * as security from '../security';
 
 const credentials: security.LoginObject = {
@@ -31,7 +29,7 @@ const credentials: security.LoginObject = {
   password: 'mcap'
 };
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('login/logout', (done) => {

@@ -20,7 +20,7 @@
 
 import * as diag from './diag';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
 
     it('logging', () => {

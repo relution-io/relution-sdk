@@ -1,6 +1,6 @@
 {
   "rules": {
-    "max-line-length": [true, 100],
+    "max-line-length": [false, 100],
     "no-inferrable-types": true,
     "class-name": true,
     "comment-format": [
@@ -17,7 +17,7 @@
     "no-arg": true,
     "no-internal-module": true,
     "no-trailing-whitespace": true,
-    "no-bitwise": true,
+    "no-bitwise": false,
     "no-shadowed-variable": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
@@ -49,7 +49,8 @@
       true,
       "ban-keywords",
       "check-format",
-      "allow-trailing-underscore"
+      "allow-trailing-underscore",
+      "allow-leading-underscore"
     ],
     "whitespace": [
       true,

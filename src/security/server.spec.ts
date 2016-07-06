@@ -23,7 +23,7 @@ import * as assert from 'assert';
 import * as core from '../core';
 import * as server from './server';
 
-describe(module.filename, () => {
+describe(module.filename || __filename, function() {
   return [
     it('serverUrl', () => {
       core.init({

@@ -371,37 +371,6 @@ function makeLoginResponse(): http.LoginResponse {
 describe(module.filename || __filename, () => {
   return [
 
-    it('encryption correct password', () => {
-      const password = 'test123#!';
-      const someData = {
-        a: 1,
-        b: 2,
-        c: <any>null
-      };
-      return offline.encryptJson(password, someData).then((encryptedData) => {
-        return offline.decryptJson(password, encryptedData);
-      }).then((decrytedData) => {
-        assert.deepEqual(decrytedData, someData, 'decryption yields same data');
-      });
-    }),
-
-    it('encryption incorrect password', () => {
-      const password = 'test123#!';
-      const someData = {
-        a: 1,
-        b: 2,
-        c: <any>null
-      };
-      return offline.encryptJson(password, someData).then((encryptedData) => {
-        return offline.decryptJson('Test123#!', encryptedData);
-      }).then((): boolean => {
-        assert.fail('decryption succeeded although passwords differ!');
-        throw new Error('never reached');
-      }, () => {
-        return true; // expected failure
-      });
-    }),
-
     it('persistence correct password', () => {
       const loginResponse = makeLoginResponse();
       const credentials = {

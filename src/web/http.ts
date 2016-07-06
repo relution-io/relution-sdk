@@ -177,7 +177,7 @@ export interface HttpError extends Error {
  *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
 export function ajax<T>(options: HttpOptions): Q.Promise<T> {
-  let serverUrl = urls.resolveUrl('/', options);
+  let serverUrl = urls.resolveServer(options.url, options);
   let serverObj = server.Server.getInstance(serverUrl);
   if (!serverObj.sessionUserUuid && serverObj.credentials) {
     // not logged in
@@ -205,6 +205,7 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
   // resolve target url
   let url = urls.resolveUrl(options.url, currentOptions);
   diag.debug.debug(options.method + ' ' + url);
+  diag.debug.assert(() => url.substr(0, serverUrl.length) === serverUrl);
 
   let requestCallback = options.requestCallback || _.identity;
   let responseCallback = options.responseCallback || _.identity;
@@ -455,7 +456,7 @@ export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
 export function login(credentials: auth.Credentials,
                       loginOptions: LoginOptions = {}): Q.Promise<LoginResponse> {
   let wasOfflineLogin = false;
-  let serverUrl = urls.resolveUrl('/', loginOptions);
+  let serverUrl = urls.resolveServer('/', loginOptions);
   let serverObj = server.Server.getInstance(serverUrl);
   if (serverObj.sessionUserUuid) {
     // logged in already
@@ -565,7 +566,7 @@ export function login(credentials: auth.Credentials,
           (offlineError) => {
             diag.debug.warn('offline login store failed', offlineError);
             return response;
-          });
+  });
       }
       return response;
     }, (error) => {
@@ -616,7 +617,7 @@ export interface LogoutOptions extends LogonOptions, init.HttpAgentOptions {
  * ```
  */
 export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<void> {
-  let serverUrl = urls.resolveUrl('/', logoutOptions);
+  let serverUrl = urls.resolveServer('/', logoutOptions);
   let serverObj = server.Server.getInstance(serverUrl);
 
   // process options
@@ -633,18 +634,18 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<void> {
     body: {}
   }, currentOptions)).catch((error: HttpError) => {
     if (error.statusCode === 422) {
-      // REST-based logout URL currently is broken reporting a 422 in all cases
+    // REST-based logout URL currently is broken reporting a 422 in all cases
       return ajax<void>(_.defaults<HttpOptions>({
-        serverUrl: serverUrl,
-        method: 'GET',
-        url: '/gofer/security-logout'
-      }, currentOptions)).then((result) => {
+      serverUrl: serverUrl,
+      method: 'GET',
+      url: '/gofer/security-logout'
+    }, currentOptions)).then((result) => {
         diag.debug.warn('BUG: resorted to classic PATH-based logout as REST-based logout failed:',
           error);
-        return result;
+      return result;
       }, (error2: HttpError) => {
         return Q.reject<void>(error2.statusCode === 422 ? error : error2);
-      });
+    });
     }
     return Q.reject<void>(error);
   }).catch((error: HttpError) => {

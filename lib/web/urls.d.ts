@@ -1,5 +1,13 @@
 import * as init from '../core/init';
 /**
+ * computes a server url from a given path.
+ *
+ * @param path path to resolve, relative or absolute.
+ * @param options of server in effect.
+ * @return {string} absolute URL of server.
+ */
+export declare function resolveServer(path: string, options?: init.ServerUrlOptions): string;
+/**
  * computes a url from a given path.
  *
  * - absolute URLs are used as is, e.g.

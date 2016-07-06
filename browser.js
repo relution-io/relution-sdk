@@ -28,7 +28,7 @@ if (!process || 'browser' in process) {
 }
 
 }).call(this,require('_process'))
-},{"./lib":8,"_process":226}],2:[function(require,module,exports){
+},{"./lib":10,"_process":231}],2:[function(require,module,exports){
 /**
  * @file connector/connector.ts
  * Relution SDK
@@ -95,7 +95,7 @@ function runCall(name, call, input) {
 }
 exports.runCall = runCall;
 
-},{"../web":23}],3:[function(require,module,exports){
+},{"../web":35}],3:[function(require,module,exports){
 /**
  * @file connector/index.ts
  * Relution SDK
@@ -122,6 +122,157 @@ function __export(m) {
 __export(require('./connector'));
 
 },{"./connector":2}],4:[function(require,module,exports){
+(function (Buffer){
+/**
+ * @file core/cipher.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 01.07.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var crypto = require('crypto');
+var Q = require('q');
+var _ = require('lodash');
+// key generation parameters
+var pbkdf2SaltLen = 64;
+var pbkdf2Iterations = 6911;
+var pbkdf2KeyLen = 192 / 8;
+var pbkdf2Digest = 'sha256';
+// see https://tools.ietf.org/html/rfc5084
+// console.log((<any>crypto).getCiphers());
+var cipherAlgorithm = 'aes-192-gcm';
+var cipherIvLen = 12;
+// promised variants
+var randomBytes = Q.denodeify(crypto.randomBytes);
+var pbkdf2 = Q.denodeify(crypto.pbkdf2);
+/**
+ * encrypts a JSON object using a user-provided password.
+ *
+ * This method is suitable for human-entered passwords and not appropriate for machine generated
+ * passwords. Make sure to read regarding pbkdf2.
+ *
+ * @param password of a human.
+ * @param json to encode.
+ * @return encoded json data.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function encryptJson(password, json) {
+    return Q.all([
+        randomBytes(pbkdf2SaltLen),
+        randomBytes(cipherIvLen)
+    ]).spread(function (salt, iv) {
+        return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
+            var cipher = crypto.createCipheriv(cipherAlgorithm, key, iv);
+            var value = cipher.update(JSON.stringify(json), 'utf8', 'base64');
+            value += cipher.final('base64');
+            var data = {
+                salt: salt.toString('base64'),
+                iv: iv.toString('base64'),
+                value: value
+            };
+            var tag = cipher.getAuthTag();
+            if (tag) {
+                data.tag = tag.toString('base64');
+            }
+            return data;
+        });
+    });
+}
+exports.encryptJson = encryptJson;
+/**
+ * decrypts some encoded json data.
+ *
+ * @param password of a human.
+ * @param data encoded json data.
+ * @return json to decoded.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function decryptJson(password, data) {
+    var salt = new Buffer(data.salt, 'base64');
+    return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
+        var iv = new Buffer(data.iv, 'base64');
+        var decipher = crypto.createDecipheriv(cipherAlgorithm, key, iv);
+        var tag = data.tag;
+        if (tag) {
+            decipher.setAuthTag(new Buffer(tag, 'base64'));
+        }
+        var value = decipher.update(data.value, 'base64', 'utf8');
+        value += decipher.final('utf8');
+        return value;
+    }).then(JSON.parse);
+}
+exports.decryptJson = decryptJson;
+/**
+ * computes a hash of some JSON object synchronously.
+ *
+ * Prefer the async variant if possible.
+ *
+ * @param data to hash.
+ * @param algorithm of choice.
+ * @return hash value.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function hashJsonSync(data, algorithm) {
+    var hash = crypto.createHash(algorithm);
+    (function feed(val) {
+        var keys = _.keys(val).sort();
+        if (keys.length) {
+            hash.update(JSON.stringify(keys), 'utf8');
+            _.forEach(keys, function (key) {
+                var value = val[key];
+                if (!_.isUndefined(value)) {
+                    if (!_.isObject(value)) {
+                        hash.update(JSON.stringify(value), 'utf8');
+                    }
+                    else {
+                        feed(value);
+                    }
+                }
+            });
+        }
+    })(JSON.parse(JSON.stringify(data)));
+    return hash.digest();
+}
+exports.hashJsonSync = hashJsonSync;
+/**
+ * computes a hash of some JSON object synchronously.
+ *
+ * @param data to hash.
+ * @param algorithm of choice.
+ * @return hash value.
+ *
+ * @internal Not part of public API, exported for library use only.
+ */
+function hashJson(data, algorithm) {
+    return Q.Promise(function (resolve, reject) {
+        try {
+            resolve(hashJsonSync(data, algorithm));
+        }
+        catch (error) {
+            reject(error);
+        }
+    });
+}
+exports.hashJson = hashJson;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":99,"crypto":110,"lodash":203,"q":239}],5:[function(require,module,exports){
 (function (process){
 /**
  * Created by Pascal Brewing
@@ -289,7 +440,7 @@ exports.Diagnostics = Diagnostics;
 exports.debug = new Diagnostics(true);
 
 }).call(this,require('_process'))
-},{"_process":226,"assert":49,"lodash":197}],5:[function(require,module,exports){
+},{"_process":231,"assert":61,"lodash":203}],6:[function(require,module,exports){
 /**
  * @file core/domain.ts
  * Relution SDK
@@ -333,7 +484,7 @@ function freeze(self) {
 }
 exports.freeze = freeze;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /**
  * @file core/index.ts
  * Relution SDK
@@ -361,7 +512,7 @@ __export(require('./diag'));
 __export(require('./init'));
 __export(require('./domain'));
 
-},{"./diag":4,"./domain":5,"./init":7}],7:[function(require,module,exports){
+},{"./diag":5,"./domain":6,"./init":8}],8:[function(require,module,exports){
 /**
  * @file core/init.ts
  * Relution SDK
@@ -434,7 +585,47 @@ function init(options) {
 }
 exports.init = init;
 
-},{"./diag":4,"lodash":197,"q":234}],8:[function(require,module,exports){
+},{"./diag":5,"lodash":203,"q":239}],9:[function(require,module,exports){
+/**
+ * @file core/objectid.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 04.07.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var machineId = parseInt('' + (Math.random() * Math.pow(16, 6)));
+var processId = parseInt('' + (Math.random() * Math.pow(16, 4)));
+var counter = parseInt('' + (Math.random() * Math.pow(16, 6)));
+function hexString(len, num) {
+    var str = num.toString(16);
+    while (str.length < len) {
+        str = '0' + str;
+    }
+    return str.substr(0, len);
+}
+// random-based impl of Mongo ObjectID
+function makeObjectID() {
+    return hexString(8, Date.now() / 1000) +
+        hexString(6, machineId) +
+        hexString(4, processId) +
+        hexString(6, counter++); // a 3-byte counter, starting with a random value.
+}
+exports.makeObjectID = makeObjectID;
+
+},{}],10:[function(require,module,exports){
 /**
  * @file index.ts
  * Relution SDK
@@ -455,6 +646,10 @@ exports.init = init;
  * limitations under the License.
  */
 "use strict";
+// version
+var pkgjson = require('../package.json');
+var version = pkgjson.version;
+exports.version = version;
 // aliases
 var diag_1 = require('./core/diag');
 exports.debug = diag_1.debug;
@@ -472,8 +667,2967 @@ exports.security = require('./security');
 exports.web = require('./web');
 // connector module
 exports.connector = require('./connector');
+// livedata module
+exports.livedata = require('./livedata');
 
-},{"./connector":3,"./core":6,"./core/diag":4,"./core/init":7,"./model":10,"./query":17,"./security":19,"./web":23}],9:[function(require,module,exports){
+},{"../package.json":329,"./connector":3,"./core":7,"./core/diag":5,"./core/init":8,"./livedata":19,"./model":22,"./query":29,"./security":31,"./web":35}],11:[function(require,module,exports){
+/**
+ * @file livedata/Collection.ts
+ * Relution SDK
+ *
+ * Created by M-Way on 27.06.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var _ = require('lodash');
+var url = require('url');
+var diag = require('../core/diag');
+var Model_1 = require('./Model');
+var rest_1 = require('./rest');
+/**
+ * tests whether a given object is a Collection.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Collection.
+ */
+function isCollection(object) {
+    if (!object || typeof object !== 'object') {
+        return false;
+    }
+    else if ('isCollection' in object) {
+        diag.debug.assert(function () { return object.isCollection === Collection.prototype.isPrototypeOf(object); });
+        return object.isCollection;
+    }
+    else {
+        return Collection.prototype.isPrototypeOf(object);
+    }
+}
+exports.isCollection = isCollection;
+/**
+ * extension of a backbone.js Collection.
+ *
+ * The Relution.livedata.Collection can be used like a Backbone Collection,
+ * but there are some enhancements to fetch, save and delete the
+ * contained models from or to other "data stores".
+ *
+ * see WebSqlStore or SyncStore for examples
+ */
+var Collection = (function (_super) {
+    __extends(Collection, _super);
+    function Collection(models, options) {
+        _super.call(this, models, options);
+        if (this.url && this.url.charAt(this.url.length - 1) !== '/') {
+            this.url += '/';
+        }
+        this.init(models, options);
+    }
+    Collection.prototype.init = function (models, options) {
+        options = options || {};
+        this.store = options.store || this.store || (this.model ? this.model.prototype.store : null);
+        this.entity = options.entity || this.entity || (this.model ? this.model.prototype.entity : null);
+        this.options = options.options || this.options;
+        this.entity = this.entity || this._entityFromUrl(this.getUrl());
+        this._updateUrl();
+        if (this.store && _.isFunction(this.store.initCollection)) {
+            this.store.initCollection(this, options);
+        }
+    };
+    Collection.prototype.ajax = function (options) {
+        return rest_1.ajax.apply(this, arguments);
+    };
+    Collection.prototype.sync = function (method, model, options) {
+        return rest_1.sync.apply(this, arguments);
+    };
+    Collection.prototype._entityFromUrl = function (urlStr) {
+        if (urlStr) {
+            var urlObj = url.parse(urlStr);
+            // extract last path part as entity name
+            var parts = urlObj.pathname.match(/([^\/]+)\/?$/);
+            if (parts && parts.length > 1) {
+                return parts[-1];
+            }
+        }
+    };
+    Collection.prototype.destroy = function (options) {
+        options = options || {};
+        var success = options.success;
+        if (this.length > 0) {
+            options.success = function () {
+                if (this.length === 0 && success) {
+                    success();
+                }
+            };
+            var model;
+            while ((model = this.first())) {
+                this.sync('delete', model, options);
+                this.remove(model);
+            }
+        }
+        else if (success) {
+            success();
+        }
+    };
+    /**
+     * save all containing models
+     */
+    Collection.prototype.save = function () {
+        this.each(function (model) {
+            model.save();
+        });
+    };
+    Collection.prototype.applyFilter = function (callback) {
+        this.trigger('filter', this.filter(callback));
+    };
+    Collection.prototype.getUrlParams = function (url) {
+        url = url || this.getUrl();
+        var m = url.match(/\?([^#]*)/);
+        var params = {};
+        if (m && m.length > 1) {
+            _.each(m[1].split('&'), function (p) {
+                var a = p.split('=');
+                params[a[0]] = a[1];
+            });
+        }
+        return params;
+    };
+    Collection.prototype.getUrl = function () {
+        return (_.isFunction(this.url) ? this.url() : this.url) || '';
+    };
+    Collection.prototype.getUrlRoot = function () {
+        var url = this.getUrl();
+        return url.indexOf('?') >= 0 ? url.substr(0, url.indexOf('?')) : url;
+    };
+    Collection.prototype._updateUrl = function () {
+        if (this.options) {
+            var params = this.getUrlParams();
+            this.url = this.getUrlRoot();
+            if (this.options.query) {
+                params.query = encodeURIComponent(JSON.stringify(this.options.query));
+            }
+            if (this.options.fields) {
+                params.fields = encodeURIComponent(JSON.stringify(this.options.fields));
+            }
+            if (this.options.sort) {
+                params.sort = encodeURIComponent(JSON.stringify(this.options.sort));
+            }
+            if (!_.isEmpty(params)) {
+                this.url += '?';
+                var a = [];
+                for (var k in params) {
+                    a.push(k + (params[k] ? '=' + params[k] : ''));
+                }
+                this.url += a.join('&');
+            }
+        }
+    };
+    /**
+     * reads an additional page of data into this collection.
+     *
+     * A fetch() must have been performed loading the initial set of data. This method is intended for infinite scrolling
+     * implementation.
+     *
+     * When async processing is done, a more attribute is set on the options object in case additional data might be
+     * available which can be loaded by calling this method again. Likewise an end attribute is set if the data is
+     * fully loaded.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see SyncContext#fetchMore()
+     */
+    Collection.prototype.fetchMore = function (options) {
+        if (!this.syncContext) {
+            return Q.reject(new Error('no context'));
+        }
+        return this.syncContext.fetchMore(this, options);
+    };
+    /**
+     * reads the next page of data into this collection.
+     *
+     * A fetch() must have been performed loading the initial set of data. This method is intended for paging
+     * implementation.
+     *
+     * When async processing is done, a next/prev attribute is set on the options object in case additional pages might be
+     * available which can be loaded by calling the corresponding method.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see SyncContext#fetchNext()
+     */
+    Collection.prototype.fetchNext = function (options) {
+        if (!this.syncContext) {
+            return Q.reject(new Error('no context'));
+        }
+        return this.syncContext.fetchNext(this, options);
+    };
+    /**
+     * reads the previous page of data into this collection.
+     *
+     * A fetch() must have been performed loading the initial set of data. This method is intended for paging
+     * implementation.
+     *
+     * When async processing is done, a next/prev attribute is set on the options object in case additional pages might be
+     * available which can be loaded by calling the corresponding method.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see SyncContext#fetchPrev()
+     */
+    Collection.prototype.fetchPrev = function (options) {
+        if (!this.syncContext) {
+            return Q.reject(new Error('no context'));
+        }
+        return this.syncContext.fetchPrev(this, options);
+    };
+    return Collection;
+}(Backbone.Collection));
+exports.Collection = Collection;
+// mixins
+var collection = _.extend(Collection.prototype, {
+    _type: 'Relution.livedata.Collection',
+    isModel: false,
+    isCollection: true,
+    isStore: false,
+    // default model type unless overwritten
+    model: Model_1.Model
+});
+diag.debug.assert(function () { return isCollection(Object.create(collection)); });
+
+},{"../core/diag":5,"./Model":13,"./rest":20,"lodash":203,"url":321}],12:[function(require,module,exports){
+/**
+ * @file livedata/LiveDataMessage.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 07.12.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var _ = require('lodash');
+var Model_1 = require('./Model');
+var diag = require('../core/diag');
+/**
+ * message packed into a Model.
+ *
+ * @module Relution.livedata.LiveDataMessage
+ *
+ * @type {*}
+ */
+var LiveDataMessageModel = (function (_super) {
+    __extends(LiveDataMessageModel, _super);
+    function LiveDataMessageModel() {
+        _super.apply(this, arguments);
+    }
+    return LiveDataMessageModel;
+}(Model_1.Model));
+exports.LiveDataMessageModel = LiveDataMessageModel;
+// mixins
+var msgmodel = _.extend(LiveDataMessageModel.prototype, {
+    _type: 'Relution.livedata.LiveDataMessageModel',
+    entity: '__msg__',
+    idAttribute: '_id'
+});
+diag.debug.assert(function () { return LiveDataMessageModel.prototype.isPrototypeOf(Object.create(msgmodel)); });
+diag.debug.assert(function () { return new LiveDataMessageModel({ _id: 'check' }).id === 'check'; });
+
+},{"../core/diag":5,"./Model":13,"lodash":203}],13:[function(require,module,exports){
+/**
+ * @file livedata/Model.ts
+ * Relution SDK
+ *
+ * Created by M-Way on 27.06.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var _ = require('lodash');
+var diag = require('../core/diag');
+var rest_1 = require('./rest');
+/**
+ * tests whether a given object is a Model.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Model.
+ */
+function isModel(object) {
+    if (!object || typeof object !== 'object') {
+        return false;
+    }
+    else if ('isModel' in object) {
+        diag.debug.assert(function () { return object.isModel === Model.prototype.isPrototypeOf(object); });
+        return object.isModel;
+    }
+    else {
+        return Model.prototype.isPrototypeOf(object);
+    }
+}
+exports.isModel = isModel;
+/**
+ * extension of a backbone.js Model.
+ */
+var Model /*<AttributesType extends Object>*/ = (function (_super) {
+    __extends(Model /*<AttributesType extends Object>*/, _super);
+    function Model /*<AttributesType extends Object>*/(attributes, options) {
+        _super.call(this, attributes, options);
+        this.changedSinceSync = {};
+        if (this.urlRoot && typeof this.urlRoot === 'string') {
+            if (this.urlRoot.charAt(this.urlRoot.length - 1) !== '/') {
+                this.urlRoot += '/';
+            }
+        }
+        this.init(attributes, options);
+    }
+    Model /*<AttributesType extends Object>*/.prototype.init = function (attributes, options) {
+        options = options || {};
+        this.collection = options.collection || this.collection;
+        this.idAttribute = options.idAttribute || this.idAttribute;
+        this.store = this.store || (this.collection ? this.collection.store : null) || options.store;
+        if (this.store && _.isFunction(this.store.initModel)) {
+            this.store.initModel(this, options);
+        }
+        this.entity = this.entity || (this.collection ? this.collection.entity : null) || options.entity;
+        this.credentials = this.credentials || (this.collection ? this.collection.credentials : null) || options.credentials;
+        this.on('change', this.onChange, this);
+        this.on('sync', this.onSync, this);
+    };
+    Model /*<AttributesType extends Object>*/.prototype.ajax = function (options) {
+        return rest_1.ajax.apply(this, arguments);
+    };
+    Model /*<AttributesType extends Object>*/.prototype.sync = function (method, model, options) {
+        return rest_1.sync.apply(this, arguments);
+    };
+    Model /*<AttributesType extends Object>*/.prototype.onChange = function (model, options) {
+        // For each `set` attribute, update or delete the current value.
+        var attrs = model.changedAttributes();
+        if (_.isObject(attrs)) {
+            for (var key in attrs) {
+                this.changedSinceSync[key] = attrs[key];
+            }
+        }
+    };
+    Model /*<AttributesType extends Object>*/.prototype.onSync = function (model, options) {
+        this.changedSinceSync = {};
+    };
+    Model /*<AttributesType extends Object>*/.prototype.getUrlRoot = function () {
+        if (this.urlRoot) {
+            return _.isFunction(this.urlRoot) ? this.urlRoot() : this.urlRoot;
+        }
+        else if (this.collection) {
+            return this.collection.getUrlRoot();
+        }
+        else if (this.url) {
+            var url = _.isFunction(this.url) ? this.url() : this.url;
+            if (url && this.id && url.indexOf(this.id) > 0) {
+                return url.substr(0, url.indexOf(this.id));
+            }
+            return url;
+        }
+    };
+    return Model /*<AttributesType extends Object>*/;
+}(Backbone.Model));
+exports.Model /*<AttributesType extends Object>*/ = Model /*<AttributesType extends Object>*/;
+// mixins
+var model = _.extend(Model.prototype, {
+    _type: 'Relution.livedata.Model',
+    isModel: true,
+    isCollection: false,
+    isStore: false
+});
+diag.debug.assert(function () { return isModel(Object.create(model)); });
+
+},{"../core/diag":5,"./rest":20,"lodash":203}],14:[function(require,module,exports){
+/**
+ * @file livedata/Store.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 24.06.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var _ = require('lodash');
+var diag = require('../core/diag');
+/**
+ * tests whether a given object is a Store.
+ *
+ * @param {object} object to check.
+ * @return {boolean} whether object is a Store.
+ */
+function isStore(object) {
+    if (!object || typeof object !== 'object') {
+        return false;
+    }
+    else if ('isStore' in object) {
+        diag.debug.assert(function () { return object.isStore === Store.prototype.isPrototypeOf(object); });
+        return object.isStore;
+    }
+    else {
+        return Store.prototype.isPrototypeOf(object);
+    }
+}
+exports.isStore = isStore;
+/**
+ * base class to build a custom data store.
+ */
+var Store = (function () {
+    function Store(options) {
+        if (options) {
+            // copy options values into the object
+            _.extend(this, options);
+        }
+    }
+    Store.prototype.close = function () {
+        // nothing to do
+    };
+    Store.prototype.initModel = function (model, options) {
+        // may be overwritten
+    };
+    Store.prototype.initCollection = function (collection, options) {
+        // may be overwritten
+    };
+    Store.prototype.sync = function (method, model, options) {
+        // must be overwritten
+        return Q.reject(new Error('not implemented!')); // purely abstract
+    };
+    /**
+     *
+     * @param collection usually a collection, but can also be a model
+     * @param options
+     */
+    Store.prototype.fetch = function (collection, options) {
+        var opts = _.extend({}, options || {}, { store: this });
+        return collection.fetch(opts);
+    };
+    Store.prototype.create = function (collection, models, options) {
+        var opts = _.extend({}, options || {}, { store: this });
+        return new collection(models, opts);
+    };
+    Store.prototype.save = function (model, attributes, options) {
+        var opts = _.extend({}, options || {}, { store: this });
+        return model.save(attributes, opts);
+    };
+    Store.prototype.destroy = function (model, options) {
+        var opts = _.extend({}, options || {}, { store: this });
+        model.destroy(opts);
+    };
+    Store.prototype.handleSuccess = function (options, result) {
+        if (options.success) {
+            return options.success.call(this, result);
+        }
+    };
+    Store.prototype.handleError = function (options, error) {
+        if (options.error) {
+            return options.error.call(this, error);
+        }
+    };
+    return Store;
+}());
+exports.Store = Store;
+// mixins
+var store = _.extend(Store.prototype, Backbone.Events, {
+    _type: 'Relution.livedata.Store',
+    isModel: false,
+    isCollection: false,
+    isStore: true,
+    name: 'relution-livedata'
+});
+diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
+
+},{"../core/diag":5,"lodash":203}],15:[function(require,module,exports){
+/**
+ * @file livedata/SyncContext.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 26.06.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var _ = require('lodash');
+var diag = require('../core/diag');
+var GetQuery_1 = require('../query/GetQuery');
+var JsonFilterVisitor_1 = require('../query/JsonFilterVisitor');
+var SortOrderComparator_1 = require('../query/SortOrderComparator');
+/**
+ * receives change messages and updates collections.
+ */
+var SyncContext = (function () {
+    /**
+     * captures option values forming a GetQuery.
+     *
+     * @param options to merge.
+     * @constructor
+     */
+    function SyncContext() {
+        var _this = this;
+        var options = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            options[_i - 0] = arguments[_i];
+        }
+        /**
+         * relevant parameters for paging, filtering and sorting.
+         *
+         * @type {Relution.livedata.GetQuery}
+         */
+        this.getQuery = new GetQuery_1.GetQuery();
+        // merge options forming a GetQuery
+        options.forEach(function (json) {
+            if (json) {
+                _this.getQuery.merge(new GetQuery_1.GetQuery().fromJSON(json));
+            }
+        });
+        this.getQuery.optimize();
+        // compute local members
+        this.pageSize = this.getQuery.limit;
+        this.compareFn = this.getQuery.sortOrder && SortOrderComparator_1.jsonCompare(this.getQuery.sortOrder);
+        this.filterFn = this.getQuery.filter && JsonFilterVisitor_1.jsonFilter(this.getQuery.filter);
+    }
+    /**
+     * reads an additional page of data into the collection.
+     *
+     * When async processing is done, a more attribute is set on the options object in case additional data might be
+     * available which can be loaded by calling this method again. Likewise an end attribute is set if the data is
+     * fully loaded.
+     *
+     * @param {object} collection to load data into.
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see Collection#fetchMore()
+     */
+    SyncContext.prototype.fetchMore = function (collection, options) {
+        if (options === void 0) { options = {}; }
+        var getQuery = this.getQuery;
+        options = _.defaults(options, {
+            limit: options.pageSize || this.pageSize || getQuery.limit,
+            sortOrder: getQuery.sortOrder,
+            filter: getQuery.filter,
+            fields: getQuery.fields
+        });
+        // prepare a query for the next page of data to load
+        options.offset = (getQuery.offset | 0) + collection.models.length;
+        // this must be set in options to state we handle it
+        options.syncContext = this;
+        // setup callbacks handling processing of results, do not use promises as these execute too late...
+        // Notice, since we call collection.sync() directly, the signature of success/error callbacks here is ajax-style.
+        // However, the user-provided callbacks are to being called backbone.js-style with collection and object.
+        var oldSuccess = options.success;
+        var oldError = options.error;
+        options.success = function fetchMoreSuccess(models) {
+            // restore callbacks
+            options.success = oldSuccess;
+            options.error = oldError;
+            // update models
+            if (models) {
+                // add models to collection, if any
+                if (models.length <= 0) {
+                    // reached the end
+                    delete options.more;
+                }
+                else {
+                    // read additional data
+                    if (options.syncContext.compareFn) {
+                        // notice, existing range of models is sorted by definition already
+                        options.at = options.syncContext.insertionPoint(models[0], collection.models);
+                    }
+                    models = collection.add(models, options) || models;
+                    // adjust query parameter
+                    getQuery.limit = collection.models.length;
+                    if (options.syncContext.getQuery.limit > getQuery.limit) {
+                        // reached the end
+                        delete options.more;
+                    }
+                    else {
+                        // more data to load
+                        options.more = true;
+                        delete options.end;
+                    }
+                }
+                // reached the end?
+                if (!options.more) {
+                    getQuery.limit = undefined; // open end
+                    options.end = true;
+                }
+            }
+            // restore query parameter
+            options.syncContext.getQuery = getQuery;
+            // call user success callback
+            if (options.success) {
+                models = options.success.call(this, collection, models, options) || models;
+            }
+            return models;
+        };
+        options.error = function fetchMoreError(error) {
+            // restore callbacks
+            options.success = oldSuccess;
+            options.error = oldError;
+            // restore query parameter
+            options.syncContext.getQuery = getQuery;
+            // call user error callback
+            if (options.error) {
+                error = options.error.call(this, collection, error, options) || error;
+            }
+            return error;
+        };
+        // fire up the page load
+        this.getQuery = new GetQuery_1.GetQuery(getQuery);
+        this.getQuery.limit = getQuery.limit + options.limit;
+        return collection.sync(options.method || 'read', collection, options);
+    };
+    /**
+     * reads a page of data into the collection.
+     *
+     * When async processing is done, a next/prev attribute is set on the options object in case additional pages might
+     * be available which can be loaded by calling this method again.
+     *
+     * @param {object} collection to load data into.
+     * @param {object} options incl. offset and limit of page to retrieve.
+     * @return {Promise} promise of the load operation.
+     */
+    SyncContext.prototype.fetchRange = function (collection, options) {
+        if (options === void 0) { options = {}; }
+        // this must be set in options to state we handle it
+        options.syncContext = this;
+        // prepare a query for the page of data to load
+        var oldQuery = this.getQuery;
+        var newQuery = new GetQuery_1.GetQuery(oldQuery);
+        if (options.offset >= 0) {
+            newQuery.offset = options.offset;
+        }
+        else if (options.offset < 0) {
+            newQuery.offset = undefined;
+        }
+        var oldLimit = options.limit;
+        if (options.limit > 0) {
+            newQuery.limit = options.limit + 1;
+            options.limit = newQuery.limit;
+        }
+        else if (options.limit <= 0) {
+            newQuery.limit = undefined;
+        }
+        // setup callbacks handling processing of results, do not use promises as these execute too late...
+        // Notice, since we call collection.sync() directly, the signature of success/error callbacks here is ajax-style.
+        // However, the user-provided callbacks are to being called backbone.js-style with collection and object.
+        var oldSuccess = options.success;
+        var oldError = options.error;
+        options.success = function fetchRangeSuccess(models) {
+            // restore callbacks and limit
+            options.success = oldSuccess;
+            options.error = oldError;
+            if (oldLimit !== undefined) {
+                options.limit = oldLimit;
+            }
+            // update models
+            if (models) {
+                // add models to collection, if any
+                if (models.length > 0) {
+                    // adjust query parameter
+                    options.next = newQuery.limit && models.length >= newQuery.limit;
+                    if (options.next) {
+                        // trick here was to read one more item to see if there is more to come
+                        models.length = models.length - 1;
+                    }
+                    // realize the page
+                    models = collection.reset(models, options) || models;
+                }
+                else {
+                    // reached the end
+                    delete options.next;
+                }
+                options.prev = newQuery.offset > 0;
+            }
+            // call user success callback
+            if (options.success) {
+                models = options.success.call(this, collection, models, options) || models;
+            }
+            return models;
+        };
+        options.error = function fetchMoreError(error) {
+            // restore callbacks and limit
+            options.success = oldSuccess;
+            options.error = oldError;
+            if (oldLimit !== undefined) {
+                options.limit = oldLimit;
+            }
+            // restore query parameter
+            options.syncContext.getQuery = oldQuery;
+            // call user error callback
+            if (options.error) {
+                error = options.error.call(this, collection, error, options) || error;
+            }
+            return error;
+        };
+        // fire up the page load
+        this.getQuery = newQuery;
+        return collection.sync(options.method || 'read', collection, options);
+    };
+    /**
+     * reads the next page of data into the collection.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see Collection#fetchNext()
+     */
+    SyncContext.prototype.fetchNext = function (collection, options) {
+        if (options === void 0) { options = {}; }
+        options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
+        options.offset = (this.getQuery.offset | 0) + collection.models.length;
+        return this.fetchRange(collection, options);
+    };
+    /**
+     * reads the previous page of data into the collection.
+     *
+     * @param {object} options such as pageSize to retrieve.
+     * @return {Promise} promise of the load operation.
+     *
+     * @see Collection#fetchPrev()
+     */
+    SyncContext.prototype.fetchPrev = function (collection, options) {
+        if (options === void 0) { options = {}; }
+        options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
+        options.offset = (this.getQuery.offset | 0) - options.limit;
+        return this.fetchRange(collection, options);
+    };
+    SyncContext.prototype.filterAttributes = function (attrs, options) {
+        return this.filterFn ? attrs.filter(this.filterFn) : attrs;
+    };
+    SyncContext.prototype.sortAttributes = function (attrs, options) {
+        return this.compareFn ? attrs.sort(this.compareFn) : attrs;
+    };
+    SyncContext.prototype.rangeAttributes = function (attrs, options) {
+        var offset = options && options.offset || this.getQuery.offset;
+        if (offset > 0) {
+            attrs.splice(0, offset);
+        }
+        var limit = options && options.limit || this.getQuery.limit;
+        if (limit < attrs.length) {
+            attrs.length = limit;
+        }
+        return attrs;
+    };
+    SyncContext.prototype.processAttributes = function (attrs, options) {
+        attrs = this.filterAttributes(attrs, options);
+        attrs = this.sortAttributes(attrs, options);
+        attrs = this.rangeAttributes(attrs, options);
+        return attrs;
+    };
+    /**
+     * receives change messages.
+     *
+     * Change messages are communicated by the SyncStore indirectly triggering a sync:channel event. This happens
+     * regardless of whether the change originates local or remote. The context then alters the backbone data
+     * incorporating the change.
+     *
+     * @param store
+     * @param collection
+     * @param msg
+     */
+    SyncContext.prototype.onMessage = function (store, collection, msg) {
+        var options = {
+            collection: collection,
+            entity: collection.entity,
+            merge: msg.method === 'patch',
+            parse: true,
+            fromMessage: true
+        };
+        var newId = collection.modelId(msg.data); // modelId(attrs) missing in DefinitelyTyped definitions
+        var oldId = msg.id || newId;
+        if (oldId === 'all') {
+            collection.reset(msg.data || {}, options);
+            return;
+        }
+        // update the collection
+        var model = oldId && collection.get(oldId);
+        switch (msg.method) {
+            case 'create':
+            /* falls through */
+            case 'update':
+                if (newId !== oldId) {
+                    diag.debug.warn('updating id ' + oldId + ' to ' + newId);
+                }
+                if (!model) {
+                    // create model in case it does not exist
+                    model = new options.collection.model(msg.data, options);
+                    if (this.filterFn && !this.filterFn(model.attributes)) {
+                        break; // filtered
+                    }
+                    if (model.validationError) {
+                        collection.trigger('invalid', this, model.validationError, options);
+                    }
+                    else {
+                        var index = collection.models.length;
+                        if (this.compareFn && index > 0) {
+                            options.at = index = this.insertionPoint(model.attributes, collection.models);
+                        }
+                        // look at index and respect offset/limit eventually ignoring model or removing some,
+                        // the not operators below cause proper handling when offset or limit is undefined...
+                        /* jshint -W018 */
+                        if ((!(this.getQuery.offset > 0) || index > 0) && !(index >= this.getQuery.limit)) {
+                            /* jshint +W018 */
+                            collection.add(model, options);
+                            if (this.getQuery.limit && collection.models.length > this.getQuery.limit) {
+                                collection.remove(collection.models[collection.models.length - 1], options);
+                            }
+                        }
+                    }
+                    break;
+                }
+            /* falls through */
+            case 'patch':
+                if (model) {
+                    // update model unless it is filtered
+                    model.set(msg.data, options);
+                    if (this.filterFn && !this.filterFn(model.attributes)) {
+                        // eventually the model is filtered
+                        collection.remove(model, options);
+                    }
+                    else if (this.compareFn) {
+                        // eventually the model changes position in collection.models
+                        var oldIndex = collection.models.indexOf(model);
+                        this.lastInsertionPoint = oldIndex >= 0 ? oldIndex : undefined;
+                        var newIndex = this.insertionPoint(model.attributes, collection.models);
+                        if (oldIndex !== newIndex) {
+                            // following acts just like backbone.Collection.sort()
+                            collection.models.splice(oldIndex, 1);
+                            collection.models.splice(newIndex, 0, model);
+                            collection.trigger('sort', collection, options);
+                        }
+                    }
+                }
+                break;
+            case 'delete':
+                if (model) {
+                    // remove model
+                    collection.remove(model, options);
+                }
+                break;
+        }
+    };
+    /**
+     * computes the insertion point of attributes into models sorted by compareFn.
+     *
+     * This is used to compute the at-index of backbone.js add() method options when adding models to a sorted collection.
+     *
+     * @param attributes being inserted.
+     * @param models sorted by compareFn.
+     * @return {number} insertion point.
+     */
+    SyncContext.prototype.insertionPoint = function (attributes, models) {
+        if (this.lastInsertionPoint !== undefined) {
+            // following performs two comparisons at the last insertion point to take advantage of locality,
+            // this means we don't subdivide evenly but check tiny interval at insertion position firstly...
+            var start = Math.max(0, this.lastInsertionPoint);
+            var end = Math.min(models.length, this.lastInsertionPoint + 3);
+            if (end - start > 1) {
+                // focus on (start;end] range speeding up binary searches by taking locality into account
+                var point = this.insertionPointBinarySearch(attributes, models, start, end);
+                if (point >= end) {
+                    // select upper interval
+                    if (point < models.length) {
+                        point = this.insertionPointBinarySearch(attributes, models, point, models.length);
+                    }
+                }
+                else if (point < start) {
+                    // select lower interval
+                    if (point > 0) {
+                        point = this.insertionPointBinarySearch(attributes, models, 0, point);
+                    }
+                }
+                this.lastInsertionPoint = point;
+                return point;
+            }
+        }
+        // locality not applicable or did not work
+        this.lastInsertionPoint = this.insertionPointBinarySearch(attributes, models, 0, models.length);
+        return this.lastInsertionPoint;
+    };
+    /**
+     * performs a binary search for insertion point of attributes into models[start:end] sorted by compareFn.
+     *
+     * @param attributes being inserted.
+     * @param models sorted by compareFn.
+     * @param compare function as of Array.sort().
+     * @param start inclusive index of search interval.
+     * @param end exclusive index of search interval.
+     * @return {number} insertion point.
+     */
+    SyncContext.prototype.insertionPointBinarySearch = function (attributes, models, start, end) {
+        var pivot = (start + end) >> 1;
+        var delta = this.compareFn(attributes, models[pivot].attributes);
+        if (end - start <= 1) {
+            return delta < 0 ? pivot : pivot + 1;
+        }
+        else if (delta < 0) {
+            // select lower half
+            return this.insertionPointBinarySearch(attributes, models, start, pivot);
+        }
+        else if (delta > 0) {
+            // select upper half
+            if (++pivot < end) {
+                return this.insertionPointBinarySearch(attributes, models, pivot, end);
+            }
+        }
+        else {
+        }
+        return pivot;
+    };
+    return SyncContext;
+}());
+exports.SyncContext = SyncContext;
+
+},{"../core/diag":5,"../query/GetQuery":24,"../query/JsonFilterVisitor":25,"../query/SortOrderComparator":28,"lodash":203}],16:[function(require,module,exports){
+/**
+ * @file livedata/SyncEndpoint.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 07.12.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var url = require('url');
+/**
+ * very simple hash coding implementation.
+ *
+ * @internal For library use only.
+ */
+function hashCode() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i - 0] = arguments[_i];
+    }
+    var hash = 0;
+    for (var i = 0; i < args.length; ++i) {
+        var str = args[i] || '';
+        for (var j = 0, l = str.length; j < l; ++j) {
+            var char = str.charCodeAt(j);
+            hash = ((hash << 5) - hash) + char;
+            hash |= 0; // Convert to 32bit integer
+        }
+    }
+    return hash;
+}
+exports.hashCode = hashCode;
+/**
+ * manages connection of SyncStore to one entity.
+ */
+var SyncEndpoint = (function () {
+    function SyncEndpoint(options) {
+        this.isConnected = null;
+        this.entity = options.entity;
+        this.modelType = options.modelType;
+        this.urlRoot = options.urlRoot;
+        this.socketPath = options.socketPath;
+        this.userUuid = options.userUuid;
+        var href = url.parse(options.urlRoot);
+        this.host = href.protocol + '//' + href.hostname;
+        if (!href.port) {
+            // socket.io needs port event for standard protocols
+            if (href.protocol === 'https:') {
+                this.host += ':443';
+            }
+            else if (href.protocol === 'http:') {
+                this.host += ':80';
+            }
+        }
+        this.path = href.pathname;
+        var user = options.userUuid ? options.userUuid + '/' : '';
+        var name = options.entity;
+        var hash = hashCode(this.host);
+        this.channel = user + name + '/' + hash;
+    }
+    /**
+     * close the endpoint explicit.
+     */
+    SyncEndpoint.prototype.close = function () {
+        if (this.socket) {
+            // consider calling this.socket.close() instead
+            this.socket.socket.close();
+            this.socket = null;
+        }
+        if (this.localStore) {
+            this.localStore.close();
+            this.localStore = null;
+        }
+    };
+    return SyncEndpoint;
+}());
+exports.SyncEndpoint = SyncEndpoint;
+
+},{"url":321}],17:[function(require,module,exports){
+(function (process,global){
+/**
+ * @file livedata/SyncStore.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 24.06.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var Q = require('q');
+var _ = require('lodash');
+var diag = require('../core/diag');
+var objectid = require('../core/objectid');
+var security = require('../security');
+var web = require('../web');
+var GetQuery_1 = require('../query/GetQuery');
+var Store_1 = require('./Store');
+var WebSqlStore_1 = require('./WebSqlStore');
+var SyncContext_1 = require('./SyncContext');
+var SyncEndpoint_1 = require('./SyncEndpoint');
+var LiveDataMessage_1 = require('./LiveDataMessage');
+var Model_1 = require('./Model');
+var Collection_1 = require('./Collection');
+/**
+ * io of browser via script tag or via require socket.io-client.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+exports.io = global['io'] ||
+    process && !process['browser'] &&
+        (global['io'] = require('socket.io-client')); // required version
+/**
+ * connects a Model/Collection to a Relution server.
+ *
+ * This will give you an online and offline store with live data updates.
+ *
+ * @example
+ *
+ * // The default configuration will save the complete model data as a json,
+ * // and the offline change log to a local WebSql database, synchronize it
+ * // trough REST calls with the server and receive live updates via a socket.io connection.
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.url = 'http://myServer.io/myOrga/myApplication/myCollection';
+ * MyCollection.prototype.store = new Relution.livedata.SyncStore({
+ *   useLocalStore: true,     // (default) store the data for offline use
+ *   useSocketNotify: true,   // (default) register at the server for live updates
+ *   useOfflineChanges: true  // (default) allow changes to the offline data
+ * });
+ */
+var SyncStore = (function (_super) {
+    __extends(SyncStore, _super);
+    function SyncStore(options) {
+        _super.call(this, options);
+        this.endpoints = {};
+        /**
+         * when set, indicates which entity caused a disconnection.
+         *
+         * <p>
+         * This is set to an entity name to limit which entity may cause a change to online state again.
+         * </p>
+         *
+         * @type {string}
+         */
+        this.disconnectedEntity = 'all';
+        if (this.credentials) {
+            this.credentials = _.clone(this.credentials);
+        }
+        if (this.localStoreOptions) {
+            this.localStoreOptions = _.clone(this.localStoreOptions);
+        }
+        if (this.orderOfflineChanges) {
+            this.orderOfflineChanges = _.clone(this.orderOfflineChanges);
+        }
+        diag.debug.trace('SyncStore', options);
+        if (this.useSocketNotify && typeof exports.io !== 'object') {
+            diag.debug.warning('Socket.IO not present !!');
+            this.useSocketNotify = false;
+        }
+    }
+    /**
+     * binds the store to a target server when the first endpoint is created.
+     *
+     * @param urlRoot used to resolve the server to operate.
+       */
+    SyncStore.prototype.initServer = function (urlRoot) {
+        var serverUrl = web.resolveServer(urlRoot, {
+            serverUrl: this.serverUrl
+        });
+        if (!this.serverUrl) {
+            var server = security.Server.getInstance(serverUrl);
+            this.serverUrl = serverUrl;
+            this.userUuid = server.authorization.name;
+            if (this.localStoreOptions && !this.localStoreOptions.credentials) {
+                // capture credentials for use by crypto stores
+                this.localStoreOptions.credentials = _.defaults({
+                    userUuid: this.userUuid
+                }, server.credentials);
+            }
+        }
+        else if (serverUrl !== this.serverUrl) {
+            throw new Error('store is bound to server ' + this.serverUrl + ' already');
+        }
+    };
+    SyncStore.prototype.checkServer = function (url, options) {
+        var _this = this;
+        diag.debug.assert(function () { return web.resolveServer(url, {
+            serverUrl: _this.serverUrl
+        }) === _this.serverUrl; });
+        if (security.Server.getInstance(this.serverUrl).authorization.name !== this.userUuid) {
+            diag.debug.warn('user identity was changed, working offline until authorization is restored');
+            var error = new Error();
+            // invoke error callback, if any
+            return options && this.handleError(options, error) || Q.reject(error);
+        }
+        return Q.resolve(url);
+    };
+    SyncStore.prototype.initEndpoint = function (modelOrCollection, modelType) {
+        var _this = this;
+        var urlRoot = modelOrCollection.getUrlRoot();
+        var entity = modelOrCollection.entity;
+        if (urlRoot && entity) {
+            // get or create endpoint for this url
+            this.initServer(urlRoot);
+            var endpoint = this.endpoints[entity];
+            if (!endpoint) {
+                diag.debug.info('Relution.livedata.SyncStore.initEndpoint: ' + entity);
+                endpoint = new SyncEndpoint_1.SyncEndpoint({
+                    entity: entity,
+                    modelType: modelType,
+                    urlRoot: urlRoot,
+                    socketPath: this.socketPath,
+                    userUuid: this.userUuid
+                });
+                this.endpoints[entity] = endpoint;
+                endpoint.localStore = this.createLocalStore(endpoint);
+                endpoint.priority = this.orderOfflineChanges && (_.lastIndexOf(this.orderOfflineChanges, endpoint.entity) + 1);
+                this.createMsgCollection();
+                endpoint.socket = this.createSocket(endpoint, entity);
+                endpoint.info = this.fetchServerInfo(endpoint);
+            }
+            else {
+                // configuration can not change, must recreate store instead...
+                diag.debug.assert(function () { return endpoint.urlRoot === urlRoot; }, 'can not change urlRoot, must recreate store instead!');
+                diag.debug.assert(function () { return endpoint.userUuid === _this.userUuid; }, 'can not change user identity, must recreate store instead!');
+            }
+            return endpoint;
+        }
+    };
+    SyncStore.prototype.initModel = function (model) {
+        model.endpoint = this.initEndpoint(model, model.constructor);
+    };
+    SyncStore.prototype.initCollection = function (collection) {
+        collection.endpoint = this.initEndpoint(collection, collection.model);
+    };
+    SyncStore.prototype.getEndpoint = function (modelOrCollection) {
+        var endpoint = this.endpoints[modelOrCollection.entity];
+        if (endpoint) {
+            diag.debug.assert(function () {
+                // checks that modelOrCollection uses a model inheriting from the one of the endpoint
+                var modelType = Collection_1.isCollection(modelOrCollection) ? modelOrCollection.model : modelOrCollection.constructor;
+                return modelType === endpoint.modelType || modelType.prototype instanceof endpoint.modelType;
+            }, 'wrong type of model!');
+            return endpoint;
+        }
+    };
+    SyncStore.prototype.createLocalStore = function (endpoint) {
+        if (this.useLocalStore) {
+            var entities = {};
+            entities[endpoint.entity] = endpoint.channel;
+            var storeOption = {
+                entities: entities
+            };
+            if (this.localStoreOptions && typeof this.localStoreOptions === 'object') {
+                storeOption = _.clone(this.localStoreOptions);
+                storeOption.entities = entities;
+            }
+            return new this.localStore(storeOption);
+        }
+    };
+    /**
+     * @description Here we save the changes in a Message local websql
+     * @returns {*}
+     */
+    SyncStore.prototype.createMsgCollection = function () {
+        if (this.useOfflineChanges && !this.messages) {
+            this.messages = new Collection_1.Collection(undefined, {
+                model: LiveDataMessage_1.LiveDataMessageModel,
+                store: new this.localStore(this.localStoreOptions)
+            });
+        }
+        return this.messages;
+    };
+    SyncStore.prototype.createSocket = function (endpoint, name) {
+        var _this = this;
+        if (this.useSocketNotify && endpoint && endpoint.socketPath) {
+            diag.debug.trace('Relution.livedata.SyncStore.createSocket: ' + name);
+            // resource
+            var connectVo = {};
+            var resource = endpoint.socketPath; // remove leading /
+            connectVo.resource = (resource && resource.indexOf('/') === 0) ? resource.substr(1) : resource;
+            if (this.socketQuery) {
+                connectVo.query = this.socketQuery;
+            }
+            // socket
+            endpoint.socket = exports.io.connect(endpoint.host, connectVo);
+            endpoint.socket.on('connect', function () {
+                _this._bindChannel(endpoint, name);
+                return _this.onConnect(endpoint).done();
+            });
+            endpoint.socket.on('disconnect', function () {
+                diag.debug.info('socket.io: disconnect');
+                return _this.onDisconnect(endpoint).done();
+            });
+            endpoint.socket.on(endpoint.channel, function (msg) {
+                return _this.onMessage(endpoint, _this._fixMessage(endpoint, msg));
+            });
+            return endpoint.socket;
+        }
+    };
+    SyncStore.prototype._bindChannel = function (endpoint, name) {
+        if (endpoint && endpoint.socket) {
+            diag.debug.trace('Relution.livedata.SyncStore._bindChannel: ' + name);
+            var channel = endpoint.channel;
+            var socket = endpoint.socket;
+            var time = this.getLastMessageTime(channel);
+            name = name || endpoint.entity;
+            socket.emit('bind', {
+                entity: name,
+                channel: channel,
+                time: time
+            });
+        }
+    };
+    SyncStore.prototype.getLastMessageTime = function (channel) {
+        if (!this.lastMesgTime) {
+            this.lastMesgTime = {};
+        }
+        else if (this.lastMesgTime[channel] !== undefined) {
+            return this.lastMesgTime[channel];
+        }
+        // the | 0 below turns strings into numbers
+        var time = localStorage.getItem('__' + channel + 'lastMesgTime') || 0;
+        this.lastMesgTime[channel] = time;
+        return time;
+    };
+    SyncStore.prototype.setLastMessageTime = function (channel, time) {
+        if (!time || time > this.getLastMessageTime(channel)) {
+            localStorage.setItem('__' + channel + 'lastMesgTime', time);
+            this.lastMesgTime[channel] = time;
+        }
+    };
+    SyncStore.prototype.onConnect = function (endpoint) {
+        var _this = this;
+        if (!endpoint.isConnected) {
+            // when offline transmission is pending, need to wait for it to complete
+            var q = Q.resolve(undefined);
+            if (this.messagesPromise && this.messagesPromise.isPending()) {
+                q = this.messagesPromise.catch(function (error) { return Q.resolve(undefined); });
+            }
+            // sync server/client changes
+            endpoint.isConnected = q.then(function () {
+                // next we'll fetch server-side changes
+                return _this.fetchChanges(endpoint).then(function () {
+                    // then send client-side changes
+                    if (_this.disconnectedEntity === 'all' || _this.disconnectedEntity === endpoint.entity) {
+                        // restart replaying of offline messages
+                        _this.messagesPromise = null;
+                        _this.disconnectedEntity = null;
+                    }
+                    return _this._sendMessages();
+                }).catch(function (error) {
+                    // catch without error indicates disconnection while going online
+                    if (!error) {
+                        // disconnected while sending offline changes
+                        return _this.onDisconnect(endpoint);
+                    }
+                    return Q.reject(error);
+                });
+            }).finally(function () {
+                // in the end, when connected still, fire an event informing client code
+                if (endpoint.isConnected) {
+                    _this.trigger('connect:' + endpoint.channel);
+                }
+            });
+        }
+        return endpoint.isConnected;
+    };
+    SyncStore.prototype.onDisconnect = function (endpoint) {
+        var _this = this;
+        if (!endpoint.isConnected) {
+            return Q.resolve(undefined);
+        }
+        endpoint.isConnected = null;
+        if (!this.disconnectedEntity) {
+            this.disconnectedEntity = 'all';
+        }
+        return Q.fcall(function () {
+            if (endpoint.socket && endpoint.socket.socket) {
+                // consider calling endpoint.socket.disconnect() instead
+                endpoint.socket.socket.onDisconnect();
+            }
+            return undefined;
+        }).finally(function () {
+            if (!endpoint.isConnected) {
+                _this.trigger('disconnect:' + endpoint.channel);
+            }
+        });
+    };
+    SyncStore.prototype._fixMessage = function (endpoint, msg) {
+        var idAttribute = endpoint.modelType.prototype.idAttribute;
+        diag.debug.assert(function () { return !!idAttribute; }, 'no idAttribute!');
+        if (msg.data && !msg.data[idAttribute] && msg.data._id) {
+            msg.data[idAttribute] = msg.data._id; // server bug!
+        }
+        else if (!msg.data && msg.method === 'delete' && msg[idAttribute]) {
+            msg.data = {};
+            msg.data[idAttribute] = msg[idAttribute]; // server bug!
+        }
+        return msg;
+    };
+    SyncStore.prototype.onMessage = function (endpoint, msg) {
+        var _this = this;
+        // this is called by the store itself for a particular endpoint!
+        if (!msg || !msg.method) {
+            return Q.reject(new Error('no message or method given'));
+        }
+        var q;
+        var channel = endpoint.channel;
+        if (endpoint.localStore) {
+            // first update the local store by forming a model and invoking sync
+            var options = _.defaults({
+                store: endpoint.localStore
+            }, this.localStoreOptions);
+            var model = new endpoint.modelType(msg.data, _.extend({
+                parse: true
+            }, options));
+            if (!model.id) {
+                // code below will persist with auto-assigned id but this nevertheless is a broken record
+                diag.debug.error('onMessage: ' + endpoint.entity + ' received data with no valid id performing ' + msg.method + '!');
+            }
+            else {
+                diag.debug.debug('onMessage: ' + endpoint.entity + ' ' + model.id + ' performing ' + msg.method);
+            }
+            q = endpoint.localStore.sync(msg.method, model, _.extend(options, {
+                merge: msg.method === 'patch'
+            })).then(function (result) {
+                if (!msg.id || msg.id === model.id) {
+                    return result;
+                }
+                // id value was reassigned, delete record of old id
+                var oldData = {};
+                oldData[model.idAttribute] = msg.id;
+                var oldModel = new endpoint.modelType(oldData, options);
+                diag.debug.debug('onMessage: ' + endpoint.entity + ' ' + model.id + ' reassigned from old record ' + oldModel.id);
+                return endpoint.localStore.sync('delete', oldModel, options);
+            });
+        }
+        else {
+            // just update all collections listening
+            q = Q.resolve(msg);
+        }
+        // finally set the message time
+        return q.then(function () {
+            if (msg.time) {
+                _this.setLastMessageTime(channel, msg.time);
+            }
+            // update all collections listening
+            _this.trigger('sync:' + channel, msg); // SyncContext.onMessage
+            return msg;
+        }, function (error) {
+            // not setting message time in error case
+            // report error as event on store
+            _this.trigger('error:' + channel, error, model);
+            return msg;
+        });
+    };
+    SyncStore.prototype.sync = function (method, model, options) {
+        var _this = this;
+        if (options === void 0) { options = {}; }
+        diag.debug.trace('Relution.livedata.SyncStore.sync');
+        try {
+            var endpoint = model.endpoint || this.getEndpoint(model);
+            if (!endpoint) {
+                throw new Error('no endpoint');
+            }
+            if (Collection_1.isCollection(model)) {
+                // collections can be filtered, etc.
+                if (method === 'read' && !options.barebone) {
+                    var syncContext = options.syncContext; // sync can be called by SyncContext itself when paging results
+                    if (!syncContext) {
+                        // capture GetQuery options
+                        syncContext = new SyncContext_1.SyncContext(options, // dynamic options passed to fetch() implement UI filters, etc.
+                        model.options, // static options on collection implement screen-specific stuff
+                        this // static options of this store realize filtering client/server
+                        );
+                        options.syncContext = syncContext;
+                    }
+                    if (model.syncContext !== syncContext) {
+                        // assign a different instance
+                        if (model.syncContext) {
+                            model.stopListening(this, 'sync:' + endpoint.channel);
+                        }
+                        model.listenTo(this, 'sync:' + endpoint.channel, _.bind(syncContext.onMessage, syncContext, this, model));
+                        model.syncContext = syncContext;
+                    }
+                }
+            }
+            else if (Model_1.isModel(model)) {
+                // offline capability requires IDs for data
+                if (!model.id) {
+                    if (method === 'create') {
+                        model.set(model.idAttribute, objectid.makeObjectID());
+                    }
+                    else {
+                        var error = new Error('no (valid) id: ' + model.id);
+                        return Q.reject(this.handleError(options, error) || error);
+                    }
+                }
+            }
+            else {
+                // something is really at odds here...
+                var error = new Error('target of sync is neither a model nor a collection!?!');
+                return Q.reject(this.handleError(options, error) || error);
+            }
+            // at this point the target server is known, check making sure the correct server is being hit
+            var serverUrl = web.resolveServer(model.getUrlRoot(), {
+                serverUrl: this.serverUrl
+            });
+            if (serverUrl !== this.serverUrl) {
+                throw new Error('store is bound to server ' + this.serverUrl);
+            }
+            var channel = endpoint.channel;
+            var time = this.getLastMessageTime(channel);
+            // only send read messages if no other store can do this or for initial load
+            if (method === 'read' && endpoint.localStore && time && !options.reset) {
+                // read data from localStore and fetch changes remote
+                var opts = _.clone(options);
+                opts.store = endpoint.localStore;
+                opts.entity = endpoint.entity;
+                delete opts.success;
+                delete opts.error;
+                return endpoint.localStore.sync(method, model, opts).then(function (resp) {
+                    // backbone success callback alters the collection now
+                    resp = _this.handleSuccess(options, resp) || resp;
+                    if (endpoint.socket || options.fetchMode === 'local') {
+                        // no need to fetch changes as we got a websocket, that is either connected or attempts reconnection
+                        return resp;
+                    }
+                    // when we are disconnected, try to connect now
+                    if (!endpoint.isConnected) {
+                        return _this.fetchServerInfo(endpoint).then(function (info) {
+                            // trigger reconnection when disconnected
+                            var result;
+                            if (!endpoint.isConnected) {
+                                result = _this.onConnect(endpoint);
+                            }
+                            return result || info;
+                        }, function (xhr) {
+                            // trigger disconnection when disconnected
+                            var result;
+                            if (!xhr.statusCode && endpoint.isConnected) {
+                                result = _this.onDisconnect(endpoint);
+                            }
+                            return result || resp;
+                        }).thenResolve(resp);
+                    } // else...
+                    // load changes only (will happen AFTER success callback is invoked,
+                    // but returned promise will resolve only after changes were processed.
+                    return _this.fetchChanges(endpoint).catch(function (xhr) {
+                        if (!xhr.statusCode && endpoint.isConnected) {
+                            return _this.onDisconnect(endpoint) || resp;
+                        }
+                        // can not do much about it...
+                        _this.trigger('error:' + channel, xhr, model);
+                        return resp;
+                    }).thenResolve(resp); // caller expects original XHR response as changes body data is NOT compatible
+                }, function () {
+                    // fall-back to loading full data set
+                    return _this._addMessage(method, model, options, endpoint);
+                });
+            }
+            // do backbone rest
+            return this._addMessage(method, model, options, endpoint);
+        }
+        catch (error) {
+            return Q.reject(this.handleError(options, error) || error);
+        }
+    };
+    SyncStore.prototype._addMessage = function (method, model, options, endpoint) {
+        var _this = this;
+        var changes = model.changedSinceSync;
+        var data = null;
+        var storeMsg = true;
+        switch (method) {
+            case 'update':
+            case 'create':
+                data = options.attrs || model.toJSON();
+                break;
+            case 'patch':
+                if (_.isEmpty(changes)) {
+                    return;
+                }
+                data = model.toJSON({
+                    attrs: changes
+                });
+                break;
+            case 'delete':
+                break;
+            default:
+                diag.debug.assert(function () { return method === 'read'; }, 'unknown method: ' + method);
+                storeMsg = false;
+                break;
+        }
+        var entity = model.entity || endpoint.entity;
+        diag.debug.assert(function () { return model.entity === endpoint.entity; });
+        diag.debug.assert(function () { return entity.indexOf('~') < 0; }, 'entity name must not contain a ~ character!');
+        var msg = {
+            _id: entity + '~' + model.id,
+            id: model.id,
+            method: method,
+            data: data,
+            // channel: endpoint.channel, // channel is hacked in by storeMessage(), we don't want to use this anymore
+            priority: endpoint.priority,
+            time: Date.now()
+        };
+        var q = Q.resolve(msg);
+        var qMessage;
+        if (storeMsg) {
+            // store and potentially merge message
+            qMessage = this.storeMessage(endpoint, q);
+            q = qMessage.then(function (message) {
+                // in case of merging, this result could be different
+                return message.attributes;
+            });
+        }
+        return q.then(function (msg2) {
+            // pass in qMessage so that deletion of stored message can be scheduled
+            return _this._emitMessage(endpoint, msg2, options, model, qMessage);
+        });
+    };
+    SyncStore.prototype._emitMessage = function (endpoint, msg, options, model, qMessage) {
+        var _this = this;
+        var channel = endpoint.channel;
+        var qAjax = this._ajaxMessage(endpoint, msg, options, model);
+        var q = qAjax;
+        if (qMessage) {
+            // following takes care of offline change store
+            q = q.then(function (data) {
+                // success, remove message stored, if any
+                return _this.removeMessage(endpoint, msg, qMessage).catch(function (error) {
+                    _this.trigger('error:' + channel, error, model); // can not do much about it...
+                    return data;
+                }).thenResolve(data); // resolve again yielding data
+            }, function (xhr) {
+                // failure eventually caught by offline changes
+                if (!xhr.statusCode && _this.useOfflineChanges) {
+                    // this seams to be only a connection problem, so we keep the message and call success
+                    return Q.resolve(msg.data);
+                }
+                else {
+                    // remove message stored and keep rejection as is
+                    return _this.removeMessage(endpoint, msg, qMessage).catch(function (error) {
+                        _this.trigger('error:' + channel, error, model); // can not do much about it...
+                        return xhr;
+                    }).thenReject(xhr);
+                }
+            });
+        }
+        q = this._applyResponse(q, endpoint, msg, options, model);
+        return q.finally(function () {
+            // do some connection handling
+            return qAjax.then(function () {
+                // trigger reconnection when disconnected
+                if (!endpoint.isConnected) {
+                    return _this.onConnect(endpoint);
+                }
+            }, function (xhr) {
+                // trigger disconnection when disconnected
+                if (!xhr.statusCode && endpoint.isConnected) {
+                    return _this.onDisconnect(endpoint);
+                }
+            });
+        });
+    };
+    SyncStore.prototype._ajaxMessage = function (endpoint, msg, options, model) {
+        var _this = this;
+        options = options || {};
+        delete options.xhr; // make sure not to use old value
+        var url = options.url;
+        if (!url) {
+            url = endpoint.urlRoot;
+            if (msg.id && msg.method !== 'create') {
+                // add ID of model
+                url += (url.charAt(url.length - 1) === '/' ? '' : '/') + msg.id;
+            }
+            if (msg.method === 'read' && Collection_1.isCollection(model)) {
+                // add query of collection
+                var collectionUrl = _.isFunction(model.url) ? model.url() : model.url;
+                var queryIndex = collectionUrl.lastIndexOf('?');
+                var getQuery = new GetQuery_1.GetQuery().fromJSON(options);
+                // currently only sortOrder can be supported as we require the initial data load to yield full dataset
+                getQuery.limit = null;
+                getQuery.offset = null;
+                getQuery.filter = null;
+                getQuery.fields = null;
+                var getParams = getQuery.toQueryParams();
+                if (queryIndex >= 0) {
+                    url += collectionUrl.substr(queryIndex);
+                    if (getParams) {
+                        url += '&' + getParams;
+                    }
+                }
+                else {
+                    if (getParams) {
+                        url += '?' + getParams;
+                    }
+                }
+            }
+        }
+        // earliest point where target URL is known
+        diag.debug.debug('ajaxMessage ' + msg.method + ' ' + url);
+        var opts = {
+            // must not take arbitrary options as these won't be replayed on reconnect
+            url: url,
+            attrs: msg.data,
+            store: {},
+            credentials: options.credentials,
+            // error propagation
+            error: options.error
+        };
+        // protect against wrong server and user identity
+        diag.debug.assert(function () { return web.resolveServer(url, {
+            serverUrl: _this.serverUrl
+        }) === _this.serverUrl; });
+        if (security.Server.getInstance(this.serverUrl).authorization.name !== this.userUuid) {
+            diag.debug.warn('user identity was changed, working offline until authorization is restored');
+            var error = new Error();
+            // invoke error callback, if any
+            return this.handleError(opts, error) || Q.reject(error);
+        }
+        // actual ajax request via backbone.js
+        return this.checkServer(url, opts).then(function () {
+            return model.sync(msg.method, model, opts).finally(function () {
+                // take over xhr resolving the options copy
+                options.xhr = opts.xhr.xhr || opts.xhr;
+            });
+        });
+    };
+    SyncStore.prototype._applyResponse = function (qXHR, endpoint, msg, options, model) {
+        var _this = this;
+        // var channel = endpoint.channel;
+        var clientTime = new Date().getTime();
+        return qXHR.then(function (data) {
+            // delete on server does not respond a body
+            if (!data && msg.method === 'delete') {
+                data = msg.data;
+            }
+            // update local store state
+            if (data) {
+                // no data if server asks not to alter state
+                // this.setLastMessageTime(channel, msg.time);
+                var promises = [];
+                var dataIds; // model id -> attributes data
+                if (msg.method !== 'read') {
+                    promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, data === msg.data ? msg : _.defaults({
+                        data: data // just accepts new data
+                    }, msg))));
+                }
+                else if (Collection_1.isCollection(model) && Array.isArray(data)) {
+                    // synchronize the collection contents with the data read
+                    var syncIds = {};
+                    model.models.forEach(function (m) {
+                        syncIds[m.id] = m;
+                    });
+                    dataIds = {};
+                    data.forEach(function (d) {
+                        if (d) {
+                            var id = d[endpoint.modelType.prototype.idAttribute] || d._id;
+                            dataIds[id] = d;
+                            var m = syncIds[id];
+                            if (m) {
+                                // update the item
+                                delete syncIds[id]; // so that it is deleted below
+                                if (!_.isEqual(_.pick.call(m, m.attributes, Object.keys(d)), d)) {
+                                    // above checked that all attributes in d are in m with equal values and found some mismatch
+                                    promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, {
+                                        id: id,
+                                        method: 'update',
+                                        time: msg.time,
+                                        data: d
+                                    })));
+                                }
+                            }
+                            else {
+                                // create the item
+                                promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, {
+                                    id: id,
+                                    method: 'create',
+                                    time: msg.time,
+                                    data: d
+                                })));
+                            }
+                        }
+                    });
+                    Object.keys(syncIds).forEach(function (id) {
+                        // delete the item
+                        var m = syncIds[id];
+                        promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, {
+                            id: id,
+                            method: 'delete',
+                            time: msg.time,
+                            data: m.attributes
+                        })));
+                    });
+                }
+                else {
+                    // trigger an update to load the data read
+                    var array = Array.isArray(data) ? data : [data];
+                    for (var i = 0; i < array.length; i++) {
+                        data = array[i];
+                        if (data) {
+                            promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, {
+                                id: data[endpoint.modelType.prototype.idAttribute] || data._id,
+                                method: 'update',
+                                time: msg.time,
+                                data: data
+                            })));
+                        }
+                    }
+                }
+                return Q.all(promises).then(function () {
+                    // delayed till operations complete
+                    if (!dataIds) {
+                        return data;
+                    }
+                    diag.debug.assert(function () { return Collection_1.isCollection(model); });
+                    // when collection was updated only pass data of models that were synced on to the success callback,
+                    // as the callback will set the models again causing our sorting and filtering to be without effect.
+                    var response = [];
+                    var models = Collection_1.isCollection(model) ? model.models : [model];
+                    for (var i = models.length; i-- > 0;) {
+                        var m = models[i];
+                        if (dataIds[m.id]) {
+                            response.push(m.attributes);
+                            delete dataIds[m.id];
+                            if (dataIds.length <= 0) {
+                                break;
+                            }
+                        }
+                    }
+                    return response.reverse();
+                });
+            }
+        }).then(function (response) {
+            if (msg.method === 'read' && Collection_1.isCollection(model)) {
+                // TODO: extract Date header from options.xhr instead of using clientTime
+                _this.setLastMessageTime(endpoint.channel, clientTime);
+            }
+            // invoke success callback, if any
+            return _this.handleSuccess(options, response) || response;
+        }, function (error) {
+            // invoke error callback, if any
+            return _this.handleError(options, error) || Q.reject(error);
+        });
+    };
+    SyncStore.prototype.fetchChanges = function (endpoint, force) {
+        var _this = this;
+        if (force === void 0) { force = false; }
+        var channel = endpoint.channel;
+        if (!endpoint.urlRoot || !channel) {
+            return Q.resolve(undefined);
+        }
+        var now = Date.now();
+        var promise = endpoint.promiseFetchingChanges;
+        if (promise && !force) {
+            if (promise.isPending() || now - endpoint.timestampFetchingChanges < 1000) {
+                // reuse existing eventually completed request for changes
+                diag.debug.warning(channel + ' skipping changes request...');
+                return promise;
+            }
+        }
+        var time = this.getLastMessageTime(channel);
+        if (!time) {
+            diag.debug.error(channel + ' can not fetch changes at this time!');
+            return promise || Q.resolve(undefined);
+        }
+        // initiate a new request for changes
+        diag.debug.info(channel + ' initiating changes request...');
+        var changes = new this.messages.constructor();
+        promise = this.checkServer(endpoint.urlRoot + 'changes/' + time).then(function (url) {
+            return Q(changes.fetch({
+                url: url,
+                store: {},
+                success: function (model, response, options) {
+                    if (changes.models.length > 0) {
+                        changes.each(function (change) {
+                            var msg = change.attributes;
+                            _this.onMessage(endpoint, _this._fixMessage(endpoint, msg));
+                        });
+                    }
+                    else {
+                        // following should use server time!
+                        _this.setLastMessageTime(channel, now);
+                    }
+                    return response || options.xhr;
+                }
+            })).thenResolve(changes);
+        });
+        endpoint.promiseFetchingChanges = promise;
+        endpoint.timestampFetchingChanges = now;
+        return promise;
+    };
+    SyncStore.prototype.fetchServerInfo = function (endpoint) {
+        var _this = this;
+        var now = Date.now();
+        var promise = endpoint.promiseFetchingServerInfo;
+        if (promise) {
+            if (promise.isPending() || now - endpoint.timestampFetchingServerInfo < 1000) {
+                // reuse existing eventually completed request for changes
+                diag.debug.warning(endpoint.channel + ' skipping info request...');
+                return promise;
+            }
+        }
+        var info = new Model_1.Model();
+        var time = this.getLastMessageTime(endpoint.channel);
+        var url = endpoint.urlRoot;
+        if (url.charAt((url.length - 1)) !== '/') {
+            url += '/';
+        }
+        promise = this.checkServer(url + 'info').then(function (url) {
+            return Q(info.fetch(({
+                url: url,
+                success: function (model, response, options) {
+                    // @todo why we set a server time here ?
+                    if (!time && info.get('time')) {
+                        _this.setLastMessageTime(endpoint.channel, info.get('time'));
+                    }
+                    if (!endpoint.socketPath && info.get('socketPath')) {
+                        endpoint.socketPath = info.get('socketPath');
+                        var name = info.get('entity') || endpoint.entity;
+                        if (_this.useSocketNotify) {
+                            endpoint.socket = _this.createSocket(endpoint, name);
+                        }
+                    }
+                    return response || options.xhr;
+                }
+            }))).thenResolve(info);
+        });
+        endpoint.promiseFetchingServerInfo = promise;
+        endpoint.timestampFetchingServerInfo = now;
+        return promise;
+    };
+    /**
+     * called when an offline change was sent to the remote server.
+     *
+     * <p>
+     * May be overwritten to alter change message error handling behavior. The default implementation will attempt
+     * reloading the server data for restoring the client state such that it reflects the server state. When this
+     * succeeded, the offline change is effectively reverted and the change message is dropped.
+     * </p>
+     * <p>
+     * An overwritten implementation may decided whether to revert failed changes based on the error reported.
+     * </p>
+     * <p>
+     * Notice, the method is not called when the offline change failed due to a connectivity issue.
+     * </p>
+     *
+     * @param error reported by remote server.
+     * @param message change reported, attributes of type LiveDataMessage.
+     * @param options context information required to access the data locally as well as remotely.
+     * @return {any} Promise indicating success to drop the change message and proceed with the next change, or
+     *    rejection indicating the change message is kept and retried later on.
+     */
+    SyncStore.prototype.processOfflineMessageResult = function (error, message, options) {
+        var _this = this;
+        if (!error) {
+            // message was processed successfully
+            if (!this.useSocketNotify) {
+                // when not using sockets, fetch changes now
+                var endpoint = this.endpoints[options.entity];
+                if (endpoint) {
+                    // will pull the change caused by the offline message and update the message time,
+                    // so that we avoid the situation where the change caused by replaying the offline
+                    // change results in a conflict later on...
+                    return this.fetchChanges(endpoint, true);
+                }
+            }
+            return Q.resolve(message);
+        }
+        // failed, eventually undo the modifications stored
+        if (!options.localStore) {
+            return Q.reject(error);
+        }
+        // revert modification by reloading data
+        var modelType = options.modelType || Model_1.Model;
+        var model = new modelType(message.get('data'), {
+            entity: options.entity
+        });
+        model.id = message.get('method') !== 'create' && message.get('id');
+        var triggerError = function () {
+            // inform client application of the offline changes error
+            var channel = message.get('channel');
+            diag.debug.error('Relution.livedata.SyncStore.processOfflineMessageResult: triggering error for channel ' + channel + ' on store', error);
+            if (!options.silent) {
+                _this.trigger('error:' + channel, error, model);
+            }
+        };
+        var localOptions = {
+            // just affect local store
+            store: options.localStore
+        };
+        var remoteOptions = {
+            urlRoot: options.urlRoot,
+            store: {} // really go to remote server
+        };
+        if (model.id) {
+            remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/') + model.id;
+        }
+        else {
+            // creation failed, just delete locally
+            diag.debug.assert(function () { return message.get('method') === 'create'; });
+            return model.destroy(localOptions).finally(triggerError);
+        }
+        return model.fetch(remoteOptions).then(function (data) {
+            // original request failed and the code above reloaded the data to revert the local modifications, which succeeded...
+            return model.save(data, localOptions).finally(triggerError);
+        }, function (fetchResp) {
+            // original request failed and the code above tried to revert the local modifications by reloading the data, which failed as well...
+            var statusCode = fetchResp && fetchResp.statusCode;
+            switch (statusCode) {
+                case 404: // NOT FOUND
+                case 401: // UNAUTHORIZED
+                case 410:
+                    // ...because the item is gone by now, maybe someone else changed it to be deleted
+                    return model.destroy(localOptions); // silent regarding triggerError
+                default:
+                    return Q.reject(fetchResp).finally(triggerError);
+            }
+        });
+    };
+    /**
+     * feeds pending offline #messages to the remote server.
+     *
+     * <p>
+     * Due to client code setting up models one at a time, this method is called multiple times during initial setup of
+     * #endpoints. The first call fetches pending offline #messages, ordered by priority and time. Then the #messages
+     * are send to the remote server until depleted, an error occurs, or some missing endpoint is encounted.
+     * </p>
+     * <p>
+     * The method is triggered each time an endpoint is registered, or state changes to online for any endpoint. When
+     * state changes from offline to online (disregarding endpoint) message submission is restarted by resetting the
+     * #messagesPromise. Otherwise, subsequent calls chain to the end of #messagesPromise.
+     * </p>
+     *
+     * @return {Promise} of #messages Collection, or last recent offline rejection
+     * @private
+     */
+    SyncStore.prototype._sendMessages = function () {
+        var _this = this;
+        // not ready yet
+        if (!this.messages) {
+            return Q.resolve(undefined);
+        }
+        // processes messages until none left, hitting a message of a not yet registered endpoint, or entering
+        // a non-recoverable error. The promise returned resolves to this.messages when done.
+        var nextMessage = function () {
+            if (!_this.messages.length) {
+                return _this.messages;
+            }
+            var message = _this.messages.models[0];
+            var entity = message.id.substr(0, message.id.indexOf('~'));
+            if (!entity) {
+                diag.debug.error('sendMessage ' + message.id + ' with no entity!');
+                return message.destroy().then(nextMessage);
+            }
+            var endpoint = _this.endpoints[entity];
+            if (!endpoint) {
+                return _this.messages;
+            }
+            diag.debug.assert(function () { return endpoint.channel === message.get('channel'); }, 'channel of endpoint ' + endpoint.channel + ' does not match channel of message ' + message.get('channel'));
+            var msg = _this._fixMessage(endpoint, message.attributes);
+            var modelType = endpoint.modelType || Model_1.Model;
+            var model = new modelType(msg.data, {
+                entity: endpoint.entity
+            });
+            model.id = message.get('method') !== 'create' && message.get('id');
+            var remoteOptions = {
+                urlRoot: endpoint.urlRoot,
+                store: {} // really go to remote server
+            };
+            if (model.id) {
+                remoteOptions.url = remoteOptions.urlRoot + (remoteOptions.urlRoot.charAt(remoteOptions.urlRoot.length - 1) === '/' ? '' : '/') + model.id;
+            }
+            diag.debug.info('sendMessage ' + model.id);
+            var offlineOptions = {
+                entity: endpoint.entity,
+                modelType: endpoint.modelType,
+                urlRoot: endpoint.urlRoot,
+                localStore: endpoint.localStore
+            };
+            return _this._applyResponse(_this._ajaxMessage(endpoint, msg, remoteOptions, model), endpoint, msg, remoteOptions, model).then(function () {
+                // succeeded
+                return _this.processOfflineMessageResult(null, message, offlineOptions);
+            }, function (error) {
+                if (error.statusCode) {
+                    // remote failed
+                    return Q(_this.processOfflineMessageResult(error, message, offlineOptions)).catch(function (error2) {
+                        // explicitly disconnect due to error in endpoint
+                        _this.disconnectedEntity = endpoint.entity;
+                        return _this.onDisconnect(endpoint).thenReject(error2);
+                    });
+                }
+                else {
+                    // connectivity issue, keep rejection
+                    return Q.reject(error);
+                }
+            }).then(function () {
+                // applying change succeeded or successfully recovered change
+                return message.destroy();
+            }).then(nextMessage);
+        };
+        diag.debug.info('Relution.livedata.SyncStore._sendMessages');
+        var q = this.messagesPromise;
+        if (!q) {
+            // initially fetch all messages
+            q = Q(this.messages.fetch({
+                sortOrder: [
+                    '+priority',
+                    '+time',
+                    '+id'
+                ]
+            }));
+        }
+        else if (this.messagesPromise.isRejected()) {
+            // early rejection
+            return this.messagesPromise;
+        }
+        else if (!this.messages.length) {
+            // no more messages
+            return this.messagesPromise;
+        }
+        // kick to process pending messages
+        this.messagesPromise = q.then(nextMessage);
+        return this.messagesPromise;
+    };
+    SyncStore.prototype.storeMessage = function (endpoint, qMsg) {
+        var _this = this;
+        return qMsg.then(function (msg) {
+            var options;
+            var id = _this.messages.modelId(msg);
+            diag.debug.info('storeMessage ' + id);
+            var message = id && _this.messages.get(id);
+            if (message) {
+                // use existing instance, should not be the case usually
+                options = {
+                    merge: true
+                };
+            }
+            else {
+                // instantiate new model, intentionally not added to collection
+                message = new _this.messages.model(msg, {
+                    collection: _this.messages,
+                    store: _this.messages.store
+                });
+                message.set('channel', endpoint.channel);
+            }
+            return Q(message.save(msg, options)).thenResolve(message);
+        });
+    };
+    SyncStore.prototype.removeMessage = function (endpoint, msg, qMessage) {
+        var _this = this;
+        return qMessage.then(function (message) {
+            if (!message) {
+                var id = _this.messages.modelId(msg);
+                if (!id) {
+                    // msg is not persistent
+                    return Q.resolve(undefined);
+                }
+                message = _this.messages.get(id);
+                if (!message) {
+                    message = new _this.messages.model({
+                        _id: msg._id
+                    }, {
+                        collection: _this.messages,
+                        store: _this.messages.store
+                    });
+                }
+            }
+            diag.debug.trace('removeMessage ' + message.id);
+            return message.destroy();
+        });
+    };
+    SyncStore.prototype.clear = function (collection) {
+        if (collection) {
+            var endpoint = this.getEndpoint(collection);
+            if (endpoint) {
+                if (this.messages) {
+                    this.messages.destroy();
+                }
+                collection.reset();
+                this.setLastMessageTime(endpoint.channel, '');
+            }
+        }
+    };
+    /**
+     * close the socket explicit
+     */
+    SyncStore.prototype.close = function () {
+        if (this.messages.store) {
+            this.messages.store.close();
+            this.messages = null;
+        }
+        var keys = Object.keys(this.endpoints);
+        for (var i = 0, l = keys.length; i < l; i++) {
+            this.endpoints[keys[i]].close();
+        }
+    };
+    return SyncStore;
+}(Store_1.Store));
+exports.SyncStore = SyncStore;
+// mixins
+var syncStore = _.extend(SyncStore.prototype, {
+    _type: 'Relution.livedata.SyncStore',
+    localStore: WebSqlStore_1.WebSqlStore,
+    useLocalStore: true,
+    useSocketNotify: true,
+    useOfflineChanges: true,
+    socketPath: ''
+});
+diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.create(syncStore)); });
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/diag":5,"../core/objectid":9,"../query/GetQuery":24,"../security":31,"../web":35,"./Collection":11,"./LiveDataMessage":12,"./Model":13,"./Store":14,"./SyncContext":15,"./SyncEndpoint":16,"./WebSqlStore":18,"_process":231,"lodash":203,"q":239,"socket.io-client":undefined}],18:[function(require,module,exports){
+(function (process,global){
+/**
+ * @file livedata/WebSqlStore.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 24.06.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var _ = require('lodash');
+var Q = require('q');
+var diag = require('../core/diag');
+var objectid = require('../core/objectid');
+var cipher = require('../core/cipher');
+var Store_1 = require('./Store');
+var Model_1 = require('./Model');
+var Collection_1 = require('./Collection');
+/**
+ * openDatabase of browser or via require websql.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+function openDatabase(options) {
+    var db;
+    if (global['sqlitePlugin']) {
+        // device implementation
+        options = _.clone(options);
+        if (!options.key) {
+            if (options.security) {
+                options.key = options.security;
+                delete options.security;
+            }
+            else if (options.credentials) {
+                options.key = cipher.hashJsonSync(options.credentials, 'sha256').toString('hex');
+                delete options.credentials;
+            }
+        }
+        if (!options.location) {
+            options.location = 2;
+        }
+        db = global['sqllitePlugin'].openDatabase(options);
+    }
+    else if (global['openDatabase']) {
+        // native implementation
+        db = global['openDatabase'](options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
+    }
+    else if (process && !process['browser']) {
+        // node.js implementation
+        var websql = void 0;
+        try {
+            websql = require('websql');
+        }
+        catch (error) {
+            diag.debug.warn(error);
+        }
+        if (websql) {
+            db = websql(options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
+        }
+    }
+    if (!db) {
+        // when this is reached no supported implementation is present
+        throw new Error('WebSQL implementation is not available');
+    }
+    return db;
+}
+exports.openDatabase = openDatabase;
+/**
+ * stores LiveData into the WebSQL database.
+ *
+ * @example
+ *
+ * // The default configuration will save the complete model data as json
+ * // into a database column with the name "data"
+ * class MyCollection extends Relution.livedata.Collection {};
+ * MyCollection.prototype.model = MyModel;
+ * MyCollection.prototype.entity = 'MyTableName';
+ * MyCollection.prototype.store = new Relution.livedata.WebSqlStore();
+ *
+ * // If you want to use specific columns you can specify the fields
+ * // in the entity of your model like this:
+ * class MyModel extends Relution.livedata.Model {};
+ * MyModel.prototype.idAttribute = 'id';
+ */
+var WebSqlStore = (function (_super) {
+    __extends(WebSqlStore, _super);
+    function WebSqlStore(options) {
+        var _this = this;
+        _super.call(this, options);
+        this.db = null;
+        this.entities = {};
+        this.transactionPromise = Q.resolve(null);
+        if (options && options.entities) {
+            for (var entity in options.entities) {
+                this.entities[entity] = {
+                    table: options.entities[entity] || entity
+                };
+            }
+        }
+        this._openDb(_.defaults({
+            name: this.name,
+            size: this.size,
+            version: this.version,
+            error: function (error) {
+                diag.debug.error(error.message);
+                _this.handleError(options, error);
+                _this.trigger('error', error);
+            }
+        }, options));
+    }
+    /**
+     * closes the database.
+     */
+    WebSqlStore.prototype.close = function () {
+        diag.debug.info('Store close');
+        if (this.db) {
+            try {
+                // some implementations offer a close() method
+                if (this.db.close) {
+                    this.db.close();
+                }
+            }
+            finally {
+                this.db = null;
+            }
+        }
+    };
+    /**
+     * @private
+     */
+    WebSqlStore.prototype._openDb = function (options) {
+        var error;
+        if (!this.db) {
+            try {
+                this.db = openDatabase(options);
+                if (this.entities) {
+                    for (var entity in this.entities) {
+                        this._createTable({
+                            entity: entity
+                        });
+                    }
+                }
+            }
+            catch (e) {
+                error = e;
+            }
+        }
+        if (this.db) {
+            if (this.version && this.db.version !== this.version && this.db.changeVersion) {
+                this._updateDb(options);
+            }
+            else {
+                this.handleSuccess(options, this.db);
+            }
+        }
+        else if (error === 2 || error === '2') {
+            // Version number mismatch.
+            this._updateDb(options);
+        }
+        else if (error) {
+            if (!_.isError(error)) {
+                error = new Error('' + error);
+            }
+            this.handleError(options, error);
+        }
+        else {
+            this.handleSuccess(options, this.db);
+        }
+    };
+    WebSqlStore.prototype._updateDb = function (options) {
+        var error;
+        var lastSql;
+        var that = this;
+        try {
+            if (!this.db) {
+                this.db = openDatabase(options);
+            }
+            try {
+                var arSql = this._sqlUpdateDatabase(this.db.version, this.version);
+                this.db.changeVersion(this.db.version, this.version, function (tx) {
+                    _.each(arSql, function (sql) {
+                        diag.debug.info('sql statement: ' + sql);
+                        lastSql = sql;
+                        tx.executeSql(sql);
+                    });
+                }, function (err) {
+                    if (!lastSql && that.db.version === that.version) {
+                        // not a real error, concurrent migration attempt completed already
+                        that.handleSuccess(options, that.db);
+                    }
+                    else {
+                        if (lastSql) {
+                            err.sql = lastSql;
+                        }
+                        that.handleError(options, err);
+                    }
+                }, function () {
+                    that.handleSuccess(options, that.db);
+                });
+            }
+            catch (e) {
+                error = e;
+                diag.debug.error('webSql change version failed, DB-Version: ' + this.db.version);
+            }
+        }
+        catch (e) {
+            error = e;
+        }
+        if (error) {
+            this.handleError(options, error);
+        }
+    };
+    WebSqlStore.prototype.sync = function (method, model, options) {
+        options = options || {};
+        var that = this;
+        var q = Q.defer();
+        var opts = _.extend({
+            entity: model.entity || options.entity
+        }, options || {}, {
+            success: function (response) {
+                var result = that.handleSuccess(options, response) || response;
+                q.resolve(result);
+                return result;
+            },
+            error: function (error) {
+                var result = that.handleError(options, error);
+                if (result) {
+                    q.resolve(result);
+                    return result;
+                }
+                else {
+                    q.reject(error);
+                }
+            }
+        });
+        switch (method) {
+            case 'create':
+                that._checkTable(opts, function () {
+                    that._insertOrReplace(model, opts);
+                });
+                break;
+            case 'update':
+            case 'patch':
+                that._checkTable(opts, function () {
+                    that._insertOrReplace(model, opts);
+                });
+                break;
+            case 'delete':
+                that._checkTable(opts, function () {
+                    that._delete(model, opts);
+                });
+                break;
+            case 'read':
+                that._checkTable(opts, function () {
+                    that._select(model, opts);
+                });
+                break;
+            default:
+                break;
+        }
+        return q.promise;
+    };
+    WebSqlStore.prototype.select = function (options) {
+        this._select(null, options);
+    };
+    WebSqlStore.prototype.drop = function (options) {
+        this._dropTable(options);
+    };
+    WebSqlStore.prototype.createTable = function (options) {
+        this._createTable(options);
+    };
+    WebSqlStore.prototype.execute = function (options) {
+        this._executeSql(options);
+    };
+    WebSqlStore.prototype._sqlUpdateDatabase = function (oldVersion, newVersion) {
+        // create sql array, simply drop and create the database
+        var sql = [];
+        for (var entity in this.entities) {
+            sql.push(this._sqlDropTable(entity));
+            sql.push(this._sqlCreateTable(entity));
+        }
+        return sql;
+    };
+    WebSqlStore.prototype._sqlDropTable = function (entity) {
+        return "DROP TABLE IF EXISTS '" + this.entities[entity].table + "';";
+    };
+    WebSqlStore.prototype._sqlCreateTable = function (entity) {
+        return "CREATE TABLE IF NOT EXISTS '" + this.entities[entity].table + "' (id VARCHAR(255) NOT NULL PRIMARY KEY ASC UNIQUE, data TEXT NOT NULL);";
+    };
+    WebSqlStore.prototype._sqlDelete = function (options, entity) {
+        var sql = 'DELETE FROM \'' + this.entities[entity].table + '\'';
+        var where = this._sqlWhereFromData(options, entity);
+        if (where) {
+            sql += ' WHERE ' + where;
+        }
+        else {
+            diag.debug.assert(function () { return false; }, 'attempt of deletion without where clause');
+        }
+        sql += options.and ? ' AND ' + options.and : '';
+        return sql;
+    };
+    WebSqlStore.prototype._sqlWhereFromData = function (options, entity) {
+        if (options && options.models && entity) {
+            var ids = [];
+            var that = this;
+            _.each(options.models, function (model) {
+                if (!model.isNew()) {
+                    ids.push(that._sqlValue(model.id));
+                }
+            });
+            if (ids.length > 0) {
+                return 'id IN (' + ids.join(',') + ')';
+            }
+        }
+        return '';
+    };
+    WebSqlStore.prototype._sqlSelect = function (options, entity) {
+        var sql = 'SELECT ';
+        sql += '*';
+        sql += ' FROM \'' + this.entities[entity].table + '\'';
+        if (options.syncContext) {
+            // new code must do stuff in JavaScript, not SQL
+            return sql;
+        }
+        var where = this._sqlWhereFromData(options, entity);
+        if (where) {
+            sql += ' WHERE ' + where;
+        }
+        if (options.order) {
+            sql += ' ORDER BY ' + options.order;
+        }
+        if (options.limit) {
+            sql += ' LIMIT ' + options.limit;
+        }
+        if (options.offset) {
+            sql += ' OFFSET ' + options.offset;
+        }
+        return sql;
+    };
+    WebSqlStore.prototype._sqlValue = function (value) {
+        value = _.isNull(value) ? 'null' : _.isObject(value) ? JSON.stringify(value) : value.toString();
+        value = value.replace(/"/g, '""');
+        return '"' + value + '"';
+    };
+    WebSqlStore.prototype._dropTable = function (options) {
+        var entity = options.entity;
+        if (entity in this.entities && this.entities[entity].created !== false) {
+            if (this._checkDb(options)) {
+                var sql = this._sqlDropTable(entity);
+                // reset flag
+                this._executeTransaction(options, [sql]);
+            }
+        }
+        else {
+            // no need dropping as table was not created
+            this.handleSuccess(options, undefined);
+        }
+    };
+    WebSqlStore.prototype._createTable = function (options) {
+        var entity = options.entity;
+        if (!(entity in this.entities)) {
+            this.entities[entity] = {
+                table: entity
+            };
+        }
+        if (this._checkDb(options)) {
+            var sql = this._sqlCreateTable(entity);
+            // reset flag
+            this._executeTransaction(options, [sql]);
+        }
+    };
+    WebSqlStore.prototype._checkTable = function (options, callback) {
+        var that = this;
+        var entity = options.entity;
+        if (entity && (!this.entities[entity] || this.entities[entity].created === false)) {
+            this._createTable({
+                success: function () {
+                    that.entities[entity].created = true;
+                    callback();
+                },
+                error: function (error) {
+                    that.handleError(options, error);
+                },
+                entity: entity
+            });
+        }
+        else {
+            // we know it's created already
+            callback();
+        }
+    };
+    WebSqlStore.prototype._insertOrReplace = function (model, options) {
+        var entity = options.entity;
+        var models = Collection_1.isCollection(model) ? model.models : [model];
+        if (this._checkDb(options) && this._checkData(options, models)) {
+            var statements = [];
+            var sqlTemplate = 'INSERT OR REPLACE INTO \'' + this.entities[entity].table + '\' (';
+            for (var i = 0; i < models.length; i++) {
+                var amodel = models[i];
+                var statement = ''; // the actual sql insert string with values
+                if (!amodel.id) {
+                    amodel.set(amodel.idAttribute, objectid.makeObjectID());
+                }
+                var value = options.attrs || amodel.attributes;
+                var keys = ['id', 'data'];
+                var args = [amodel.id, JSON.stringify(value)];
+                if (args.length > 0) {
+                    var values = new Array(args.length).join('?,') + '?';
+                    var columns = '\'' + keys.join('\',\'') + '\'';
+                    statement += sqlTemplate + columns + ') VALUES (' + values + ');';
+                    statements.push({
+                        statement: statement,
+                        arguments: args
+                    });
+                }
+            }
+            this._executeTransaction(options, statements, model.toJSON());
+        }
+    };
+    WebSqlStore.prototype._select = function (model, options) {
+        var entity = options.entity;
+        if (this._checkDb(options)) {
+            var lastStatement;
+            var isCollection = !Model_1.isModel(model);
+            var result;
+            if (isCollection) {
+                result = [];
+            }
+            else if (model) {
+                options.models = [model];
+            }
+            var stm = this._sqlSelect(options, entity);
+            var that = this;
+            this.db.readTransaction(function (t) {
+                var statement = stm.statement || stm;
+                var args = stm.arguments;
+                lastStatement = statement;
+                diag.debug.info('sql statement: ' + statement);
+                if (args) {
+                    diag.debug.trace('arguments: ' + JSON.stringify(args));
+                }
+                t.executeSql(statement, args, function (tx, res) {
+                    var len = res.rows.length;
+                    for (var i = 0; i < len; i++) {
+                        var item = res.rows.item(i);
+                        var attrs;
+                        try {
+                            attrs = JSON.parse(item.data);
+                        }
+                        catch (e) {
+                            that.trigger('error', e);
+                            continue;
+                        }
+                        if (isCollection) {
+                            result.push(attrs);
+                        }
+                        else {
+                            result = attrs;
+                            break;
+                        }
+                    }
+                }, function (t2, e) {
+                    // error
+                    diag.debug.error('webSql error: ' + e.message);
+                    return true; // abort
+                });
+            }, function (sqlError) {
+                if (lastStatement) {
+                    sqlError.sql = lastStatement;
+                }
+                diag.debug.error('WebSql Syntax Error: ' + sqlError.message);
+                that.handleError(options, sqlError);
+            }, function () {
+                if (result) {
+                    if (options.syncContext) {
+                        result = options.syncContext.processAttributes(result, options);
+                    }
+                    that.handleSuccess(options, result);
+                }
+                else {
+                    var error = new Error('no result');
+                    if (lastStatement) {
+                        error.sql = lastStatement;
+                    }
+                    that.handleError(options, error);
+                }
+            });
+        }
+    };
+    WebSqlStore.prototype._delete = function (model, options) {
+        var entity = options.entity;
+        var models = Collection_1.isCollection(model) ? model.models : [model];
+        if (this._checkDb(options)) {
+            options.models = models;
+            var sql = this._sqlDelete(options, entity);
+            // reset flag
+            this._executeTransaction(options, [sql], model.toJSON());
+        }
+    };
+    WebSqlStore.prototype._executeSql = function (options) {
+        if (options.sql) {
+            this._executeTransaction(options, [options.sql]);
+        }
+    };
+    WebSqlStore.prototype._executeTransaction = function (options, statements, result) {
+        var _this = this;
+        if (!this._checkDb(options)) {
+            return; // database not open, error was issued by _checkDb() above
+        }
+        // following sequentially processes transactions avoiding running too many concurrently
+        this.transactionPromise = this.transactionPromise.finally(function () {
+            var lastStatement;
+            return Q.Promise(function (resolve, reject) {
+                /* transaction has 3 parameters: the transaction callback, the error callback and the success callback */
+                return _this.db.transaction(function (t) {
+                    return _.each(statements, function (stm) {
+                        var statement = stm.statement || stm;
+                        var args = stm.arguments;
+                        lastStatement = statement;
+                        if (diag.debug.enabled) {
+                            diag.debug.info('sql statement: ' + statement);
+                            if (args) {
+                                diag.debug.trace('    arguments: ' + JSON.stringify(args));
+                            }
+                        }
+                        t.executeSql(statement, args);
+                    });
+                }, reject, resolve);
+            }).then(function () {
+                return _this.handleSuccess(options, result) || null;
+            }, function (error) {
+                if (lastStatement) {
+                    error.sql = lastStatement;
+                }
+                diag.debug.error(error.message);
+                return _this.handleError(options, error) || null;
+            });
+        });
+    };
+    WebSqlStore.prototype._checkDb = function (options) {
+        // has to be initialized first
+        if (!this.db) {
+            var error = new Error('db handler not initialized.');
+            diag.debug.error(error.message);
+            this.handleError(options, error);
+            return false;
+        }
+        return true;
+    };
+    WebSqlStore.prototype._checkData = function (options, data) {
+        if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
+            var error = new Error('no data.');
+            diag.debug.error(error.message);
+            this.handleError(options, error);
+            return false;
+        }
+        return true;
+    };
+    return WebSqlStore;
+}(Store_1.Store));
+exports.WebSqlStore = WebSqlStore;
+// mixins
+var webSqlStore = _.extend(WebSqlStore.prototype, {
+    _type: 'Relution.livedata.WebSqlStore',
+    size: 1024 * 1024,
+    version: '1.0'
+});
+diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Object.create(webSqlStore)); });
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/cipher":4,"../core/diag":5,"../core/objectid":9,"./Collection":11,"./Model":13,"./Store":14,"_process":231,"lodash":203,"q":239,"websql":undefined}],19:[function(require,module,exports){
+/**
+ * @file livedata/index.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 27.06.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+__export(require('./Collection'));
+__export(require('./LiveDataMessage'));
+__export(require('./Model'));
+__export(require('./Store'));
+__export(require('./SyncContext'));
+__export(require('./SyncEndpoint'));
+__export(require('./SyncStore'));
+__export(require('./WebSqlStore'));
+
+},{"./Collection":11,"./LiveDataMessage":12,"./Model":13,"./Store":14,"./SyncContext":15,"./SyncEndpoint":16,"./SyncStore":17,"./WebSqlStore":18}],20:[function(require,module,exports){
+(function (process,global){
+/**
+ * @file livedata/rest.ts
+ * Relution SDK
+ *
+ * Created by Thomas Beckmann on 27.06.2015
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+"use strict";
+var diag = require('../core/diag');
+var Q = require('q');
+var web = require('../web');
+/**
+ * Backbone of browser via script tag or via require backbone.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+exports.Backbone = global['Backbone'] ||
+    process && !process['browser'] &&
+        (global['Backbone'] = require('backbone')); // required version
+/**
+ * options passed to Collection.fetch() preventing backbone.js from consuming the response.
+ *
+ * This can be used when fetching large quantities of data and just the store and attached
+ * collections are to be updated. By merging these options in and the server response is
+ * not used to update the collection fetched itself.
+ */
+exports.bareboneOptions = Object.freeze({
+    // indicates not to rely on Collection contents to aware code, not used by backbone.js
+    barebone: true,
+    // prevents any mutation of the Collection contents
+    add: false,
+    remove: false,
+    merge: false,
+    // does not resort once the response data arrives
+    sort: false,
+    // omits events from being fired
+    silent: true
+});
+var backboneAjax = exports.Backbone.ajax;
+exports.Backbone.ajax = function ajax(options) {
+    var superAjax = options && options.ajax || backboneAjax;
+    return superAjax.apply(this, arguments);
+};
+function ajax(options) {
+    var that = this;
+    var args = arguments;
+    var fnSuccess = options.success;
+    delete options.success;
+    var fnError = options.error;
+    delete options.error;
+    options.method = options.type;
+    options.body = options.data;
+    var superAjax = that.super_ && that.super_.ajax || web.ajax;
+    var xhr = superAjax.apply(that, args);
+    if (!xhr) {
+        return Q.reject(new Error('ajax failed'));
+    }
+    options.xhr = xhr;
+    var promise = xhr.then(function (response) {
+        // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
+        if (fnSuccess) {
+            fnSuccess(response);
+        }
+        return Q.resolve(response);
+    }, function (response) {
+        // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
+        if (fnError) {
+            fnError(response, response.statusMessage || response.message, response);
+        }
+        return Q.reject(response);
+    });
+    promise.xhr = xhr;
+    return promise;
+}
+exports.ajax = ajax;
+function sync(method, model, options) {
+    if (options === void 0) { options = {}; }
+    var store = options.store || this.store;
+    options.credentials = options.credentials || this.credentials || store && store.options && store.options.credentials;
+    diag.debug.info('Relution.livedata.sync ' + method + ' ' + model.id);
+    if (store && store.sync) {
+        // store access (this is redundant model argument)
+        var storeAjax = store.ajax && _.bind(store.ajax, store);
+        options.ajax = options.ajax || storeAjax || this.ajax || ajax;
+        options.promise = store.sync.apply(store, arguments);
+        return options.promise;
+    }
+    else {
+        // direct access (goes via Backbone)
+        var superSync = this.super_ && this.super_.sync || exports.Backbone.sync;
+        options.ajax = options.ajax || this.ajax;
+        if (options.ajax) {
+            // we must avoid backbone stringifying the body data as our ajax runs in
+            if (options.data == null && model && (method === 'create' || method === 'update' || method === 'patch')) {
+                options.data = options.attrs || model.toJSON(options);
+            }
+        }
+        return superSync.apply(this, arguments);
+    }
+}
+exports.sync = sync;
+
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/diag":5,"../web":35,"_process":231,"backbone":undefined,"q":239}],21:[function(require,module,exports){
 /**
  * model/ModelContainer.ts
  * Relution SDK
@@ -749,7 +3903,7 @@ var ModelFactory = (function () {
 }());
 exports.ModelFactory = ModelFactory;
 
-},{"../core/diag":4,"lodash":197}],10:[function(require,module,exports){
+},{"../core/diag":5,"lodash":203}],22:[function(require,module,exports){
 /**
  * @file model/index.ts
  * Relution SDK
@@ -775,7 +3929,7 @@ function __export(m) {
 }
 __export(require('./ModelContainer'));
 
-},{"./ModelContainer":9}],11:[function(require,module,exports){
+},{"./ModelContainer":21}],23:[function(require,module,exports){
 /**
  * @file query/FilterVisitor.ts
  * Relution SDK
@@ -809,7 +3963,7 @@ var FilterVisitorBase = (function () {
 }());
 exports.FilterVisitorBase = FilterVisitorBase;
 
-},{}],12:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /**
  * @file query/GetQuery.ts
  * Relution SDK
@@ -980,7 +4134,7 @@ var GetQuery = (function () {
 }());
 exports.GetQuery = GetQuery;
 
-},{"./SortOrder":15,"lodash":197}],13:[function(require,module,exports){
+},{"./SortOrder":27,"lodash":203}],25:[function(require,module,exports){
 /**
  * @file query/JsonFilterVisitor.ts
  * Relution SDK
@@ -1382,7 +4536,7 @@ var JsonFilterVisitor = (function (_super) {
     return JsonFilterVisitor;
 }(FilterVisitor_1.FilterVisitorBase));
 
-},{"./FilterVisitor":11,"./JsonPath":14,"lodash":197}],14:[function(require,module,exports){
+},{"./FilterVisitor":23,"./JsonPath":26,"lodash":203}],26:[function(require,module,exports){
 /**
  * @file query/JsonPath.ts
  * Relution SDK
@@ -1456,7 +4610,7 @@ var JsonPath = (function () {
 }());
 exports.JsonPath = JsonPath;
 
-},{"JSONPath":27}],15:[function(require,module,exports){
+},{"JSONPath":39}],27:[function(require,module,exports){
 /**
  * @file query/SortOrder.ts
  * Relution SDK
@@ -1497,7 +4651,7 @@ var SortOrder = (function () {
      * parses a JSON literal such as ['-rating', '+date', 'id'] into this instance.
      *
      * @param json data, such as ['-rating', '+date'].
-     * @return {Relution.LiveData.SortOrder} this instance.
+     * @return {SortOrder} this instance.
      */
     SortOrder.prototype.fromJSON = function (json) {
         this.sortFields = new Array(json.length);
@@ -1560,7 +4714,7 @@ var SortField = (function () {
      * parses a JSON literal such as '-rating' into this instance.
      *
      * @param json data, such as '-rating'.
-     * @return {Relution.LiveData.SortOrder} this instance.
+     * @return {SortField} this instance.
      */
     SortField.prototype.fromJSON = function (json) {
         var order = json.length > 0 && json.charAt(0);
@@ -1588,7 +4742,7 @@ var SortField = (function () {
 }());
 exports.SortField = SortField;
 
-},{"lodash":197}],16:[function(require,module,exports){
+},{"lodash":203}],28:[function(require,module,exports){
 /**
  * @file query/SortOrderComparator.ts
  * Relution SDK
@@ -1622,11 +4776,11 @@ function jsonCompare(arg, options) {
     var sortOrder;
     if (typeof arg === 'string') {
         sortOrder = new SortOrder_1.SortOrder();
-        sortOrder.fromJSON.apply(sortOrder, arguments);
+        sortOrder.fromJSON([arg]);
     }
     else if (_.isArray(arg)) {
         sortOrder = new SortOrder_1.SortOrder();
-        sortOrder.fromJSON.call(sortOrder, arg);
+        sortOrder.fromJSON(arg);
     }
     else {
         sortOrder = arg;
@@ -1730,7 +4884,7 @@ var SortOrderComparator = (function () {
     return SortOrderComparator;
 }());
 
-},{"./JsonPath":14,"./SortOrder":15,"lodash":197}],17:[function(require,module,exports){
+},{"./JsonPath":26,"./SortOrder":27,"lodash":203}],29:[function(require,module,exports){
 /**
  * @file query/index.ts
  * Relution SDK
@@ -1761,7 +4915,7 @@ __export(require('./JsonPath'));
 __export(require('./SortOrder'));
 __export(require('./SortOrderComparator'));
 
-},{"./FilterVisitor":11,"./GetQuery":12,"./JsonFilterVisitor":13,"./JsonPath":14,"./SortOrder":15,"./SortOrderComparator":16}],18:[function(require,module,exports){
+},{"./FilterVisitor":23,"./GetQuery":24,"./JsonFilterVisitor":25,"./JsonPath":26,"./SortOrder":27,"./SortOrderComparator":28}],30:[function(require,module,exports){
 /**
  * @file security/Authorization.ts
  * Relution SDK
@@ -1830,7 +4984,7 @@ exports.ANONYMOUS_AUTHORIZATION = freezeAuthorization({
     ]
 });
 
-},{}],19:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /**
  * @file security/index.ts
  * Relution SDK
@@ -1858,7 +5012,7 @@ __export(require('./auth'));
 __export(require('./roles'));
 __export(require('./server'));
 
-},{"./auth":18,"./roles":20,"./server":21}],20:[function(require,module,exports){
+},{"./auth":30,"./roles":32,"./server":33}],32:[function(require,module,exports){
 /**
  * @file security/roles.ts
  * Relution SDK
@@ -1920,7 +5074,7 @@ function freezeUser(user) {
 }
 exports.freezeUser = freezeUser;
 
-},{"../core/domain":5}],21:[function(require,module,exports){
+},{"../core/domain":6}],33:[function(require,module,exports){
 /**
  * @file security/server.ts
  * Relution SDK
@@ -2138,7 +5292,7 @@ function getCurrentUser() {
 }
 exports.getCurrentUser = getCurrentUser;
 
-},{"../core/diag":4,"../core/init":7,"./auth":18,"./roles":20,"assert":49,"lodash":197}],22:[function(require,module,exports){
+},{"../core/diag":5,"../core/init":8,"./auth":30,"./roles":32,"assert":61,"lodash":203}],34:[function(require,module,exports){
 /**
  * @file web/http.ts
  * Relution SDK
@@ -2222,7 +5376,7 @@ var requestWithDefaults = request.defaults(requestDefaults);
  *    including `requestUrl`, `statusCode` and `statusMessage`.
  */
 function ajax(options) {
-    var serverUrl = urls.resolveUrl('/', options);
+    var serverUrl = urls.resolveServer(options.url, options);
     var serverObj = server.Server.getInstance(serverUrl);
     if (!serverObj.sessionUserUuid && serverObj.credentials) {
         // not logged in
@@ -2248,6 +5402,7 @@ function ajax(options) {
     // resolve target url
     var url = urls.resolveUrl(options.url, currentOptions);
     diag.debug.debug(options.method + ' ' + url);
+    diag.debug.assert(function () { return url.substr(0, serverUrl.length) === serverUrl; });
     var requestCallback = options.requestCallback || _.identity;
     var responseCallback = options.responseCallback || _.identity;
     options = _.clone(options);
@@ -2459,7 +5614,7 @@ exports.ajax = ajax;
 function login(credentials, loginOptions) {
     if (loginOptions === void 0) { loginOptions = {}; }
     var wasOfflineLogin = false;
-    var serverUrl = urls.resolveUrl('/', loginOptions);
+    var serverUrl = urls.resolveServer('/', loginOptions);
     var serverObj = server.Server.getInstance(serverUrl);
     if (serverObj.sessionUserUuid) {
         // logged in already
@@ -2614,7 +5769,7 @@ exports.login = login;
  */
 function logout(logoutOptions) {
     if (logoutOptions === void 0) { logoutOptions = {}; }
-    var serverUrl = urls.resolveUrl('/', logoutOptions);
+    var serverUrl = urls.resolveServer('/', logoutOptions);
     var serverObj = server.Server.getInstance(serverUrl);
     // process options
     var currentOptions = serverObj.applyOptions({
@@ -2668,7 +5823,7 @@ function logout(logoutOptions) {
 }
 exports.logout = logout;
 
-},{"../core/diag":4,"../core/init":7,"../security/auth":18,"../security/server":21,"./offline":24,"./urls":25,"http":298,"lodash":197,"q":234,"request":253}],23:[function(require,module,exports){
+},{"../core/diag":5,"../core/init":8,"../security/auth":30,"../security/server":33,"./offline":36,"./urls":37,"http":299,"lodash":203,"q":239,"request":258}],35:[function(require,module,exports){
 /**
  * @file web/index.ts
  * Relution SDK
@@ -2696,8 +5851,8 @@ __export(require('./urls'));
 __export(require('./http'));
 __export(require('./verb'));
 
-},{"./http":22,"./urls":25,"./verb":26}],24:[function(require,module,exports){
-(function (global,Buffer,__filename){
+},{"./http":34,"./urls":37,"./verb":38}],36:[function(require,module,exports){
+(function (process,global,__filename){
 /**
  * @file web/offline.ts
  * Relution SDK
@@ -2718,84 +5873,19 @@ __export(require('./verb'));
  * limitations under the License.
  */
 "use strict";
-var crypto = require('crypto');
 var Q = require('q');
-// localStorage of browser or via node-localstorage
+var cipher = require('../core/cipher');
+/**
+ * localStorage of browser or via require node-localstorage.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
 function localStorage() {
     return global['localStorage'] ||
-        (global['localStorage'] = new (require('node-localstorage').LocalStorage)('localStorage'));
+        process && !process['browser'] && (global['localStorage'] =
+            new (require('node-localstorage').LocalStorage)('localStorage')); // required version
 }
-// key generation parameters
-var pbkdf2SaltLen = 64;
-var pbkdf2Iterations = 36911;
-var pbkdf2KeyLen = 192 / 8;
-var pbkdf2Digest = 'sha256';
-// see https://tools.ietf.org/html/rfc5084
-// console.log((<any>crypto).getCiphers());
-var cipherAlgorithm = 'aes-192-gcm';
-var cipherIvLen = 12;
-// promised variants
-var randomBytes = Q.denodeify(crypto.randomBytes);
-var pbkdf2 = Q.denodeify(crypto.pbkdf2);
-/**
- * encrypts a JSON object using a user-provided password.
- *
- * This method is suitable for human-entered passwords and not appropriate for machine generated
- * passwords. Make sure to read regarding pbkdf2.
- *
- * @param password of a human.
- * @param json to encode.
- * @return encoded json data.
- *
- * @internal Not part of public API, exported for test only.
- */
-function encryptJson(password, json) {
-    return Q.all([
-        randomBytes(pbkdf2SaltLen),
-        randomBytes(cipherIvLen)
-    ]).spread(function (salt, iv) {
-        return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
-            var cipher = crypto.createCipheriv(cipherAlgorithm, key, iv);
-            var value = cipher.update(JSON.stringify(json), 'utf8', 'base64');
-            value += cipher.final('base64');
-            var data = {
-                salt: salt.toString('base64'),
-                iv: iv.toString('base64'),
-                value: value
-            };
-            var tag = cipher.getAuthTag();
-            if (tag) {
-                data.tag = tag.toString('base64');
-            }
-            return data;
-        });
-    });
-}
-exports.encryptJson = encryptJson;
-/**
- * decrypts some encoded json data.
- *
- * @param password of a human.
- * @param data encoded json data.
- * @return json to decoded.
- *
- * @internal Not part of public API, exported for test only.
- */
-function decryptJson(password, data) {
-    var salt = new Buffer(data.salt, 'base64');
-    return pbkdf2(password, salt, pbkdf2Iterations, pbkdf2KeyLen, pbkdf2Digest).then(function (key) {
-        var iv = new Buffer(data.iv, 'base64');
-        var decipher = crypto.createDecipheriv(cipherAlgorithm, key, iv);
-        var tag = data.tag;
-        if (tag) {
-            decipher.setAuthTag(new Buffer(tag, 'base64'));
-        }
-        var value = decipher.update(data.value, 'base64', 'utf8');
-        value += decipher.final('utf8');
-        return value;
-    }).then(JSON.parse);
-}
-exports.decryptJson = decryptJson;
+exports.localStorage = localStorage;
 /**
  * computes key of login response data for some server.
  *
@@ -2840,7 +5930,7 @@ exports.clearOfflineLogin = clearOfflineLogin;
  * @internal Not part of public API, for library use only.
  */
 function storeOfflineLogin(credentials, serverOptions, loginResponse) {
-    return encryptJson(credentials['password'], loginResponse).then(function (value) {
+    return cipher.encryptJson(credentials['password'], loginResponse).then(function (value) {
         localStorage().setItem(computeLocalStorageKey(serverOptions), JSON.stringify(value));
         return loginResponse;
     });
@@ -2865,7 +5955,7 @@ function fetchOfflineLogin(credentials, serverOptions) {
         if (!value) {
             return Q.resolve(undefined);
         }
-        return decryptJson(credentials['password'], JSON.parse(value));
+        return cipher.decryptJson(credentials['password'], JSON.parse(value));
     }
     catch (error) {
         return Q.reject(error);
@@ -2873,8 +5963,8 @@ function fetchOfflineLogin(credentials, serverOptions) {
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,"/lib\\web\\offline.js")
-},{"buffer":87,"crypto":99,"node-localstorage":203,"q":234}],25:[function(require,module,exports){
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
+},{"../core/cipher":4,"_process":231,"node-localstorage":undefined,"q":239}],37:[function(require,module,exports){
 /**
  * @file web/urls.ts
  * Relution SDK
@@ -2900,6 +5990,27 @@ var _ = require('lodash');
 var init = require('../core/init');
 var server = require('../security/server');
 /**
+ * computes a server url from a given path.
+ *
+ * @param path path to resolve, relative or absolute.
+ * @param options of server in effect.
+ * @return {string} absolute URL of server.
+ */
+function resolveServer(path, options) {
+    if (options === void 0) { options = {}; }
+    var serverUrl = options.serverUrl || init.initOptions.serverUrl;
+    if (path) {
+        if (serverUrl) {
+            path = url.resolve(serverUrl, path);
+        }
+    }
+    else {
+        path = serverUrl;
+    }
+    return url.resolve(path, '/');
+}
+exports.resolveServer = resolveServer;
+/**
  * computes a url from a given path.
  *
  * - absolute URLs are used as is, e.g.
@@ -2920,7 +6031,7 @@ var server = require('../security/server');
  */
 function resolveUrl(path, options) {
     if (options === void 0) { options = {}; }
-    var serverUrl = options.serverUrl || init.initOptions.serverUrl;
+    var serverUrl = resolveServer(path, options);
     if (!serverUrl) {
         return path;
     }
@@ -2979,7 +6090,7 @@ function resolveApp(baseAliasOrNameOrApp, options) {
 }
 exports.resolveApp = resolveApp;
 
-},{"../core/init":7,"../security/server":21,"lodash":197,"url":320}],26:[function(require,module,exports){
+},{"../core/init":8,"../security/server":33,"lodash":203,"url":321}],38:[function(require,module,exports){
 /**
  * @file web/verb.ts
  * Relution SDK
@@ -3177,7 +6288,7 @@ exports.delete = del;
  * @see ajax
  */
 
-},{"./http":22,"lodash":197}],27:[function(require,module,exports){
+},{"./http":34,"lodash":203}],39:[function(require,module,exports){
 /*global module, exports, require*/
 /*jslint vars:true, evil:true*/
 /* JSONPath 0.8.0 - XPath for JSON
@@ -3609,7 +6720,7 @@ else {
 
 }(typeof require === 'undefined' ? null : require));
 
-},{"vm":326}],28:[function(require,module,exports){
+},{"vm":327}],40:[function(require,module,exports){
 var asn1 = exports;
 
 asn1.bignum = require('bn.js');
@@ -3620,7 +6731,7 @@ asn1.constants = require('./asn1/constants');
 asn1.decoders = require('./asn1/decoders');
 asn1.encoders = require('./asn1/encoders');
 
-},{"./asn1/api":29,"./asn1/base":31,"./asn1/constants":35,"./asn1/decoders":37,"./asn1/encoders":40,"bn.js":55}],29:[function(require,module,exports){
+},{"./asn1/api":41,"./asn1/base":43,"./asn1/constants":47,"./asn1/decoders":49,"./asn1/encoders":52,"bn.js":67}],41:[function(require,module,exports){
 var asn1 = require('../asn1');
 var inherits = require('inherits');
 
@@ -3683,7 +6794,7 @@ Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
   return this._getEncoder(enc).encode(data, reporter);
 };
 
-},{"../asn1":28,"inherits":178,"vm":326}],30:[function(require,module,exports){
+},{"../asn1":40,"inherits":184,"vm":327}],42:[function(require,module,exports){
 var inherits = require('inherits');
 var Reporter = require('../base').Reporter;
 var Buffer = require('buffer').Buffer;
@@ -3801,7 +6912,7 @@ EncoderBuffer.prototype.join = function join(out, offset) {
   return out;
 };
 
-},{"../base":31,"buffer":87,"inherits":178}],31:[function(require,module,exports){
+},{"../base":43,"buffer":99,"inherits":184}],43:[function(require,module,exports){
 var base = exports;
 
 base.Reporter = require('./reporter').Reporter;
@@ -3809,7 +6920,7 @@ base.DecoderBuffer = require('./buffer').DecoderBuffer;
 base.EncoderBuffer = require('./buffer').EncoderBuffer;
 base.Node = require('./node');
 
-},{"./buffer":30,"./node":32,"./reporter":33}],32:[function(require,module,exports){
+},{"./buffer":42,"./node":44,"./reporter":45}],44:[function(require,module,exports){
 var Reporter = require('../base').Reporter;
 var EncoderBuffer = require('../base').EncoderBuffer;
 var DecoderBuffer = require('../base').DecoderBuffer;
@@ -4426,7 +7537,7 @@ Node.prototype._isPrintstr = function isPrintstr(str) {
   return /^[A-Za-z0-9 '\(\)\+,\-\.\/:=\?]*$/.test(str);
 };
 
-},{"../base":31,"minimalistic-assert":202}],33:[function(require,module,exports){
+},{"../base":43,"minimalistic-assert":208}],45:[function(require,module,exports){
 var inherits = require('inherits');
 
 function Reporter(options) {
@@ -4539,7 +7650,7 @@ ReporterError.prototype.rethrow = function rethrow(msg) {
   return this;
 };
 
-},{"inherits":178}],34:[function(require,module,exports){
+},{"inherits":184}],46:[function(require,module,exports){
 var constants = require('../constants');
 
 exports.tagClass = {
@@ -4583,7 +7694,7 @@ exports.tag = {
 };
 exports.tagByName = constants._reverse(exports.tag);
 
-},{"../constants":35}],35:[function(require,module,exports){
+},{"../constants":47}],47:[function(require,module,exports){
 var constants = exports;
 
 // Helper
@@ -4604,7 +7715,7 @@ constants._reverse = function reverse(map) {
 
 constants.der = require('./der');
 
-},{"./der":34}],36:[function(require,module,exports){
+},{"./der":46}],48:[function(require,module,exports){
 var inherits = require('inherits');
 
 var asn1 = require('../../asn1');
@@ -4927,13 +8038,13 @@ function derDecodeLen(buf, primitive, fail) {
   return len;
 }
 
-},{"../../asn1":28,"inherits":178}],37:[function(require,module,exports){
+},{"../../asn1":40,"inherits":184}],49:[function(require,module,exports){
 var decoders = exports;
 
 decoders.der = require('./der');
 decoders.pem = require('./pem');
 
-},{"./der":36,"./pem":38}],38:[function(require,module,exports){
+},{"./der":48,"./pem":50}],50:[function(require,module,exports){
 var inherits = require('inherits');
 var Buffer = require('buffer').Buffer;
 
@@ -4984,7 +8095,7 @@ PEMDecoder.prototype.decode = function decode(data, options) {
   return DERDecoder.prototype.decode.call(this, input, options);
 };
 
-},{"./der":36,"buffer":87,"inherits":178}],39:[function(require,module,exports){
+},{"./der":48,"buffer":99,"inherits":184}],51:[function(require,module,exports){
 var inherits = require('inherits');
 var Buffer = require('buffer').Buffer;
 
@@ -5279,13 +8390,13 @@ function encodeTag(tag, primitive, cls, reporter) {
   return res;
 }
 
-},{"../../asn1":28,"buffer":87,"inherits":178}],40:[function(require,module,exports){
+},{"../../asn1":40,"buffer":99,"inherits":184}],52:[function(require,module,exports){
 var encoders = exports;
 
 encoders.der = require('./der');
 encoders.pem = require('./pem');
 
-},{"./der":39,"./pem":41}],41:[function(require,module,exports){
+},{"./der":51,"./pem":53}],53:[function(require,module,exports){
 var inherits = require('inherits');
 
 var DEREncoder = require('./der');
@@ -5308,7 +8419,7 @@ PEMEncoder.prototype.encode = function encode(data, options) {
   return out.join('\n');
 };
 
-},{"./der":39,"inherits":178}],42:[function(require,module,exports){
+},{"./der":51,"inherits":184}],54:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 
@@ -5323,7 +8434,7 @@ module.exports = {
 
 };
 
-},{}],43:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 var errors = require('./errors');
@@ -5352,7 +8463,7 @@ for (var e in errors) {
     module.exports[e] = errors[e];
 }
 
-},{"./errors":42,"./reader":44,"./types":45,"./writer":46}],44:[function(require,module,exports){
+},{"./errors":54,"./reader":56,"./types":57,"./writer":58}],56:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
@@ -5617,7 +8728,7 @@ Reader.prototype._readTag = function(tag) {
 module.exports = Reader;
 
 }).call(this,require("buffer").Buffer)
-},{"./errors":42,"./types":45,"assert":49,"buffer":87}],45:[function(require,module,exports){
+},{"./errors":54,"./types":57,"assert":61,"buffer":99}],57:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 
@@ -5655,7 +8766,7 @@ module.exports = {
   Context: 128
 };
 
-},{}],46:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
@@ -5975,7 +9086,7 @@ Writer.prototype._ensure = function(len) {
 module.exports = Writer;
 
 }).call(this,require("buffer").Buffer)
-},{"./errors":42,"./types":45,"assert":49,"buffer":87}],47:[function(require,module,exports){
+},{"./errors":54,"./types":57,"assert":61,"buffer":99}],59:[function(require,module,exports){
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
 
 // If you have no idea what ASN.1 or BER is, see this:
@@ -5997,7 +9108,7 @@ module.exports = {
 
 };
 
-},{"./ber/index":43}],48:[function(require,module,exports){
+},{"./ber/index":55}],60:[function(require,module,exports){
 (function (Buffer,process){
 // Copyright (c) 2012, Mark Cavage. All rights reserved.
 // Copyright 2015 Joyent, Inc.
@@ -6207,7 +9318,7 @@ function _setExports(ndebug) {
 module.exports = _setExports(process.env.NODE_NDEBUG);
 
 }).call(this,{"isBuffer":require("../is-buffer/index.js")},require('_process'))
-},{"../is-buffer/index.js":179,"_process":226,"assert":49,"stream":297,"util":324}],49:[function(require,module,exports){
+},{"../is-buffer/index.js":185,"_process":231,"assert":61,"stream":298,"util":325}],61:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -6568,7 +9679,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":324}],50:[function(require,module,exports){
+},{"util/":325}],62:[function(require,module,exports){
 
 /*!
  *  Copyright 2010 LearnBoost <dev@learnboost.com>
@@ -6782,7 +9893,7 @@ function canonicalizeResource (resource) {
 }
 module.exports.canonicalizeResource = canonicalizeResource
 
-},{"crypto":99,"url":320}],51:[function(require,module,exports){
+},{"crypto":110,"url":321}],63:[function(require,module,exports){
 (function (process,Buffer){
 var aws4 = exports,
     url = require('url'),
@@ -7104,7 +10215,7 @@ aws4.sign = function(request, credentials) {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./lru":52,"_process":226,"buffer":87,"crypto":99,"querystring":241,"url":320}],52:[function(require,module,exports){
+},{"./lru":64,"_process":231,"buffer":99,"crypto":110,"querystring":246,"url":321}],64:[function(require,module,exports){
 module.exports = function(size) {
   return new LruCache(size)
 }
@@ -7202,7 +10313,7 @@ function DoublyLinkedNode(key, val) {
   this.next = null
 }
 
-},{}],53:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict'
 
 exports.toByteArray = toByteArray
@@ -7313,7 +10424,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],54:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 (function (Buffer){
 var DuplexStream = require('readable-stream/duplex')
   , util         = require('util')
@@ -7560,7 +10671,7 @@ BufferList.prototype.destroy = function destroy () {
 module.exports = BufferList
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"readable-stream/duplex":243,"util":324}],55:[function(require,module,exports){
+},{"buffer":99,"readable-stream/duplex":248,"util":325}],67:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 
@@ -10981,7 +14092,7 @@ module.exports = BufferList
   };
 })(typeof module === 'undefined' || module, this);
 
-},{}],56:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 var r;
 
 module.exports = function rand(len) {
@@ -11040,9 +14151,9 @@ if (typeof window === 'object') {
   }
 }
 
-},{}],57:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 
-},{}],58:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function (Buffer){
 // based on the aes implimentation in triple sec
 // https://github.com/keybase/triplesec
@@ -11223,7 +14334,7 @@ AES.prototype._doCryptBlock = function (M, keySchedule, SUB_MIX, SBOX) {
 exports.AES = AES
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],59:[function(require,module,exports){
+},{"buffer":99}],71:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes')
 var Transform = require('cipher-base')
@@ -11324,7 +14435,7 @@ function xorTest (a, b) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./aes":58,"./ghash":63,"buffer":87,"buffer-xor":86,"cipher-base":90,"inherits":178}],60:[function(require,module,exports){
+},{"./aes":70,"./ghash":75,"buffer":99,"buffer-xor":98,"cipher-base":102,"inherits":184}],72:[function(require,module,exports){
 var ciphers = require('./encrypter')
 exports.createCipher = exports.Cipher = ciphers.createCipher
 exports.createCipheriv = exports.Cipheriv = ciphers.createCipheriv
@@ -11337,7 +14448,7 @@ function getCiphers () {
 }
 exports.listCiphers = exports.getCiphers = getCiphers
 
-},{"./decrypter":61,"./encrypter":62,"./modes":64}],61:[function(require,module,exports){
+},{"./decrypter":73,"./encrypter":74,"./modes":76}],73:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes')
 var Transform = require('cipher-base')
@@ -11478,7 +14589,7 @@ exports.createDecipher = createDecipher
 exports.createDecipheriv = createDecipheriv
 
 }).call(this,require("buffer").Buffer)
-},{"./aes":58,"./authCipher":59,"./modes":64,"./modes/cbc":65,"./modes/cfb":66,"./modes/cfb1":67,"./modes/cfb8":68,"./modes/ctr":69,"./modes/ecb":70,"./modes/ofb":71,"./streamCipher":72,"buffer":87,"cipher-base":90,"evp_bytestokey":132,"inherits":178}],62:[function(require,module,exports){
+},{"./aes":70,"./authCipher":71,"./modes":76,"./modes/cbc":77,"./modes/cfb":78,"./modes/cfb1":79,"./modes/cfb8":80,"./modes/ctr":81,"./modes/ecb":82,"./modes/ofb":83,"./streamCipher":84,"buffer":99,"cipher-base":102,"evp_bytestokey":143,"inherits":184}],74:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes')
 var Transform = require('cipher-base')
@@ -11604,7 +14715,7 @@ exports.createCipheriv = createCipheriv
 exports.createCipher = createCipher
 
 }).call(this,require("buffer").Buffer)
-},{"./aes":58,"./authCipher":59,"./modes":64,"./modes/cbc":65,"./modes/cfb":66,"./modes/cfb1":67,"./modes/cfb8":68,"./modes/ctr":69,"./modes/ecb":70,"./modes/ofb":71,"./streamCipher":72,"buffer":87,"cipher-base":90,"evp_bytestokey":132,"inherits":178}],63:[function(require,module,exports){
+},{"./aes":70,"./authCipher":71,"./modes":76,"./modes/cbc":77,"./modes/cfb":78,"./modes/cfb1":79,"./modes/cfb8":80,"./modes/ctr":81,"./modes/ecb":82,"./modes/ofb":83,"./streamCipher":84,"buffer":99,"cipher-base":102,"evp_bytestokey":143,"inherits":184}],75:[function(require,module,exports){
 (function (Buffer){
 var zeros = new Buffer(16)
 zeros.fill(0)
@@ -11706,7 +14817,7 @@ function xor (a, b) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],64:[function(require,module,exports){
+},{"buffer":99}],76:[function(require,module,exports){
 exports['aes-128-ecb'] = {
   cipher: 'AES',
   key: 128,
@@ -11879,7 +14990,7 @@ exports['aes-256-gcm'] = {
   type: 'auth'
 }
 
-},{}],65:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 var xor = require('buffer-xor')
 
 exports.encrypt = function (self, block) {
@@ -11898,7 +15009,7 @@ exports.decrypt = function (self, block) {
   return xor(out, pad)
 }
 
-},{"buffer-xor":86}],66:[function(require,module,exports){
+},{"buffer-xor":98}],78:[function(require,module,exports){
 (function (Buffer){
 var xor = require('buffer-xor')
 
@@ -11933,7 +15044,7 @@ function encryptStart (self, data, decrypt) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"buffer-xor":86}],67:[function(require,module,exports){
+},{"buffer":99,"buffer-xor":98}],79:[function(require,module,exports){
 (function (Buffer){
 function encryptByte (self, byteParam, decrypt) {
   var pad
@@ -11971,7 +15082,7 @@ function shiftIn (buffer, value) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],68:[function(require,module,exports){
+},{"buffer":99}],80:[function(require,module,exports){
 (function (Buffer){
 function encryptByte (self, byteParam, decrypt) {
   var pad = self._cipher.encryptBlock(self._prev)
@@ -11990,7 +15101,7 @@ exports.encrypt = function (self, chunk, decrypt) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],69:[function(require,module,exports){
+},{"buffer":99}],81:[function(require,module,exports){
 (function (Buffer){
 var xor = require('buffer-xor')
 
@@ -12025,7 +15136,7 @@ exports.encrypt = function (self, chunk) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"buffer-xor":86}],70:[function(require,module,exports){
+},{"buffer":99,"buffer-xor":98}],82:[function(require,module,exports){
 exports.encrypt = function (self, block) {
   return self._cipher.encryptBlock(block)
 }
@@ -12033,7 +15144,7 @@ exports.decrypt = function (self, block) {
   return self._cipher.decryptBlock(block)
 }
 
-},{}],71:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 (function (Buffer){
 var xor = require('buffer-xor')
 
@@ -12053,7 +15164,7 @@ exports.encrypt = function (self, chunk) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"buffer-xor":86}],72:[function(require,module,exports){
+},{"buffer":99,"buffer-xor":98}],84:[function(require,module,exports){
 (function (Buffer){
 var aes = require('./aes')
 var Transform = require('cipher-base')
@@ -12082,7 +15193,7 @@ StreamCipher.prototype._final = function () {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./aes":58,"buffer":87,"cipher-base":90,"inherits":178}],73:[function(require,module,exports){
+},{"./aes":70,"buffer":99,"cipher-base":102,"inherits":184}],85:[function(require,module,exports){
 var ebtk = require('evp_bytestokey')
 var aes = require('browserify-aes/browser')
 var DES = require('browserify-des')
@@ -12157,7 +15268,7 @@ function getCiphers () {
 }
 exports.listCiphers = exports.getCiphers = getCiphers
 
-},{"browserify-aes/browser":60,"browserify-aes/modes":64,"browserify-des":74,"browserify-des/modes":75,"evp_bytestokey":132}],74:[function(require,module,exports){
+},{"browserify-aes/browser":72,"browserify-aes/modes":76,"browserify-des":86,"browserify-des/modes":87,"evp_bytestokey":143}],86:[function(require,module,exports){
 (function (Buffer){
 var CipherBase = require('cipher-base')
 var des = require('des.js')
@@ -12204,7 +15315,7 @@ DES.prototype._final = function () {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"cipher-base":90,"des.js":101,"inherits":178}],75:[function(require,module,exports){
+},{"buffer":99,"cipher-base":102,"des.js":112,"inherits":184}],87:[function(require,module,exports){
 exports['des-ecb'] = {
   key: 8,
   iv: 0
@@ -12230,7 +15341,7 @@ exports['des-ede'] = {
   iv: 0
 }
 
-},{}],76:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 var randomBytes = require('randombytes');
@@ -12274,7 +15385,7 @@ function getr(priv) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":55,"buffer":87,"randombytes":242}],77:[function(require,module,exports){
+},{"bn.js":67,"buffer":99,"randombytes":247}],89:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 exports['RSA-SHA224'] = exports.sha224WithRSAEncryption = {
@@ -12350,7 +15461,7 @@ exports['RSA-MD5'] = exports.md5WithRSAEncryption = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],78:[function(require,module,exports){
+},{"buffer":99}],90:[function(require,module,exports){
 (function (Buffer){
 var _algos = require('./algos')
 var createHash = require('create-hash')
@@ -12457,7 +15568,7 @@ module.exports = {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./algos":77,"./sign":80,"./verify":81,"buffer":87,"create-hash":95,"inherits":178,"stream":297}],79:[function(require,module,exports){
+},{"./algos":89,"./sign":92,"./verify":93,"buffer":99,"create-hash":106,"inherits":184,"stream":298}],91:[function(require,module,exports){
 'use strict'
 exports['1.3.132.0.10'] = 'secp256k1'
 
@@ -12471,7 +15582,7 @@ exports['1.3.132.0.34'] = 'p384'
 
 exports['1.3.132.0.35'] = 'p521'
 
-},{}],80:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
 var createHmac = require('create-hmac')
@@ -12660,7 +15771,7 @@ module.exports.getKey = getKey
 module.exports.makeKey = makeKey
 
 }).call(this,require("buffer").Buffer)
-},{"./curves":79,"bn.js":55,"browserify-rsa":76,"buffer":87,"create-hmac":98,"elliptic":114,"parse-asn1":220}],81:[function(require,module,exports){
+},{"./curves":91,"bn.js":67,"browserify-rsa":88,"buffer":99,"create-hmac":109,"elliptic":125,"parse-asn1":225}],93:[function(require,module,exports){
 (function (Buffer){
 // much of this based on https://github.com/indutny/self-signed/blob/gh-pages/lib/rsa.js
 var curves = require('./curves')
@@ -12767,7 +15878,7 @@ function checkValue (b, q) {
 module.exports = verify
 
 }).call(this,require("buffer").Buffer)
-},{"./curves":79,"bn.js":55,"buffer":87,"elliptic":114,"parse-asn1":220}],82:[function(require,module,exports){
+},{"./curves":91,"bn.js":67,"buffer":99,"elliptic":125,"parse-asn1":225}],94:[function(require,module,exports){
 (function (process,Buffer){
 var msg = require('pako/lib/zlib/messages');
 var zstream = require('pako/lib/zlib/zstream');
@@ -13007,7 +16118,7 @@ Zlib.prototype._error = function(status) {
 exports.Zlib = Zlib;
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":226,"buffer":87,"pako/lib/zlib/constants":208,"pako/lib/zlib/deflate.js":210,"pako/lib/zlib/inflate.js":212,"pako/lib/zlib/messages":214,"pako/lib/zlib/zstream":216}],83:[function(require,module,exports){
+},{"_process":231,"buffer":99,"pako/lib/zlib/constants":213,"pako/lib/zlib/deflate.js":215,"pako/lib/zlib/inflate.js":217,"pako/lib/zlib/messages":219,"pako/lib/zlib/zstream":221}],95:[function(require,module,exports){
 (function (process,Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -13621,9 +16732,9 @@ util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./binding":82,"_process":226,"_stream_transform":251,"assert":49,"buffer":87,"util":324}],84:[function(require,module,exports){
-arguments[4][57][0].apply(exports,arguments)
-},{"dup":57}],85:[function(require,module,exports){
+},{"./binding":94,"_process":231,"_stream_transform":256,"assert":61,"buffer":99,"util":325}],96:[function(require,module,exports){
+arguments[4][69][0].apply(exports,arguments)
+},{"dup":69}],97:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -13735,7 +16846,7 @@ exports.allocUnsafeSlow = function allocUnsafeSlow(size) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"buffer":87}],86:[function(require,module,exports){
+},{"buffer":99}],98:[function(require,module,exports){
 (function (Buffer){
 module.exports = function xor (a, b) {
   var length = Math.min(a.length, b.length)
@@ -13749,7 +16860,7 @@ module.exports = function xor (a, b) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],87:[function(require,module,exports){
+},{"buffer":99}],99:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -15464,7 +18575,7 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":53,"ieee754":175,"isarray":184}],88:[function(require,module,exports){
+},{"base64-js":65,"ieee754":182,"isarray":190}],100:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -15529,7 +18640,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],89:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 function Caseless (dict) {
   this.dict = dict || {}
 }
@@ -15597,7 +18708,7 @@ module.exports.httpify = function (resp, headers) {
   return c
 }
 
-},{}],90:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 (function (Buffer){
 var Transform = require('stream').Transform
 var inherits = require('inherits')
@@ -15691,7 +18802,7 @@ CipherBase.prototype._toString = function (value, enc, final) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"inherits":178,"stream":297,"string_decoder":308}],91:[function(require,module,exports){
+},{"buffer":99,"inherits":184,"stream":298,"string_decoder":309}],103:[function(require,module,exports){
 (function (Buffer){
 var util = require('util');
 var Stream = require('stream').Stream;
@@ -15883,218 +18994,7 @@ CombinedStream.prototype._emitError = function(err) {
 };
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":179,"delayed-stream":100,"stream":297,"util":324}],92:[function(require,module,exports){
-module.exports={
-  "O_RDONLY": 0,
-  "O_WRONLY": 1,
-  "O_RDWR": 2,
-  "S_IFMT": 61440,
-  "S_IFREG": 32768,
-  "S_IFDIR": 16384,
-  "S_IFCHR": 8192,
-  "S_IFBLK": 24576,
-  "S_IFIFO": 4096,
-  "S_IFLNK": 40960,
-  "S_IFSOCK": 49152,
-  "O_CREAT": 512,
-  "O_EXCL": 2048,
-  "O_NOCTTY": 131072,
-  "O_TRUNC": 1024,
-  "O_APPEND": 8,
-  "O_DIRECTORY": 1048576,
-  "O_NOFOLLOW": 256,
-  "O_SYNC": 128,
-  "O_SYMLINK": 2097152,
-  "O_NONBLOCK": 4,
-  "S_IRWXU": 448,
-  "S_IRUSR": 256,
-  "S_IWUSR": 128,
-  "S_IXUSR": 64,
-  "S_IRWXG": 56,
-  "S_IRGRP": 32,
-  "S_IWGRP": 16,
-  "S_IXGRP": 8,
-  "S_IRWXO": 7,
-  "S_IROTH": 4,
-  "S_IWOTH": 2,
-  "S_IXOTH": 1,
-  "E2BIG": 7,
-  "EACCES": 13,
-  "EADDRINUSE": 48,
-  "EADDRNOTAVAIL": 49,
-  "EAFNOSUPPORT": 47,
-  "EAGAIN": 35,
-  "EALREADY": 37,
-  "EBADF": 9,
-  "EBADMSG": 94,
-  "EBUSY": 16,
-  "ECANCELED": 89,
-  "ECHILD": 10,
-  "ECONNABORTED": 53,
-  "ECONNREFUSED": 61,
-  "ECONNRESET": 54,
-  "EDEADLK": 11,
-  "EDESTADDRREQ": 39,
-  "EDOM": 33,
-  "EDQUOT": 69,
-  "EEXIST": 17,
-  "EFAULT": 14,
-  "EFBIG": 27,
-  "EHOSTUNREACH": 65,
-  "EIDRM": 90,
-  "EILSEQ": 92,
-  "EINPROGRESS": 36,
-  "EINTR": 4,
-  "EINVAL": 22,
-  "EIO": 5,
-  "EISCONN": 56,
-  "EISDIR": 21,
-  "ELOOP": 62,
-  "EMFILE": 24,
-  "EMLINK": 31,
-  "EMSGSIZE": 40,
-  "EMULTIHOP": 95,
-  "ENAMETOOLONG": 63,
-  "ENETDOWN": 50,
-  "ENETRESET": 52,
-  "ENETUNREACH": 51,
-  "ENFILE": 23,
-  "ENOBUFS": 55,
-  "ENODATA": 96,
-  "ENODEV": 19,
-  "ENOENT": 2,
-  "ENOEXEC": 8,
-  "ENOLCK": 77,
-  "ENOLINK": 97,
-  "ENOMEM": 12,
-  "ENOMSG": 91,
-  "ENOPROTOOPT": 42,
-  "ENOSPC": 28,
-  "ENOSR": 98,
-  "ENOSTR": 99,
-  "ENOSYS": 78,
-  "ENOTCONN": 57,
-  "ENOTDIR": 20,
-  "ENOTEMPTY": 66,
-  "ENOTSOCK": 38,
-  "ENOTSUP": 45,
-  "ENOTTY": 25,
-  "ENXIO": 6,
-  "EOPNOTSUPP": 102,
-  "EOVERFLOW": 84,
-  "EPERM": 1,
-  "EPIPE": 32,
-  "EPROTO": 100,
-  "EPROTONOSUPPORT": 43,
-  "EPROTOTYPE": 41,
-  "ERANGE": 34,
-  "EROFS": 30,
-  "ESPIPE": 29,
-  "ESRCH": 3,
-  "ESTALE": 70,
-  "ETIME": 101,
-  "ETIMEDOUT": 60,
-  "ETXTBSY": 26,
-  "EWOULDBLOCK": 35,
-  "EXDEV": 18,
-  "SIGHUP": 1,
-  "SIGINT": 2,
-  "SIGQUIT": 3,
-  "SIGILL": 4,
-  "SIGTRAP": 5,
-  "SIGABRT": 6,
-  "SIGIOT": 6,
-  "SIGBUS": 10,
-  "SIGFPE": 8,
-  "SIGKILL": 9,
-  "SIGUSR1": 30,
-  "SIGSEGV": 11,
-  "SIGUSR2": 31,
-  "SIGPIPE": 13,
-  "SIGALRM": 14,
-  "SIGTERM": 15,
-  "SIGCHLD": 20,
-  "SIGCONT": 19,
-  "SIGSTOP": 17,
-  "SIGTSTP": 18,
-  "SIGTTIN": 21,
-  "SIGTTOU": 22,
-  "SIGURG": 16,
-  "SIGXCPU": 24,
-  "SIGXFSZ": 25,
-  "SIGVTALRM": 26,
-  "SIGPROF": 27,
-  "SIGWINCH": 28,
-  "SIGIO": 23,
-  "SIGSYS": 12,
-  "SSL_OP_ALL": 2147486719,
-  "SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION": 262144,
-  "SSL_OP_CIPHER_SERVER_PREFERENCE": 4194304,
-  "SSL_OP_CISCO_ANYCONNECT": 32768,
-  "SSL_OP_COOKIE_EXCHANGE": 8192,
-  "SSL_OP_CRYPTOPRO_TLSEXT_BUG": 2147483648,
-  "SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS": 2048,
-  "SSL_OP_EPHEMERAL_RSA": 0,
-  "SSL_OP_LEGACY_SERVER_CONNECT": 4,
-  "SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER": 32,
-  "SSL_OP_MICROSOFT_SESS_ID_BUG": 1,
-  "SSL_OP_MSIE_SSLV2_RSA_PADDING": 0,
-  "SSL_OP_NETSCAPE_CA_DN_BUG": 536870912,
-  "SSL_OP_NETSCAPE_CHALLENGE_BUG": 2,
-  "SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG": 1073741824,
-  "SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG": 8,
-  "SSL_OP_NO_COMPRESSION": 131072,
-  "SSL_OP_NO_QUERY_MTU": 4096,
-  "SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION": 65536,
-  "SSL_OP_NO_SSLv2": 16777216,
-  "SSL_OP_NO_SSLv3": 33554432,
-  "SSL_OP_NO_TICKET": 16384,
-  "SSL_OP_NO_TLSv1": 67108864,
-  "SSL_OP_NO_TLSv1_1": 268435456,
-  "SSL_OP_NO_TLSv1_2": 134217728,
-  "SSL_OP_PKCS1_CHECK_1": 0,
-  "SSL_OP_PKCS1_CHECK_2": 0,
-  "SSL_OP_SINGLE_DH_USE": 1048576,
-  "SSL_OP_SINGLE_ECDH_USE": 524288,
-  "SSL_OP_SSLEAY_080_CLIENT_DH_BUG": 128,
-  "SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG": 0,
-  "SSL_OP_TLS_BLOCK_PADDING_BUG": 512,
-  "SSL_OP_TLS_D5_BUG": 256,
-  "SSL_OP_TLS_ROLLBACK_BUG": 8388608,
-  "ENGINE_METHOD_DSA": 2,
-  "ENGINE_METHOD_DH": 4,
-  "ENGINE_METHOD_RAND": 8,
-  "ENGINE_METHOD_ECDH": 16,
-  "ENGINE_METHOD_ECDSA": 32,
-  "ENGINE_METHOD_CIPHERS": 64,
-  "ENGINE_METHOD_DIGESTS": 128,
-  "ENGINE_METHOD_STORE": 256,
-  "ENGINE_METHOD_PKEY_METHS": 512,
-  "ENGINE_METHOD_PKEY_ASN1_METHS": 1024,
-  "ENGINE_METHOD_ALL": 65535,
-  "ENGINE_METHOD_NONE": 0,
-  "DH_CHECK_P_NOT_SAFE_PRIME": 2,
-  "DH_CHECK_P_NOT_PRIME": 1,
-  "DH_UNABLE_TO_CHECK_GENERATOR": 4,
-  "DH_NOT_SUITABLE_GENERATOR": 8,
-  "NPN_ENABLED": 1,
-  "RSA_PKCS1_PADDING": 1,
-  "RSA_SSLV23_PADDING": 2,
-  "RSA_NO_PADDING": 3,
-  "RSA_PKCS1_OAEP_PADDING": 4,
-  "RSA_X931_PADDING": 5,
-  "RSA_PKCS1_PSS_PADDING": 6,
-  "POINT_CONVERSION_COMPRESSED": 2,
-  "POINT_CONVERSION_UNCOMPRESSED": 4,
-  "POINT_CONVERSION_HYBRID": 6,
-  "F_OK": 0,
-  "R_OK": 4,
-  "W_OK": 2,
-  "X_OK": 1,
-  "UV_UDP_REUSEADDR": 4
-}
-
-},{}],93:[function(require,module,exports){
+},{"../../is-buffer/index.js":185,"delayed-stream":111,"stream":298,"util":325}],104:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -16205,7 +19105,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":179}],94:[function(require,module,exports){
+},{"../../is-buffer/index.js":185}],105:[function(require,module,exports){
 (function (Buffer){
 var elliptic = require('elliptic');
 var BN = require('bn.js');
@@ -16331,7 +19231,7 @@ function formatReturnValue(bn, enc, len) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"bn.js":55,"buffer":87,"elliptic":114}],95:[function(require,module,exports){
+},{"bn.js":67,"buffer":99,"elliptic":125}],106:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var inherits = require('inherits')
@@ -16387,7 +19287,7 @@ module.exports = function createHash (alg) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":97,"buffer":87,"cipher-base":90,"inherits":178,"ripemd160":265,"sha.js":267}],96:[function(require,module,exports){
+},{"./md5":108,"buffer":99,"cipher-base":102,"inherits":184,"ripemd160":270,"sha.js":272}],107:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var intSize = 4;
@@ -16424,7 +19324,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 }
 exports.hash = hash;
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],97:[function(require,module,exports){
+},{"buffer":99}],108:[function(require,module,exports){
 'use strict';
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
@@ -16581,7 +19481,7 @@ function bit_rol(num, cnt)
 module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
-},{"./helpers":96}],98:[function(require,module,exports){
+},{"./helpers":107}],109:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 var createHash = require('create-hash/browser');
@@ -16653,7 +19553,7 @@ module.exports = function createHmac(alg, key) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"create-hash/browser":95,"inherits":178,"stream":297}],99:[function(require,module,exports){
+},{"buffer":99,"create-hash/browser":106,"inherits":184,"stream":298}],110:[function(require,module,exports){
 'use strict'
 
 exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes')
@@ -16732,7 +19632,7 @@ var publicEncrypt = require('public-encrypt')
   }
 })
 
-},{"browserify-cipher":73,"browserify-sign":78,"browserify-sign/algos":77,"create-ecdh":94,"create-hash":95,"create-hmac":98,"diffie-hellman":107,"pbkdf2":222,"public-encrypt":227,"randombytes":242}],100:[function(require,module,exports){
+},{"browserify-cipher":85,"browserify-sign":90,"browserify-sign/algos":89,"create-ecdh":105,"create-hash":106,"create-hmac":109,"diffie-hellman":118,"pbkdf2":227,"public-encrypt":232,"randombytes":247}],111:[function(require,module,exports){
 var Stream = require('stream').Stream;
 var util = require('util');
 
@@ -16841,7 +19741,7 @@ DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
   this.emit('error', new Error(message));
 };
 
-},{"stream":297,"util":324}],101:[function(require,module,exports){
+},{"stream":298,"util":325}],112:[function(require,module,exports){
 'use strict';
 
 exports.utils = require('./des/utils');
@@ -16850,7 +19750,7 @@ exports.DES = require('./des/des');
 exports.CBC = require('./des/cbc');
 exports.EDE = require('./des/ede');
 
-},{"./des/cbc":102,"./des/cipher":103,"./des/des":104,"./des/ede":105,"./des/utils":106}],102:[function(require,module,exports){
+},{"./des/cbc":113,"./des/cipher":114,"./des/des":115,"./des/ede":116,"./des/utils":117}],113:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -16917,7 +19817,7 @@ proto._update = function _update(inp, inOff, out, outOff) {
   }
 };
 
-},{"inherits":178,"minimalistic-assert":202}],103:[function(require,module,exports){
+},{"inherits":184,"minimalistic-assert":208}],114:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -17060,7 +19960,7 @@ Cipher.prototype._finalDecrypt = function _finalDecrypt() {
   return this._unpad(out);
 };
 
-},{"minimalistic-assert":202}],104:[function(require,module,exports){
+},{"minimalistic-assert":208}],115:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -17205,7 +20105,7 @@ DES.prototype._decrypt = function _decrypt(state, lStart, rStart, out, off) {
   utils.rip(l, r, out, off);
 };
 
-},{"../des":101,"inherits":178,"minimalistic-assert":202}],105:[function(require,module,exports){
+},{"../des":112,"inherits":184,"minimalistic-assert":208}],116:[function(require,module,exports){
 'use strict';
 
 var assert = require('minimalistic-assert');
@@ -17262,7 +20162,7 @@ EDE.prototype._update = function _update(inp, inOff, out, outOff) {
 EDE.prototype._pad = DES.prototype._pad;
 EDE.prototype._unpad = DES.prototype._unpad;
 
-},{"../des":101,"inherits":178,"minimalistic-assert":202}],106:[function(require,module,exports){
+},{"../des":112,"inherits":184,"minimalistic-assert":208}],117:[function(require,module,exports){
 'use strict';
 
 exports.readUInt32BE = function readUInt32BE(bytes, off) {
@@ -17520,7 +20420,7 @@ exports.padSplit = function padSplit(num, size, group) {
   return out.join(' ');
 };
 
-},{}],107:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 (function (Buffer){
 var generatePrime = require('./lib/generatePrime')
 var primes = require('./lib/primes.json')
@@ -17566,7 +20466,7 @@ exports.DiffieHellmanGroup = exports.createDiffieHellmanGroup = exports.getDiffi
 exports.createDiffieHellman = exports.DiffieHellman = createDiffieHellman
 
 }).call(this,require("buffer").Buffer)
-},{"./lib/dh":108,"./lib/generatePrime":109,"./lib/primes.json":110,"buffer":87}],108:[function(require,module,exports){
+},{"./lib/dh":119,"./lib/generatePrime":120,"./lib/primes.json":121,"buffer":99}],119:[function(require,module,exports){
 (function (Buffer){
 var BN = require('bn.js');
 var MillerRabin = require('miller-rabin');
@@ -17734,7 +20634,7 @@ function formatReturnValue(bn, enc) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./generatePrime":109,"bn.js":55,"buffer":87,"miller-rabin":198,"randombytes":242}],109:[function(require,module,exports){
+},{"./generatePrime":120,"bn.js":67,"buffer":99,"miller-rabin":204,"randombytes":247}],120:[function(require,module,exports){
 var randomBytes = require('randombytes');
 module.exports = findPrime;
 findPrime.simpleSieve = simpleSieve;
@@ -17841,7 +20741,7 @@ function findPrime(bits, gen) {
 
 }
 
-},{"bn.js":55,"miller-rabin":198,"randombytes":242}],110:[function(require,module,exports){
+},{"bn.js":67,"miller-rabin":204,"randombytes":247}],121:[function(require,module,exports){
 module.exports={
     "modp1": {
         "gen": "02",
@@ -17876,7 +20776,7 @@ module.exports={
         "prime": "ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a92108011a723c12a787e6d788719a10bdba5b2699c327186af4e23c1a946834b6150bda2583e9ca2ad44ce8dbbbc2db04de8ef92e8efc141fbecaa6287c59474e6bc05d99b2964fa090c3a2233ba186515be7ed1f612970cee2d7afb81bdd762170481cd0069127d5b05aa993b4ea988d8fddc186ffb7dc90a6c08f4df435c93402849236c3fab4d27c7026c1d4dcb2602646dec9751e763dba37bdf8ff9406ad9e530ee5db382f413001aeb06a53ed9027d831179727b0865a8918da3edbebcf9b14ed44ce6cbaced4bb1bdb7f1447e6cc254b332051512bd7af426fb8f401378cd2bf5983ca01c64b92ecf032ea15d1721d03f482d7ce6e74fef6d55e702f46980c82b5a84031900b1c9e59e7c97fbec7e8f323a97a7e36cc88be0f1d45b7ff585ac54bd407b22b4154aacc8f6d7ebf48e1d814cc5ed20f8037e0a79715eef29be32806a1d58bb7c5da76f550aa3d8a1fbff0eb19ccb1a313d55cda56c9ec2ef29632387fe8d76e3c0468043e8f663f4860ee12bf2d5b0b7474d6e694f91e6dbe115974a3926f12fee5e438777cb6a932df8cd8bec4d073b931ba3bc832b68d9dd300741fa7bf8afc47ed2576f6936ba424663aab639c5ae4f5683423b4742bf1c978238f16cbe39d652de3fdb8befc848ad922222e04a4037c0713eb57a81a23f0c73473fc646cea306b4bcbc8862f8385ddfa9d4b7fa2c087e879683303ed5bdd3a062b3cf5b3a278a66d2a13f83f44f82ddf310ee074ab6a364597e899a0255dc164f31cc50846851df9ab48195ded7ea1b1d510bd7ee74d73faf36bc31ecfa268359046f4eb879f924009438b481c6cd7889a002ed5ee382bc9190da6fc026e479558e4475677e9aa9e3050e2765694dfc81f56e880b96e7160c980dd98edd3dfffffffffffffffff"
     }
 }
-},{}],111:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 (function (Buffer){
 var crypto = require("crypto");
 var BigInteger = require("jsbn").BigInteger;
@@ -17937,7 +20837,7 @@ exports.ECKey = function(curve, key, isPublic)
 
 
 }).call(this,require("buffer").Buffer)
-},{"./lib/ec.js":112,"./lib/sec.js":113,"buffer":87,"crypto":99,"jsbn":192}],112:[function(require,module,exports){
+},{"./lib/ec.js":123,"./lib/sec.js":124,"buffer":99,"crypto":110,"jsbn":198}],123:[function(require,module,exports){
 // Basic Javascript Elliptic Curve implementation
 // Ported loosely from BouncyCastle's Java EC code
 // Only Fp curves implemented for now
@@ -18500,7 +21400,7 @@ var exports = {
 
 module.exports = exports
 
-},{"jsbn":192}],113:[function(require,module,exports){
+},{"jsbn":198}],124:[function(require,module,exports){
 // Named EC curves
 
 // Requires ec.js, jsbn.js, and jsbn2.js
@@ -18672,7 +21572,7 @@ module.exports = {
   "secp256r1":secp256r1
 }
 
-},{"./ec.js":112,"jsbn":192}],114:[function(require,module,exports){
+},{"./ec.js":123,"jsbn":198}],125:[function(require,module,exports){
 'use strict';
 
 var elliptic = exports;
@@ -18688,7 +21588,7 @@ elliptic.curves = require('./elliptic/curves');
 elliptic.ec = require('./elliptic/ec');
 elliptic.eddsa = require('./elliptic/eddsa');
 
-},{"../package.json":130,"./elliptic/curve":117,"./elliptic/curves":120,"./elliptic/ec":121,"./elliptic/eddsa":124,"./elliptic/hmac-drbg":127,"./elliptic/utils":129,"brorand":56}],115:[function(require,module,exports){
+},{"../package.json":141,"./elliptic/curve":128,"./elliptic/curves":131,"./elliptic/ec":132,"./elliptic/eddsa":135,"./elliptic/hmac-drbg":138,"./elliptic/utils":140,"brorand":68}],126:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -19065,7 +21965,7 @@ BasePoint.prototype.dblp = function dblp(k) {
   return r;
 };
 
-},{"../../elliptic":114,"bn.js":55}],116:[function(require,module,exports){
+},{"../../elliptic":125,"bn.js":67}],127:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -19500,7 +22400,7 @@ Point.prototype.eqXToP = function eqXToP(x) {
 Point.prototype.toP = Point.prototype.normalize;
 Point.prototype.mixedAdd = Point.prototype.add;
 
-},{"../../elliptic":114,"../curve":117,"bn.js":55,"inherits":178}],117:[function(require,module,exports){
+},{"../../elliptic":125,"../curve":128,"bn.js":67,"inherits":184}],128:[function(require,module,exports){
 'use strict';
 
 var curve = exports;
@@ -19510,7 +22410,7 @@ curve.short = require('./short');
 curve.mont = require('./mont');
 curve.edwards = require('./edwards');
 
-},{"./base":115,"./edwards":116,"./mont":118,"./short":119}],118:[function(require,module,exports){
+},{"./base":126,"./edwards":127,"./mont":129,"./short":130}],129:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -19692,7 +22592,7 @@ Point.prototype.getX = function getX() {
   return this.x.fromRed();
 };
 
-},{"../../elliptic":114,"../curve":117,"bn.js":55,"inherits":178}],119:[function(require,module,exports){
+},{"../../elliptic":125,"../curve":128,"bn.js":67,"inherits":184}],130:[function(require,module,exports){
 'use strict';
 
 var curve = require('../curve');
@@ -20632,7 +23532,7 @@ JPoint.prototype.isInfinity = function isInfinity() {
   return this.z.cmpn(0) === 0;
 };
 
-},{"../../elliptic":114,"../curve":117,"bn.js":55,"inherits":178}],120:[function(require,module,exports){
+},{"../../elliptic":125,"../curve":128,"bn.js":67,"inherits":184}],131:[function(require,module,exports){
 'use strict';
 
 var curves = exports;
@@ -20839,7 +23739,7 @@ defineCurve('secp256k1', {
   ]
 });
 
-},{"../elliptic":114,"./precomputed/secp256k1":128,"hash.js":162}],121:[function(require,module,exports){
+},{"../elliptic":125,"./precomputed/secp256k1":139,"hash.js":169}],132:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -21077,7 +23977,7 @@ EC.prototype.getKeyRecoveryParam = function(e, signature, Q, enc) {
   throw new Error('Unable to find valid recovery factor');
 };
 
-},{"../../elliptic":114,"./key":122,"./signature":123,"bn.js":55}],122:[function(require,module,exports){
+},{"../../elliptic":125,"./key":133,"./signature":134,"bn.js":67}],133:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -21186,7 +24086,7 @@ KeyPair.prototype.inspect = function inspect() {
          ' pub: ' + (this.pub && this.pub.inspect()) + ' >';
 };
 
-},{"bn.js":55}],123:[function(require,module,exports){
+},{"bn.js":67}],134:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -21323,7 +24223,7 @@ Signature.prototype.toDER = function toDER(enc) {
   return utils.encode(res, enc);
 };
 
-},{"../../elliptic":114,"bn.js":55}],124:[function(require,module,exports){
+},{"../../elliptic":125,"bn.js":67}],135:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -21443,7 +24343,7 @@ EDDSA.prototype.isPoint = function isPoint(val) {
   return val instanceof this.pointClass;
 };
 
-},{"../../elliptic":114,"./key":125,"./signature":126,"hash.js":162}],125:[function(require,module,exports){
+},{"../../elliptic":125,"./key":136,"./signature":137,"hash.js":169}],136:[function(require,module,exports){
 'use strict';
 
 var elliptic = require('../../elliptic');
@@ -21541,7 +24441,7 @@ KeyPair.prototype.getPublic = function getPublic(enc) {
 
 module.exports = KeyPair;
 
-},{"../../elliptic":114}],126:[function(require,module,exports){
+},{"../../elliptic":125}],137:[function(require,module,exports){
 'use strict';
 
 var BN = require('bn.js');
@@ -21609,7 +24509,7 @@ Signature.prototype.toHex = function toHex() {
 
 module.exports = Signature;
 
-},{"../../elliptic":114,"bn.js":55}],127:[function(require,module,exports){
+},{"../../elliptic":125,"bn.js":67}],138:[function(require,module,exports){
 'use strict';
 
 var hash = require('hash.js');
@@ -21725,7 +24625,7 @@ HmacDRBG.prototype.generate = function generate(len, enc, add, addEnc) {
   return utils.encode(res, enc);
 };
 
-},{"../elliptic":114,"hash.js":162}],128:[function(require,module,exports){
+},{"../elliptic":125,"hash.js":169}],139:[function(require,module,exports){
 module.exports = {
   doubles: {
     step: 4,
@@ -22507,7 +25407,7 @@ module.exports = {
   }
 };
 
-},{}],129:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 'use strict';
 
 var utils = exports;
@@ -22681,7 +25581,7 @@ function intFromLE(bytes) {
 utils.intFromLE = intFromLE;
 
 
-},{"bn.js":55}],130:[function(require,module,exports){
+},{"bn.js":67}],141:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -22800,7 +25700,7 @@ module.exports={
   "version": "6.3.1"
 }
 
-},{}],131:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -23104,7 +26004,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],132:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 (function (Buffer){
 var md5 = require('create-hash/md5')
 module.exports = EVP_BytesToKey
@@ -23176,7 +26076,7 @@ function EVP_BytesToKey (password, salt, keyLen, ivLen) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"create-hash/md5":97}],133:[function(require,module,exports){
+},{"buffer":99,"create-hash/md5":108}],144:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -23264,7 +26164,7 @@ module.exports = function extend() {
 };
 
 
-},{}],134:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 /*
  * extsprintf.js: extended POSIX-style sprintf
  */
@@ -23432,7 +26332,7 @@ function dumpException(ex)
 	return (ret);
 }
 
-},{"assert":49,"util":324}],135:[function(require,module,exports){
+},{"assert":61,"util":325}],146:[function(require,module,exports){
 module.exports = ForeverAgent
 ForeverAgent.SSL = ForeverAgentSSL
 
@@ -23572,11 +26472,11 @@ function createConnectionSSL (port, host, options) {
   return tls.connect(options);
 }
 
-},{"http":298,"https":174,"net":84,"tls":84,"util":324}],136:[function(require,module,exports){
+},{"http":299,"https":181,"net":96,"tls":96,"util":325}],147:[function(require,module,exports){
 /* eslint-env browser */
 module.exports = FormData;
 
-},{}],137:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 var util = require('util')
 
 var INDENT_START = /[\{\[]/
@@ -23639,7 +26539,7 @@ module.exports = function() {
   return line
 }
 
-},{"util":324}],138:[function(require,module,exports){
+},{"util":325}],149:[function(require,module,exports){
 var isProperty = require('is-property')
 
 var gen = function(obj, prop) {
@@ -23653,665 +26553,7 @@ gen.property = function (prop) {
 
 module.exports = gen
 
-},{"is-property":182}],139:[function(require,module,exports){
-'use strict'
-
-var fs = require('fs')
-
-module.exports = clone(fs)
-
-function clone (obj) {
-  if (obj === null || typeof obj !== 'object')
-    return obj
-
-  if (obj instanceof Object)
-    var copy = { __proto__: obj.__proto__ }
-  else
-    var copy = Object.create(null)
-
-  Object.getOwnPropertyNames(obj).forEach(function (key) {
-    Object.defineProperty(copy, key, Object.getOwnPropertyDescriptor(obj, key))
-  })
-
-  return copy
-}
-
-},{"fs":84}],140:[function(require,module,exports){
-(function (process){
-var fs = require('fs')
-var polyfills = require('./polyfills.js')
-var legacy = require('./legacy-streams.js')
-var queue = []
-
-var util = require('util')
-
-function noop () {}
-
-var debug = noop
-if (util.debuglog)
-  debug = util.debuglog('gfs4')
-else if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || ''))
-  debug = function() {
-    var m = util.format.apply(util, arguments)
-    m = 'GFS4: ' + m.split(/\n/).join('\nGFS4: ')
-    console.error(m)
-  }
-
-if (/\bgfs4\b/i.test(process.env.NODE_DEBUG || '')) {
-  process.on('exit', function() {
-    debug(queue)
-    require('assert').equal(queue.length, 0)
-  })
-}
-
-module.exports = patch(require('./fs.js'))
-if (process.env.TEST_GRACEFUL_FS_GLOBAL_PATCH) {
-  module.exports = patch(fs)
-}
-
-// Always patch fs.close/closeSync, because we want to
-// retry() whenever a close happens *anywhere* in the program.
-// This is essential when multiple graceful-fs instances are
-// in play at the same time.
-module.exports.close =
-fs.close = (function (fs$close) { return function (fd, cb) {
-  return fs$close.call(fs, fd, function (err) {
-    if (!err)
-      retry()
-
-    if (typeof cb === 'function')
-      cb.apply(this, arguments)
-  })
-}})(fs.close)
-
-module.exports.closeSync =
-fs.closeSync = (function (fs$closeSync) { return function (fd) {
-  // Note that graceful-fs also retries when fs.closeSync() fails.
-  // Looks like a bug to me, although it's probably a harmless one.
-  var rval = fs$closeSync.apply(fs, arguments)
-  retry()
-  return rval
-}})(fs.closeSync)
-
-function patch (fs) {
-  // Everything that references the open() function needs to be in here
-  polyfills(fs)
-  fs.gracefulify = patch
-  fs.FileReadStream = ReadStream;  // Legacy name.
-  fs.FileWriteStream = WriteStream;  // Legacy name.
-  fs.createReadStream = createReadStream
-  fs.createWriteStream = createWriteStream
-  var fs$readFile = fs.readFile
-  fs.readFile = readFile
-  function readFile (path, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    return go$readFile(path, options, cb)
-
-    function go$readFile (path, options, cb) {
-      return fs$readFile(path, options, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$readFile, [path, options, cb]])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-          retry()
-        }
-      })
-    }
-  }
-
-  var fs$writeFile = fs.writeFile
-  fs.writeFile = writeFile
-  function writeFile (path, data, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    return go$writeFile(path, data, options, cb)
-
-    function go$writeFile (path, data, options, cb) {
-      return fs$writeFile(path, data, options, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$writeFile, [path, data, options, cb]])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-          retry()
-        }
-      })
-    }
-  }
-
-  var fs$appendFile = fs.appendFile
-  if (fs$appendFile)
-    fs.appendFile = appendFile
-  function appendFile (path, data, options, cb) {
-    if (typeof options === 'function')
-      cb = options, options = null
-
-    return go$appendFile(path, data, options, cb)
-
-    function go$appendFile (path, data, options, cb) {
-      return fs$appendFile(path, data, options, function (err) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$appendFile, [path, data, options, cb]])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-          retry()
-        }
-      })
-    }
-  }
-
-  var fs$readdir = fs.readdir
-  fs.readdir = readdir
-  function readdir (path, cb) {
-    return go$readdir(path, cb)
-
-    function go$readdir () {
-      return fs$readdir(path, function (err, files) {
-        if (files && files.sort)
-          files.sort();  // Backwards compatibility with graceful-fs.
-
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$readdir, [path, cb]])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-          retry()
-        }
-      })
-    }
-  }
-
-
-  if (process.version.substr(0, 4) === 'v0.8') {
-    var legStreams = legacy(fs)
-    ReadStream = legStreams.ReadStream
-    WriteStream = legStreams.WriteStream
-  }
-
-  var fs$ReadStream = fs.ReadStream
-  ReadStream.prototype = Object.create(fs$ReadStream.prototype)
-  ReadStream.prototype.open = ReadStream$open
-
-  var fs$WriteStream = fs.WriteStream
-  WriteStream.prototype = Object.create(fs$WriteStream.prototype)
-  WriteStream.prototype.open = WriteStream$open
-
-  fs.ReadStream = ReadStream
-  fs.WriteStream = WriteStream
-
-  function ReadStream (path, options) {
-    if (this instanceof ReadStream)
-      return fs$ReadStream.apply(this, arguments), this
-    else
-      return ReadStream.apply(Object.create(ReadStream.prototype), arguments)
-  }
-
-  function ReadStream$open () {
-    var that = this
-    open(that.path, that.flags, that.mode, function (err, fd) {
-      if (err) {
-        if (that.autoClose)
-          that.destroy()
-
-        that.emit('error', err)
-      } else {
-        that.fd = fd
-        that.emit('open', fd)
-        that.read()
-      }
-    })
-  }
-
-  function WriteStream (path, options) {
-    if (this instanceof WriteStream)
-      return fs$WriteStream.apply(this, arguments), this
-    else
-      return WriteStream.apply(Object.create(WriteStream.prototype), arguments)
-  }
-
-  function WriteStream$open () {
-    var that = this
-    open(that.path, that.flags, that.mode, function (err, fd) {
-      if (err) {
-        that.destroy()
-        that.emit('error', err)
-      } else {
-        that.fd = fd
-        that.emit('open', fd)
-      }
-    })
-  }
-
-  function createReadStream (path, options) {
-    return new ReadStream(path, options)
-  }
-
-  function createWriteStream (path, options) {
-    return new WriteStream(path, options)
-  }
-
-  var fs$open = fs.open
-  fs.open = open
-  function open (path, flags, mode, cb) {
-    if (typeof mode === 'function')
-      cb = mode, mode = null
-
-    return go$open(path, flags, mode, cb)
-
-    function go$open (path, flags, mode, cb) {
-      return fs$open(path, flags, mode, function (err, fd) {
-        if (err && (err.code === 'EMFILE' || err.code === 'ENFILE'))
-          enqueue([go$open, [path, flags, mode, cb]])
-        else {
-          if (typeof cb === 'function')
-            cb.apply(this, arguments)
-          retry()
-        }
-      })
-    }
-  }
-
-  return fs
-}
-
-function enqueue (elem) {
-  debug('ENQUEUE', elem[0].name, elem[1])
-  queue.push(elem)
-}
-
-function retry () {
-  var elem = queue.shift()
-  if (elem) {
-    debug('RETRY', elem[0].name, elem[1])
-    elem[0].apply(null, elem[1])
-  }
-}
-
-}).call(this,require('_process'))
-},{"./fs.js":139,"./legacy-streams.js":141,"./polyfills.js":142,"_process":226,"assert":49,"fs":84,"util":324}],141:[function(require,module,exports){
-(function (process){
-var Stream = require('stream').Stream
-
-module.exports = legacy
-
-function legacy (fs) {
-  return {
-    ReadStream: ReadStream,
-    WriteStream: WriteStream
-  }
-
-  function ReadStream (path, options) {
-    if (!(this instanceof ReadStream)) return new ReadStream(path, options);
-
-    Stream.call(this);
-
-    var self = this;
-
-    this.path = path;
-    this.fd = null;
-    this.readable = true;
-    this.paused = false;
-
-    this.flags = 'r';
-    this.mode = 438; /*=0666*/
-    this.bufferSize = 64 * 1024;
-
-    options = options || {};
-
-    // Mixin options into this
-    var keys = Object.keys(options);
-    for (var index = 0, length = keys.length; index < length; index++) {
-      var key = keys[index];
-      this[key] = options[key];
-    }
-
-    if (this.encoding) this.setEncoding(this.encoding);
-
-    if (this.start !== undefined) {
-      if ('number' !== typeof this.start) {
-        throw TypeError('start must be a Number');
-      }
-      if (this.end === undefined) {
-        this.end = Infinity;
-      } else if ('number' !== typeof this.end) {
-        throw TypeError('end must be a Number');
-      }
-
-      if (this.start > this.end) {
-        throw new Error('start must be <= end');
-      }
-
-      this.pos = this.start;
-    }
-
-    if (this.fd !== null) {
-      process.nextTick(function() {
-        self._read();
-      });
-      return;
-    }
-
-    fs.open(this.path, this.flags, this.mode, function (err, fd) {
-      if (err) {
-        self.emit('error', err);
-        self.readable = false;
-        return;
-      }
-
-      self.fd = fd;
-      self.emit('open', fd);
-      self._read();
-    })
-  }
-
-  function WriteStream (path, options) {
-    if (!(this instanceof WriteStream)) return new WriteStream(path, options);
-
-    Stream.call(this);
-
-    this.path = path;
-    this.fd = null;
-    this.writable = true;
-
-    this.flags = 'w';
-    this.encoding = 'binary';
-    this.mode = 438; /*=0666*/
-    this.bytesWritten = 0;
-
-    options = options || {};
-
-    // Mixin options into this
-    var keys = Object.keys(options);
-    for (var index = 0, length = keys.length; index < length; index++) {
-      var key = keys[index];
-      this[key] = options[key];
-    }
-
-    if (this.start !== undefined) {
-      if ('number' !== typeof this.start) {
-        throw TypeError('start must be a Number');
-      }
-      if (this.start < 0) {
-        throw new Error('start must be >= zero');
-      }
-
-      this.pos = this.start;
-    }
-
-    this.busy = false;
-    this._queue = [];
-
-    if (this.fd === null) {
-      this._open = fs.open;
-      this._queue.push([this._open, this.path, this.flags, this.mode, undefined]);
-      this.flush();
-    }
-  }
-}
-
-}).call(this,require('_process'))
-},{"_process":226,"stream":297}],142:[function(require,module,exports){
-(function (process){
-var fs = require('./fs.js')
-var constants = require('constants')
-
-var origCwd = process.cwd
-var cwd = null
-process.cwd = function() {
-  if (!cwd)
-    cwd = origCwd.call(process)
-  return cwd
-}
-try {
-  process.cwd()
-} catch (er) {}
-
-var chdir = process.chdir
-process.chdir = function(d) {
-  cwd = null
-  chdir.call(process, d)
-}
-
-module.exports = patch
-
-function patch (fs) {
-  // (re-)implement some things that are known busted or missing.
-
-  // lchmod, broken prior to 0.6.2
-  // back-port the fix here.
-  if (constants.hasOwnProperty('O_SYMLINK') &&
-      process.version.match(/^v0\.6\.[0-2]|^v0\.5\./)) {
-    patchLchmod(fs)
-  }
-
-  // lutimes implementation, or no-op
-  if (!fs.lutimes) {
-    patchLutimes(fs)
-  }
-
-  // https://github.com/isaacs/node-graceful-fs/issues/4
-  // Chown should not fail on einval or eperm if non-root.
-  // It should not fail on enosys ever, as this just indicates
-  // that a fs doesn't support the intended operation.
-
-  fs.chown = chownFix(fs.chown)
-  fs.fchown = chownFix(fs.fchown)
-  fs.lchown = chownFix(fs.lchown)
-
-  fs.chmod = chownFix(fs.chmod)
-  fs.fchmod = chownFix(fs.fchmod)
-  fs.lchmod = chownFix(fs.lchmod)
-
-  fs.chownSync = chownFixSync(fs.chownSync)
-  fs.fchownSync = chownFixSync(fs.fchownSync)
-  fs.lchownSync = chownFixSync(fs.lchownSync)
-
-  fs.chmodSync = chownFix(fs.chmodSync)
-  fs.fchmodSync = chownFix(fs.fchmodSync)
-  fs.lchmodSync = chownFix(fs.lchmodSync)
-
-  // if lchmod/lchown do not exist, then make them no-ops
-  if (!fs.lchmod) {
-    fs.lchmod = function (path, mode, cb) {
-      process.nextTick(cb)
-    }
-    fs.lchmodSync = function () {}
-  }
-  if (!fs.lchown) {
-    fs.lchown = function (path, uid, gid, cb) {
-      process.nextTick(cb)
-    }
-    fs.lchownSync = function () {}
-  }
-
-  // on Windows, A/V software can lock the directory, causing this
-  // to fail with an EACCES or EPERM if the directory contains newly
-  // created files.  Try again on failure, for up to 1 second.
-  if (process.platform === "win32") {
-    fs.rename = (function (fs$rename) { return function (from, to, cb) {
-      var start = Date.now()
-      fs$rename(from, to, function CB (er) {
-        if (er
-            && (er.code === "EACCES" || er.code === "EPERM")
-            && Date.now() - start < 1000) {
-          return fs$rename(from, to, CB)
-        }
-        if (cb) cb(er)
-      })
-    }})(fs.rename)
-  }
-
-  // if read() returns EAGAIN, then just try it again.
-  fs.read = (function (fs$read) { return function (fd, buffer, offset, length, position, callback_) {
-    var callback
-    if (callback_ && typeof callback_ === 'function') {
-      var eagCounter = 0
-      callback = function (er, _, __) {
-        if (er && er.code === 'EAGAIN' && eagCounter < 10) {
-          eagCounter ++
-          return fs$read.call(fs, fd, buffer, offset, length, position, callback)
-        }
-        callback_.apply(this, arguments)
-      }
-    }
-    return fs$read.call(fs, fd, buffer, offset, length, position, callback)
-  }})(fs.read)
-
-  fs.readSync = (function (fs$readSync) { return function (fd, buffer, offset, length, position) {
-    var eagCounter = 0
-    while (true) {
-      try {
-        return fs$readSync.call(fs, fd, buffer, offset, length, position)
-      } catch (er) {
-        if (er.code === 'EAGAIN' && eagCounter < 10) {
-          eagCounter ++
-          continue
-        }
-        throw er
-      }
-    }
-  }})(fs.readSync)
-}
-
-function patchLchmod (fs) {
-  fs.lchmod = function (path, mode, callback) {
-    callback = callback || noop
-    fs.open( path
-           , constants.O_WRONLY | constants.O_SYMLINK
-           , mode
-           , function (err, fd) {
-      if (err) {
-        callback(err)
-        return
-      }
-      // prefer to return the chmod error, if one occurs,
-      // but still try to close, and report closing errors if they occur.
-      fs.fchmod(fd, mode, function (err) {
-        fs.close(fd, function(err2) {
-          callback(err || err2)
-        })
-      })
-    })
-  }
-
-  fs.lchmodSync = function (path, mode) {
-    var fd = fs.openSync(path, constants.O_WRONLY | constants.O_SYMLINK, mode)
-
-    // prefer to return the chmod error, if one occurs,
-    // but still try to close, and report closing errors if they occur.
-    var threw = true
-    var ret
-    try {
-      ret = fs.fchmodSync(fd, mode)
-      threw = false
-    } finally {
-      if (threw) {
-        try {
-          fs.closeSync(fd)
-        } catch (er) {}
-      } else {
-        fs.closeSync(fd)
-      }
-    }
-    return ret
-  }
-}
-
-function patchLutimes (fs) {
-  if (constants.hasOwnProperty("O_SYMLINK")) {
-    fs.lutimes = function (path, at, mt, cb) {
-      fs.open(path, constants.O_SYMLINK, function (er, fd) {
-        cb = cb || noop
-        if (er) return cb(er)
-        fs.futimes(fd, at, mt, function (er) {
-          fs.close(fd, function (er2) {
-            return cb(er || er2)
-          })
-        })
-      })
-    }
-
-    fs.lutimesSync = function (path, at, mt) {
-      var fd = fs.openSync(path, constants.O_SYMLINK)
-      var ret
-      var threw = true
-      try {
-        ret = fs.futimesSync(fd, at, mt)
-        threw = false
-      } finally {
-        if (threw) {
-          try {
-            fs.closeSync(fd)
-          } catch (er) {}
-        } else {
-          fs.closeSync(fd)
-        }
-      }
-      return ret
-    }
-
-  } else {
-    fs.lutimes = function (_a, _b, _c, cb) { process.nextTick(cb) }
-    fs.lutimesSync = function () {}
-  }
-}
-
-function chownFix (orig) {
-  if (!orig) return orig
-  return function (target, uid, gid, cb) {
-    return orig.call(fs, target, uid, gid, function (er, res) {
-      if (chownErOk(er)) er = null
-      cb(er, res)
-    })
-  }
-}
-
-function chownFixSync (orig) {
-  if (!orig) return orig
-  return function (target, uid, gid) {
-    try {
-      return orig.call(fs, target, uid, gid)
-    } catch (er) {
-      if (!chownErOk(er)) throw er
-    }
-  }
-}
-
-// ENOSYS means that the fs doesn't support the op. Just ignore
-// that, because it doesn't matter.
-//
-// if there's no getuid, or if getuid() is something other
-// than 0, and the error is EINVAL or EPERM, then just ignore
-// it.
-//
-// This specific case is a silent failure in cp, install, tar,
-// and most other unix tools that manage permissions.
-//
-// When running as root, or if other types of errors are
-// encountered, then it's strict.
-function chownErOk (er) {
-  if (!er)
-    return true
-
-  if (er.code === "ENOSYS")
-    return true
-
-  var nonroot = !process.getuid || process.getuid() !== 0
-  if (nonroot) {
-    if (er.code === "EINVAL" || er.code === "EPERM")
-      return true
-  }
-
-  return false
-}
-
-}).call(this,require('_process'))
-},{"./fs.js":139,"_process":226,"constants":92}],143:[function(require,module,exports){
+},{"is-property":188}],150:[function(require,module,exports){
 'use strict'
 
 function ValidationError (errors) {
@@ -24323,7 +26565,7 @@ ValidationError.prototype = Error.prototype
 
 module.exports = ValidationError
 
-},{}],144:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 'use strict'
 
 var Promise = require('pinkie-promise')
@@ -24347,7 +26589,7 @@ Object.keys(schemas).map(function (name) {
   module.exports[name] = promisify(schemas[name])
 })
 
-},{"./runner":145,"./schemas":153,"pinkie-promise":223}],145:[function(require,module,exports){
+},{"./runner":152,"./schemas":160,"pinkie-promise":228}],152:[function(require,module,exports){
 'use strict'
 
 var schemas = require('./schemas')
@@ -24378,7 +26620,7 @@ module.exports = function (schema, data, cb) {
   return valid
 }
 
-},{"./error":143,"./schemas":153,"is-my-json-valid":181}],146:[function(require,module,exports){
+},{"./error":150,"./schemas":160,"is-my-json-valid":187}],153:[function(require,module,exports){
 module.exports={
   "properties": {
     "beforeRequest": {
@@ -24393,7 +26635,7 @@ module.exports={
   }
 }
 
-},{}],147:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 module.exports={
   "oneOf": [{
     "type": "object",
@@ -24426,7 +26668,7 @@ module.exports={
   }]
 }
 
-},{}],148:[function(require,module,exports){
+},{}],155:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24455,7 +26697,7 @@ module.exports={
   }
 }
 
-},{}],149:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24491,7 +26733,7 @@ module.exports={
   }
 }
 
-},{}],150:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24511,7 +26753,7 @@ module.exports={
   }
 }
 
-},{}],151:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 module.exports={
   "type": "object",
   "optional": true,
@@ -24564,7 +26806,7 @@ module.exports={
   }
 }
 
-},{}],152:[function(require,module,exports){
+},{}],159:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24577,7 +26819,7 @@ module.exports={
   }
 }
 
-},{}],153:[function(require,module,exports){
+},{}],160:[function(require,module,exports){
 'use strict'
 
 var schemas = {
@@ -24628,7 +26870,7 @@ schemas.har.properties.log = schemas.log
 
 module.exports = schemas
 
-},{"./cache.json":146,"./cacheEntry.json":147,"./content.json":148,"./cookie.json":149,"./creator.json":150,"./entry.json":151,"./har.json":152,"./log.json":154,"./page.json":155,"./pageTimings.json":156,"./postData.json":157,"./record.json":158,"./request.json":159,"./response.json":160,"./timings.json":161}],154:[function(require,module,exports){
+},{"./cache.json":153,"./cacheEntry.json":154,"./content.json":155,"./cookie.json":156,"./creator.json":157,"./entry.json":158,"./har.json":159,"./log.json":161,"./page.json":162,"./pageTimings.json":163,"./postData.json":164,"./record.json":165,"./request.json":166,"./response.json":167,"./timings.json":168}],161:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24664,7 +26906,7 @@ module.exports={
   }
 }
 
-},{}],155:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 module.exports={
   "type": "object",
   "optional": true,
@@ -24696,7 +26938,7 @@ module.exports={
   }
 }
 
-},{}],156:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 module.exports={
   "type": "object",
   "properties": {
@@ -24714,7 +26956,7 @@ module.exports={
   }
 }
 
-},{}],157:[function(require,module,exports){
+},{}],164:[function(require,module,exports){
 module.exports={
   "type": "object",
   "optional": true,
@@ -24757,7 +26999,7 @@ module.exports={
   }
 }
 
-},{}],158:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24777,7 +27019,7 @@ module.exports={
   }
 }
 
-},{}],159:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24834,7 +27076,7 @@ module.exports={
   }
 }
 
-},{}],160:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 module.exports={
   "type": "object",
   "required": [
@@ -24888,7 +27130,7 @@ module.exports={
   }
 }
 
-},{}],161:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 module.exports={
   "required": [
     "send",
@@ -24930,7 +27172,7 @@ module.exports={
   }
 }
 
-},{}],162:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 var hash = exports;
 
 hash.utils = require('./hash/utils');
@@ -24947,7 +27189,7 @@ hash.sha384 = hash.sha.sha384;
 hash.sha512 = hash.sha.sha512;
 hash.ripemd160 = hash.ripemd.ripemd160;
 
-},{"./hash/common":163,"./hash/hmac":164,"./hash/ripemd":165,"./hash/sha":166,"./hash/utils":167}],163:[function(require,module,exports){
+},{"./hash/common":170,"./hash/hmac":171,"./hash/ripemd":172,"./hash/sha":173,"./hash/utils":174}],170:[function(require,module,exports){
 var hash = require('../hash');
 var utils = hash.utils;
 var assert = utils.assert;
@@ -25040,7 +27282,7 @@ BlockHash.prototype._pad = function pad() {
   return res;
 };
 
-},{"../hash":162}],164:[function(require,module,exports){
+},{"../hash":169}],171:[function(require,module,exports){
 var hmac = exports;
 
 var hash = require('../hash');
@@ -25090,7 +27332,7 @@ Hmac.prototype.digest = function digest(enc) {
   return this.outer.digest(enc);
 };
 
-},{"../hash":162}],165:[function(require,module,exports){
+},{"../hash":169}],172:[function(require,module,exports){
 var hash = require('../hash');
 var utils = hash.utils;
 
@@ -25236,7 +27478,7 @@ var sh = [
   8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11
 ];
 
-},{"../hash":162}],166:[function(require,module,exports){
+},{"../hash":169}],173:[function(require,module,exports){
 var hash = require('../hash');
 var utils = hash.utils;
 var assert = utils.assert;
@@ -25802,7 +28044,7 @@ function g1_512_lo(xh, xl) {
   return r;
 }
 
-},{"../hash":162}],167:[function(require,module,exports){
+},{"../hash":169}],174:[function(require,module,exports){
 var utils = exports;
 var inherits = require('inherits');
 
@@ -26061,7 +28303,7 @@ function shr64_lo(ah, al, num) {
 };
 exports.shr64_lo = shr64_lo;
 
-},{"inherits":178}],168:[function(require,module,exports){
+},{"inherits":184}],175:[function(require,module,exports){
 /*
     HTTP Hawk Authentication Scheme
     Copyright (c) 2012-2014, Eran Hammer <eran@hammer.io>
@@ -26700,7 +28942,7 @@ if (typeof module !== 'undefined' && module.exports) {
 /* eslint-enable */
 // $lab:coverage:on$
 
-},{}],169:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 // Copyright 2015 Joyent, Inc.
 
 var parser = require('./parser');
@@ -26731,7 +28973,7 @@ module.exports = {
   verifyHMAC: verify.verifyHMAC
 };
 
-},{"./parser":170,"./signer":171,"./utils":172,"./verify":173}],170:[function(require,module,exports){
+},{"./parser":177,"./signer":178,"./utils":179,"./verify":180}],177:[function(require,module,exports){
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = require('assert-plus');
@@ -27051,7 +29293,7 @@ module.exports = {
 
 };
 
-},{"./utils":172,"assert-plus":48,"util":324}],171:[function(require,module,exports){
+},{"./utils":179,"assert-plus":60,"util":325}],178:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
@@ -27454,7 +29696,7 @@ module.exports = {
 };
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":179,"./utils":172,"assert-plus":48,"crypto":99,"http":298,"jsprim":196,"sshpk":290,"util":324}],172:[function(require,module,exports){
+},{"../../is-buffer/index.js":185,"./utils":179,"assert-plus":60,"crypto":110,"http":299,"jsprim":202,"sshpk":291,"util":325}],179:[function(require,module,exports){
 // Copyright 2012 Joyent, Inc.  All rights reserved.
 
 var assert = require('assert-plus');
@@ -27568,7 +29810,7 @@ module.exports = {
   }
 };
 
-},{"assert-plus":48,"sshpk":290,"util":324}],173:[function(require,module,exports){
+},{"assert-plus":60,"sshpk":291,"util":325}],180:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -27660,7 +29902,7 @@ module.exports = {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./utils":172,"assert-plus":48,"buffer":87,"crypto":99,"sshpk":290}],174:[function(require,module,exports){
+},{"./utils":179,"assert-plus":60,"buffer":99,"crypto":110,"sshpk":291}],181:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -27676,7 +29918,7 @@ https.request = function (params, cb) {
     return http.request.call(this, params, cb);
 }
 
-},{"http":298}],175:[function(require,module,exports){
+},{"http":299}],182:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -27762,147 +30004,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],176:[function(require,module,exports){
-/**
- * @preserve
- * JS Implementation of incremental MurmurHash3 (r150) (as of May 10, 2013)
- *
- * @author <a href="mailto:jensyt@gmail.com">Jens Taylor</a>
- * @see http://github.com/homebrewing/brauhaus-diff
- * @author <a href="mailto:gary.court@gmail.com">Gary Court</a>
- * @see http://github.com/garycourt/murmurhash-js
- * @author <a href="mailto:aappleby@gmail.com">Austin Appleby</a>
- * @see http://sites.google.com/site/murmurhash/
- */
-(function(){
-    var cache;
-
-    // Call this function without `new` to use the cached object (good for
-    // single-threaded environments), or with `new` to create a new object.
-    //
-    // @param {string} key A UTF-16 or ASCII string
-    // @param {number} seed An optional positive integer
-    // @return {object} A MurmurHash3 object for incremental hashing
-    function MurmurHash3(key, seed) {
-        var m = this instanceof MurmurHash3 ? this : cache;
-        m.reset(seed)
-        if (typeof key === 'string' && key.length > 0) {
-            m.hash(key);
-        }
-
-        if (m !== this) {
-            return m;
-        }
-    };
-
-    // Incrementally add a string to this hash
-    //
-    // @param {string} key A UTF-16 or ASCII string
-    // @return {object} this
-    MurmurHash3.prototype.hash = function(key) {
-        var h1, k1, i, top, len;
-
-        len = key.length;
-        this.len += len;
-
-        k1 = this.k1;
-        i = 0;
-        switch (this.rem) {
-            case 0: k1 ^= len > i ? (key.charCodeAt(i++) & 0xffff) : 0;
-            case 1: k1 ^= len > i ? (key.charCodeAt(i++) & 0xffff) << 8 : 0;
-            case 2: k1 ^= len > i ? (key.charCodeAt(i++) & 0xffff) << 16 : 0;
-            case 3:
-                k1 ^= len > i ? (key.charCodeAt(i) & 0xff) << 24 : 0;
-                k1 ^= len > i ? (key.charCodeAt(i++) & 0xff00) >> 8 : 0;
-        }
-
-        this.rem = (len + this.rem) & 3; // & 3 is same as % 4
-        len -= this.rem;
-        if (len > 0) {
-            h1 = this.h1;
-            while (1) {
-                k1 = (k1 * 0x2d51 + (k1 & 0xffff) * 0xcc9e0000) & 0xffffffff;
-                k1 = (k1 << 15) | (k1 >>> 17);
-                k1 = (k1 * 0x3593 + (k1 & 0xffff) * 0x1b870000) & 0xffffffff;
-
-                h1 ^= k1;
-                h1 = (h1 << 13) | (h1 >>> 19);
-                h1 = (h1 * 5 + 0xe6546b64) & 0xffffffff;
-
-                if (i >= len) {
-                    break;
-                }
-
-                k1 = ((key.charCodeAt(i++) & 0xffff)) ^
-                     ((key.charCodeAt(i++) & 0xffff) << 8) ^
-                     ((key.charCodeAt(i++) & 0xffff) << 16);
-                top = key.charCodeAt(i++);
-                k1 ^= ((top & 0xff) << 24) ^
-                      ((top & 0xff00) >> 8);
-            }
-
-            k1 = 0;
-            switch (this.rem) {
-                case 3: k1 ^= (key.charCodeAt(i + 2) & 0xffff) << 16;
-                case 2: k1 ^= (key.charCodeAt(i + 1) & 0xffff) << 8;
-                case 1: k1 ^= (key.charCodeAt(i) & 0xffff);
-            }
-
-            this.h1 = h1;
-        }
-
-        this.k1 = k1;
-        return this;
-    };
-
-    // Get the result of this hash
-    //
-    // @return {number} The 32-bit hash
-    MurmurHash3.prototype.result = function() {
-        var k1, h1;
-        
-        k1 = this.k1;
-        h1 = this.h1;
-
-        if (k1 > 0) {
-            k1 = (k1 * 0x2d51 + (k1 & 0xffff) * 0xcc9e0000) & 0xffffffff;
-            k1 = (k1 << 15) | (k1 >>> 17);
-            k1 = (k1 * 0x3593 + (k1 & 0xffff) * 0x1b870000) & 0xffffffff;
-            h1 ^= k1;
-        }
-
-        h1 ^= this.len;
-
-        h1 ^= h1 >>> 16;
-        h1 = (h1 * 0xca6b + (h1 & 0xffff) * 0x85eb0000) & 0xffffffff;
-        h1 ^= h1 >>> 13;
-        h1 = (h1 * 0xae35 + (h1 & 0xffff) * 0xc2b20000) & 0xffffffff;
-        h1 ^= h1 >>> 16;
-
-        return h1 >>> 0;
-    };
-
-    // Reset the hash object for reuse
-    //
-    // @param {number} seed An optional positive integer
-    MurmurHash3.prototype.reset = function(seed) {
-        this.h1 = typeof seed === 'number' ? seed : 0;
-        this.rem = this.k1 = this.len = 0;
-        return this;
-    };
-
-    // A cached object to use. This can be safely used if you're in a single-
-    // threaded environment, otherwise you need to create new hashes to use.
-    cache = new MurmurHash3();
-
-    if (typeof(module) != 'undefined') {
-        module.exports = MurmurHash3;
-    } else {
-        this.MurmurHash3 = MurmurHash3;
-    }
-}());
-
-},{}],177:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -27913,7 +30015,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],178:[function(require,module,exports){
+},{}],184:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -27938,7 +30040,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],179:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
 /**
  * Determine if an object is Buffer
  *
@@ -27957,7 +30059,7 @@ module.exports = function (obj) {
     ))
 }
 
-},{}],180:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 exports['date-time'] = /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-[0-9]{2}[tT ]\d{2}:\d{2}:\d{2}(\.\d+)?([zZ]|[+-]\d{2}:\d{2})$/
 exports['date'] = /^\d{4}-(?:0[0-9]{1}|1[0-2]{1})-[0-9]{2}$/
 exports['time'] = /^\d{2}:\d{2}:\d{2}$/
@@ -27973,7 +30075,7 @@ exports['style'] = /\s*(.+?):\s*([^;]+);?/g
 exports['phone'] = /^\+(?:[0-9] ?){6,14}[0-9]$/
 exports['utc-millisec'] = /^[0-9]{1,15}\.?[0-9]{0,15}$/
 
-},{}],181:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 var genobj = require('generate-object-property')
 var genfun = require('generate-function')
 var jsonpointer = require('jsonpointer')
@@ -28559,13 +30661,13 @@ module.exports.filter = function(schema, opts) {
   }
 }
 
-},{"./formats":180,"generate-function":137,"generate-object-property":138,"jsonpointer":195,"xtend":328}],182:[function(require,module,exports){
+},{"./formats":186,"generate-function":148,"generate-object-property":149,"jsonpointer":201,"xtend":328}],188:[function(require,module,exports){
 "use strict"
 function isProperty(str) {
   return /^[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/.test(str)
 }
 module.exports = isProperty
-},{}],183:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -28608,14 +30710,14 @@ function isLooseTypedArray(arr) {
   return names[toString.call(arr)]
 }
 
-},{}],184:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],185:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 var stream = require('stream')
 
 
@@ -28644,7 +30746,7 @@ module.exports.isReadable = isReadable
 module.exports.isWritable = isWritable
 module.exports.isDuplex   = isDuplex
 
-},{"stream":297}],186:[function(require,module,exports){
+},{"stream":298}],192:[function(require,module,exports){
 "use strict";
 
 /*
@@ -28681,7 +30783,7 @@ var utils = require('./lib/utils');
 
 module.exports = ns;
 
-},{"./lib/curve255":188,"./lib/dh":189,"./lib/eddsa":190,"./lib/utils":191}],187:[function(require,module,exports){
+},{"./lib/curve255":194,"./lib/dh":195,"./lib/eddsa":196,"./lib/utils":197}],193:[function(require,module,exports){
 "use strict";
 /**
  * @fileOverview
@@ -29164,7 +31266,7 @@ var crypto = require('crypto');
 
 module.exports = ns;
 
-},{"crypto":99}],188:[function(require,module,exports){
+},{"crypto":110}],194:[function(require,module,exports){
 "use strict";
 /**
  * @fileOverview
@@ -29387,7 +31489,7 @@ var utils = require('./utils');
 
 module.exports = ns;
 
-},{"./core":187,"./utils":191}],189:[function(require,module,exports){
+},{"./core":193,"./utils":197}],195:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 /**
@@ -29502,7 +31604,7 @@ var curve255 = require('./curve255');
 module.exports = ns;
 
 }).call(this,require("buffer").Buffer)
-},{"./core":187,"./curve255":188,"./utils":191,"buffer":87}],190:[function(require,module,exports){
+},{"./core":193,"./curve255":194,"./utils":197,"buffer":99}],196:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 /**
@@ -30079,7 +32181,7 @@ var crypto = require('crypto');
 module.exports = ns;
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":179,"./core":187,"./curve255":188,"./utils":191,"crypto":99,"jsbn":192}],191:[function(require,module,exports){
+},{"../../is-buffer/index.js":185,"./core":193,"./curve255":194,"./utils":197,"crypto":110,"jsbn":198}],197:[function(require,module,exports){
 "use strict";
 /**
  * @fileOverview
@@ -30279,7 +32381,7 @@ var core = require('./core');
 
 module.exports = ns;
 
-},{"./core":187}],192:[function(require,module,exports){
+},{"./core":193}],198:[function(require,module,exports){
 (function(){
 
     // Copyright (c) 2005  Tom Wu
@@ -31639,7 +33741,7 @@ module.exports = ns;
 
 }).call(this);
 
-},{}],193:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 /**
  * JSONSchema Validator - Validates JavaScript objects using JSON Schemas
  *	(http://www.json.com/json-schema-proposal/)
@@ -31901,7 +34003,7 @@ exports.mustBeValid = function(result){
 return exports;
 });
 
-},{}],194:[function(require,module,exports){
+},{}],200:[function(require,module,exports){
 exports = module.exports = stringify
 exports.getSerialize = serializer
 
@@ -31930,7 +34032,7 @@ function serializer(replacer, cycleReplacer) {
   }
 }
 
-},{}],195:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
 var untilde = function(str) {
   return str.replace(/~./g, function(m) {
     switch (m) {
@@ -32008,7 +34110,7 @@ var set = function(obj, pointer, value) {
 exports.get = get
 exports.set = set
 
-},{}],196:[function(require,module,exports){
+},{}],202:[function(require,module,exports){
 /*
  * lib/jsprim.js: utilities for primitive JavaScript types
  */
@@ -32498,7 +34600,7 @@ function mergeObjects(provided, overrides, defaults)
 	return (rv);
 }
 
-},{"assert":49,"extsprintf":134,"json-schema":193,"util":324,"verror":325}],197:[function(require,module,exports){
+},{"assert":61,"extsprintf":145,"json-schema":199,"util":325,"verror":326}],203:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -48906,7 +51008,7 @@ function mergeObjects(provided, overrides, defaults)
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],198:[function(require,module,exports){
+},{}],204:[function(require,module,exports){
 var bn = require('bn.js');
 var brorand = require('brorand');
 
@@ -49021,7 +51123,7 @@ MillerRabin.prototype.getDivisor = function getDivisor(n, k) {
   return false;
 };
 
-},{"bn.js":55,"brorand":56}],199:[function(require,module,exports){
+},{"bn.js":67,"brorand":68}],205:[function(require,module,exports){
 module.exports={
   "application/1d-interleaved-parityfec": {
     "source": "iana"
@@ -55650,7 +57752,7 @@ module.exports={
   }
 }
 
-},{}],200:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 /*!
  * mime-db
  * Copyright(c) 2014 Jonathan Ong
@@ -55663,7 +57765,7 @@ module.exports={
 
 module.exports = require('./db.json')
 
-},{"./db.json":199}],201:[function(require,module,exports){
+},{"./db.json":205}],207:[function(require,module,exports){
 /*!
  * mime-types
  * Copyright(c) 2014 Jonathan Ong
@@ -55853,7 +57955,7 @@ function populateMaps(extensions, types) {
   })
 }
 
-},{"mime-db":200,"path":221}],202:[function(require,module,exports){
+},{"mime-db":206,"path":226}],208:[function(require,module,exports){
 module.exports = assert;
 
 function assert(val, msg) {
@@ -55866,317 +57968,7 @@ assert.equal = function assertEqual(l, r, msg) {
     throw new Error(msg || ('Assertion failed: ' + l + ' != ' + r));
 };
 
-},{}],203:[function(require,module,exports){
-(function (process){
-// Generated by CoffeeScript 1.10.0
-(function() {
-  var JSONStorage, KEY_FOR_EMPTY_STRING, LocalStorage, MetaKey, QUOTA_EXCEEDED_ERR, StorageEvent, _emptyDirectory, _escapeKey, _rm, createMap, events, fs, path, writeSync,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  path = require('path');
-
-  fs = require('fs');
-
-  events = require('events');
-
-  writeSync = require('write-file-atomic').sync;
-
-  KEY_FOR_EMPTY_STRING = '---.EMPTY_STRING.---';
-
-  _emptyDirectory = function(target) {
-    var i, len, p, ref, results;
-    ref = fs.readdirSync(target);
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      p = ref[i];
-      results.push(_rm(path.join(target, p)));
-    }
-    return results;
-  };
-
-  _rm = function(target) {
-    if (fs.statSync(target).isDirectory()) {
-      _emptyDirectory(target);
-      return fs.rmdirSync(target);
-    } else {
-      return fs.unlinkSync(target);
-    }
-  };
-
-  _escapeKey = function(key) {
-    var newKey;
-    if (key === '') {
-      newKey = KEY_FOR_EMPTY_STRING;
-    } else {
-      newKey = key.toString();
-    }
-    return newKey;
-  };
-
-  QUOTA_EXCEEDED_ERR = (function(superClass) {
-    extend(QUOTA_EXCEEDED_ERR, superClass);
-
-    function QUOTA_EXCEEDED_ERR(message) {
-      this.message = message != null ? message : 'Unknown error.';
-      if (Error.captureStackTrace != null) {
-        Error.captureStackTrace(this, this.constructor);
-      }
-      this.name = this.constructor.name;
-    }
-
-    QUOTA_EXCEEDED_ERR.prototype.toString = function() {
-      return this.name + ": " + this.message;
-    };
-
-    return QUOTA_EXCEEDED_ERR;
-
-  })(Error);
-
-  StorageEvent = (function() {
-    function StorageEvent(key1, oldValue1, newValue1, url, storageArea) {
-      this.key = key1;
-      this.oldValue = oldValue1;
-      this.newValue = newValue1;
-      this.url = url;
-      this.storageArea = storageArea != null ? storageArea : 'localStorage';
-    }
-
-    return StorageEvent;
-
-  })();
-
-  MetaKey = (function() {
-    function MetaKey(key1, index1) {
-      this.key = key1;
-      this.index = index1;
-      if (!(this instanceof MetaKey)) {
-        return new MetaKey(this.key, this.index);
-      }
-    }
-
-    return MetaKey;
-
-  })();
-
-  createMap = function() {
-    var Map;
-    Map = function() {};
-    Map.prototype = Object.create(null);
-    return new Map();
-  };
-
-  LocalStorage = (function(superClass) {
-    var instanceMap;
-
-    extend(LocalStorage, superClass);
-
-    instanceMap = {};
-
-    function LocalStorage(_location, quota) {
-      this._location = _location;
-      this.quota = quota != null ? quota : 5 * 1024 * 1024;
-      if (!(this instanceof LocalStorage)) {
-        return new LocalStorage(this._location, this.quota);
-      }
-      this._location = path.resolve(this._location);
-      if (instanceMap[this._location] != null) {
-        return instanceMap[this._location];
-      }
-      this.length = 0;
-      this._bytesInUse = 0;
-      this._keys = [];
-      this._metaKeyMap = createMap();
-      this._eventUrl = "pid:" + process.pid;
-      this._init();
-      this._QUOTA_EXCEEDED_ERR = QUOTA_EXCEEDED_ERR;
-      instanceMap[this._location] = this;
-      return instanceMap[this._location];
-    }
-
-    LocalStorage.prototype._init = function() {
-      var _MetaKey, _decodedKey, _keys, error, i, index, k, len, stat;
-      try {
-        stat = fs.statSync(this._location);
-        if ((stat != null) && !stat.isDirectory()) {
-          throw new Error("A file exists at the location '" + this._location + "' when trying to create/open localStorage");
-        }
-        this._bytesInUse = 0;
-        this.length = 0;
-        _keys = fs.readdirSync(this._location);
-        for (index = i = 0, len = _keys.length; i < len; index = ++i) {
-          k = _keys[index];
-          _decodedKey = decodeURIComponent(k);
-          this._keys.push(_decodedKey);
-          _MetaKey = new MetaKey(k, index);
-          this._metaKeyMap[_decodedKey] = _MetaKey;
-          stat = this._getStat(k);
-          if ((stat != null ? stat.size : void 0) != null) {
-            _MetaKey.size = stat.size;
-            this._bytesInUse += stat.size;
-          }
-        }
-        this.length = _keys.length;
-      } catch (error) {
-        fs.mkdirSync(this._location);
-      }
-    };
-
-    LocalStorage.prototype.setItem = function(key, value) {
-      var encodedKey, evnt, existsBeforeSet, filename, hasListeners, metaKey, oldLength, oldValue, valueString, valueStringLength;
-      hasListeners = events.EventEmitter.listenerCount(this, 'storage');
-      oldValue = null;
-      if (hasListeners) {
-        oldValue = this.getItem(key);
-      }
-      key = _escapeKey(key);
-      encodedKey = encodeURIComponent(key);
-      filename = path.join(this._location, encodedKey);
-      valueString = value.toString();
-      valueStringLength = valueString.length;
-      metaKey = this._metaKeyMap[key];
-      existsBeforeSet = !!metaKey;
-      if (existsBeforeSet) {
-        oldLength = metaKey.size;
-      } else {
-        oldLength = 0;
-      }
-      if (this._bytesInUse - oldLength + valueStringLength > this.quota) {
-        throw new QUOTA_EXCEEDED_ERR();
-      }
-      writeSync(filename, valueString, 'utf8');
-      if (!existsBeforeSet) {
-        metaKey = new MetaKey(encodedKey, (this._keys.push(key)) - 1);
-        metaKey.size = valueStringLength;
-        this._metaKeyMap[key] = metaKey;
-        this.length += 1;
-        this._bytesInUse += valueStringLength;
-      }
-      if (hasListeners) {
-        evnt = new StorageEvent(key, oldValue, value, this._eventUrl);
-        return this.emit('storage', evnt);
-      }
-    };
-
-    LocalStorage.prototype.getItem = function(key) {
-      var filename, metaKey;
-      key = _escapeKey(key);
-      metaKey = this._metaKeyMap[key];
-      if (!!metaKey) {
-        filename = path.join(this._location, metaKey.key);
-        return fs.readFileSync(filename, 'utf8');
-      } else {
-        return null;
-      }
-    };
-
-    LocalStorage.prototype._getStat = function(key) {
-      var error, filename;
-      key = _escapeKey(key);
-      filename = path.join(this._location, encodeURIComponent(key));
-      try {
-        return fs.statSync(filename);
-      } catch (error) {
-        return null;
-      }
-    };
-
-    LocalStorage.prototype.removeItem = function(key) {
-      var evnt, filename, hasListeners, k, meta, metaKey, oldValue, ref, v;
-      key = _escapeKey(key);
-      metaKey = this._metaKeyMap[key];
-      if (!!metaKey) {
-        hasListeners = events.EventEmitter.listenerCount(this, 'storage');
-        oldValue = null;
-        if (hasListeners) {
-          oldValue = this.getItem(key);
-        }
-        delete this._metaKeyMap[key];
-        this.length -= 1;
-        this._bytesInUse -= metaKey.size;
-        filename = path.join(this._location, metaKey.key);
-        this._keys.splice(metaKey.index, 1);
-        ref = this._metaKeyMap;
-        for (k in ref) {
-          v = ref[k];
-          meta = this._metaKeyMap[k];
-          if (meta.index > metaKey.index) {
-            meta.index -= 1;
-          }
-        }
-        _rm(filename);
-        if (hasListeners) {
-          evnt = new StorageEvent(key, oldValue, null, this._eventUrl);
-          return this.emit('storage', evnt);
-        }
-      }
-    };
-
-    LocalStorage.prototype.key = function(n) {
-      return this._keys[n];
-    };
-
-    LocalStorage.prototype.clear = function() {
-      var evnt;
-      _emptyDirectory(this._location);
-      this._metaKeyMap = createMap();
-      this._keys = [];
-      this.length = 0;
-      this._bytesInUse = 0;
-      if (events.EventEmitter.listenerCount(this, 'storage')) {
-        evnt = new StorageEvent(null, null, null, this._eventUrl);
-        return this.emit('storage', evnt);
-      }
-    };
-
-    LocalStorage.prototype._getBytesInUse = function() {
-      return this._bytesInUse;
-    };
-
-    LocalStorage.prototype._deleteLocation = function() {
-      delete instanceMap[this._location];
-      _rm(this._location);
-      this._metaKeyMap = {};
-      this._keys = [];
-      this.length = 0;
-      return this._bytesInUse = 0;
-    };
-
-    return LocalStorage;
-
-  })(events.EventEmitter);
-
-  JSONStorage = (function(superClass) {
-    extend(JSONStorage, superClass);
-
-    function JSONStorage() {
-      return JSONStorage.__super__.constructor.apply(this, arguments);
-    }
-
-    JSONStorage.prototype.setItem = function(key, value) {
-      var newValue;
-      newValue = JSON.stringify(value);
-      return JSONStorage.__super__.setItem.call(this, key, newValue);
-    };
-
-    JSONStorage.prototype.getItem = function(key) {
-      return JSON.parse(JSONStorage.__super__.getItem.call(this, key));
-    };
-
-    return JSONStorage;
-
-  })(LocalStorage);
-
-  exports.LocalStorage = LocalStorage;
-
-  exports.JSONStorage = JSONStorage;
-
-  exports.QUOTA_EXCEEDED_ERR = QUOTA_EXCEEDED_ERR;
-
-}).call(this);
-
-}).call(this,require('_process'))
-},{"_process":226,"events":131,"fs":84,"path":221,"write-file-atomic":327}],204:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 (function (Buffer){
 //     uuid.js
 //
@@ -56452,7 +58244,7 @@ assert.equal = function assertEqual(l, r, msg) {
 })('undefined' !== typeof window ? window : null);
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"crypto":99}],205:[function(require,module,exports){
+},{"buffer":99,"crypto":110}],210:[function(require,module,exports){
 var crypto = require('crypto')
   , qs = require('querystring')
   ;
@@ -56590,7 +58382,7 @@ exports.rfc3986 = rfc3986
 exports.generateBase = generateBase
 
 
-},{"crypto":99,"querystring":241}],206:[function(require,module,exports){
+},{"crypto":110,"querystring":246}],211:[function(require,module,exports){
 'use strict';
 
 
@@ -56694,7 +58486,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],207:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -56728,7 +58520,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],208:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 module.exports = {
 
   /* Allowed flush values; see deflate() and inflate() below for details */
@@ -56777,7 +58569,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],209:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -56820,7 +58612,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],210:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 'use strict';
 
 var utils   = require('../utils/common');
@@ -58587,7 +60379,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":206,"./adler32":207,"./crc32":209,"./messages":214,"./trees":215}],211:[function(require,module,exports){
+},{"../utils/common":211,"./adler32":212,"./crc32":214,"./messages":219,"./trees":220}],216:[function(require,module,exports){
 'use strict';
 
 // See state defs from inflate.js
@@ -58915,7 +60707,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],212:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 'use strict';
 
 
@@ -60420,7 +62212,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":206,"./adler32":207,"./crc32":209,"./inffast":211,"./inftrees":213}],213:[function(require,module,exports){
+},{"../utils/common":211,"./adler32":212,"./crc32":214,"./inffast":216,"./inftrees":218}],218:[function(require,module,exports){
 'use strict';
 
 
@@ -60749,7 +62541,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":206}],214:[function(require,module,exports){
+},{"../utils/common":211}],219:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -60764,7 +62556,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],215:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 'use strict';
 
 
@@ -61965,7 +63757,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":206}],216:[function(require,module,exports){
+},{"../utils/common":211}],221:[function(require,module,exports){
 'use strict';
 
 
@@ -61996,7 +63788,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],217:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
 module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
 "2.16.840.1.101.3.4.1.2": "aes-128-cbc",
 "2.16.840.1.101.3.4.1.3": "aes-128-ofb",
@@ -62010,7 +63802,7 @@ module.exports={"2.16.840.1.101.3.4.1.1": "aes-128-ecb",
 "2.16.840.1.101.3.4.1.43": "aes-256-ofb",
 "2.16.840.1.101.3.4.1.44": "aes-256-cfb"
 }
-},{}],218:[function(require,module,exports){
+},{}],223:[function(require,module,exports){
 // from https://github.com/indutny/self-signed/blob/gh-pages/lib/asn1.js
 // Fedor, you are amazing.
 
@@ -62129,7 +63921,7 @@ exports.signature = asn1.define('signature', function () {
   )
 })
 
-},{"asn1.js":28}],219:[function(require,module,exports){
+},{"asn1.js":40}],224:[function(require,module,exports){
 (function (Buffer){
 // adapted from https://github.com/apatil/pemstrip
 var findProc = /Proc-Type: 4,ENCRYPTED\r?\nDEK-Info: AES-((?:128)|(?:192)|(?:256))-CBC,([0-9A-H]+)\r?\n\r?\n([0-9A-z\n\r\+\/\=]+)\r?\n/m
@@ -62163,7 +63955,7 @@ module.exports = function (okey, password) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"browserify-aes":60,"buffer":87,"evp_bytestokey":132}],220:[function(require,module,exports){
+},{"browserify-aes":72,"buffer":99,"evp_bytestokey":143}],225:[function(require,module,exports){
 (function (Buffer){
 var asn1 = require('./asn1')
 var aesid = require('./aesid.json')
@@ -62268,7 +64060,7 @@ function decrypt (data, password) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./aesid.json":217,"./asn1":218,"./fixProc":219,"browserify-aes":60,"buffer":87,"pbkdf2":222}],221:[function(require,module,exports){
+},{"./aesid.json":222,"./asn1":223,"./fixProc":224,"browserify-aes":72,"buffer":99,"pbkdf2":227}],226:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -62496,7 +64288,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":226}],222:[function(require,module,exports){
+},{"_process":231}],227:[function(require,module,exports){
 (function (Buffer){
 var createHmac = require('create-hmac')
 var MAX_ALLOC = Math.pow(2, 30) - 1 // default in iojs
@@ -62580,12 +64372,12 @@ function pbkdf2Sync (password, salt, iterations, keylen, digest) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"create-hmac":98}],223:[function(require,module,exports){
+},{"buffer":99,"create-hmac":109}],228:[function(require,module,exports){
 'use strict';
 
 module.exports = typeof Promise === 'function' ? Promise : require('pinkie');
 
-},{"pinkie":224}],224:[function(require,module,exports){
+},{"pinkie":229}],229:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -62881,7 +64673,7 @@ Promise.reject = function (reason) {
 module.exports = Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],225:[function(require,module,exports){
+},{}],230:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -62928,7 +64720,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":226}],226:[function(require,module,exports){
+},{"_process":231}],231:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -63049,7 +64841,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],227:[function(require,module,exports){
+},{}],232:[function(require,module,exports){
 exports.publicEncrypt = require('./publicEncrypt');
 exports.privateDecrypt = require('./privateDecrypt');
 
@@ -63060,7 +64852,7 @@ exports.privateEncrypt = function privateEncrypt(key, buf) {
 exports.publicDecrypt = function publicDecrypt(key, buf) {
   return exports.privateDecrypt(key, buf, true);
 };
-},{"./privateDecrypt":229,"./publicEncrypt":230}],228:[function(require,module,exports){
+},{"./privateDecrypt":234,"./publicEncrypt":235}],233:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('create-hash');
 module.exports = function (seed, len) {
@@ -63079,7 +64871,7 @@ function i2ops(c) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"create-hash":95}],229:[function(require,module,exports){
+},{"buffer":99,"create-hash":106}],234:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var mgf = require('./mgf');
@@ -63190,7 +64982,7 @@ function compare(a, b){
   return dif;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":228,"./withPublic":231,"./xor":232,"bn.js":55,"browserify-rsa":76,"buffer":87,"create-hash":95,"parse-asn1":220}],230:[function(require,module,exports){
+},{"./mgf":233,"./withPublic":236,"./xor":237,"bn.js":67,"browserify-rsa":88,"buffer":99,"create-hash":106,"parse-asn1":225}],235:[function(require,module,exports){
 (function (Buffer){
 var parseKeys = require('parse-asn1');
 var randomBytes = require('randombytes');
@@ -63288,7 +65080,7 @@ function nonZero(len, crypto) {
   return out;
 }
 }).call(this,require("buffer").Buffer)
-},{"./mgf":228,"./withPublic":231,"./xor":232,"bn.js":55,"browserify-rsa":76,"buffer":87,"create-hash":95,"parse-asn1":220,"randombytes":242}],231:[function(require,module,exports){
+},{"./mgf":233,"./withPublic":236,"./xor":237,"bn.js":67,"browserify-rsa":88,"buffer":99,"create-hash":106,"parse-asn1":225,"randombytes":247}],236:[function(require,module,exports){
 (function (Buffer){
 var bn = require('bn.js');
 function withPublic(paddedMsg, key) {
@@ -63301,7 +65093,7 @@ function withPublic(paddedMsg, key) {
 
 module.exports = withPublic;
 }).call(this,require("buffer").Buffer)
-},{"bn.js":55,"buffer":87}],232:[function(require,module,exports){
+},{"bn.js":67,"buffer":99}],237:[function(require,module,exports){
 module.exports = function xor(a, b) {
   var len = a.length;
   var i = -1;
@@ -63310,7 +65102,7 @@ module.exports = function xor(a, b) {
   }
   return a
 };
-},{}],233:[function(require,module,exports){
+},{}],238:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -63847,7 +65639,7 @@ module.exports = function xor(a, b) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],234:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -65899,7 +67691,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":226}],235:[function(require,module,exports){
+},{"_process":231}],240:[function(require,module,exports){
 'use strict';
 
 var Stringify = require('./stringify');
@@ -65910,7 +67702,7 @@ module.exports = {
     parse: Parse
 };
 
-},{"./parse":236,"./stringify":237}],236:[function(require,module,exports){
+},{"./parse":241,"./stringify":242}],241:[function(require,module,exports){
 'use strict';
 
 var Utils = require('./utils');
@@ -66076,7 +67868,7 @@ module.exports = function (str, opts) {
     return Utils.compact(obj);
 };
 
-},{"./utils":238}],237:[function(require,module,exports){
+},{"./utils":243}],242:[function(require,module,exports){
 'use strict';
 
 var Utils = require('./utils');
@@ -66209,7 +68001,7 @@ module.exports = function (object, opts) {
     return keys.join(delimiter);
 };
 
-},{"./utils":238}],238:[function(require,module,exports){
+},{"./utils":243}],243:[function(require,module,exports){
 'use strict';
 
 var hexTable = (function () {
@@ -66373,7 +68165,7 @@ exports.isBuffer = function (obj) {
     return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
 };
 
-},{}],239:[function(require,module,exports){
+},{}],244:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -66459,7 +68251,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],240:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -66546,13 +68338,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],241:[function(require,module,exports){
+},{}],246:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":239,"./encode":240}],242:[function(require,module,exports){
+},{"./decode":244,"./encode":245}],247:[function(require,module,exports){
 (function (process,global,Buffer){
 'use strict'
 
@@ -66592,10 +68384,10 @@ function randomBytes (size, cb) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"_process":226,"buffer":87}],243:[function(require,module,exports){
+},{"_process":231,"buffer":99}],248:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":244}],244:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":249}],249:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -66671,7 +68463,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":246,"./_stream_writable":248,"core-util-is":93,"inherits":178,"process-nextick-args":225}],245:[function(require,module,exports){
+},{"./_stream_readable":251,"./_stream_writable":253,"core-util-is":104,"inherits":184,"process-nextick-args":230}],250:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -66698,7 +68490,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":247,"core-util-is":93,"inherits":178}],246:[function(require,module,exports){
+},{"./_stream_transform":252,"core-util-is":104,"inherits":184}],251:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -67581,7 +69373,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":244,"_process":226,"buffer":87,"core-util-is":93,"events":131,"inherits":178,"isarray":184,"process-nextick-args":225,"string_decoder/":308,"util":57}],247:[function(require,module,exports){
+},{"./_stream_duplex":249,"_process":231,"buffer":99,"core-util-is":104,"events":142,"inherits":184,"isarray":190,"process-nextick-args":230,"string_decoder/":309,"util":69}],252:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -67762,7 +69554,7 @@ function done(stream, er) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":244,"core-util-is":93,"inherits":178}],248:[function(require,module,exports){
+},{"./_stream_duplex":249,"core-util-is":104,"inherits":184}],253:[function(require,module,exports){
 (function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
@@ -68281,10 +70073,10 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":244,"_process":226,"buffer":87,"core-util-is":93,"events":131,"inherits":178,"process-nextick-args":225,"util-deprecate":322}],249:[function(require,module,exports){
+},{"./_stream_duplex":249,"_process":231,"buffer":99,"core-util-is":104,"events":142,"inherits":184,"process-nextick-args":230,"util-deprecate":323}],254:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":245}],250:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":250}],255:[function(require,module,exports){
 var Stream = (function (){
   try {
     return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
@@ -68298,13 +70090,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":244,"./lib/_stream_passthrough.js":245,"./lib/_stream_readable.js":246,"./lib/_stream_transform.js":247,"./lib/_stream_writable.js":248}],251:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":249,"./lib/_stream_passthrough.js":250,"./lib/_stream_readable.js":251,"./lib/_stream_transform.js":252,"./lib/_stream_writable.js":253}],256:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":247}],252:[function(require,module,exports){
+},{"./lib/_stream_transform.js":252}],257:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":248}],253:[function(require,module,exports){
+},{"./lib/_stream_writable.js":253}],258:[function(require,module,exports){
 // Copyright 2010-2012 Mikeal Rogers
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
@@ -68463,7 +70255,7 @@ Object.defineProperty(request, 'debug', {
   }
 })
 
-},{"./lib/cookies":255,"./lib/helpers":258,"./request":264,"extend":133}],254:[function(require,module,exports){
+},{"./lib/cookies":260,"./lib/helpers":263,"./request":269,"extend":144}],259:[function(require,module,exports){
 'use strict'
 
 var caseless = require('caseless')
@@ -68633,7 +70425,7 @@ Auth.prototype.onResponse = function (response) {
 
 exports.Auth = Auth
 
-},{"./helpers":258,"caseless":89,"node-uuid":204}],255:[function(require,module,exports){
+},{"./helpers":263,"caseless":101,"node-uuid":209}],260:[function(require,module,exports){
 'use strict'
 
 var tough = require('tough-cookie')
@@ -68674,7 +70466,7 @@ exports.jar = function(store) {
   return new RequestJar(store)
 }
 
-},{"tough-cookie":311}],256:[function(require,module,exports){
+},{"tough-cookie":312}],261:[function(require,module,exports){
 (function (process){
 'use strict'
 
@@ -68757,7 +70549,7 @@ function getProxyFromURI(uri) {
 module.exports = getProxyFromURI
 
 }).call(this,require('_process'))
-},{"_process":226}],257:[function(require,module,exports){
+},{"_process":231}],262:[function(require,module,exports){
 'use strict'
 
 var fs = require('fs')
@@ -68974,7 +70766,7 @@ Har.prototype.options = function (options) {
 
 exports.Har = Har
 
-},{"extend":133,"fs":84,"har-validator":144,"querystring":241}],258:[function(require,module,exports){
+},{"extend":144,"fs":96,"har-validator":151,"querystring":246}],263:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -69052,7 +70844,7 @@ exports.version               = version
 exports.defer                 = deferMethod()
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":226,"buffer":87,"crypto":99,"json-stringify-safe":194}],259:[function(require,module,exports){
+},{"_process":231,"buffer":99,"crypto":110,"json-stringify-safe":200}],264:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 
@@ -69168,7 +70960,7 @@ Multipart.prototype.onRequest = function (options) {
 exports.Multipart = Multipart
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"combined-stream":91,"isstream":185,"node-uuid":204}],260:[function(require,module,exports){
+},{"buffer":99,"combined-stream":103,"isstream":191,"node-uuid":209}],265:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 
@@ -69319,7 +71111,7 @@ OAuth.prototype.onRequest = function (_oauth) {
 exports.OAuth = OAuth
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"caseless":89,"crypto":99,"node-uuid":204,"oauth-sign":205,"qs":235,"url":320}],261:[function(require,module,exports){
+},{"buffer":99,"caseless":101,"crypto":110,"node-uuid":209,"oauth-sign":210,"qs":240,"url":321}],266:[function(require,module,exports){
 'use strict'
 
 var qs = require('qs')
@@ -69372,7 +71164,7 @@ Querystring.prototype.unescape = querystring.unescape
 
 exports.Querystring = Querystring
 
-},{"qs":235,"querystring":241}],262:[function(require,module,exports){
+},{"qs":240,"querystring":246}],267:[function(require,module,exports){
 'use strict'
 
 var url = require('url')
@@ -69527,7 +71319,7 @@ Redirect.prototype.onResponse = function (response) {
 
 exports.Redirect = Redirect
 
-},{"url":320}],263:[function(require,module,exports){
+},{"url":321}],268:[function(require,module,exports){
 'use strict'
 
 var url = require('url')
@@ -69705,7 +71497,7 @@ Tunnel.defaultProxyHeaderWhiteList = defaultProxyHeaderWhiteList
 Tunnel.defaultProxyHeaderExclusiveList = defaultProxyHeaderExclusiveList
 exports.Tunnel = Tunnel
 
-},{"tunnel-agent":318,"url":320}],264:[function(require,module,exports){
+},{"tunnel-agent":319,"url":321}],269:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -71167,7 +72959,7 @@ Request.prototype.toJSON = requestToJSON
 module.exports = Request
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./lib/auth":254,"./lib/cookies":255,"./lib/getProxyFromURI":256,"./lib/har":257,"./lib/helpers":258,"./lib/multipart":259,"./lib/oauth":260,"./lib/querystring":261,"./lib/redirect":262,"./lib/tunnel":263,"_process":226,"aws-sign2":50,"aws4":51,"bl":54,"buffer":87,"caseless":89,"extend":133,"forever-agent":135,"form-data":136,"hawk":168,"http":298,"http-signature":169,"https":174,"is-typedarray":183,"isstream":185,"mime-types":201,"stream":297,"stringstream":309,"url":320,"util":324,"zlib":83}],265:[function(require,module,exports){
+},{"./lib/auth":259,"./lib/cookies":260,"./lib/getProxyFromURI":261,"./lib/har":262,"./lib/helpers":263,"./lib/multipart":264,"./lib/oauth":265,"./lib/querystring":266,"./lib/redirect":267,"./lib/tunnel":268,"_process":231,"aws-sign2":62,"aws4":63,"bl":66,"buffer":99,"caseless":101,"extend":144,"forever-agent":146,"form-data":147,"hawk":175,"http":299,"http-signature":176,"https":181,"is-typedarray":189,"isstream":191,"mime-types":207,"stream":298,"stringstream":310,"url":321,"util":325,"zlib":95}],270:[function(require,module,exports){
 (function (Buffer){
 /*
 CryptoJS v3.1.2
@@ -71381,7 +73173,7 @@ function ripemd160 (message) {
 module.exports = ripemd160
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],266:[function(require,module,exports){
+},{"buffer":99}],271:[function(require,module,exports){
 (function (Buffer){
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -71454,7 +73246,7 @@ Hash.prototype._update = function () {
 module.exports = Hash
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],267:[function(require,module,exports){
+},{"buffer":99}],272:[function(require,module,exports){
 var exports = module.exports = function SHA (algorithm) {
   algorithm = algorithm.toLowerCase()
 
@@ -71471,7 +73263,7 @@ exports.sha256 = require('./sha256')
 exports.sha384 = require('./sha384')
 exports.sha512 = require('./sha512')
 
-},{"./sha":268,"./sha1":269,"./sha224":270,"./sha256":271,"./sha384":272,"./sha512":273}],268:[function(require,module,exports){
+},{"./sha":273,"./sha1":274,"./sha224":275,"./sha256":276,"./sha384":277,"./sha512":278}],273:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-0, as defined
@@ -71568,7 +73360,7 @@ Sha.prototype._hash = function () {
 module.exports = Sha
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":266,"buffer":87,"inherits":178}],269:[function(require,module,exports){
+},{"./hash":271,"buffer":99,"inherits":184}],274:[function(require,module,exports){
 (function (Buffer){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
@@ -71670,7 +73462,7 @@ Sha1.prototype._hash = function () {
 module.exports = Sha1
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":266,"buffer":87,"inherits":178}],270:[function(require,module,exports){
+},{"./hash":271,"buffer":99,"inherits":184}],275:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -71726,7 +73518,7 @@ Sha224.prototype._hash = function () {
 module.exports = Sha224
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":266,"./sha256":271,"buffer":87,"inherits":178}],271:[function(require,module,exports){
+},{"./hash":271,"./sha256":276,"buffer":99,"inherits":184}],276:[function(require,module,exports){
 (function (Buffer){
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -71864,7 +73656,7 @@ Sha256.prototype._hash = function () {
 module.exports = Sha256
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":266,"buffer":87,"inherits":178}],272:[function(require,module,exports){
+},{"./hash":271,"buffer":99,"inherits":184}],277:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var SHA512 = require('./sha512')
@@ -71924,7 +73716,7 @@ Sha384.prototype._hash = function () {
 module.exports = Sha384
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":266,"./sha512":273,"buffer":87,"inherits":178}],273:[function(require,module,exports){
+},{"./hash":271,"./sha512":278,"buffer":99,"inherits":184}],278:[function(require,module,exports){
 (function (Buffer){
 var inherits = require('inherits')
 var Hash = require('./hash')
@@ -72187,110 +73979,7 @@ Sha512.prototype._hash = function () {
 module.exports = Sha512
 
 }).call(this,require("buffer").Buffer)
-},{"./hash":266,"buffer":87,"inherits":178}],274:[function(require,module,exports){
-(function (process){
-
-/*
-usage:
-
-// do something to a list of things
-asyncMap(myListOfStuff, function (thing, cb) { doSomething(thing.foo, cb) }, cb)
-// do more than one thing to each item
-asyncMap(list, fooFn, barFn, cb)
-
-*/
-
-module.exports = asyncMap
-
-function asyncMap () {
-  var steps = Array.prototype.slice.call(arguments)
-    , list = steps.shift() || []
-    , cb_ = steps.pop()
-  if (typeof cb_ !== "function") throw new Error(
-    "No callback provided to asyncMap")
-  if (!list) return cb_(null, [])
-  if (!Array.isArray(list)) list = [list]
-  var n = steps.length
-    , data = [] // 2d array
-    , errState = null
-    , l = list.length
-    , a = l * n
-  if (!a) return cb_(null, [])
-  function cb (er) {
-    if (er && !errState) errState = er
-
-    var argLen = arguments.length
-    for (var i = 1; i < argLen; i ++) if (arguments[i] !== undefined) {
-      data[i - 1] = (data[i - 1] || []).concat(arguments[i])
-    }
-    // see if any new things have been added.
-    if (list.length > l) {
-      var newList = list.slice(l)
-      a += (list.length - l) * n
-      l = list.length
-      process.nextTick(function () {
-        newList.forEach(function (ar) {
-          steps.forEach(function (fn) { fn(ar, cb) })
-        })
-      })
-    }
-
-    if (--a === 0) cb_.apply(null, [errState].concat(data))
-  }
-  // expect the supplied cb function to be called
-  // "n" times for each thing in the array.
-  list.forEach(function (ar) {
-    steps.forEach(function (fn) { fn(ar, cb) })
-  })
-}
-
-}).call(this,require('_process'))
-},{"_process":226}],275:[function(require,module,exports){
-module.exports = bindActor
-function bindActor () {
-  var args = 
-        Array.prototype.slice.call
-        (arguments) // jswtf.
-    , obj = null
-    , fn
-  if (typeof args[0] === "object") {
-    obj = args.shift()
-    fn = args.shift()
-    if (typeof fn === "string")
-      fn = obj[ fn ]
-  } else fn = args.shift()
-  return function (cb) {
-    fn.apply(obj, args.concat(cb)) }
-}
-
-},{}],276:[function(require,module,exports){
-module.exports = chain
-var bindActor = require("./bind-actor.js")
-chain.first = {} ; chain.last = {}
-function chain (things, cb) {
-  var res = []
-  ;(function LOOP (i, len) {
-    if (i >= len) return cb(null,res)
-    if (Array.isArray(things[i]))
-      things[i] = bindActor.apply(null,
-        things[i].map(function(i){
-          return (i===chain.first) ? res[0]
-           : (i===chain.last)
-             ? res[res.length - 1] : i }))
-    if (!things[i]) return LOOP(i + 1, len)
-    things[i](function (er, data) {
-      if (er) return cb(er, res)
-      if (data !== undefined) res = res.concat(data)
-      LOOP(i + 1, len)
-    })
-  })(0, things.length) }
-
-},{"./bind-actor.js":275}],277:[function(require,module,exports){
-exports.asyncMap = require("./async-map")
-exports.bindActor = require("./bind-actor")
-exports.chain = require("./chain")
-
-},{"./async-map":274,"./bind-actor":275,"./chain":276}],278:[function(require,module,exports){
+},{"./hash":271,"buffer":99,"inherits":184}],279:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -72462,7 +74151,7 @@ module.exports = {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87}],279:[function(require,module,exports){
+},{"buffer":99}],280:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -72777,7 +74466,7 @@ ECPrivate.prototype.deriveSharedSecret = function (pubKey) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./algs":278,"./key":291,"./private-key":292,"./utils":295,"assert-plus":296,"buffer":87,"crypto":99,"ecc-jsbn":111,"ecc-jsbn/lib/ec":112,"jodid25519":186,"jsbn":192}],280:[function(require,module,exports){
+},{"./algs":279,"./key":292,"./private-key":293,"./utils":296,"assert-plus":297,"buffer":99,"crypto":110,"ecc-jsbn":122,"ecc-jsbn/lib/ec":123,"jodid25519":192,"jsbn":198}],281:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -72877,7 +74566,7 @@ Signer.prototype.sign = function () {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./signature":293,"assert-plus":296,"buffer":87,"stream":297,"tweetnacl":319,"util":324}],281:[function(require,module,exports){
+},{"./signature":294,"assert-plus":297,"buffer":99,"stream":298,"tweetnacl":320,"util":325}],282:[function(require,module,exports){
 // Copyright 2015 Joyent, Inc.
 
 var assert = require('assert-plus');
@@ -72950,7 +74639,7 @@ module.exports = {
 	KeyEncryptedError: KeyEncryptedError
 };
 
-},{"assert-plus":296,"util":324}],282:[function(require,module,exports){
+},{"assert-plus":297,"util":325}],283:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -73094,7 +74783,7 @@ Fingerprint._oldVersionDetect = function (obj) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./algs":278,"./errors":281,"./key":291,"./utils":295,"assert-plus":296,"buffer":87,"crypto":99}],283:[function(require,module,exports){
+},{"./algs":279,"./errors":282,"./key":292,"./utils":296,"assert-plus":297,"buffer":99,"crypto":110}],284:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -73171,7 +74860,7 @@ function write(key, options) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../key":291,"../private-key":292,"../utils":295,"./pem":284,"./rfc4253":287,"./ssh":289,"assert-plus":296,"buffer":87}],284:[function(require,module,exports){
+},{"../key":292,"../private-key":293,"../utils":296,"./pem":285,"./rfc4253":288,"./ssh":290,"assert-plus":297,"buffer":99}],285:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -73361,7 +75050,7 @@ function write(key, options, type) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../algs":278,"../errors":281,"../key":291,"../private-key":292,"../utils":295,"./pkcs1":285,"./pkcs8":286,"./rfc4253":287,"./ssh-private":288,"asn1":47,"assert-plus":296,"buffer":87,"crypto":99}],285:[function(require,module,exports){
+},{"../algs":279,"../errors":282,"../key":292,"../private-key":293,"../utils":296,"./pkcs1":286,"./pkcs8":287,"./rfc4253":288,"./ssh-private":289,"asn1":59,"assert-plus":297,"buffer":99,"crypto":110}],286:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -73685,7 +75374,7 @@ function writePkcs1ECDSAPrivate(der, key) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../algs":278,"../key":291,"../private-key":292,"../utils":295,"./pem":284,"./pkcs8":286,"asn1":47,"assert-plus":296,"buffer":87}],286:[function(require,module,exports){
+},{"../algs":279,"../key":292,"../private-key":293,"../utils":296,"./pem":285,"./pkcs8":287,"asn1":59,"assert-plus":297,"buffer":99}],287:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -74199,7 +75888,7 @@ function writePkcs8ECDSAPrivate(key, der) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../algs":278,"../key":291,"../private-key":292,"../utils":295,"./pem":284,"asn1":47,"assert-plus":296,"buffer":87}],287:[function(require,module,exports){
+},{"../algs":279,"../key":292,"../private-key":293,"../utils":296,"./pem":285,"asn1":59,"assert-plus":297,"buffer":99}],288:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -74349,7 +76038,7 @@ function write(key, options) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../algs":278,"../key":291,"../private-key":292,"../ssh-buffer":294,"../utils":295,"assert-plus":296,"buffer":87}],288:[function(require,module,exports){
+},{"../algs":279,"../key":292,"../private-key":293,"../ssh-buffer":295,"../utils":296,"assert-plus":297,"buffer":99}],289:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -74491,7 +76180,7 @@ function write(key, options) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../algs":278,"../key":291,"../private-key":292,"../ssh-buffer":294,"../utils":295,"./pem":284,"./rfc4253":287,"asn1":47,"assert-plus":296,"buffer":87,"crypto":99}],289:[function(require,module,exports){
+},{"../algs":279,"../key":292,"../private-key":293,"../ssh-buffer":295,"../utils":296,"./pem":285,"./rfc4253":288,"asn1":59,"assert-plus":297,"buffer":99,"crypto":110}],290:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -74609,7 +76298,7 @@ function write(key, options) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"../key":291,"../private-key":292,"../utils":295,"./rfc4253":287,"./ssh-private":288,"assert-plus":296,"buffer":87}],290:[function(require,module,exports){
+},{"../key":292,"../private-key":293,"../utils":296,"./rfc4253":288,"./ssh-private":289,"assert-plus":297,"buffer":99}],291:[function(require,module,exports){
 // Copyright 2015 Joyent, Inc.
 
 var Key = require('./key');
@@ -74637,7 +76326,7 @@ module.exports = {
 	KeyEncryptedError: errs.KeyEncryptedError
 };
 
-},{"./errors":281,"./fingerprint":282,"./key":291,"./private-key":292,"./signature":293}],291:[function(require,module,exports){
+},{"./errors":282,"./fingerprint":283,"./key":292,"./private-key":293,"./signature":294}],292:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -74910,7 +76599,7 @@ Key._oldVersionDetect = function (obj) {
 };
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":179,"./algs":278,"./dhe":279,"./ed-compat":280,"./errors":281,"./fingerprint":282,"./formats/auto":283,"./formats/pem":284,"./formats/pkcs1":285,"./formats/pkcs8":286,"./formats/rfc4253":287,"./formats/ssh":289,"./formats/ssh-private":288,"./private-key":292,"./signature":293,"./utils":295,"assert-plus":296,"crypto":99}],292:[function(require,module,exports){
+},{"../../is-buffer/index.js":185,"./algs":279,"./dhe":280,"./ed-compat":281,"./errors":282,"./fingerprint":283,"./formats/auto":284,"./formats/pem":285,"./formats/pkcs1":286,"./formats/pkcs8":287,"./formats/rfc4253":288,"./formats/ssh":290,"./formats/ssh-private":289,"./private-key":293,"./signature":294,"./utils":296,"assert-plus":297,"crypto":110}],293:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -75145,7 +76834,7 @@ PrivateKey._oldVersionDetect = function (obj) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./algs":278,"./ed-compat":280,"./errors":281,"./fingerprint":282,"./formats/auto":283,"./formats/pem":284,"./formats/pkcs1":285,"./formats/pkcs8":286,"./formats/rfc4253":287,"./formats/ssh-private":288,"./key":291,"./signature":293,"./utils":295,"assert-plus":296,"buffer":87,"crypto":99,"jodid25519":186,"util":324}],293:[function(require,module,exports){
+},{"./algs":279,"./ed-compat":281,"./errors":282,"./fingerprint":283,"./formats/auto":284,"./formats/pem":285,"./formats/pkcs1":286,"./formats/pkcs8":287,"./formats/rfc4253":288,"./formats/ssh-private":289,"./key":292,"./signature":294,"./utils":296,"assert-plus":297,"buffer":99,"crypto":110,"jodid25519":192,"util":325}],294:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -75386,7 +77075,7 @@ Signature._oldVersionDetect = function (obj) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"./algs":278,"./errors":281,"./ssh-buffer":294,"./utils":295,"asn1":47,"assert-plus":296,"buffer":87,"crypto":99}],294:[function(require,module,exports){
+},{"./algs":279,"./errors":282,"./ssh-buffer":295,"./utils":296,"asn1":59,"assert-plus":297,"buffer":99,"crypto":110}],295:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -75514,7 +77203,7 @@ SSHBuffer.prototype.write = function (buf) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"assert-plus":296,"buffer":87}],295:[function(require,module,exports){
+},{"assert-plus":297,"buffer":99}],296:[function(require,module,exports){
 (function (Buffer){
 // Copyright 2015 Joyent, Inc.
 
@@ -75764,7 +77453,7 @@ function addRSAMissing(key) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./private-key":292,"assert-plus":296,"buffer":87,"crypto":99,"jsbn":192}],296:[function(require,module,exports){
+},{"./private-key":293,"assert-plus":297,"buffer":99,"crypto":110,"jsbn":198}],297:[function(require,module,exports){
 (function (Buffer,process){
 // Copyright (c) 2012, Mark Cavage. All rights reserved.
 // Copyright 2015 Joyent, Inc.
@@ -75979,7 +77668,7 @@ function _setExports(ndebug) {
 module.exports = _setExports(process.env.NODE_NDEBUG);
 
 }).call(this,{"isBuffer":require("../../../is-buffer/index.js")},require('_process'))
-},{"../../../is-buffer/index.js":179,"_process":226,"assert":49,"stream":297,"util":324}],297:[function(require,module,exports){
+},{"../../../is-buffer/index.js":185,"_process":231,"assert":61,"stream":298,"util":325}],298:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -76108,7 +77797,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":131,"inherits":178,"readable-stream/duplex.js":243,"readable-stream/passthrough.js":249,"readable-stream/readable.js":250,"readable-stream/transform.js":251,"readable-stream/writable.js":252}],298:[function(require,module,exports){
+},{"events":142,"inherits":184,"readable-stream/duplex.js":248,"readable-stream/passthrough.js":254,"readable-stream/readable.js":255,"readable-stream/transform.js":256,"readable-stream/writable.js":257}],299:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -76190,7 +77879,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":300,"builtin-status-codes":88,"url":320,"xtend":328}],299:[function(require,module,exports){
+},{"./lib/request":301,"builtin-status-codes":100,"url":321,"xtend":328}],300:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableByteStream)
 
@@ -76234,7 +77923,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],300:[function(require,module,exports){
+},{}],301:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -76515,7 +78204,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":299,"./response":301,"_process":226,"buffer":87,"inherits":178,"readable-stream":307,"to-arraybuffer":310}],301:[function(require,module,exports){
+},{"./capability":300,"./response":302,"_process":231,"buffer":99,"inherits":184,"readable-stream":308,"to-arraybuffer":311}],302:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -76699,11 +78388,11 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":299,"_process":226,"buffer":87,"inherits":178,"readable-stream":307}],302:[function(require,module,exports){
-arguments[4][244][0].apply(exports,arguments)
-},{"./_stream_readable":304,"./_stream_writable":306,"core-util-is":93,"dup":244,"inherits":178,"process-nextick-args":225}],303:[function(require,module,exports){
-arguments[4][245][0].apply(exports,arguments)
-},{"./_stream_transform":305,"core-util-is":93,"dup":245,"inherits":178}],304:[function(require,module,exports){
+},{"./capability":300,"_process":231,"buffer":99,"inherits":184,"readable-stream":308}],303:[function(require,module,exports){
+arguments[4][249][0].apply(exports,arguments)
+},{"./_stream_readable":305,"./_stream_writable":307,"core-util-is":104,"dup":249,"inherits":184,"process-nextick-args":230}],304:[function(require,module,exports){
+arguments[4][250][0].apply(exports,arguments)
+},{"./_stream_transform":306,"core-util-is":104,"dup":250,"inherits":184}],305:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -77599,7 +79288,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":302,"_process":226,"buffer":87,"buffer-shims":85,"core-util-is":93,"events":131,"inherits":178,"isarray":184,"process-nextick-args":225,"string_decoder/":308,"util":57}],305:[function(require,module,exports){
+},{"./_stream_duplex":303,"_process":231,"buffer":99,"buffer-shims":97,"core-util-is":104,"events":142,"inherits":184,"isarray":190,"process-nextick-args":230,"string_decoder/":309,"util":69}],306:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -77780,7 +79469,7 @@ function done(stream, er) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":302,"core-util-is":93,"inherits":178}],306:[function(require,module,exports){
+},{"./_stream_duplex":303,"core-util-is":104,"inherits":184}],307:[function(require,module,exports){
 (function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
@@ -78309,7 +79998,7 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":302,"_process":226,"buffer":87,"buffer-shims":85,"core-util-is":93,"events":131,"inherits":178,"process-nextick-args":225,"util-deprecate":322}],307:[function(require,module,exports){
+},{"./_stream_duplex":303,"_process":231,"buffer":99,"buffer-shims":97,"core-util-is":104,"events":142,"inherits":184,"process-nextick-args":230,"util-deprecate":323}],308:[function(require,module,exports){
 (function (process){
 var Stream = (function (){
   try {
@@ -78329,7 +80018,7 @@ if (!process.browser && process.env.READABLE_STREAM === 'disable' && Stream) {
 }
 
 }).call(this,require('_process'))
-},{"./lib/_stream_duplex.js":302,"./lib/_stream_passthrough.js":303,"./lib/_stream_readable.js":304,"./lib/_stream_transform.js":305,"./lib/_stream_writable.js":306,"_process":226}],308:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":303,"./lib/_stream_passthrough.js":304,"./lib/_stream_readable.js":305,"./lib/_stream_transform.js":306,"./lib/_stream_writable.js":307,"_process":231}],309:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -78552,7 +80241,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":87}],309:[function(require,module,exports){
+},{"buffer":99}],310:[function(require,module,exports){
 (function (Buffer){
 var util = require('util')
 var Stream = require('stream')
@@ -78658,7 +80347,7 @@ function alignedWrite(buffer) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":87,"stream":297,"string_decoder":308,"util":324}],310:[function(require,module,exports){
+},{"buffer":99,"stream":298,"string_decoder":309,"util":325}],311:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -78687,7 +80376,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":87}],311:[function(require,module,exports){
+},{"buffer":99}],312:[function(require,module,exports){
 /*!
  * Copyright (c) 2015, Salesforce.com, Inc.
  * All rights reserved.
@@ -80031,7 +81720,7 @@ module.exports = {
   canonicalDomain: canonicalDomain
 };
 
-},{"../package.json":317,"./memstore":312,"./pathMatch":313,"./permuteDomain":314,"./pubsuffix":315,"./store":316,"net":84,"punycode":233,"url":320}],312:[function(require,module,exports){
+},{"../package.json":318,"./memstore":313,"./pathMatch":314,"./permuteDomain":315,"./pubsuffix":316,"./store":317,"net":96,"punycode":238,"url":321}],313:[function(require,module,exports){
 /*!
  * Copyright (c) 2015, Salesforce.com, Inc.
  * All rights reserved.
@@ -80203,7 +81892,7 @@ MemoryCookieStore.prototype.getAllCookies = function(cb) {
   cb(null, cookies);
 };
 
-},{"./pathMatch":313,"./permuteDomain":314,"./store":316,"util":324}],313:[function(require,module,exports){
+},{"./pathMatch":314,"./permuteDomain":315,"./store":317,"util":325}],314:[function(require,module,exports){
 /*!
  * Copyright (c) 2015, Salesforce.com, Inc.
  * All rights reserved.
@@ -80266,7 +81955,7 @@ function pathMatch (reqPath, cookiePath) {
 
 exports.pathMatch = pathMatch;
 
-},{}],314:[function(require,module,exports){
+},{}],315:[function(require,module,exports){
 /*!
  * Copyright (c) 2015, Salesforce.com, Inc.
  * All rights reserved.
@@ -80324,7 +82013,7 @@ function permuteDomain (domain) {
 
 exports.permuteDomain = permuteDomain;
 
-},{"./pubsuffix":315}],315:[function(require,module,exports){
+},{"./pubsuffix":316}],316:[function(require,module,exports){
 /****************************************************
  * AUTOMATICALLY GENERATED by generate-pubsuffix.js *
  *                  DO NOT EDIT!                    *
@@ -80424,7 +82113,7 @@ var index = module.exports.index = Object.freeze(
 
 // END of automatically generated file
 
-},{"punycode":233}],316:[function(require,module,exports){
+},{"punycode":238}],317:[function(require,module,exports){
 /*!
  * Copyright (c) 2015, Salesforce.com, Inc.
  * All rights reserved.
@@ -80497,7 +82186,7 @@ Store.prototype.getAllCookies = function(cb) {
   throw new Error('getAllCookies is not implemented (therefore jar cannot be serialized)');
 };
 
-},{}],317:[function(require,module,exports){
+},{}],318:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -80626,7 +82315,7 @@ module.exports={
   "version": "2.2.2"
 }
 
-},{}],318:[function(require,module,exports){
+},{}],319:[function(require,module,exports){
 (function (process,Buffer){
 'use strict'
 
@@ -80873,7 +82562,7 @@ if (process.env.NODE_DEBUG && /\btunnel\b/.test(process.env.NODE_DEBUG)) {
 exports.debug = debug // for test
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":226,"assert":49,"buffer":87,"events":131,"http":298,"https":174,"net":84,"tls":84,"util":324}],319:[function(require,module,exports){
+},{"_process":231,"assert":61,"buffer":99,"events":142,"http":299,"https":181,"net":96,"tls":96,"util":325}],320:[function(require,module,exports){
 (function (Buffer){
 (function(nacl) {
 'use strict';
@@ -83295,7 +84984,7 @@ nacl.setPRNG = function(fn) {
 })(typeof module !== 'undefined' && module.exports ? module.exports : (window.nacl = window.nacl || {}));
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":57,"crypto":57}],320:[function(require,module,exports){
+},{"buffer":69,"crypto":69}],321:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -84029,7 +85718,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":321,"punycode":233,"querystring":241}],321:[function(require,module,exports){
+},{"./util":322,"punycode":238,"querystring":246}],322:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -84047,7 +85736,7 @@ module.exports = {
   }
 };
 
-},{}],322:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 (function (global){
 
 /**
@@ -84118,14 +85807,14 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],323:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],324:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -84715,7 +86404,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":323,"_process":226,"inherits":178}],325:[function(require,module,exports){
+},{"./support/isBuffer":324,"_process":231,"inherits":184}],326:[function(require,module,exports){
 /*
  * verror.js: richer JavaScript errors
  */
@@ -84874,7 +86563,7 @@ WError.prototype.cause = function we_cause(c)
 	return (this.we_cause);
 };
 
-},{"assert":49,"extsprintf":134,"util":324}],326:[function(require,module,exports){
+},{"assert":61,"extsprintf":145,"util":325}],327:[function(require,module,exports){
 var indexOf = require('indexof');
 
 var Object_keys = function (obj) {
@@ -85014,55 +86703,7 @@ exports.createContext = Script.createContext = function (context) {
     return copy;
 };
 
-},{"indexof":177}],327:[function(require,module,exports){
-(function (process,__filename){
-'use strict'
-var fs = require('graceful-fs')
-var chain = require('slide').chain
-var MurmurHash3 = require('imurmurhash')
-
-function murmurhex () {
-  var hash = new MurmurHash3()
-  for (var ii = 0; ii < arguments.length; ++ii) hash.hash('' + arguments[ii])
-  return hash.result()
-}
-var invocations = 0
-var getTmpname = function (filename) {
-  return filename + '.' + murmurhex(__filename, process.pid, ++invocations)
-}
-
-module.exports = function writeFile (filename, data, options, callback) {
-  if (options instanceof Function) {
-    callback = options
-    options = null
-  }
-  if (!options) options = {}
-  var tmpfile = getTmpname(filename)
-  chain([
-    [fs, fs.writeFile, tmpfile, data, options],
-    options.chown && [fs, fs.chown, tmpfile, options.chown.uid, options.chown.gid],
-    [fs, fs.rename, tmpfile, filename]
-  ], function (err) {
-    err ? fs.unlink(tmpfile, function () { callback(err) })
-      : callback()
-  })
-}
-
-module.exports.sync = function writeFileSync (filename, data, options) {
-  if (!options) options = {}
-  var tmpfile = getTmpname(filename)
-  try {
-    fs.writeFileSync(tmpfile, data, options)
-    if (options.chown) fs.chownSync(tmpfile, options.chown.uid, options.chown.gid)
-    fs.renameSync(tmpfile, filename)
-  } catch (err) {
-    try { fs.unlinkSync(tmpfile) } catch (e) {}
-    throw err
-  }
-}
-
-}).call(this,require('_process'),"/node_modules\\write-file-atomic\\index.js")
-},{"_process":226,"graceful-fs":140,"imurmurhash":176,"slide":277}],328:[function(require,module,exports){
+},{"indexof":183}],328:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -85081,6 +86722,57 @@ function extend() {
     }
 
     return target
+}
+
+},{}],329:[function(require,module,exports){
+module.exports={
+  "name": "relution-sdk",
+  "version": "0.0.1",
+  "description": "Relution Software Development Kit for TypeScript and JavaScript",
+  "keywords": [
+    "relution",
+    "livedata",
+    "backbone",
+    "framework",
+    "realtime",
+    "offline",
+    "mvc"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "precommit": "npm run tslint",
+    "tslint": "tslint src/**/*.ts",
+    "test": "npm run build && mocha lib/**/*.spec.js",
+    "build": "tsc -p .",
+    "api": "typedoc --options %CD%/typedoc.json",
+    "gh-pages": "git subtree push --prefix public/docs origin gh-pages",
+    "watch": "tsc -p . -w",
+    "postinstall": "typings install",
+    "browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql",
+    "testify": "browserify ./lib/index.spec.js -o browser.spec.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql"
+  },
+  "author": "Thomas Beckmann",
+  "license": "Apache License",
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "sinon": "^1.16.0",
+    "tslint": "^3.8.1",
+    "typedoc": "sierrasoftworks/typedoc#v1.8.10",
+    "typescript": "^1.8.10",
+    "underscore": "~1.8.3"
+  },
+  "dependencies": {
+    "backbone": "~1.2.1",
+    "lodash": "^4.0.0",
+	"node-localstorage": "^1.3.0",
+    "q": "^1.4.1",
+    "request": "^2.69.0",
+    "socket.io-client": "~0.9.16",
+    "websql": "^0.4.4",
+    "JSONPath": "^0.11.2"
+  }
 }
 
 },{}]},{},[1]);

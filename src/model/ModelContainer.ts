@@ -78,7 +78,7 @@ class ArrayLookupImpl<T> extends Array<T> implements ArrayLookup<T> {
     Object.defineProperty(array, 'index', {
       value: _.keyBy(array, lookup),
       enumerable: false
-    })
+    });
     self.has = ArrayLookupImpl.prototype.has;
     self.get = ArrayLookupImpl.prototype.get;
     return self;
