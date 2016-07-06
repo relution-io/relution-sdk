@@ -1,8 +1,8 @@
 /**
- * @file core/domain.ts
+ * @file push/index.ts
  * Relution SDK
  *
- * Created by Thomas Beckmann on 28.04.2016
+ * Created by Thomas Beckmann on 06.07.2016
  * Copyright 2016 M-Way Solutions GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,25 +17,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface Referenceable {
-    uuid: string;
-}
-export interface Secure {
-    aclEntries: string[];
-    effectivePermissions?: string;
-}
-export interface HasVersion {
-    version: number;
-}
-export interface HasBundle {
-    bundle?: string;
-}
-export interface HasApplication {
-    application?: string;
-}
-export interface HasModified {
-    createdUser?: string;
-    createdDate?: Date;
-    modifiedUser?: string;
-    modifiedDate?: Date;
-}
+export * from './push';

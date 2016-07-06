@@ -15,7 +15,7 @@ import * as http from './http';
  *
  * @see ajax
  */
-export declare function head(optionsOrUrl: http.HttpOptions | string): Q.Promise<any>;
+export declare function head<T>(optionsOrUrl: http.HttpOptions | string): Q.Promise<T>;
 /**
  * issues an http/ajax GET request against the Relution server.
  *
@@ -31,7 +31,7 @@ export declare function head(optionsOrUrl: http.HttpOptions | string): Q.Promise
  *
  * @see ajax
  */
-export declare function get(optionsOrUrl: http.HttpOptions | string): Q.Promise<any>;
+export declare function get<T>(optionsOrUrl: http.HttpOptions | string): Q.Promise<T>;
 /**
  * issues an http/ajax PUT request against the Relution server.
  *
@@ -48,7 +48,7 @@ export declare function get(optionsOrUrl: http.HttpOptions | string): Q.Promise<
  *
  * @see ajax
  */
-export declare function put(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any>;
+export declare function put<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T>;
 /**
  * issues an http/ajax POST request against the Relution server.
  *
@@ -65,7 +65,7 @@ export declare function put(optionsOrUrl: http.HttpOptions | string, body?: any)
  *
  * @see ajax
  */
-export declare function post(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any>;
+export declare function post<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T>;
 /**
  * issues an http/ajax PATCH request against the Relution server.
  *
@@ -82,7 +82,7 @@ export declare function post(optionsOrUrl: http.HttpOptions | string, body?: any
  *
  * @see ajax
  */
-export declare function patch(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any>;
+export declare function patch<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T>;
 /**
  * issues an http/ajax DELETE request against the Relution server.
  *
@@ -104,7 +104,7 @@ export declare function patch(optionsOrUrl: http.HttpOptions | string, body?: an
  *
  * @see ajax
  */
-export declare function del(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any>;
+export declare function del<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T>;
 /**
  * issues an http/ajax DELETE request against the Relution server.
  *

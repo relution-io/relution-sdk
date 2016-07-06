@@ -42,6 +42,9 @@ export import security = require('./security');
 // web module
 export import web = require('./web');
 
+// push module
+export import push = require('./push');
+
 // connector module
 export import connector = require('./connector');
 
