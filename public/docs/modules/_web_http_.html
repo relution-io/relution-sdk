@@ -76,6 +76,7 @@
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.httperror.html" class="tsd-kind-icon">Http<wbr>Error</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-kind-icon">Http<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.loginoptions.html" class="tsd-kind-icon">Login<wbr>Options</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.loginresponse.html" class="tsd-kind-icon">Login<wbr>Response</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.logonoptions.html" class="tsd-kind-icon">Logon<wbr>Options</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-kind-icon">Logout<wbr>Options</a></li>
 							</ul>
@@ -90,7 +91,7 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#login" class="tsd-kind-icon">login</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_web_http_.html#logout" class="tsd-kind-icon">logout</a></li>
 							</ul>
@@ -106,7 +107,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:54</li>
+							<li>Defined in web/http.ts:55</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -121,7 +122,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IncomingMessage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:58</li>
+							<li>Defined in web/http.ts:59</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -133,17 +134,17 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 					<a name="ajax" class="tsd-anchor"></a>
 					<h3>ajax</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">ajax<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">ajax&lt;T&gt;<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_web_http_.httpoptions.html" class="tsd-signature-type">HttpOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:178</li>
+									<li>Defined in web/http.ts:179</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -188,6 +189,12 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 )
 </code></pre>
 							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -197,7 +204,7 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>of response body, in case of failure rejects to an HttpError object
 							including <code>requestUrl</code>, <code>statusCode</code> and <code>statusMessage</code>.</p>
 						</li>
@@ -207,20 +214,27 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 					<a name="login" class="tsd-anchor"></a>
 					<h3>login</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">login<span class="tsd-signature-symbol">(</span>credentials<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_auth_.credentials.html" class="tsd-signature-type">Credentials</a>, loginOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_web_http_.loginoptions.html" class="tsd-signature-type">LoginOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">login<span class="tsd-signature-symbol">(</span>credentials<span class="tsd-signature-symbol">: </span><a href="../interfaces/_security_auth_.credentials.html" class="tsd-signature-type">Credentials</a>, loginOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_web_http_.loginoptions.html" class="tsd-signature-type">LoginOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_web_http_.loginresponse.html" class="tsd-signature-type">LoginResponse</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:431</li>
+									<li>Defined in web/http.ts:456</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>logs into a Relution server.</p>
 								</div>
-								<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> Relution <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk'</span>;
+								<p>Notice, specifying <code>offlineCapable=true</code> in the options will store the login response locally on
+									the device when online and the login succeeded. When offline, the option will reuse the stored
+									response. Data encryption is used guaranteeing both secrecy of login data and verification of
+								the credentials provided.</p>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="lang-javascript">
+<span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> Relution <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk'</span>;
 <span class="hljs-comment">//config</span>
 Relution.init({
    serverUrl: <span class="hljs-string">'http://localhost:8080'</span>
@@ -246,6 +260,8 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
  () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'complete'</span>)
 )
 </code></pre>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -262,7 +278,7 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_web_http_.loginresponse.html" class="tsd-signature-type">LoginResponse</a><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>of login response.</p>
 						</li>
 					</ul>
@@ -271,27 +287,25 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 					<a name="logout" class="tsd-anchor"></a>
 					<h3>logout</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">logout<span class="tsd-signature-symbol">(</span>logoutOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">logout<span class="tsd-signature-symbol">(</span>logoutOptions<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:505</li>
+									<li>Defined in web/http.ts:619</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>logs out of a Relution server.</p>
 								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> logoutOptions: <a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>overwriting <a href="_core_init_.html#init">init</a> defaults.</p>
-										<pre><code class="lang-javascript">
+								<p>For explicit logouts (trigger by app user pressing a logout button, for example) specifying
+									<code>offlineCapable = true</code> will drop any persisted offline login data for the server logging out
+								of.</p>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="lang-javascript">
 Relution.web.logout()
  .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
  .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
@@ -304,10 +318,19 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
  () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'bye bye'</span>)
 )
 </code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> logoutOptions: <a href="../interfaces/_web_http_.logoutoptions.html" class="tsd-signature-type">LogoutOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>overwriting <a href="_core_init_.html#init">init</a> defaults.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>of logout response.</p>
 						</li>
 					</ul>
@@ -320,80 +343,8 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_connector_connector_.html">"connector/connector"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_connector_index_.html">"connector/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_diag_.html">"core/diag"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_domain_.html">"core/domain"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_index_.html">"core/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_init_.html">"core/init"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_index_.html">"index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_model_modelcontainer_.html">"model/<wbr>Model<wbr>Container"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_model_index_.html">"model/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_filter_.html">"query/<wbr>Filter"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_filtervisitor_.html">"query/<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_getquery_.html">"query/<wbr>Get<wbr>Query"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_jsonfiltervisitor_.html">"query/<wbr>Json<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_sortordercomparator_.html">"query/<wbr>Sort<wbr>Order<wbr>Comparator"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_index_.html">"query/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_auth_.html">"security/auth"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_index_.html">"security/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_roles_.html">"security/roles"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_server_.html">"security/server"</a>
-					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_web_http_.html">"web/http"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_index_.html">"web/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_urls_.html">"web/urls"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_verb_.html">"web/verb"</a>
 					</li>
 				</ul>
 			</nav>
@@ -412,6 +363,9 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 						<a href="../interfaces/_web_http_.loginoptions.html" class="tsd-kind-icon">Login<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_web_http_.loginresponse.html" class="tsd-kind-icon">Login<wbr>Response</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_web_http_.logonoptions.html" class="tsd-kind-icon">Logon<wbr>Options</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
@@ -423,7 +377,7 @@ Observable.fromPromise(Relution.web.logout()).subscribe(
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="_web_http_.html#httpresponse" class="tsd-kind-icon">Http<wbr>Response</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="_web_http_.html#ajax" class="tsd-kind-icon">ajax</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">

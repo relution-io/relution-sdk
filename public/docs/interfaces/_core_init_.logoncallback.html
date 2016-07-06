@@ -76,6 +76,8 @@
 					<p>The function may be executed multiple times, for example when the session times out. The purpose
 						of it is to call application-specific logons passing information such as credentials of 3rd-tier
 					backend servers.</p>
+					<p>It is called only as part of online login. Any data returned is stored in
+					<code>LoginResponse.logonInfos</code> and will be made available even on offline login.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
@@ -89,13 +91,13 @@
 			<section class="tsd-panel">
 				<h3 class="tsd-before-signature">Callable</h3>
 				<ul class="tsd-signatures tsd-kind-interface tsd-parent-kind-external-module">
-					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">__call<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in core/init.ts:37</li>
+								<li>Defined in core/init.ts:40</li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -105,8 +107,19 @@
 							<p>The function may be executed multiple times, for example when the session times out. The purpose
 								of it is to call application-specific logons passing information such as credentials of 3rd-tier
 							backend servers.</p>
+							<p>It is called only as part of online login. Any data returned is stored in
+							<code>LoginResponse.logonInfos</code> and will be made available even on offline login.</p>
 						</div>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>value: <span class="tsd-signature-type">any</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>
+							<span class="tsd-signature-symbol"> | </span>
+							<span class="tsd-signature-type">any</span>
+						</h4>
 					</li>
 				</ul>
 			</section>
@@ -117,80 +130,8 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_connector_connector_.html">"connector/connector"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_connector_index_.html">"connector/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_core_diag_.html">"core/diag"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_core_domain_.html">"core/domain"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_core_index_.html">"core/index"</a>
-					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="../modules/_core_init_.html">"core/init"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_index_.html">"index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_model_modelcontainer_.html">"model/<wbr>Model<wbr>Container"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_model_index_.html">"model/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_filter_.html">"query/<wbr>Filter"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_filtervisitor_.html">"query/<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_getquery_.html">"query/<wbr>Get<wbr>Query"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_jsonfiltervisitor_.html">"query/<wbr>Json<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_sortordercomparator_.html">"query/<wbr>Sort<wbr>Order<wbr>Comparator"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_query_index_.html">"query/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_security_auth_.html">"security/auth"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_security_index_.html">"security/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_security_roles_.html">"security/roles"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_security_server_.html">"security/server"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_web_http_.html">"web/http"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_web_index_.html">"web/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_web_urls_.html">"web/urls"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="../modules/_web_verb_.html">"web/verb"</a>
 					</li>
 				</ul>
 			</nav>
