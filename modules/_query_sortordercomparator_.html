@@ -91,10 +91,43 @@
 					<a name="jsoncompare" class="tsd-anchor"></a>
 					<h3>json<wbr>Compare</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">json<wbr>Compare&lt;T&gt;<span class="tsd-signature-symbol">(</span>json<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_query_sortordercomparator_.jsoncompareoptions.html" class="tsd-signature-type">JsonCompareOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_query_sortordercomparator_.jsoncomparefn.html" class="tsd-signature-type">JsonCompareFn</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
 						<li class="tsd-signature tsd-kind-icon">json<wbr>Compare&lt;T&gt;<span class="tsd-signature-symbol">(</span>json<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_query_sortordercomparator_.jsoncompareoptions.html" class="tsd-signature-type">JsonCompareOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_query_sortordercomparator_.jsoncomparefn.html" class="tsd-signature-type">JsonCompareFn</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
 						<li class="tsd-signature tsd-kind-icon">json<wbr>Compare&lt;T&gt;<span class="tsd-signature-symbol">(</span>sortOrder<span class="tsd-signature-symbol">: </span><a href="../classes/_query_sortorder_.sortorder.html" class="tsd-signature-type">SortOrder</a>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_query_sortordercomparator_.jsoncompareoptions.html" class="tsd-signature-type">JsonCompareOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_query_sortordercomparator_.jsoncomparefn.html" class="tsd-signature-type">JsonCompareFn</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/SortOrderComparator.ts:57</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>compiles a JsonCompareFn from a given SortOrder.</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>json: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of SortOrder being compiled.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <a href="../interfaces/_query_sortordercomparator_.jsoncompareoptions.html" class="tsd-signature-type">JsonCompareOptions</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_query_sortordercomparator_.jsoncomparefn.html" class="tsd-signature-type">JsonCompareFn</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>a JsonCompareFn function compatible to Array.sort().</p>
+						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
@@ -169,80 +202,8 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_connector_connector_.html">"connector/connector"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_connector_index_.html">"connector/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_diag_.html">"core/diag"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_domain_.html">"core/domain"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_index_.html">"core/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_core_init_.html">"core/init"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_index_.html">"index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_model_modelcontainer_.html">"model/<wbr>Model<wbr>Container"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_model_index_.html">"model/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_filter_.html">"query/<wbr>Filter"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_filtervisitor_.html">"query/<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_getquery_.html">"query/<wbr>Get<wbr>Query"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_jsonfiltervisitor_.html">"query/<wbr>Json<wbr>Filter<wbr>Visitor"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_jsonpath_.html">"query/<wbr>Json<wbr>Path"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_sortorder_.html">"query/<wbr>Sort<wbr>Order"</a>
-					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_query_sortordercomparator_.html">"query/<wbr>Sort<wbr>Order<wbr>Comparator"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_query_index_.html">"query/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_auth_.html">"security/auth"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_index_.html">"security/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_roles_.html">"security/roles"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_security_server_.html">"security/server"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_http_.html">"web/http"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_index_.html">"web/index"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_urls_.html">"web/urls"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="_web_verb_.html">"web/verb"</a>
 					</li>
 				</ul>
 			</nav>
