@@ -1,3 +1,23 @@
+/**
+ * @file livedata/Collection.ts
+ * Relution SDK
+ *
+ * Created by M-Way on 27.06.2016
+ * Copyright 2016 M-Way Solutions GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import * as _ from 'lodash';
 import { Store } from './Store';
 import { Model, ModelCtor } from './Model';
 import { SyncContext } from './SyncContext';
@@ -51,7 +71,7 @@ export declare class Collection extends Backbone.Collection<Model> {
      * save all containing models
      */
     save(): void;
-    applyFilter(callback: any): void;
+    applyFilter(callback: _.ListIterator<Model, boolean>): void;
     getUrlParams(url?: string): any;
     getUrl(): string;
     getUrlRoot(): string;
@@ -71,7 +91,7 @@ export declare class Collection extends Backbone.Collection<Model> {
      *
      * @see SyncContext#fetchMore()
      */
-    fetchMore(options: any): PromiseLike<any>;
+    fetchMore(options?: any): PromiseLike<any>;
     /**
      * reads the next page of data into this collection.
      *
@@ -86,7 +106,7 @@ export declare class Collection extends Backbone.Collection<Model> {
      *
      * @see SyncContext#fetchNext()
      */
-    fetchNext(options: any): PromiseLike<any>;
+    fetchNext(options?: any): PromiseLike<any>;
     /**
      * reads the previous page of data into this collection.
      *
@@ -101,5 +121,5 @@ export declare class Collection extends Backbone.Collection<Model> {
      *
      * @see SyncContext#fetchPrev()
      */
-    fetchPrev(options: any): PromiseLike<any>;
+    fetchPrev(options?: any): PromiseLike<any>;
 }

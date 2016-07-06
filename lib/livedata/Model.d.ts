@@ -35,7 +35,7 @@ export declare class Model extends Backbone.Model {
     protected init(attributes?: any, options?: any): void;
     ajax(options: any): any;
     sync(method: string, model: Backbone.ModelBase, options?: any): any;
-    onChange(model: any, options: any): void;
-    onSync(model: any, options: any): void;
+    onChange(model: Model, options: any): void;
+    onSync(model: Model, options: any): void;
     getUrlRoot(): string;
 }

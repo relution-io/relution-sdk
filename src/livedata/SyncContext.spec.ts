@@ -19,7 +19,6 @@
  */
 
 import {assert} from 'chai';
-import {debug} from '../core/diag';
 
 import * as Q from 'q';
 
@@ -29,7 +28,7 @@ import {SyncStore} from './SyncStore';
 
 import {makeApprovals} from './approvals.data';
 
-var serverUrl = "http://localhost:8200";
+var serverUrl = 'http://localhost:8200';
 
 describe(module.filename || __filename, function() {
   this.timeout(60000);
@@ -38,24 +37,24 @@ describe(module.filename || __filename, function() {
   var store = new SyncStore({
   });
 
-  class TestModel extends Model {};
+  class TestModel extends Model {}
   TestModel.prototype.idAttribute = 'id';
   TestModel.prototype.entity = 'approval';
 
-  class TestCollection extends Collection {};
+  class TestCollection extends Collection {}
   TestCollection.prototype.model = TestModel;
   TestCollection.prototype.store = store;
   TestCollection.prototype.url = serverUrl + '/relution/livedata/approvals/';
 
   // loads data using collection, returns promise on collection, collection is empty afterwards
-  function loadCollection(collection, data) {
-    return collection.fetch().then(function () {
+  function loadCollection(collection: Collection, data: any[]): Q.Promise<Collection> {
+    return Q(collection.fetch()).then(function () {
       // delete all before running tests
       return Q.all(collection.models.slice().map(function (model) {
         return model.destroy();
       })).then(function () {
         assert.equal(collection.models.length, 0, 'collection must be empty initially after destroy');
-      return collection;
+        return collection;
       });
     }).then(function (collection2) {
       // load sample data into fresh database
@@ -71,7 +70,7 @@ describe(module.filename || __filename, function() {
     });
   }
 
-  var qApprovals;
+  var qApprovals: Q.Promise<any[]>;
 
   function loadApprovals() {
     if (!qApprovals) {
@@ -94,16 +93,16 @@ describe(module.filename || __filename, function() {
     }),
 
     it('infinite scrolling', () => {
-      var approvals;
+      var approvals: any[];
       var collection = new TestCollection();
       var counter = 10;
       return loadApprovals().then(function (data) {
         approvals = data;
-        var options = {
+        var options: any = {
           limit: counter,
           sortOrder: [ 'id' ]
         };
-        return (<any>collection.fetch(options)).thenResolve(options);
+        return Q(collection.fetch(options)).thenResolve(options);
       }).then(function scroll(options) {
         assert.equal(collection.models.length, counter, 'number of models retrieved so far');
         assert.deepEqual(collection.models.map(function (x) {
@@ -128,7 +127,7 @@ describe(module.filename || __filename, function() {
     }),
 
     it('next/prev paging', () => {
-      var approvals;
+      var approvals: any[];
       var collection = new TestCollection();
       var i = 0;
       return loadApprovals().then(function (data) {

@@ -1543,9 +1543,9 @@ var Store = (function () {
         var opts = _.extend({}, options || {}, { store: this });
         return new collection(models, opts);
     };
-    Store.prototype.save = function (model, attr, options) {
+    Store.prototype.save = function (model, attributes, options) {
         var opts = _.extend({}, options || {}, { store: this });
-        return model.save(attr, opts);
+        return model.save(attributes, opts);
     };
     Store.prototype.destroy = function (model, options) {
         var opts = _.extend({}, options || {}, { store: this });
@@ -1705,8 +1705,9 @@ var SyncContext = (function () {
      * @see Collection#fetchMore()
      */
     SyncContext.prototype.fetchMore = function (collection, options) {
+        if (options === void 0) { options = {}; }
         var getQuery = this.getQuery;
-        options = _.defaults(options || {}, {
+        options = _.defaults(options, {
             limit: options.pageSize || this.pageSize || getQuery.limit,
             sortOrder: getQuery.sortOrder,
             filter: getQuery.filter,
@@ -1793,8 +1794,8 @@ var SyncContext = (function () {
      * @return {Promise} promise of the load operation.
      */
     SyncContext.prototype.fetchRange = function (collection, options) {
+        if (options === void 0) { options = {}; }
         // this must be set in options to state we handle it
-        options = options || {};
         options.syncContext = this;
         // prepare a query for the page of data to load
         var oldQuery = this.getQuery;
@@ -1878,7 +1879,7 @@ var SyncContext = (function () {
      * @see Collection#fetchNext()
      */
     SyncContext.prototype.fetchNext = function (collection, options) {
-        options = options || {};
+        if (options === void 0) { options = {}; }
         options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
         options.offset = (this.getQuery.offset | 0) + collection.models.length;
         return this.fetchRange(collection, options);
@@ -1892,7 +1893,7 @@ var SyncContext = (function () {
      * @see Collection#fetchPrev()
      */
     SyncContext.prototype.fetchPrev = function (collection, options) {
-        options = options || {};
+        if (options === void 0) { options = {}; }
         options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
         options.offset = (this.getQuery.offset | 0) - options.limit;
         return this.fetchRange(collection, options);
@@ -2118,7 +2119,7 @@ var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var SyncStore_1 = require('./SyncStore');
 var approvals_data_1 = require('./approvals.data');
-var serverUrl = "http://localhost:8200";
+var serverUrl = 'http://localhost:8200';
 describe(module.filename || __filename, function () {
     this.timeout(60000);
     // prepare model/collection types
@@ -2130,7 +2131,6 @@ describe(module.filename || __filename, function () {
         }
         return TestModel;
     }(Model_1.Model));
-    ;
     TestModel.prototype.idAttribute = 'id';
     TestModel.prototype.entity = 'approval';
     var TestCollection = (function (_super) {
@@ -2140,13 +2140,12 @@ describe(module.filename || __filename, function () {
         }
         return TestCollection;
     }(Collection_1.Collection));
-    ;
     TestCollection.prototype.model = TestModel;
     TestCollection.prototype.store = store;
     TestCollection.prototype.url = serverUrl + '/relution/livedata/approvals/';
     // loads data using collection, returns promise on collection, collection is empty afterwards
     function loadCollection(collection, data) {
-        return collection.fetch().then(function () {
+        return Q(collection.fetch()).then(function () {
             // delete all before running tests
             return Q.all(collection.models.slice().map(function (model) {
                 return model.destroy();
@@ -2195,7 +2194,7 @@ describe(module.filename || __filename, function () {
                     limit: counter,
                     sortOrder: ['id']
                 };
-                return collection.fetch(options).thenResolve(options);
+                return Q(collection.fetch(options)).thenResolve(options);
             }).then(function scroll(options) {
                 chai_1.assert.equal(collection.models.length, counter, 'number of models retrieved so far');
                 chai_1.assert.deepEqual(collection.models.map(function (x) {
@@ -2439,12 +2438,12 @@ var SyncStore_1 = require('./SyncStore');
 var WebSqlStore_1 = require('./WebSqlStore');
 var serverUrl = "http://localhost:8200";
 describe(module.filename || __filename, function () {
-    var model = null;
-    var Store = null;
-    var modelType = null;
     this.timeout(8000);
+    var model = null;
+    var store = null;
+    var modelType = null;
     before(function () {
-        Store = new SyncStore_1.SyncStore({
+        store = new SyncStore_1.SyncStore({
             useLocalStore: true,
             useSocketNotify: false
         });
@@ -2453,16 +2452,15 @@ describe(module.filename || __filename, function () {
             function ModelType() {
                 _super.apply(this, arguments);
             }
-            ModelType.prototype.ajax = function (requ) {
+            ModelType.prototype.ajax = function () {
                 diag_1.debug.info('offline');
                 return Q.reject(new Error('Not Online'));
             };
             return ModelType;
         }(Model_1.Model));
-        ;
         ModelType.prototype.idAttribute = 'id';
         ModelType.prototype.entity = 'User';
-        ModelType.prototype.store = Store;
+        ModelType.prototype.store = store;
         ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
         ModelType.prototype.defaults = {
             username: 'admin',
@@ -2480,7 +2478,7 @@ describe(module.filename || __filename, function () {
         }),
         it('not saved on Server but must be websql', function () {
             var username = 'offline';
-            return model.save({ username: username }).then(function () {
+            return Q(model.save({ username: username })).then(function () {
                 return WebSqlStore_1.openDatabase({
                     name: 'relution-livedata'
                 });
@@ -2514,7 +2512,7 @@ describe(module.filename || __filename, function () {
         }),
         it('not saved on Server but must be in websql msg-table', function () {
             var username = 'message-offline-test';
-            return model.save({ username: username }).then(function () {
+            return Q(model.save({ username: username })).then(function () {
                 return WebSqlStore_1.openDatabase({
                     name: 'relution-livedata'
                 });
@@ -2579,15 +2577,15 @@ var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var SyncStore_1 = require('./SyncStore');
 var WebSqlStore_1 = require('./WebSqlStore');
-var serverUrl = "http://localhost:8200";
+var serverUrl = 'http://localhost:8200';
 describe(module.filename || __filename, function () {
     this.timeout(8000);
     var model = null;
-    var Store = null;
+    var store = null;
     var modelType = null;
     var promise = null;
     beforeEach(function () {
-        Store = new SyncStore_1.SyncStore({
+        store = new SyncStore_1.SyncStore({
             useLocalStore: true,
             useSocketNotify: false
         });
@@ -2598,14 +2596,13 @@ describe(module.filename || __filename, function () {
             }
             return ModelType;
         }(Model_1.Model));
-        ;
         ModelType.prototype.idAttribute = 'id';
         ModelType.prototype.entity = 'User';
-        ModelType.prototype.store = Store;
+        ModelType.prototype.store = store;
         ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
         modelType = ModelType;
         model = new modelType({ id: '12312' });
-        promise = model.fetch().thenResolve(model);
+        promise = Q(model.fetch()).thenResolve(model);
     });
     return [
         it('fetch model sync to server', function () {
@@ -3081,8 +3078,8 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype.sync = function (method, model, options) {
         var _this = this;
+        if (options === void 0) { options = {}; }
         diag.debug.trace('Relution.livedata.SyncStore.sync');
-        options = options || {};
         try {
             var endpoint = model.endpoint || this.getEndpoint(model);
             if (!endpoint) {
@@ -3210,7 +3207,9 @@ var SyncStore = (function (_super) {
                     if (_.isEmpty(changes)) {
                         return;
                     }
-                    data = model.toJSON({ attrs: changes });
+                    data = model.toJSON({
+                        attrs: changes
+                    });
                     break;
                 case 'delete':
                     break;
@@ -3369,7 +3368,7 @@ var SyncStore = (function (_super) {
                 // no data if server asks not to alter state
                 // this.setLastMessageTime(channel, msg.time);
                 var promises = [];
-                var dataIds;
+                var dataIds; // model id -> attributes data
                 if (msg.method !== 'read') {
                     promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, data === msg.data ? msg : _.defaults({
                         data: data // just accepts new data
@@ -3474,6 +3473,7 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype.fetchChanges = function (endpoint, force) {
         var _this = this;
+        if (force === void 0) { force = false; }
         var channel = endpoint.channel;
         if (!endpoint.urlRoot || !channel) {
             return Q.resolve(undefined);
@@ -3872,7 +3872,7 @@ var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var SyncStore_1 = require('./SyncStore');
-var serverUrl = "http://localhost:8200";
+var serverUrl = 'http://localhost:8200';
 function backbone_error(done) {
     return function (model, error) {
         done(error instanceof Error ? error : new Error(JSON.stringify(error)));
@@ -3908,7 +3908,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel;
             }(Model_1.Model));
-            ;
             TestModel.prototype.idAttribute = '_id';
             TestModel.prototype.entity = 'test';
             TEST.TestModel = TestModel;
@@ -3921,7 +3920,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestsModelCollection;
             }(Collection_1.Collection));
-            ;
             TestsModelCollection.prototype.model = TEST.TestModel;
             TestsModelCollection.prototype.url = TEST.url;
             TestsModelCollection.prototype.store = TEST.store;
@@ -3957,7 +3955,7 @@ describe(module.filename || __filename, function () {
         }),
         it('get record', function () {
             var model = TEST.Tests.get(TEST.id);
-            chai_1.assert.ok(model, "record found");
+            chai_1.assert.ok(model, 'record found');
             chai_1.assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
             chai_1.assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
             chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
@@ -3970,7 +3968,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel2;
             }(Model_1.Model));
-            ;
             TestModel2.prototype.url = TEST.url;
             TestModel2.prototype.idAttribute = '_id';
             TestModel2.prototype.store = TEST.store;
@@ -3978,8 +3975,8 @@ describe(module.filename || __filename, function () {
             TEST.TestModel2 = TestModel2;
             var data = { _id: TEST.id };
             var model = new TEST.TestModel2(data);
-            chai_1.assert.isObject(model, "new model created");
-            chai_1.assert.ok(_.isEqual(model.attributes, data), "new model holds correct data attributes");
+            chai_1.assert.isObject(model, 'new model created');
+            chai_1.assert.ok(_.isEqual(model.attributes, data), 'new model holds correct data attributes');
             model.fetch({
                 success: function () {
                     chai_1.assert.ok(true, 'model has been fetched.');
@@ -4000,7 +3997,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel2;
             }(Model_1.Model));
-            ;
             TestModel2.prototype.url = TEST.url;
             TestModel2.prototype.idAttribute = '_id';
             TestModel2.prototype.store = TEST.store;
@@ -4008,8 +4004,8 @@ describe(module.filename || __filename, function () {
             TEST.TestModel2 = TestModel2;
             var model = new TEST.TestModel2({});
             model.fetch({
-                success: function (model) {
-                    backbone_error(done)(model, new Error('this should have failed!'));
+                success: function (model2) {
+                    backbone_error(done)(model2, new Error('this should have failed!'));
                 },
                 error: function () {
                     done();
@@ -4024,7 +4020,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel2;
             }(Model_1.Model));
-            ;
             TestModel2.prototype.url = TEST.url;
             TestModel2.prototype.idAttribute = '_id';
             TestModel2.prototype.store = TEST.store;
@@ -4037,9 +4032,9 @@ describe(module.filename || __filename, function () {
                 throw new Error('this should have failed!');
             }, function () {
                 return model;
-            }).then(function (model) {
+            }).then(function (model2) {
                 done();
-                return model;
+                return model2;
             }, function (error) {
                 backbone_error(done)(model, error);
                 return model;
@@ -4058,7 +4053,7 @@ describe(module.filename || __filename, function () {
         }),
         it('get record', function () {
             var model = TEST.Tests.get(TEST.id);
-            chai_1.assert.ok(model, "record found");
+            chai_1.assert.ok(model, 'record found');
             chai_1.assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
             chai_1.assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
             chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
@@ -4100,7 +4095,6 @@ describe(module.filename || __filename, function () {
                 };
                 return TestModel;
             }(Model_1.Model));
-            ;
             TestModel.prototype.url = TEST.url;
             TestModel.prototype.idAttribute = '_id';
             TestModel.prototype.store = TEST.store;
@@ -4130,7 +4124,7 @@ describe(module.filename || __filename, function () {
             chai_1.assert.isObject(model, 'model found in collection');
             chai_1.assert.equal(model.id, TEST.id, 'model has the correct id');
             model.destroy({
-                success: function (model) {
+                success: function (model2) {
                     chai_1.assert.ok(true, 'record has been deleted.');
                     done();
                 },
@@ -4142,7 +4136,7 @@ describe(module.filename || __filename, function () {
                 done();
             }
             else {
-                var model, hasError = false, isDone = false;
+                var hasError = false, isDone = false;
                 TEST.Tests.models.forEach(function (model) {
                     if (!hasError) {
                         model.destroy({
@@ -4153,7 +4147,7 @@ describe(module.filename || __filename, function () {
                                     done();
                                 }
                             },
-                            error: function (model, error) {
+                            error: function () {
                                 hasError = isDone = true;
                                 backbone_error(done).apply(this, arguments);
                             }
@@ -4287,7 +4281,7 @@ var WebSqlStore = (function (_super) {
             size: this.size,
             version: this.version,
             error: function (error) {
-                diag.debug.error(error);
+                diag.debug.error(error.message);
                 _this.handleError(options, error);
                 _this.trigger('error', error);
             }
@@ -4300,6 +4294,7 @@ var WebSqlStore = (function (_super) {
         diag.debug.info('Store close');
         if (this.db) {
             try {
+                // some implementations offer a close() method
                 if (this.db.close) {
                     this.db.close();
                 }
@@ -4342,6 +4337,9 @@ var WebSqlStore = (function (_super) {
             this._updateDb(options);
         }
         else if (error) {
+            if (!_.isError(error)) {
+                error = new Error('' + error);
+            }
             this.handleError(options, error);
         }
         else {
@@ -4607,7 +4605,7 @@ var WebSqlStore = (function (_super) {
             if (isCollection) {
                 result = [];
             }
-            else {
+            else if (model) {
                 options.models = [model];
             }
             var stm = this._sqlSelect(options, entity);
@@ -4643,6 +4641,7 @@ var WebSqlStore = (function (_super) {
                 }, function (t2, e) {
                     // error
                     diag.debug.error('webSql error: ' + e.message);
+                    return true; // abort
                 });
             }, function (sqlError) {
                 if (lastStatement) {
@@ -4818,7 +4817,6 @@ describe(module.filename || __filename, function () {
                 }
                 return SimpleModel;
             }(Model_1.Model));
-            ;
             SimpleModel.prototype.idAttribute = 'key';
             TEST.SimpleModel = SimpleModel;
             chai_1.assert.typeOf(TEST.SimpleModel, 'function', 'SimpleModel model successfully extended.');
@@ -4829,7 +4827,6 @@ describe(module.filename || __filename, function () {
                 }
                 return SimpleModelCollection;
             }(Collection_1.Collection));
-            ;
             SimpleModelCollection.prototype.model = TEST.SimpleModel;
             SimpleModelCollection.prototype.store = new WebSqlStore_1.WebSqlStore();
             SimpleModelCollection.prototype.entity = 'test';
@@ -4857,7 +4854,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel;
             }(Model_1.Model));
-            ;
             TestModel.prototype.idAttribute = 'key';
             TestModel.prototype.entity = 'test';
             TEST.TestModel = TestModel;
@@ -4869,7 +4865,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModelCollection;
             }(Collection_1.Collection));
-            ;
             TestModelCollection.prototype.model = TEST.TestModel;
             TestModelCollection.prototype.store = TEST.store;
             TEST.TestModelCollection = TestModelCollection;
@@ -4902,7 +4897,7 @@ describe(module.filename || __filename, function () {
         }),
         it('read record', function () {
             var model = TEST.Tests.get(TEST.key);
-            chai_1.assert.ok(model, "record found");
+            chai_1.assert.ok(model, 'record found');
             chai_1.assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
             chai_1.assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
             chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
@@ -4915,7 +4910,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel2;
             }(Model_1.Model));
-            ;
             TestModel2.prototype.idAttribute = 'key';
             TestModel2.prototype.store = TEST.store;
             TestModel2.prototype.entity = 'test';
@@ -4923,11 +4917,11 @@ describe(module.filename || __filename, function () {
             var model = new TEST.TestModel2({
                 key: TEST.key
             });
-            chai_1.assert.isObject(model, "new model created");
+            chai_1.assert.isObject(model, 'new model created');
             model.fetch({
                 success: function () {
                     chai_1.assert.ok(true, 'model has been fetched.');
-                    chai_1.assert.equal(model.id, TEST.key, "found record has the correct id");
+                    chai_1.assert.equal(model.id, TEST.key, 'found record has the correct id');
                     chai_1.assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
                     chai_1.assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
                     chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
@@ -4982,7 +4976,6 @@ describe(module.filename || __filename, function () {
                 }
                 return TestModel2;
             }(Model_1.Model));
-            ;
             TestModel2.prototype.idAttribute = 'key';
             TestModel2.prototype.store = TEST.store;
             TestModel2.prototype.entity = 'test';
@@ -4991,7 +4984,7 @@ describe(module.filename || __filename, function () {
                 model: TEST.TestModel2,
                 store: TEST.store
             });
-            chai_1.assert.isObject(TEST.Tests2, "Collection created");
+            chai_1.assert.isObject(TEST.Tests2, 'Collection created');
             TEST.data = {
                 firstName: 'Max',
                 sureName: 'Mustermann',
@@ -5009,7 +5002,7 @@ describe(module.filename || __filename, function () {
         }),
         it('read record', function () {
             var model = TEST.Tests2.get(TEST.key);
-            chai_1.assert.ok(model, "record found");
+            chai_1.assert.ok(model, 'record found');
             chai_1.assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
             chai_1.assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
             chai_1.assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
@@ -13382,13 +13375,13 @@ function ajax(options) {
         return Q.reject(new Error('ajax failed'));
     }
     options.xhr = xhr;
-    var promise = xhr.then(function onSuccess(response) {
+    var promise = xhr.then(function (response) {
         // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
         if (fnSuccess) {
             fnSuccess(response);
         }
         return Q.resolve(response);
-    }, function onError(response) {
+    }, function (response) {
         // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
         if (fnError) {
             fnError(response, response.statusMessage || response.message, response);
@@ -13400,7 +13393,7 @@ function ajax(options) {
 }
 exports.ajax = ajax;
 function sync(method, model, options) {
-    options = options || {};
+    if (options === void 0) { options = {}; }
     var store = options.store || this.store;
     options.credentials = options.credentials || this.credentials || store && store.options && store.options.credentials;
     diag.debug.info('Relution.livedata.sync ' + method + ' ' + model.id);

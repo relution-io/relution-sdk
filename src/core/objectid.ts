@@ -22,7 +22,7 @@ let machineId = parseInt('' + (Math.random() * Math.pow(16, 6)));
 let processId = parseInt('' + (Math.random() * Math.pow(16, 4)));
 let counter = parseInt('' + (Math.random() * Math.pow(16, 6)));
 
-function hexString(len, num) {
+function hexString(len: number, num: number) {
   let str = num.toString(16);
   while (str.length < len) {
     str = '0' + str;

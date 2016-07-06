@@ -27,7 +27,7 @@ import * as cipher from '../core/cipher';
 
 import {Store} from './Store';
 import {Model, isModel} from './Model';
-import {isCollection} from './Collection';
+import {Collection, isCollection} from './Collection';
 
 export interface WebSqlOptions {
   name: string;
@@ -40,6 +40,11 @@ export interface WebSqlOptions {
   key?: string;
   security?: string;
   credentials?: any;
+}
+
+export interface Statement {
+  statement: string,
+  arguments: any[]
 }
 
 export interface WebSqlError extends Error {
@@ -55,7 +60,7 @@ export interface WebSqlError extends Error {
  * @internal Not public API, exported for testing purposes only!
  */
 export function openDatabase(options: WebSqlOptions) {
-  let db;
+  let db: Database;
   if (global['sqlitePlugin']) {
     // device implementation
     options = _.clone(options);
@@ -77,7 +82,7 @@ export function openDatabase(options: WebSqlOptions) {
     db = global['openDatabase'](options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
   } else if (process && !process['browser']) {
     // node.js implementation
-    let websql;
+    let websql: typeof window.openDatabase;
     try {
       websql = require('websql');
     } catch (error) {
@@ -117,7 +122,7 @@ export class WebSqlStore extends Store {
   protected size: number;
   protected version: string;
 
-  protected db: any = null;
+  protected db: Database = null;
   protected entities: { [entity: string]: {
     table: string,    // by default, entity itself but is given explicitly by SyncStore!
     created?: boolean // tri-state as initial state is not known and thus undefined
@@ -139,8 +144,8 @@ export class WebSqlStore extends Store {
       size: this.size,
       version: this.version,
 
-      error: (error) => {
-        diag.debug.error(error);
+      error: (error: Error) => {
+        diag.debug.error(error.message);
         this.handleError(options, error);
         this.trigger('error', error);
       }
@@ -154,8 +159,9 @@ export class WebSqlStore extends Store {
     diag.debug.info('Store close');
     if (this.db) {
       try {
-        if (this.db.close) {
-          this.db.close();
+        // some implementations offer a close() method
+        if ((<any>this.db).close) {
+          (<any>this.db).close();
         }
       } finally {
         this.db = null;
@@ -166,8 +172,8 @@ export class WebSqlStore extends Store {
   /**
    * @private
    */
-  private _openDb(options) {
-    var error;
+  private _openDb(options: any) {
+    var error: Error | number | string;
     if (!this.db) {
       try {
         this.db = openDatabase(options);
@@ -193,15 +199,18 @@ export class WebSqlStore extends Store {
       // Version number mismatch.
       this._updateDb(options);
     } else if (error) {
-      this.handleError(options, error);
+      if (!_.isError(error)) {
+        error = new Error('' + error);
+      }
+      this.handleError(options, <Error>error);
     } else {
       this.handleSuccess(options, this.db);
     }
   }
 
-  private _updateDb(options) {
-    var error;
-    var lastSql;
+  private _updateDb(options: WebSqlOptions) {
+    var error: Error;
+    var lastSql: string;
     var that = this;
     try {
       if (!this.db) {
@@ -215,7 +224,7 @@ export class WebSqlStore extends Store {
             lastSql = sql;
             tx.executeSql(sql);
           });
-        }, function (err) {
+        }, function (err: any) {
           if (!lastSql && that.db.version === that.version) {
             // not a real error, concurrent migration attempt completed already
             that.handleSuccess(options, that.db);
@@ -240,19 +249,19 @@ export class WebSqlStore extends Store {
     }
   }
 
-  public sync(method, model, options) {
+  sync(method: string, model: Model | Collection, options?: any): Q.Promise<any> {
     options = options || {};
     var that = this;
     var q = Q.defer();
     var opts = _.extend({
       entity: model.entity || options.entity
     }, options || {}, {
-      success: function (response) {
+      success: function (response: any) {
         var result = that.handleSuccess(options, response) || response;
         q.resolve(result);
         return result;
       },
-      error: function (error) {
+      error: function (error: Error) {
         var result = that.handleError(options, error);
         if (result) {
           q.resolve(result);
@@ -295,25 +304,25 @@ export class WebSqlStore extends Store {
     return q.promise;
   }
 
-  protected select(options) {
+  protected select(options: any) {
     this._select(null, options);
   }
 
-  protected drop(options) {
+  protected drop(options: any) {
     this._dropTable(options);
   }
 
-  protected createTable(options) {
+  protected createTable(options: any) {
     this._createTable(options);
   }
 
-  protected execute(options) {
+  protected execute(options: any) {
     this._executeSql(options);
   }
 
-  protected _sqlUpdateDatabase(oldVersion, newVersion) {
+  protected _sqlUpdateDatabase(oldVersion: string | DOMString, newVersion: string) {
     // create sql array, simply drop and create the database
-    var sql = [];
+    var sql: string[] = [];
     for (var entity in this.entities) {
       sql.push(this._sqlDropTable(entity));
       sql.push(this._sqlCreateTable(entity));
@@ -321,15 +330,15 @@ export class WebSqlStore extends Store {
     return sql;
   }
 
-  protected _sqlDropTable(entity) {
+  protected _sqlDropTable(entity: string) {
     return `DROP TABLE IF EXISTS '${this.entities[entity].table}';`;
   }
 
-  protected _sqlCreateTable(entity) {
+  protected _sqlCreateTable(entity: string) {
     return `CREATE TABLE IF NOT EXISTS '${this.entities[entity].table}' (id VARCHAR(255) NOT NULL PRIMARY KEY ASC UNIQUE, data TEXT NOT NULL);`;
   }
 
-  protected _sqlDelete(options, entity) {
+  protected _sqlDelete(options: any, entity: string) {
     var sql = 'DELETE FROM \'' + this.entities[entity].table + '\'';
     var where = this._sqlWhereFromData(options, entity);
     if (where) {
@@ -341,9 +350,9 @@ export class WebSqlStore extends Store {
     return sql;
   }
 
-  protected _sqlWhereFromData(options, entity) {
+  protected _sqlWhereFromData(options: any, entity: string) {
     if (options && options.models && entity) {
-      var ids = [];
+      var ids: string[] = [];
       var that = this;
       _.each(options.models, function (model: Model) {
         if (!model.isNew()) {
@@ -357,7 +366,7 @@ export class WebSqlStore extends Store {
     return '';
   }
 
-  protected _sqlSelect(options, entity) {
+  protected _sqlSelect(options: any, entity: string) {
     var sql = 'SELECT ';
     sql += '*';
     sql += ' FROM \'' + this.entities[entity].table + '\'';
@@ -387,13 +396,13 @@ export class WebSqlStore extends Store {
     return sql;
   }
 
-  protected _sqlValue(value) {
+  protected _sqlValue(value: any) {
     value = _.isNull(value) ? 'null' : _.isObject(value) ? JSON.stringify(value) : value.toString();
     value = value.replace(/"/g, '""');
     return '"' + value + '"';
   }
 
-  protected _dropTable(options) {
+  protected _dropTable(options: any) {
     var entity = options.entity;
     if (entity in this.entities && this.entities[entity].created !== false) {
       if (this._checkDb(options)) {
@@ -407,7 +416,7 @@ export class WebSqlStore extends Store {
     }
   }
 
-  protected _createTable(options) {
+  protected _createTable(options: any) {
     var entity = options.entity;
     if (!(entity in this.entities)) {
       this.entities[entity] = {
@@ -422,7 +431,7 @@ export class WebSqlStore extends Store {
     }
   }
 
-  protected _checkTable(options, callback) {
+  protected _checkTable(options: any, callback: Function) {
     var that = this;
     var entity = options.entity;
     if (entity && (!this.entities[entity] || this.entities[entity].created === false)) {
@@ -431,7 +440,7 @@ export class WebSqlStore extends Store {
           that.entities[entity].created = true;
           callback();
         },
-        error: function (error) {
+        error: function (error: Error) {
           that.handleError(options, error);
         },
         entity: entity
@@ -442,11 +451,11 @@ export class WebSqlStore extends Store {
     }
   }
 
-  protected _insertOrReplace(model, options) {
+  protected _insertOrReplace(model: Model | Collection, options: any) {
     var entity = options.entity;
     var models = isCollection(model) ? model.models : [model];
     if (this._checkDb(options) && this._checkData(options, models)) {
-      var statements = [];
+      var statements: Statement[] = [];
       var sqlTemplate = 'INSERT OR REPLACE INTO \'' + this.entities[entity].table + '\' (';
       for (var i = 0; i < models.length; i++) {
         var amodel = models[i];
@@ -471,15 +480,15 @@ export class WebSqlStore extends Store {
     }
   }
 
-  protected _select(model, options) {
+  protected _select(model: Model | Collection, options: any) {
     var entity = options.entity;
     if (this._checkDb(options)) {
-      var lastStatement;
+      var lastStatement: string;
       var isCollection = !isModel(model);
-      var result;
+      var result: any;
       if (isCollection) {
         result = [];
-      } else {
+      } else if (model) {
         options.models = [model];
       }
       var stm: any = this._sqlSelect(options, entity);
@@ -496,7 +505,7 @@ export class WebSqlStore extends Store {
           var len = res.rows.length;
           for (var i = 0; i < len; i++) {
             var item = res.rows.item(i);
-            var attrs;
+            var attrs: any;
             try {
               attrs = JSON.parse(item.data);
             } catch (e) {
@@ -510,11 +519,12 @@ export class WebSqlStore extends Store {
               break;
             }
           }
-        }, function (t2, e) {
+        }, function (t2: SQLTransaction, e: SQLError) {
           // error
           diag.debug.error('webSql error: ' + e.message);
+          return true; // abort
         });
-      }, function (sqlError) { // errorCallback
+      }, function (sqlError: any) { // errorCallback
         if (lastStatement) {
           sqlError.sql = lastStatement;
         }
@@ -537,7 +547,7 @@ export class WebSqlStore extends Store {
     }
   }
 
-  protected _delete(model, options) {
+  protected _delete(model: Model | Collection, options: any) {
     var entity = options.entity;
     var models = isCollection(model) ? model.models : [model];
     if (this._checkDb(options)) {
@@ -548,7 +558,7 @@ export class WebSqlStore extends Store {
     }
   }
 
-  protected _executeSql(options) {
+  protected _executeSql(options: any) {
     if (options.sql) {
       this._executeTransaction(options, [options.sql]);
     }
@@ -556,14 +566,14 @@ export class WebSqlStore extends Store {
 
   private transactionPromise = Q.resolve(null);
 
-  protected _executeTransaction(options, statements, result?) {
+  protected _executeTransaction(options: any, statements: (Statement | string)[], result?: any) {
     if (!this._checkDb(options)) {
       return; // database not open, error was issued by _checkDb() above
     }
 
     // following sequentially processes transactions avoiding running too many concurrently
     this.transactionPromise = this.transactionPromise.finally(() => {
-      var lastStatement;
+      var lastStatement: string;
       return Q.Promise((resolve, reject) => {
         /* transaction has 3 parameters: the transaction callback, the error callback and the success callback */
         return this.db.transaction((t) => {
@@ -581,10 +591,10 @@ export class WebSqlStore extends Store {
 
             t.executeSql(statement, args);
           });
-        }, reject, resolve);
+        }, reject, <SQLVoidCallback>resolve);
       }).then(() => {
         return this.handleSuccess(options, result) || null;
-      }, (error) => {
+      }, (error: WebSqlError) => {
         if (lastStatement) {
           error.sql = lastStatement;
         }
@@ -594,7 +604,7 @@ export class WebSqlStore extends Store {
     });
   }
 
-  protected _checkDb(options) {
+  protected _checkDb(options: any) {
     // has to be initialized first
     if (!this.db) {
       var error = new Error('db handler not initialized.');
@@ -605,7 +615,7 @@ export class WebSqlStore extends Store {
     return true;
   }
 
-  protected _checkData(options, data) {
+  protected _checkData(options: any, data: Model[]) {
     if ((!_.isArray(data) || data.length === 0) && !_.isObject(data)) {
       var error = new Error('no data.');
       diag.debug.error(error.message);

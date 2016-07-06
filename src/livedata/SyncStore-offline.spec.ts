@@ -22,33 +22,34 @@ import * as Q from 'q';
 import {assert} from 'chai';
 import {debug} from '../core/diag';
 
-import {Model} from './Model';
+import {Model, ModelCtor} from './Model';
 import {SyncStore} from './SyncStore';
 import {openDatabase} from './WebSqlStore';
 
 var serverUrl = "http://localhost:8200";
 
 describe(module.filename || __filename, function() {
-  var model = null;
-  var Store = null
-  var modelType = null;
   this.timeout(8000);
 
+  var model: Model = null;
+  var store: SyncStore = null;
+  var modelType: ModelCtor = null;
+
   before(function() {
-    Store = new SyncStore({
+    store = new SyncStore({
       useLocalStore: true,
       useSocketNotify: false
     });
 
     class ModelType extends Model {
-      ajax(requ) {
+      ajax() {
         debug.info('offline');
         return Q.reject(new Error('Not Online'));
       }
-    };
+    }
     ModelType.prototype.idAttribute = 'id';
     ModelType.prototype.entity = 'User';
-    ModelType.prototype.store = Store;
+    ModelType.prototype.store = store;
     ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
     ModelType.prototype.defaults = <any>{
       username: 'admin',
@@ -70,12 +71,12 @@ describe(module.filename || __filename, function() {
     it('not saved on Server but must be websql', () => {
       var username = 'offline';
 
-      return model.save({ username: username }).then(() => {
+      return Q(model.save({ username: username })).then(() => {
         return openDatabase({
           name: 'relution-livedata'
         });
       }).then((db) => {
-        var channel = model.store.getEndpoint(model).channel;
+        var channel = (<SyncStore>model.store).getEndpoint(model).channel;
         var query = 'SELECT * FROM \'' + channel + '\' WHERE id =?';
         debug.trace(query);
 
@@ -105,7 +106,7 @@ describe(module.filename || __filename, function() {
     it('not saved on Server but must be in websql msg-table', () => {
       var username = 'message-offline-test';
 
-      return model.save({ username: username }).then(() => {
+      return Q(model.save({ username: username })).then(() => {
         return openDatabase({
           name: 'relution-livedata'
         });

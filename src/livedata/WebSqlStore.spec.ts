@@ -24,8 +24,8 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {WebSqlStore} from './WebSqlStore';
 
-function backbone_error(done) {
-  return function (model, error) {
+function backbone_error(done: Function) {
+  return function (model: Model | Collection, error: any) {
     done(error instanceof Error ? error : new Error(JSON.stringify(error)));
   };
 }
@@ -38,7 +38,7 @@ var TEST: any = {
   }
 };
 
-TEST.dropTableTest = function (done) {
+TEST.dropTableTest = function (done: Function) {
   TEST.store.drop({
     entity: 'test',
     success: function () {
@@ -68,13 +68,13 @@ describe(module.filename || __filename, function() {
 
     it('simple websql store', function (done) {
 
-      class SimpleModel extends Model {};
+      class SimpleModel extends Model {}
       SimpleModel.prototype.idAttribute = 'key';
       TEST.SimpleModel = SimpleModel;
 
       assert.typeOf(TEST.SimpleModel, 'function', 'SimpleModel model successfully extended.');
 
-      class SimpleModelCollection extends Collection {};
+      class SimpleModelCollection extends Collection {}
       SimpleModelCollection.prototype.model = TEST.SimpleModel;
       SimpleModelCollection.prototype.store = new WebSqlStore();
       SimpleModelCollection.prototype.entity = 'test';
@@ -88,7 +88,7 @@ describe(module.filename || __filename, function() {
 
       TEST.Simple.create(TEST.data,
         {
-          success: function (model) {
+          success: function (model: Model) {
             assert.ok(model, 'new record exists.');
 
             TEST.key = model.id;
@@ -109,14 +109,14 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
-      class TestModel extends Model {};
+      class TestModel extends Model {}
       TestModel.prototype.idAttribute = 'key';
       TestModel.prototype.entity = 'test';
       TEST.TestModel = TestModel;
 
       assert.typeOf(TEST.TestModel, 'function', 'TestModel model successfully extended.');
 
-      class TestModelCollection extends Collection {};
+      class TestModelCollection extends Collection {}
       TestModelCollection.prototype.model = TEST.TestModel;
       TestModelCollection.prototype.store = TEST.store;
       TEST.TestModelCollection = TestModelCollection;
@@ -135,7 +135,7 @@ describe(module.filename || __filename, function() {
 
       TEST.Tests.create(TEST.data,
         {
-          success: function (model) {
+          success: function (model: Model) {
             assert.ok(model, 'new record exists.');
 
             TEST.key = model.id;
@@ -153,7 +153,7 @@ describe(module.filename || __filename, function() {
 
       TEST.Tests.create(TEST.data,
         {
-          success: function (model) {
+          success: function (model: Model) {
             assert.ok(model, 'new record exists.');
 
             TEST.key = model.id;
@@ -170,7 +170,7 @@ describe(module.filename || __filename, function() {
     it('read record', function () {
       var model = TEST.Tests.get(TEST.key);
 
-      assert.ok(model, "record found");
+      assert.ok(model, 'record found');
 
       assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
       assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
@@ -180,7 +180,7 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', function (done) {
 
-      class TestModel2 extends Model {};
+      class TestModel2 extends Model {}
       TestModel2.prototype.idAttribute = 'key';
       TestModel2.prototype.store = TEST.store;
       TestModel2.prototype.entity = 'test';
@@ -190,25 +190,25 @@ describe(module.filename || __filename, function() {
         key: TEST.key
       });
 
-      assert.isObject(model, "new model created");
+      assert.isObject(model, 'new model created');
 
       model.fetch({
         success: function () {
           assert.ok(true, 'model has been fetched.');
-          assert.equal(model.id, TEST.key, "found record has the correct id");
+          assert.equal(model.id, TEST.key, 'found record has the correct id');
           assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
           assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
           assert.equal(model.get('age'), TEST.data.age, "found record has the correct 'age' value");
           done();
         },
         error: backbone_error(done)
-      })
+      });
     }),
 
     it('delete record', function (done) {
       TEST.Tests.get(TEST.key).destroy(
         {
-          success: function (model) {
+          success: function (model: any) {
             assert.ok(true, 'record has been deleted.');
             done();
           },
@@ -219,7 +219,7 @@ describe(module.filename || __filename, function() {
 
     it('fetching collection', function (done) {
       TEST.Tests.fetch({
-        success: function (collection) {
+        success: function (collection: any) {
           assert.ok(true, 'Test collection fetched successfully.');
           TEST.count = TEST.Tests.length;
           done();
@@ -233,12 +233,12 @@ describe(module.filename || __filename, function() {
       if (TEST.Tests.length === 0) {
         done();
       } else {
-        TEST.Tests.on('all', function (event) {
+        TEST.Tests.on('all', function (event: string) {
           if (event === 'destroy' && TEST.Tests.length == 0) {
             done();
           }
         });
-        var model;
+        var model: Model;
         while (model = TEST.Tests.first()) {
           model.destroy();
         }
@@ -252,7 +252,7 @@ describe(module.filename || __filename, function() {
       // recreate store type to drop schema information
       TEST.store = new WebSqlStore(undefined);
 
-      class TestModel2 extends Model {};
+      class TestModel2 extends Model {}
       TestModel2.prototype.idAttribute = 'key';
       TestModel2.prototype.store = TEST.store;
       TestModel2.prototype.entity = 'test';
@@ -262,7 +262,7 @@ describe(module.filename || __filename, function() {
         model: TEST.TestModel2,
         store: TEST.store
       });
-      assert.isObject(TEST.Tests2, "Collection created");
+      assert.isObject(TEST.Tests2, 'Collection created');
 
       TEST.data = {
         firstName: 'Max',
@@ -272,7 +272,7 @@ describe(module.filename || __filename, function() {
 
       TEST.Tests2.create(TEST.data,
         {
-          success: function (model) {
+          success: function (model: Model) {
             assert.ok(model, 'new record exists.');
 
             TEST.key = model.id;
@@ -289,7 +289,7 @@ describe(module.filename || __filename, function() {
     it('read record', function () {
       var model = TEST.Tests2.get(TEST.key);
 
-      assert.ok(model, "record found");
+      assert.ok(model, 'record found');
 
       assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
       assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");

@@ -1,3 +1,5 @@
+import { Model } from './Model';
+import { Collection } from './Collection';
 /**
  * options passed to Collection.fetch() preventing backbone.js from consuming the response.
  *
@@ -13,5 +15,5 @@ export declare const bareboneOptions: {
     sort: boolean;
     silent: boolean;
 };
-export declare function ajax(options: any): any;
-export declare function sync(method: any, model: any, options: any): any;
+export declare function ajax(options: any): PromiseLike<any>;
+export declare function sync(method: string, model: Model | Collection, options?: any): PromiseLike<any>;

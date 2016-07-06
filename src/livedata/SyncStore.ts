@@ -155,7 +155,7 @@ export class SyncStore extends Store {
     }
   }
 
-  private checkServer(url: string, options?): Q.Promise<string> {
+  private checkServer(url: string, options?: any): Q.Promise<string> {
     diag.debug.assert(() => web.resolveServer(url, {
       serverUrl: this.serverUrl
     }) === this.serverUrl);
@@ -279,7 +279,7 @@ export class SyncStore extends Store {
     }
   }
 
-  _bindChannel(endpoint: SyncEndpoint, name) {
+  _bindChannel(endpoint: SyncEndpoint, name?: string) {
     if (endpoint && endpoint.socket) {
       diag.debug.trace('Relution.livedata.SyncStore._bindChannel: ' + name);
 
@@ -392,7 +392,7 @@ export class SyncStore extends Store {
       return Q.reject<LiveDataMessage>(new Error('no message or method given'));
     }
 
-    var q;
+    var q: Q.Promise<any>;
     var channel = endpoint.channel;
     if (endpoint.localStore) {
       // first update the local store by forming a model and invoking sync
@@ -436,7 +436,7 @@ export class SyncStore extends Store {
       // update all collections listening
       this.trigger('sync:' + channel, msg); // SyncContext.onMessage
       return msg;
-    }, (error) => {
+    }, (error: Error) => {
       // not setting message time in error case
 
       // report error as event on store
@@ -445,9 +445,8 @@ export class SyncStore extends Store {
     });
   }
 
-  public sync(method: string, model: Model | Collection, options?) {
+  public sync(method: string, model: Model | Collection, options: any = {}): Q.Promise<any> {
     diag.debug.trace('Relution.livedata.SyncStore.sync');
-    options = options || {};
     try {
       var endpoint: SyncEndpoint = model.endpoint || this.getEndpoint(model);
       if (!endpoint) {
@@ -525,16 +524,16 @@ export class SyncStore extends Store {
               return resp;
             }
 
-            return qInfo.then((info) => {
+            return qInfo.then((info): any => {
               // trigger reconnection when disconnected
-              var result;
+              var result: Q.Promise<void>;
               if (!endpoint.isConnected) {
                 result = this.onConnect(endpoint);
               }
               return result || info;
             }, (xhr: web.HttpError) => {
               // trigger disconnection when disconnected
-              var result;
+              var result: Q.Promise<void>;
               if (!xhr.statusCode && endpoint.isConnected) {
                 result = this.onDisconnect(endpoint);
               }
@@ -566,10 +565,11 @@ export class SyncStore extends Store {
     }
   }
 
-  private _addMessage(method: string, model, options, endpoint: SyncEndpoint): Q.Promise<any> {
+  private _addMessage(method: string, model: Model | Collection, options: any,
+                      endpoint: SyncEndpoint): Q.Promise<any> {
     if (method && model) {
-      var changes = model.changedSinceSync;
-      var data = null;
+      var changes = (<Model>model).changedSinceSync;
+      var data: any = null;
       var storeMsg = true;
       switch (method) {
         case 'update':
@@ -581,7 +581,9 @@ export class SyncStore extends Store {
           if (_.isEmpty(changes)) {
             return;
           }
-          data = model.toJSON({attrs: changes});
+          data = model.toJSON({
+            attrs: changes
+          });
           break;
 
         case 'delete':
@@ -596,8 +598,8 @@ export class SyncStore extends Store {
       diag.debug.assert(() => model.entity === endpoint.entity);
       diag.debug.assert(() => entity.indexOf('~') < 0, 'entity name must not contain a ~ character!');
       var msg: LiveDataMessage = {
-        _id: entity + '~' + model.id,
-        id: model.id,
+        _id: entity + '~' + (<Model>model).id,
+        id: (<Model>model).id,
         method: method,
         data: data,
         // channel: endpoint.channel, // channel is hacked in by storeMessage(), we don't want to use this anymore
@@ -606,7 +608,7 @@ export class SyncStore extends Store {
       };
 
       var q = Q.resolve(msg);
-      var qMessage;
+      var qMessage: Q.Promise<LiveDataMessageModel>;
       if (storeMsg) {
         // store and potentially merge message
         qMessage = this.storeMessage(endpoint, q);
@@ -622,7 +624,9 @@ export class SyncStore extends Store {
     }
   }
 
-  private _emitMessage(endpoint: SyncEndpoint, msg: LiveDataMessage, options, model: Model | Collection, qMessage): Q.Promise<any> {
+  private _emitMessage(endpoint: SyncEndpoint, msg: LiveDataMessage, options: any,
+                       model: Model | Collection, qMessage: Q.Promise<LiveDataMessageModel>):
+  Q.Promise<any> {
     var channel = endpoint.channel;
     var qAjax = this._ajaxMessage(endpoint, msg, options, model);
     var q = qAjax;
@@ -668,7 +672,8 @@ export class SyncStore extends Store {
     });
   }
 
-  private _ajaxMessage(endpoint: SyncEndpoint, msg: LiveDataMessage, options, model: Model | Collection): Q.Promise<any> {
+  private _ajaxMessage(endpoint: SyncEndpoint, msg: LiveDataMessage, options: any,
+                       model: Model | Collection): Q.Promise<any> {
     options = options || {};
     delete options.xhr; // make sure not to use old value
 
@@ -735,7 +740,8 @@ export class SyncStore extends Store {
     });
   }
 
-  private _applyResponse<T>(qXHR: Q.Promise<T>, endpoint: SyncEndpoint, msg: LiveDataMessage, options: any, model: Model | Collection): Q.Promise<T> {
+  private _applyResponse<T>(qXHR: Q.Promise<T>, endpoint: SyncEndpoint, msg: LiveDataMessage,
+                            options: any, model: Model | Collection): Q.Promise<T> {
     // var channel = endpoint.channel;
     var clientTime = new Date().getTime();
     return qXHR.then((data: T | any) => {
@@ -748,8 +754,8 @@ export class SyncStore extends Store {
       if (data) {
         // no data if server asks not to alter state
         // this.setLastMessageTime(channel, msg.time);
-        var promises = [];
-        var dataIds;
+        var promises: Q.Promise<LiveDataMessage>[] = [];
+        var dataIds: any; // model id -> attributes data
         if (msg.method !== 'read') {
           promises.push(this.onMessage(endpoint, this._fixMessage(endpoint, data === msg.data ? msg : <LiveDataMessage>_.defaults({
             data: data // just accepts new data
@@ -761,7 +767,7 @@ export class SyncStore extends Store {
             syncIds[m.id] = m;
           });
           dataIds = {};
-          data.forEach((d) => {
+          data.forEach((d: any) => {
             if (d) {
               var id = d[endpoint.modelType.prototype.idAttribute] || d._id;
               dataIds[id] = d;
@@ -823,7 +829,7 @@ export class SyncStore extends Store {
 
           // when collection was updated only pass data of models that were synced on to the success callback,
           // as the callback will set the models again causing our sorting and filtering to be without effect.
-          var response = [];
+          var response: any[] = [];
           let models = isCollection(model) ? model.models : [model];
           for (let i = models.length; i-- > 0; ) {
             var m = models[i];
@@ -851,7 +857,7 @@ export class SyncStore extends Store {
     });
   }
 
-  private fetchChanges(endpoint: SyncEndpoint, force?: boolean): Q.Promise<Collection> {
+  private fetchChanges(endpoint: SyncEndpoint, force = false): Q.Promise<Collection> {
     let channel = endpoint.channel;
     if (!endpoint.urlRoot || !channel) {
       return Q.resolve<Collection>(undefined);
@@ -875,7 +881,7 @@ export class SyncStore extends Store {
 
     // initiate a new request for changes
     diag.debug.info(channel + ' initiating changes request...');
-    let changes = new (<any>this.messages).constructor();
+    let changes: Collection = new (<any>this.messages).constructor();
     promise = this.checkServer(endpoint.urlRoot + 'changes/' + time).then((url) => {
       return Q(changes.fetch(<Backbone.CollectionFetchOptions>{
         url: url,
@@ -883,7 +889,7 @@ export class SyncStore extends Store {
 
         success: (model, response, options) => {
           if (changes.models.length > 0) {
-            changes.each((change) => {
+            changes.each((change: LiveDataMessageModel) => {
               let msg: LiveDataMessage = change.attributes;
               this.onMessage(endpoint, this._fixMessage(endpoint, msg));
             });
@@ -1064,7 +1070,7 @@ export class SyncStore extends Store {
 
     // processes messages until none left, hitting a message of a not yet registered endpoint, or entering
     // a non-recoverable error. The promise returned resolves to this.messages when done.
-    let nextMessage = () => {
+    let nextMessage = (): any => {
       if (!this.messages.length) {
         return this.messages;
       }
@@ -1149,13 +1155,13 @@ export class SyncStore extends Store {
 
   private storeMessage(endpoint: SyncEndpoint, qMsg: Q.Promise<LiveDataMessage>): Q.Promise<LiveDataMessageModel> {
     return qMsg.then((msg: LiveDataMessage) => {
-      let options;
+      let options: Backbone.ModelSaveOptions;
       let id = this.messages.modelId(msg);
       diag.debug.info('storeMessage ' + id);
       var message: LiveDataMessageModel = id && <LiveDataMessageModel>this.messages.get(id);
       if (message) {
         // use existing instance, should not be the case usually
-        options = {
+        options = <Backbone.ModelSaveOptions>{
           merge: true
         };
       } else {

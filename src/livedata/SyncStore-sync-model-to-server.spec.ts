@@ -21,33 +21,34 @@
 import * as Q from 'q';
 import {assert} from 'chai';
 
-import {Model} from './Model';
+import {Model, ModelCtor} from './Model';
 import {SyncStore} from './SyncStore';
 import {openDatabase} from './WebSqlStore';
 
-var serverUrl = "http://localhost:8200";
+var serverUrl = 'http://localhost:8200';
 
 describe(module.filename || __filename, function() {
   this.timeout(8000);
-  var model = null;
-  var Store = null
-  var modelType = null;
-  var promise = null;
+
+  var model: Model = null;
+  var store: SyncStore = null;
+  var modelType: ModelCtor = null;
+  var promise: Q.Promise<Model> = null;
 
   beforeEach(function () {
-    Store = new SyncStore({
+    store = new SyncStore({
       useLocalStore: true,
       useSocketNotify: false
     });
 
-    class ModelType extends Model {};
+    class ModelType extends Model {}
     ModelType.prototype.idAttribute = 'id';
     ModelType.prototype.entity = 'User';
-    ModelType.prototype.store = Store;
+    ModelType.prototype.store = store;
     ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
     modelType = ModelType;
     model = new modelType({ id: '12312' });
-    promise = model.fetch().thenResolve(model);
+    promise = Q(model.fetch()).thenResolve(model);
   });
 
   return [
@@ -94,7 +95,7 @@ describe(module.filename || __filename, function() {
 
     it('delete model from db', () => {
       return promise.then(() => {
-        const channel = model.store.getEndpoint(model).channel;
+        const channel = (<SyncStore>model.store).getEndpoint(model).channel;
         return model.destroy().thenResolve(channel);
       }).then((channel) => {
         var query = 'SELECT * FROM \'' + channel + '\' WHERE id =?';

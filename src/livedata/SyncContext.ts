@@ -96,9 +96,9 @@ export class SyncContext {
    *
    * @see Collection#fetchMore()
    */
-  public fetchMore(collection: Collection, options?) {
+  public fetchMore(collection: Collection, options: any = {}) {
     var getQuery = this.getQuery;
-    options = _.defaults(options || {}, {
+    options = _.defaults(options, {
       limit: options.pageSize || this.pageSize || getQuery.limit,
       sortOrder: getQuery.sortOrder,
       filter: getQuery.filter,
@@ -114,7 +114,7 @@ export class SyncContext {
     // However, the user-provided callbacks are to being called backbone.js-style with collection and object.
     var oldSuccess = options.success;
     var oldError = options.error;
-    options.success = function fetchMoreSuccess(models) {
+    options.success = function fetchMoreSuccess(models: any[]) {
       // restore callbacks
       options.success = oldSuccess;
       options.error = oldError;
@@ -131,7 +131,7 @@ export class SyncContext {
             // notice, existing range of models is sorted by definition already
             options.at = options.syncContext.insertionPoint(models[0], collection.models);
           }
-          models = collection.add(models, options) || models;
+          models = <any>collection.add(models, options) || models;
 
           // adjust query parameter
           getQuery.limit = collection.models.length;
@@ -161,7 +161,7 @@ export class SyncContext {
       }
       return models;
     };
-    options.error = function fetchMoreError(error) {
+    options.error = function fetchMoreError(error: Error) {
       // restore callbacks
       options.success = oldSuccess;
       options.error = oldError;
@@ -192,9 +192,8 @@ export class SyncContext {
    * @param {object} options incl. offset and limit of page to retrieve.
    * @return {Promise} promise of the load operation.
    */
-  private fetchRange(collection: Collection, options?) {
+  private fetchRange(collection: Collection, options: any = {}) {
     // this must be set in options to state we handle it
-    options = options || {};
     options.syncContext = this;
 
     // prepare a query for the page of data to load
@@ -218,7 +217,7 @@ export class SyncContext {
     // However, the user-provided callbacks are to being called backbone.js-style with collection and object.
     var oldSuccess = options.success;
     var oldError = options.error;
-    options.success = function fetchRangeSuccess(models) {
+    options.success = function fetchRangeSuccess(models: any[]) {
       // restore callbacks and limit
       options.success = oldSuccess;
       options.error = oldError;
@@ -252,7 +251,7 @@ export class SyncContext {
       }
       return models;
     };
-    options.error = function fetchMoreError(error) {
+    options.error = function fetchMoreError(error: Error) {
       // restore callbacks and limit
       options.success = oldSuccess;
       options.error = oldError;
@@ -283,8 +282,7 @@ export class SyncContext {
    *
    * @see Collection#fetchNext()
    */
-  public fetchNext(collection: Collection, options?) {
-    options = options || {};
+  public fetchNext(collection: Collection, options: any = {}) {
     options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
     options.offset = (this.getQuery.offset | 0) + collection.models.length;
     return this.fetchRange(collection, options);
@@ -298,22 +296,21 @@ export class SyncContext {
    *
    * @see Collection#fetchPrev()
    */
-  public fetchPrev(collection: Collection, options?) {
-    options = options || {};
+  public fetchPrev(collection: Collection, options: any = {}) {
     options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
     options.offset = (this.getQuery.offset | 0) - options.limit;
     return this.fetchRange(collection, options);
   }
 
-  public filterAttributes<T>(attrs: T[], options?): T[] {
+  public filterAttributes<T>(attrs: T[], options?: any): T[] {
     return this.filterFn ? attrs.filter(this.filterFn) : attrs;
   }
 
-  public sortAttributes<T>(attrs: T[], options?): T[] {
+  public sortAttributes<T>(attrs: T[], options?: any): T[] {
     return this.compareFn ? attrs.sort(this.compareFn) : attrs;
   }
 
-  public rangeAttributes<T>(attrs: T[], options?): T[] {
+  public rangeAttributes<T>(attrs: T[], options?: any): T[] {
     var offset = options && options.offset || this.getQuery.offset;
     if (offset > 0) {
       attrs.splice(0, offset);
@@ -325,7 +322,7 @@ export class SyncContext {
     return attrs;
   }
 
-  public processAttributes<T>(attrs: T[], options?): T[] {
+  public processAttributes<T>(attrs: T[], options?: any): T[] {
     attrs = this.filterAttributes(attrs, options);
     attrs = this.sortAttributes(attrs, options);
     attrs = this.rangeAttributes(attrs, options);
@@ -433,7 +430,7 @@ export class SyncContext {
    * @param models sorted by compareFn.
    * @return {number} insertion point.
    */
-  private insertionPoint(attributes, models: Model[]): number {
+  private insertionPoint(attributes: any, models: Model[]): number {
     if (this.lastInsertionPoint !== undefined) {
       // following performs two comparisons at the last insertion point to take advantage of locality,
       // this means we don't subdivide evenly but check tiny interval at insertion position firstly...
@@ -473,7 +470,8 @@ export class SyncContext {
    * @param end exclusive index of search interval.
    * @return {number} insertion point.
    */
-  private insertionPointBinarySearch(attributes, models, start: number, end: number): number {
+  private insertionPointBinarySearch(attributes: any, models: Model[],
+                                     start: number, end: number): number {
     var pivot = (start + end) >> 1;
     var delta = this.compareFn(attributes, models[pivot].attributes);
     if (end - start <= 1) {

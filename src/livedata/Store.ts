@@ -24,6 +24,7 @@ import * as diag from '../core/diag';
 
 import {Model} from './Model';
 import {Collection} from './Collection';
+import {CollectionCtor} from "./Collection";
 
 /**
  * constructor function of Store.
@@ -41,7 +42,7 @@ export interface StoreCtor {
  * @param {object} object to check.
  * @return {boolean} whether object is a Store.
  */
-export function isStore(object): object is Store {
+export function isStore(object: any): object is Store {
   if (!object || typeof object !== 'object') {
     return false;
   } else if ('isStore' in object) {
@@ -79,53 +80,59 @@ export class Store {
     // nothing to do
   }
 
-  initModel(model, options?: any): void {
+  initModel(model: Model, options?: any): void {
     // may be overwritten
   }
 
-  initCollection(collection, options?: any): void {
+  initCollection(collection: Collection, options?: any): void {
     // may be overwritten
   }
 
-  sync(method: string, model: Model | Collection, options?: any): PromiseLike<any> {
+  sync(method: string, model: Model | Collection, options?: any): Q.Promise<any> {
     // must be overwritten
     return Q.reject(new Error('not implemented!')); // purely abstract
   }
 
+  fetch(collection: Model, options: Backbone.ModelFetchOptions): Q.Promise<any>;
+  fetch(collection: Collection, options: Backbone.CollectionFetchOptions): Q.Promise<any>;
   /**
    *
    * @param collection usually a collection, but can also be a model
    * @param options
    */
-  fetch(collection, options) {
+  fetch(collection: Model | Collection, options: Backbone.ModelFetchOptions | Backbone.CollectionFetchOptions) {
     var opts = _.extend({}, options || {}, { store: this });
-    return collection.fetch(opts);
+    return (<any>collection).fetch(opts);
   }
 
-  create(collection, models, options) {
+  create(collection: CollectionCtor, models: Model[], options?: any) {
     var opts = _.extend({}, options || {}, { store: this });
     return new collection(models, opts);
   }
 
-  save(model, attr, options) {
+  save(model: Model, attributes?: any, options?: Backbone.ModelSaveOptions) {
     var opts = _.extend({}, options || {}, { store: this });
-    return model.save(attr, opts);
+    return model.save(attributes, opts);
   }
 
-  destroy(model, options) {
+  destroy(model: Model, options?: Backbone.ModelDestroyOptions) {
     var opts = _.extend({}, options || {}, { store: this });
     model.destroy(opts);
   }
 
   protected trigger: typeof Backbone.Events.prototype.trigger;
 
-  protected handleSuccess(options, result: any): any {
+  protected handleSuccess(options: {
+    success?: Function
+  }, result: any): any {
     if (options.success) {
       return options.success.call(this, result);
     }
   }
 
-  protected handleError(options, error: Error): any {
+  protected handleError(options: {
+    error?: Function
+  }, error: Error): any {
     if (options.error) {
       return options.error.call(this, error);
     }

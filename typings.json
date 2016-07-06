@@ -13,7 +13,8 @@
     "node": "registry:dt/node#4.0.0+20160423143914",
     "q": "registry:dt/q#0.0.0+20160417152954",
     "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
-    "underscore": "registry:dt/underscore#1.7.0+20160622050840"
+    "underscore": "registry:dt/underscore#1.7.0+20160622050840",
+    "websql": "registry:dt/websql#0.0.0+20160316155526"
   },
   "dependencies": {
     "lodash": "registry:npm/lodash#4.0.0+20160416211519",

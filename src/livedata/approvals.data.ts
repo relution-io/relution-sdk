@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-export function makeApprovals(): any {
+export function makeApprovals(): any[] {
   return [
     {
       "_id": "sample-B-ac5b1e69-63af-4945-9744-9b3f7c078caf",

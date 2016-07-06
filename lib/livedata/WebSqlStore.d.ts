@@ -1,5 +1,7 @@
 import * as Q from 'q';
 import { Store } from './Store';
+import { Model } from './Model';
+import { Collection } from './Collection';
 export interface WebSqlOptions {
     name: string;
     description?: string;
@@ -9,6 +11,10 @@ export interface WebSqlOptions {
     key?: string;
     security?: string;
     credentials?: any;
+}
+export interface Statement {
+    statement: string;
+    arguments: any[];
 }
 export interface WebSqlError extends Error {
     /**
@@ -36,7 +42,7 @@ export interface WebSqlError extends Error {
 export declare class WebSqlStore extends Store {
     protected size: number;
     protected version: string;
-    protected db: any;
+    protected db: Database;
     protected entities: {
         [entity: string]: {
             table: string;
@@ -53,27 +59,27 @@ export declare class WebSqlStore extends Store {
      */
     private _openDb(options);
     private _updateDb(options);
-    sync(method: any, model: any, options: any): Q.Promise<{}>;
+    sync(method: string, model: Model | Collection, options?: any): Q.Promise<any>;
     protected select(options: any): void;
     protected drop(options: any): void;
     protected createTable(options: any): void;
     protected execute(options: any): void;
-    protected _sqlUpdateDatabase(oldVersion: any, newVersion: any): any[];
-    protected _sqlDropTable(entity: any): string;
-    protected _sqlCreateTable(entity: any): string;
-    protected _sqlDelete(options: any, entity: any): string;
-    protected _sqlWhereFromData(options: any, entity: any): string;
-    protected _sqlSelect(options: any, entity: any): string;
+    protected _sqlUpdateDatabase(oldVersion: string | DOMString, newVersion: string): string[];
+    protected _sqlDropTable(entity: string): string;
+    protected _sqlCreateTable(entity: string): string;
+    protected _sqlDelete(options: any, entity: string): string;
+    protected _sqlWhereFromData(options: any, entity: string): string;
+    protected _sqlSelect(options: any, entity: string): string;
     protected _sqlValue(value: any): string;
     protected _dropTable(options: any): void;
     protected _createTable(options: any): void;
-    protected _checkTable(options: any, callback: any): void;
-    protected _insertOrReplace(model: any, options: any): void;
-    protected _select(model: any, options: any): void;
-    protected _delete(model: any, options: any): void;
+    protected _checkTable(options: any, callback: Function): void;
+    protected _insertOrReplace(model: Model | Collection, options: any): void;
+    protected _select(model: Model | Collection, options: any): void;
+    protected _delete(model: Model | Collection, options: any): void;
     protected _executeSql(options: any): void;
     private transactionPromise;
-    protected _executeTransaction(options: any, statements: any, result?: any): void;
+    protected _executeTransaction(options: any, statements: (Statement | string)[], result?: any): void;
     protected _checkDb(options: any): boolean;
-    protected _checkData(options: any, data: any): boolean;
+    protected _checkData(options: any, data: Model[]): boolean;
 }

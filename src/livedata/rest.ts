@@ -7,6 +7,9 @@ import * as Q from 'q';
 
 import * as web from '../web';
 
+import {Model} from './Model';
+import {Collection} from './Collection';
+
 /**
  * Backbone of browser via script tag or via require backbone.
  *
@@ -41,12 +44,12 @@ export const bareboneOptions = Object.freeze({
 
 const backboneAjax = Backbone.ajax;
 
-Backbone.ajax = function ajax(options) {
+Backbone.ajax = function ajax(options?: any) {
   var superAjax = options && options.ajax || backboneAjax;
   return superAjax.apply(this, arguments);
 };
 
-export function ajax(options) {
+export function ajax(options: any): PromiseLike<any> {
   var that = this;
   var args = arguments;
 
@@ -65,13 +68,13 @@ export function ajax(options) {
   }
   options.xhr = xhr;
 
-  let promise = xhr.then(function onSuccess (response) {
+  let promise = xhr.then((response: any) => {
     // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
     if (fnSuccess) {
       fnSuccess(response);
     }
     return Q.resolve(response);
-  }, function onError (response: web.HttpError) {
+  }, (response: web.HttpError) => {
     // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
     if (fnError) {
       fnError(response, response.statusMessage || response.message, response);
@@ -82,12 +85,12 @@ export function ajax(options) {
   return promise;
 }
 
-export function sync(method, model, options) {
-  options = options || {};
+export function sync(method: string, model: Model | Collection, options: any = {}):
+PromiseLike<any> {
   var store = options.store || this.store;
   options.credentials = options.credentials || this.credentials || store && store.options && store.options.credentials;
 
-  diag.debug.info('Relution.livedata.sync ' + method + ' ' + model.id);
+  diag.debug.info('Relution.livedata.sync ' + method + ' ' + (<any>model).id);
   if (store && store.sync) {
     // store access (this is redundant model argument)
     var storeAjax = store.ajax && _.bind(store.ajax, store);

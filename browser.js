@@ -1164,9 +1164,9 @@ var Store = (function () {
         var opts = _.extend({}, options || {}, { store: this });
         return new collection(models, opts);
     };
-    Store.prototype.save = function (model, attr, options) {
+    Store.prototype.save = function (model, attributes, options) {
         var opts = _.extend({}, options || {}, { store: this });
-        return model.save(attr, opts);
+        return model.save(attributes, opts);
     };
     Store.prototype.destroy = function (model, options) {
         var opts = _.extend({}, options || {}, { store: this });
@@ -1269,8 +1269,9 @@ var SyncContext = (function () {
      * @see Collection#fetchMore()
      */
     SyncContext.prototype.fetchMore = function (collection, options) {
+        if (options === void 0) { options = {}; }
         var getQuery = this.getQuery;
-        options = _.defaults(options || {}, {
+        options = _.defaults(options, {
             limit: options.pageSize || this.pageSize || getQuery.limit,
             sortOrder: getQuery.sortOrder,
             filter: getQuery.filter,
@@ -1357,8 +1358,8 @@ var SyncContext = (function () {
      * @return {Promise} promise of the load operation.
      */
     SyncContext.prototype.fetchRange = function (collection, options) {
+        if (options === void 0) { options = {}; }
         // this must be set in options to state we handle it
-        options = options || {};
         options.syncContext = this;
         // prepare a query for the page of data to load
         var oldQuery = this.getQuery;
@@ -1442,7 +1443,7 @@ var SyncContext = (function () {
      * @see Collection#fetchNext()
      */
     SyncContext.prototype.fetchNext = function (collection, options) {
-        options = options || {};
+        if (options === void 0) { options = {}; }
         options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
         options.offset = (this.getQuery.offset | 0) + collection.models.length;
         return this.fetchRange(collection, options);
@@ -1456,7 +1457,7 @@ var SyncContext = (function () {
      * @see Collection#fetchPrev()
      */
     SyncContext.prototype.fetchPrev = function (collection, options) {
-        options = options || {};
+        if (options === void 0) { options = {}; }
         options.limit = options.pageSize || this.pageSize || this.getQuery.limit;
         options.offset = (this.getQuery.offset | 0) - options.limit;
         return this.fetchRange(collection, options);
@@ -2136,8 +2137,8 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype.sync = function (method, model, options) {
         var _this = this;
+        if (options === void 0) { options = {}; }
         diag.debug.trace('Relution.livedata.SyncStore.sync');
-        options = options || {};
         try {
             var endpoint = model.endpoint || this.getEndpoint(model);
             if (!endpoint) {
@@ -2265,7 +2266,9 @@ var SyncStore = (function (_super) {
                     if (_.isEmpty(changes)) {
                         return;
                     }
-                    data = model.toJSON({ attrs: changes });
+                    data = model.toJSON({
+                        attrs: changes
+                    });
                     break;
                 case 'delete':
                     break;
@@ -2424,7 +2427,7 @@ var SyncStore = (function (_super) {
                 // no data if server asks not to alter state
                 // this.setLastMessageTime(channel, msg.time);
                 var promises = [];
-                var dataIds;
+                var dataIds; // model id -> attributes data
                 if (msg.method !== 'read') {
                     promises.push(_this.onMessage(endpoint, _this._fixMessage(endpoint, data === msg.data ? msg : _.defaults({
                         data: data // just accepts new data
@@ -2529,6 +2532,7 @@ var SyncStore = (function (_super) {
     };
     SyncStore.prototype.fetchChanges = function (endpoint, force) {
         var _this = this;
+        if (force === void 0) { force = false; }
         var channel = endpoint.channel;
         if (!endpoint.urlRoot || !channel) {
             return Q.resolve(undefined);
@@ -3016,7 +3020,7 @@ var WebSqlStore = (function (_super) {
             size: this.size,
             version: this.version,
             error: function (error) {
-                diag.debug.error(error);
+                diag.debug.error(error.message);
                 _this.handleError(options, error);
                 _this.trigger('error', error);
             }
@@ -3029,6 +3033,7 @@ var WebSqlStore = (function (_super) {
         diag.debug.info('Store close');
         if (this.db) {
             try {
+                // some implementations offer a close() method
                 if (this.db.close) {
                     this.db.close();
                 }
@@ -3071,6 +3076,9 @@ var WebSqlStore = (function (_super) {
             this._updateDb(options);
         }
         else if (error) {
+            if (!_.isError(error)) {
+                error = new Error('' + error);
+            }
             this.handleError(options, error);
         }
         else {
@@ -3336,7 +3344,7 @@ var WebSqlStore = (function (_super) {
             if (isCollection) {
                 result = [];
             }
-            else {
+            else if (model) {
                 options.models = [model];
             }
             var stm = this._sqlSelect(options, entity);
@@ -3372,6 +3380,7 @@ var WebSqlStore = (function (_super) {
                 }, function (t2, e) {
                     // error
                     diag.debug.error('webSql error: ' + e.message);
+                    return true; // abort
                 });
             }, function (sqlError) {
                 if (lastStatement) {
@@ -3565,13 +3574,13 @@ function ajax(options) {
         return Q.reject(new Error('ajax failed'));
     }
     options.xhr = xhr;
-    var promise = xhr.then(function onSuccess(response) {
+    var promise = xhr.then(function (response) {
         // AJAX success function( Anything data, String textStatus, jqXHR jqXHR )
         if (fnSuccess) {
             fnSuccess(response);
         }
         return Q.resolve(response);
-    }, function onError(response) {
+    }, function (response) {
         // AJAX error function( jqXHR jqXHR, String textStatus, String errorThrown )
         if (fnError) {
             fnError(response, response.statusMessage || response.message, response);
@@ -3583,7 +3592,7 @@ function ajax(options) {
 }
 exports.ajax = ajax;
 function sync(method, model, options) {
-    options = options || {};
+    if (options === void 0) { options = {}; }
     var store = options.store || this.store;
     options.credentials = options.credentials || this.credentials || store && store.options && store.options.credentials;
     diag.debug.info('Relution.livedata.sync ' + method + ' ' + model.id);

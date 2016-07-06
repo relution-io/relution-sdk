@@ -121,7 +121,7 @@ export function decryptJson<T>(password: string, data: EncryptedJson<T>): Q.Prom
  */
 export function hashJsonSync(data: any, algorithm: string): Buffer {
   const hash = crypto.createHash(algorithm);
-  (function feed(val) {
+  (function feed(val: any) {
     const keys = _.keys(val).sort();
     if (keys.length) {
       hash.update(JSON.stringify(keys), 'utf8');

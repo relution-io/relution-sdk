@@ -101,14 +101,14 @@ export declare class SyncStore extends Store {
      */
     createMsgCollection(): Collection;
     createSocket(endpoint: SyncEndpoint, name: string): SocketIOClient.Socket;
-    _bindChannel(endpoint: SyncEndpoint, name: any): void;
+    _bindChannel(endpoint: SyncEndpoint, name?: string): void;
     getLastMessageTime(channel: string): any;
     setLastMessageTime(channel: string, time: any): void;
     onConnect(endpoint: SyncEndpoint): Q.Promise<void>;
     onDisconnect(endpoint: SyncEndpoint): Q.Promise<void>;
     _fixMessage(endpoint: SyncEndpoint, msg: LiveDataMessage): LiveDataMessage;
     onMessage(endpoint: SyncEndpoint, msg: LiveDataMessage): Q.Promise<LiveDataMessage>;
-    sync(method: string, model: Model | Collection, options?: any): PromiseLike<any>;
+    sync(method: string, model: Model | Collection, options?: any): Q.Promise<any>;
     private _addMessage(method, model, options, endpoint);
     private _emitMessage(endpoint, msg, options, model, qMessage);
     private _ajaxMessage(endpoint, msg, options, model);

@@ -119,7 +119,7 @@ describe(module.filename || __filename, function() {
 
     it('sorting data', function () {
 
-      TEST.Developers.comparator = function (m1, m2) {
+      TEST.Developers.comparator = function (m1: Model, m2: Model) {
         return m2.get('age') - m1.get('age');
       };
       TEST.Developers.sort();
@@ -131,14 +131,14 @@ describe(module.filename || __filename, function() {
 
     it('filtering data', function () {
       // filter all devs older or equal to 26
-      var a1 = TEST.Developers.filter(function (rec) {
+      var a1 = TEST.Developers.filter(function (rec: Model) {
         return rec.get('age') >= 26;
       });
 
       assert.ok(a1.length === 5, 'Records successfully filtered. Everyone is 26 or older.');
 
       // filter all devs older than 26
-      var a2 = TEST.Developers.filter(function (rec) {
+      var a2 = TEST.Developers.filter(function (rec: Model) {
         return rec.get('age') > 26;
       });
 

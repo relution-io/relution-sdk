@@ -46,7 +46,7 @@ export interface CollectionCtor {
  * @param {object} object to check.
  * @return {boolean} whether object is a Collection.
  */
-export function isCollection(object): object is Collection {
+export function isCollection(object: any): object is Collection {
   if (!object || typeof object !== 'object') {
     return false;
   } else if ('isCollection' in object) {
@@ -75,7 +75,7 @@ export class Collection extends Backbone.Collection<Model> {
 
   public model: ModelCtor;
   public entity: string;
-  public options;
+  public options: any;
 
   public store: Store;
   public syncContext: SyncContext;
@@ -131,7 +131,7 @@ export class Collection extends Backbone.Collection<Model> {
     }
   }
 
-  public destroy(options?) {
+  public destroy(options?: any) {
     options = options || {};
     var success = options.success;
     if (this.length > 0) {
@@ -140,7 +140,7 @@ export class Collection extends Backbone.Collection<Model> {
           success();
         }
       };
-      var model;
+      var model: Model;
       while ((model = this.first())) {
         this.sync('delete', model, options);
         this.remove(model);
@@ -159,7 +159,7 @@ export class Collection extends Backbone.Collection<Model> {
     });
   }
 
-  public applyFilter(callback) {
+  public applyFilter(callback: _.ListIterator<Model, boolean>) {
     this.trigger('filter', this.filter(callback));
   }
 
@@ -202,7 +202,7 @@ export class Collection extends Backbone.Collection<Model> {
 
       if (!_.isEmpty(params)) {
         this.url += '?';
-        var a = [];
+        var a: string[] = [];
         for (var k in params) {
           a.push(k + (params[k] ? '=' + params[k] : ''));
         }
@@ -226,7 +226,7 @@ export class Collection extends Backbone.Collection<Model> {
    *
    * @see SyncContext#fetchMore()
    */
-  public fetchMore(options): PromiseLike<any> {
+  public fetchMore(options?: any): PromiseLike<any> {
     if (!this.syncContext) {
       return Q.reject(new Error('no context'));
     }
@@ -248,7 +248,7 @@ export class Collection extends Backbone.Collection<Model> {
    *
    * @see SyncContext#fetchNext()
    */
-  public fetchNext(options): PromiseLike<any> {
+  public fetchNext(options?: any): PromiseLike<any> {
     if (!this.syncContext) {
       return Q.reject(new Error('no context'));
     }
@@ -270,7 +270,7 @@ export class Collection extends Backbone.Collection<Model> {
    *
    * @see SyncContext#fetchPrev()
    */
-  public fetchPrev(options): PromiseLike<any> {
+  public fetchPrev(options?: any): PromiseLike<any> {
     if (!this.syncContext) {
       return Q.reject(new Error('no context'));
     }

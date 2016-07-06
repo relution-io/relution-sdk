@@ -1,5 +1,6 @@
 import { Model } from './Model';
 import { Collection } from './Collection';
+import { CollectionCtor } from "./Collection";
 /**
  * constructor function of Store.
  */
@@ -29,19 +30,19 @@ export declare class Store {
     endpoints: any;
     constructor(options?: any);
     close(): void;
-    initModel(model: any, options?: any): void;
-    initCollection(collection: any, options?: any): void;
-    sync(method: string, model: Model | Collection, options?: any): PromiseLike<any>;
-    /**
-     *
-     * @param collection usually a collection, but can also be a model
-     * @param options
-     */
-    fetch(collection: any, options: any): any;
-    create(collection: any, models: any, options: any): any;
-    save(model: any, attr: any, options: any): any;
-    destroy(model: any, options: any): void;
+    initModel(model: Model, options?: any): void;
+    initCollection(collection: Collection, options?: any): void;
+    sync(method: string, model: Model | Collection, options?: any): Q.Promise<any>;
+    fetch(collection: Model, options: Backbone.ModelFetchOptions): Q.Promise<any>;
+    fetch(collection: Collection, options: Backbone.CollectionFetchOptions): Q.Promise<any>;
+    create(collection: CollectionCtor, models: Model[], options?: any): Collection;
+    save(model: Model, attributes?: any, options?: Backbone.ModelSaveOptions): any;
+    destroy(model: Model, options?: Backbone.ModelDestroyOptions): void;
     protected trigger: typeof Backbone.Events.prototype.trigger;
-    protected handleSuccess(options: any, result: any): any;
-    protected handleError(options: any, error: Error): any;
+    protected handleSuccess(options: {
+        success?: Function;
+    }, result: any): any;
+    protected handleError(options: {
+        error?: Function;
+    }, error: Error): any;
 }

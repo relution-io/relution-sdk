@@ -44,7 +44,7 @@ export interface ModelCtor {
  * @param {object} object to check.
  * @return {boolean} whether object is a Model.
  */
-export function isModel(object): object is Model {
+export function isModel(object: any): object is Model {
   if (!object || typeof object !== 'object') {
     return false;
   } else if ('isModel' in object) {
@@ -108,7 +108,7 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
     return sync.apply(this, arguments);
   }
 
-  public onChange(model, options) {
+  public onChange(model: Model, options: any) {
     // For each `set` attribute, update or delete the current value.
     var attrs = model.changedAttributes();
     if (_.isObject(attrs)) {
@@ -118,7 +118,7 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
     }
   }
 
-  public onSync(model, options) {
+  public onSync(model: Model, options: any) {
     this.changedSinceSync = {};
   }
 

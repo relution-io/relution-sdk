@@ -25,10 +25,10 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
-var serverUrl = "http://localhost:8200";
+var serverUrl = 'http://localhost:8200';
 
-function backbone_error(done) {
-  return function (model, error) {
+function backbone_error(done: Function) {
+  return function (model: Model | Collection, error: any) {
     done(error instanceof Error ? error : new Error(JSON.stringify(error)));
   };
 }
@@ -63,7 +63,7 @@ describe(module.filename || __filename, function() {
     it('creating collection', () => {
       assert.isFunction(Collection, 'Collection is defined');
 
-      class TestModel extends Model {};
+      class TestModel extends Model {}
       TestModel.prototype.idAttribute = '_id';
       TestModel.prototype.entity = 'test';
       TEST.TestModel = TestModel;
@@ -72,7 +72,7 @@ describe(module.filename || __filename, function() {
 
       TEST.url = serverUrl + '/relution/livedata/test/';
 
-      class TestsModelCollection extends Collection {};
+      class TestsModelCollection extends Collection {}
       TestsModelCollection.prototype.model = TEST.TestModel;
       TestsModelCollection.prototype.url = TEST.url;
       TestsModelCollection.prototype.store = TEST.store;
@@ -110,7 +110,7 @@ describe(module.filename || __filename, function() {
     it('create record', (done) => {
       TEST.Tests.create(TEST.data,
         {
-          success: function(model) {
+          success: function(model: Model) {
             assert.isObject(model, 'new record created successfully.');
 
             TEST.id = model.id;
@@ -126,7 +126,7 @@ describe(module.filename || __filename, function() {
     it('get record', () => {
       var model = TEST.Tests.get(TEST.id);
 
-      assert.ok(model, "record found");
+      assert.ok(model, 'record found');
 
       assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
       assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
@@ -136,7 +136,7 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', (done) => {
 
-      class TestModel2 extends Model {};
+      class TestModel2 extends Model {}
       TestModel2.prototype.url = TEST.url;
       TestModel2.prototype.idAttribute = '_id';
       TestModel2.prototype.store = TEST.store;
@@ -146,9 +146,9 @@ describe(module.filename || __filename, function() {
       var data = { _id: TEST.id };
       var model = new TEST.TestModel2(data);
 
-      assert.isObject(model, "new model created");
+      assert.isObject(model, 'new model created');
 
-      assert.ok(_.isEqual(model.attributes, data), "new model holds correct data attributes");
+      assert.ok(_.isEqual(model.attributes, data), 'new model holds correct data attributes');
 
       model.fetch({
         success: function() {
@@ -164,7 +164,7 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with no id using callbacks', (done) => {
-      class TestModel2 extends Model {};
+      class TestModel2 extends Model {}
       TestModel2.prototype.url = TEST.url;
       TestModel2.prototype.idAttribute = '_id';
       TestModel2.prototype.store = TEST.store;
@@ -173,8 +173,8 @@ describe(module.filename || __filename, function() {
 
       var model = new TEST.TestModel2({});
       model.fetch({
-        success: function(model) {
-          backbone_error(done)(model, new Error('this should have failed!'));
+        success: function(model2: Model) {
+          backbone_error(done)(model2, new Error('this should have failed!'));
         },
         error: function() {
           done();
@@ -183,7 +183,7 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with empty-string id using promises', (done) => {
-      class TestModel2 extends Model {};
+      class TestModel2 extends Model {}
       TestModel2.prototype.url = TEST.url;
       TestModel2.prototype.idAttribute = '_id';
       TestModel2.prototype.store = TEST.store;
@@ -196,15 +196,15 @@ describe(module.filename || __filename, function() {
       model.fetch().then(function() {
         throw new Error('this should have failed!');
       },
-        function() {
-          return model;
-        }).then(function(model) {
-          done();
-          return model;
-        }, function(error) {
-          backbone_error(done)(model, error);
-          return model;
-        }).done();
+      function() {
+        return model;
+      }).then(function(model2: Model) {
+        done();
+        return model2;
+      }, function(error: Error) {
+        backbone_error(done)(model, error);
+        return model;
+      }).done();
     }),
 
     it('fetching collection', (done) => {
@@ -212,7 +212,7 @@ describe(module.filename || __filename, function() {
       assert.equal(TEST.Tests.length, 0, 'reset has cleared the collection.');
 
       TEST.Tests.fetch({
-        success: function(collection) {
+        success: function(collection: Collection) {
           assert.isObject(TEST.Tests.get(TEST.id), 'The model is still there');
           done();
         },
@@ -223,7 +223,7 @@ describe(module.filename || __filename, function() {
     it('get record', () => {
       var model = TEST.Tests.get(TEST.id);
 
-      assert.ok(model, "record found");
+      assert.ok(model, 'record found');
 
       assert.equal(model.get('firstName'), TEST.data.firstName, "found record has the correct 'firstname' value");
       assert.equal(model.get('sureName'), TEST.data.sureName, "found record has the correct 'sureName' value");
@@ -251,9 +251,9 @@ describe(module.filename || __filename, function() {
       var newId = '4711-' + oldId;
 
       class TestModel extends Model {
-        ajax(options) {
+        ajax(options?: any) {
           // following simulates server reassigning ID value
-          return Model.prototype.ajax.apply(this, arguments).then(function(response) {
+          return Model.prototype.ajax.apply(this, arguments).then(function(response: any) {
             if (response._id === oldId) {
               response._id = newId;
             } else if (response._id === newId) {
@@ -262,7 +262,7 @@ describe(module.filename || __filename, function() {
             return response;
           });
         }
-      };
+      }
       TestModel.prototype.url = TEST.url;
       TestModel.prototype.idAttribute = '_id';
       TestModel.prototype.store = TEST.store;
@@ -299,7 +299,7 @@ describe(module.filename || __filename, function() {
 
       model.destroy(
         {
-          success: function(model) {
+          success: function(model2: any) {
             assert.ok(true, 'record has been deleted.');
             done();
           },
@@ -311,8 +311,8 @@ describe(module.filename || __filename, function() {
       if (TEST.Tests.length === 0) {
         done();
       } else {
-        var model, hasError = false, isDone = false;
-        TEST.Tests.models.forEach(function(model) {
+        var hasError = false, isDone = false;
+        TEST.Tests.models.forEach(function(model: Model) {
           if (!hasError) {
             model.destroy({
               success: function() {
@@ -322,7 +322,7 @@ describe(module.filename || __filename, function() {
                   done();
                 }
               },
-              error: function(model, error) {
+              error: function() {
                 hasError = isDone = true;
                 backbone_error(done).apply(this, arguments);
               }
@@ -334,4 +334,3 @@ describe(module.filename || __filename, function() {
 
   ];
 });
-

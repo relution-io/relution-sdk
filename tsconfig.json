@@ -9,9 +9,10 @@
         "pretty": true,
         "stripInternal": true,
         "noEmitOnError": true,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "suppressImplicitAnyIndexErrors": true,
         "noFallthroughCasesInSwitch": false,
+		"noImplicitReturns": false,
         "forceConsistentCasingInFileNames": true
     },
     "filesGlob": [
