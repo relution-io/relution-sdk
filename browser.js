@@ -377,6 +377,8 @@ exports.ready = (function () {
             diag.debug.assert(!!platformId, 'unknown platform: ' + platformName);
         }
         return {
+            uuid: device && device.uuid,
+            serial: device && device.serial,
             platform: {
                 id: platformId,
                 name: platformName,

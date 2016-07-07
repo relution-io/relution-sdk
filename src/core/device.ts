@@ -21,6 +21,7 @@
 import * as Q from 'q';
 
 import * as diag from './diag';
+import * as domain from './domain';
 
 /**
  * platform IDs compatible to constants of ionic.
@@ -42,7 +43,15 @@ export type PlatformId =
 /**
  * describes the device platform, vendor, etc.
  */
-export interface Information {
+export interface Information extends domain.Referenceable {
+  /**
+   * serial number extracted using cordova device plugin.
+   *
+   * This may be useful as an encryption key. Notice, the `uuid` is also part of this object. Both
+   * information currently is available only if hosted on a mobile device running in a container.
+   */
+  serial: string;
+
   platform: {
     id: PlatformId;
     name: string;
@@ -132,6 +141,9 @@ export const ready = (() => {
     }
 
     return <Information>{
+      uuid: device && device.uuid,
+      serial: device && device.serial,
+
       platform: {
         id: platformId,
         name: platformName,
