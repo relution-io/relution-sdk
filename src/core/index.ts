@@ -3,7 +3,7 @@
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
- * Copyright 2016 M-Way Solutions GmbH   
+ * Copyright 2016 M-Way Solutions GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,4 +20,5 @@
 
 export * from './diag';
 export * from './init';
+export * from './device';
 export * from './domain';
