@@ -23,6 +23,7 @@ import * as _ from 'lodash';
 import * as Q from 'q';
 
 import * as diag from './diag';
+import * as device from './device';
 
 // initialize to go in sync with init() call
 Q.longStackSupport = diag.debug.enabled;
@@ -166,6 +167,7 @@ export let initOptions: InitOptions = {};
  * (re)initializes the SDK providing global configuration parameters.
  *
  * @param options of configuration, often these are hardcoded values of the mobile client app.
+ * @return promise resolving to Information object as soon as the device is ready.
  */
 export function init(options: InitOptions = {}) {
   if ('debug' in options) {
@@ -175,4 +177,6 @@ export function init(options: InitOptions = {}) {
 
   _.assignWith(initOptions, cloneServerInitOptions(options),
     (left: any, right: any) => _.isUndefined(right) ? left : right);
+
+  return device.ready;
 }

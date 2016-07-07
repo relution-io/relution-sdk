@@ -52,6 +52,8 @@ export interface Information {
 
 /**
  * resolves to Information object as soon as the device is ready.
+ *
+ * @internal SDK client code is required to use init() to obtain the Information.
  */
 export const ready = (() => {
   // must be extracted from global scope object as otherwise we get ReferenceError in node.js

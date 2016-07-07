@@ -295,6 +295,8 @@ var Q = require('q');
 var diag = require('./diag');
 /**
  * resolves to Information object as soon as the device is ready.
+ *
+ * @internal SDK client code is required to use init() to obtain the Information.
  */
 exports.ready = (function () {
     // must be extracted from global scope object as otherwise we get ReferenceError in node.js
@@ -689,6 +691,7 @@ __export(require('./domain'));
 var _ = require('lodash');
 var Q = require('q');
 var diag = require('./diag');
+var device = require('./device');
 // initialize to go in sync with init() call
 Q.longStackSupport = diag.debug.enabled;
 /**
@@ -727,6 +730,7 @@ exports.initOptions = {};
  * (re)initializes the SDK providing global configuration parameters.
  *
  * @param options of configuration, often these are hardcoded values of the mobile client app.
+ * @return promise resolving to Information object as soon as the device is ready.
  */
 function init(options) {
     if (options === void 0) { options = {}; }
@@ -735,10 +739,11 @@ function init(options) {
         Q.longStackSupport = options.debug;
     }
     _.assignWith(exports.initOptions, cloneServerInitOptions(options), function (left, right) { return _.isUndefined(right) ? left : right; });
+    return device.ready;
 }
 exports.init = init;
 
-},{"./diag":4,"lodash":252,"q":288}],9:[function(require,module,exports){
+},{"./device":3,"./diag":4,"lodash":252,"q":288}],9:[function(require,module,exports){
 (function (__filename){
 /**
  * @file core/mocha.spec.ts
