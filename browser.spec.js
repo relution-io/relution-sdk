@@ -744,6 +744,9 @@ function init(options) {
         Q.longStackSupport = options.debug;
     }
     _.assignWith(exports.initOptions, cloneServerInitOptions(options), function (left, right) { return _.isUndefined(right) ? left : right; });
+    if ('push' in options) {
+        exports.initOptions.push = _.cloneDeep(options.push);
+    }
     return device.ready;
 }
 exports.init = init;

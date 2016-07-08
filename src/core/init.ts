@@ -154,6 +154,14 @@ export interface InitOptions extends ServerUrlOptions, ServerInitOptions {
    */
   debug?: boolean;
 
+  /**
+   * push configuration of the app.
+   *
+   * Usually, `init()` is passed some deployment artifact such as the environment constants in an
+   * ionic app. When doing so, the push configuration can be specified directly as part of it.
+   */
+  push?: PhonegapPluginPush.InitOptions;
+
 }
 
 /**
@@ -177,6 +185,10 @@ export function init(options: InitOptions = {}) {
 
   _.assignWith(initOptions, cloneServerInitOptions(options),
     (left: any, right: any) => _.isUndefined(right) ? left : right);
+
+  if ('push' in options) {
+    initOptions.push = _.cloneDeep(options.push);
+  }
 
   return device.ready;
 }

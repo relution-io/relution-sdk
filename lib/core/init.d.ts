@@ -119,6 +119,13 @@ export interface InitOptions extends ServerUrlOptions, ServerInitOptions {
      * Default setting of the library is debug enabled.
      */
     debug?: boolean;
+    /**
+     * push configuration of the app.
+     *
+     * Usually, `init()` is passed some deployment artifact such as the environment constants in an
+     * ionic app. When doing so, the push configuration can be specified directly as part of it.
+     */
+    push?: PhonegapPluginPush.InitOptions;
 }
 /**
  * (re)initializes the SDK providing global configuration parameters.

@@ -11,6 +11,7 @@
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
     "mocha": "registry:dt/mocha#2.2.5+20160317120654",
     "node": "registry:dt/node#4.0.0+20160423143914",
+    "phonegap-plugin-push": "registry:dt/phonegap-plugin-push#0.0.0+20160501153936",
     "q": "registry:dt/q#0.0.0+20160417152954",
     "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
     "underscore": "registry:dt/underscore#1.7.0+20160622050840",
