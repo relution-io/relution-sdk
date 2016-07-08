@@ -18,3 +18,4 @@
  * limitations under the License.
  */
 export * from './push';
+export * from './cordova';

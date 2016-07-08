@@ -59,6 +59,7 @@
         "src/livedata/WebSqlStore.ts",
         "src/model/index.ts",
         "src/model/ModelContainer.ts",
+        "src/push/cordova.ts",
         "src/push/index.ts",
         "src/push/push.ts",
         "src/query/Filter.ts",
