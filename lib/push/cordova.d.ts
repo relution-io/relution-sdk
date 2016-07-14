@@ -18,6 +18,7 @@
  * limitations under the License.
  */
 import * as Q from 'q';
+import * as push from './push';
 /**
  * an incoming push notification message.
  */
@@ -62,4 +63,4 @@ export declare function listenPushNotification(callback: PushCallback): Q.Promis
  * authorizes current Relution server logged onto to send push notifications by transmitting the
  * registration token.
  */
-export declare function configurePushDevice(): void;
+export declare function configurePushDevice(options?: push.RegistrationOptions): Q.Promise<push.Device>;

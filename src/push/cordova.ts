@@ -23,6 +23,7 @@ import * as Q from 'q';
 import * as diag from '../core/diag';
 import * as device from '../core/device';
 import * as init from '../core/init';
+import * as push from './push';
 
 /**
  * an incoming push notification message.
@@ -196,6 +197,15 @@ export function listenPushNotification(callback: PushCallback): Q.Promise<Phoneg
  * authorizes current Relution server logged onto to send push notifications by transmitting the
  * registration token.
  */
-export function configurePushDevice() {
-  throw new Error('not implemented yet');
+export function configurePushDevice(options?: push.RegistrationOptions): Q.Promise<push.Device> {
+  return Q.when(promiseRegistrationEventResponse, (registrationEventResponse) => {
+    if (!registrationEventResponse) {
+      // either there is no configuration or since this method was called,
+      // registration was canceled
+      return Q.resolve<push.Device>(undefined);
+    }
+
+    // remaining implementation in push.ts as this is independent of Cordova...
+    return push.registerPushDevice(registrationEventResponse.registrationId, options);
+  });
 }

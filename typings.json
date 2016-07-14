@@ -8,6 +8,7 @@
   "globalDependencies": {
     "backbone": "registry:dt/backbone#1.0.0+20160316155526",
     "backbone-global": "registry:dt/backbone-global#1.0.0+20160626232945",
+    "cordova/plugins/device": "registry:dt/cordova/plugins/device#0.0.0+20160316155526",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
     "mocha": "registry:dt/mocha#2.2.5+20160317120654",
     "node": "registry:dt/node#4.0.0+20160423143914",

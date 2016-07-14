@@ -376,11 +376,13 @@ exports.ready = (function () {
         return {
             uuid: device && device.uuid,
             serial: device && device.serial,
+            language: navigator && (navigator.language || navigator.userLanguage),
             platform: {
                 id: platformId,
                 name: platformName,
                 version: platformVersion
-            }
+            },
+            device: device
         };
     });
 })();
