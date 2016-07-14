@@ -35,8 +35,12 @@ export interface HasBundle {
   bundle?: string;
 }
 
+export interface HasApplication {
+  application?: string;
+}
+
 export interface HasModified {
-  createdRole?: string;
+  createdUser?: string;
   createdDate?: Date;
   modifiedUser?: string;
   modifiedDate?: Date;

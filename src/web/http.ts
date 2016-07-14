@@ -298,7 +298,7 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
             diag.debug.info('server overloaded, retrying request.');
             // here promiseResponse must have been resolved already,
             // we chain anyways because of error propagation
-            promiseResponse.thenResolve(ajax(options)).done(resolveResult, rejectResult);
+            promiseResponse.thenResolve(ajax<T>(options)).done(resolveResult, rejectResult);
             return; // early exit as result is handled by done call above
           } else {
             // logon session processing
@@ -319,7 +319,7 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
                 }).then(() => {
                   diag.debug.assert(() => !!serverObj.sessionUserUuid);
                   diag.debug.info('server session recovered.');
-                  return ajax(options);
+                  return ajax<T>(options);
                 })).done(resolveResult, rejectResult);
                 return; // early exit as result is handled by done call above
               }
@@ -627,7 +627,7 @@ export function logout(logoutOptions: LogoutOptions = {}): Q.Promise<void> {
     agentClass: logoutOptions.agentClass || init.initOptions.agentClass,
     // options taking effect at logout time
   });
-  return ajax(_.defaults<HttpOptions>({
+  return ajax<void>(_.defaults<HttpOptions>({
     serverUrl: serverUrl,
     method: 'POST',
     url: '/gofer/security/rest/auth/logout',

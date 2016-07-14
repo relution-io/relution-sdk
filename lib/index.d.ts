@@ -7,5 +7,6 @@ export import model = require('./model');
 export import query = require('./query');
 export import security = require('./security');
 export import web = require('./web');
+export import push = require('./push');
 export import connector = require('./connector');
 export import livedata = require('./livedata');

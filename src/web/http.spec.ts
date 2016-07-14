@@ -41,7 +41,7 @@ describe(module.filename || __filename, function() {
         const user = security.getCurrentUser();
         assert(!!user);
         assert.equal(user.name, credentials.userName);
-        return web.get('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
+        return web.get<web.LoginResponse>('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
           assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
           assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
           return currentAuthResp;

@@ -19,6 +19,7 @@
  */
 import * as tls from 'tls';
 import * as Q from 'q';
+import * as device from './device';
 /**
  * applied on each successful authentication with the Relution server.
  *
@@ -118,10 +119,18 @@ export interface InitOptions extends ServerUrlOptions, ServerInitOptions {
      * Default setting of the library is debug enabled.
      */
     debug?: boolean;
+    /**
+     * push configuration of the app.
+     *
+     * Usually, `init()` is passed some deployment artifact such as the environment constants in an
+     * ionic app. When doing so, the push configuration can be specified directly as part of it.
+     */
+    push?: PhonegapPluginPush.InitOptions;
 }
 /**
  * (re)initializes the SDK providing global configuration parameters.
  *
  * @param options of configuration, often these are hardcoded values of the mobile client app.
+ * @return promise resolving to Information object as soon as the device is ready.
  */
-export declare function init(options?: InitOptions): void;
+export declare function init(options?: InitOptions): Q.Promise<device.Information>;

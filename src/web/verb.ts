@@ -42,7 +42,7 @@ import * as http from './http';
  *
  * @internal Implements verb methods.
  */
-function verb(method: string, optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any> {
+function verb<T>(method: string, optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T> {
   const options: any = {
     method: method
   };
@@ -54,7 +54,7 @@ function verb(method: string, optionsOrUrl: http.HttpOptions | string, body?: an
   if (!_.isUndefined(body)) {
     options.body = body;
   }
-  return http.ajax(options);
+  return http.ajax<T>(options);
 }
 
 /**
@@ -72,8 +72,8 @@ function verb(method: string, optionsOrUrl: http.HttpOptions | string, body?: an
  *
  * @see ajax
  */
-export function head(optionsOrUrl: http.HttpOptions | string): Q.Promise<any> {
-  return verb('HEAD', optionsOrUrl);
+export function head<T>(optionsOrUrl: http.HttpOptions | string): Q.Promise<T> {
+  return verb<T>('HEAD', optionsOrUrl);
 }
 
 /**
@@ -91,8 +91,8 @@ export function head(optionsOrUrl: http.HttpOptions | string): Q.Promise<any> {
  *
  * @see ajax
  */
-export function get(optionsOrUrl: http.HttpOptions | string): Q.Promise<any> {
-  return verb('GET', optionsOrUrl);
+export function get<T>(optionsOrUrl: http.HttpOptions | string): Q.Promise<T> {
+  return verb<T>('GET', optionsOrUrl);
 }
 
 /**
@@ -111,8 +111,8 @@ export function get(optionsOrUrl: http.HttpOptions | string): Q.Promise<any> {
  *
  * @see ajax
  */
-export function put(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any> {
-  return verb('PUT', optionsOrUrl, body);
+export function put<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T> {
+  return verb<T>('PUT', optionsOrUrl, body);
 }
 
 /**
@@ -131,8 +131,8 @@ export function put(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Prom
  *
  * @see ajax
  */
-export function post(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any> {
-  return verb('POST', optionsOrUrl, body);
+export function post<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T> {
+  return verb<T>('POST', optionsOrUrl, body);
 }
 
 /**
@@ -151,8 +151,8 @@ export function post(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Pro
  *
  * @see ajax
  */
-export function patch(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any> {
-  return verb('PATCH', optionsOrUrl, body);
+export function patch<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T> {
+  return verb<T>('PATCH', optionsOrUrl, body);
 }
 
 /**
@@ -176,8 +176,8 @@ export function patch(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Pr
  *
  * @see ajax
  */
-export function del(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<any> {
-  return verb('DELETE', optionsOrUrl, body);
+export function del<T>(optionsOrUrl: http.HttpOptions | string, body?: any): Q.Promise<T> {
+  return verb<T>('DELETE', optionsOrUrl, body);
 }
 
 /**

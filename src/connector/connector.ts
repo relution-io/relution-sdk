@@ -44,10 +44,7 @@ const connectorsUrl = 'api/v1/connectors';
  * @returns promise of async execution.
  */
 export function configureSession(name: string, properties: any): Q.Promise<any> {
-  return web.ajax({
-    url: connectorsUrl + '/' + name,
-    body: properties
-  });
+  return web.post(connectorsUrl + '/' + name, properties);
 }
 
 /**
@@ -60,9 +57,5 @@ export function configureSession(name: string, properties: any): Q.Promise<any> 
  * @returns promise providing output/error.
  */
 export function runCall(name: string, call: string, input: any): Q.Promise<any> {
-  return web.ajax({
-    method: 'POST',
-    url: connectorsUrl + '/' + name + '/' + call,
-    body: input
-  });
+  return web.post(connectorsUrl + '/' + name + '/' + call, input);
 }

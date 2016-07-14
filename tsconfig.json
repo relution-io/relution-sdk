@@ -12,7 +12,7 @@
         "noImplicitAny": true,
         "suppressImplicitAnyIndexErrors": true,
         "noFallthroughCasesInSwitch": false,
-		"noImplicitReturns": false,
+        "noImplicitReturns": false,
         "forceConsistentCasingInFileNames": true
     },
     "filesGlob": [
@@ -26,6 +26,7 @@
         "src/connector/index.ts",
         "src/core/cipher.spec.ts",
         "src/core/cipher.ts",
+        "src/core/device.ts",
         "src/core/diag.spec.ts",
         "src/core/diag.ts",
         "src/core/domain.ts",
@@ -58,6 +59,9 @@
         "src/livedata/WebSqlStore.ts",
         "src/model/index.ts",
         "src/model/ModelContainer.ts",
+        "src/push/cordova.ts",
+        "src/push/index.ts",
+        "src/push/push.ts",
         "src/query/Filter.ts",
         "src/query/FilterVisitor.ts",
         "src/query/GetQuery.ts",
