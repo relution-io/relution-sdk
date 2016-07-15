@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;core/init&quot; | Relution-SDK</title>
+	<title>&quot;push/cordova&quot; | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,10 +55,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_core_init_.html">&quot;core/init&quot;</a>
+					<a href="_push_cordova_.html">&quot;push/cordova&quot;</a>
 				</li>
 			</ul>
-			<h1>External module &quot;core/init&quot;</h1>
+			<h1>External module &quot;push/cordova&quot;</h1>
 		</div>
 	</div>
 </header>
@@ -70,117 +70,161 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Interfaces</h3>
+							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.httpagentoptions.html" class="tsd-kind-icon">Http<wbr>Agent<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Variables</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_push_cordova_.html#pushcallback" class="tsd-kind-icon">Push<wbr>Callback</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_push_cordova_.html#pushmessage" class="tsd-kind-icon">Push<wbr>Message</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_core_init_.html#cloneserverinitoptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_core_init_.html#init" class="tsd-kind-icon">init</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_push_cordova_.html#configurepushdevice" class="tsd-kind-icon">configure<wbr>Push<wbr>Device</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_push_cordova_.html#listenpushnotification" class="tsd-kind-icon">listen<wbr>Push<wbr>Notification</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Variables</h2>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
-					<a name="initoptions-1" class="tsd-anchor"></a>
-					<h3>init<wbr>Options</h3>
-					<div class="tsd-signature tsd-kind-icon">init<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a></div>
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="pushcallback" class="tsd-anchor"></a>
+					<h3>Push<wbr>Callback</h3>
+					<div class="tsd-signature tsd-kind-icon">Push<wbr>Callback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:172</li>
+							<li>Defined in push/cordova.ts:53</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>copy of options the SDK was initialized with using <a href="_core_init_.html#init">init</a> function serving as defaults.</p>
+							<p>receives incoming push notification messages once registered using <code>listenPushNotification()</code>.</p>
 						</div>
-						<dl class="tsd-comment-tags">
-							<dt>internal</dt>
-							<dd><p>for SDK internal use only!</p>
-							</dd>
-						</dl>
+						<p>For each incoming push notification message the callback is executed performing some
+							app-specific action. The caller will wait until the optionally returned promise gets
+						resolved, before signalling the operating system the message got processed completely.</p>
+						<p>Notice, the next push notification message may be passed to the callback even before the
+							returned promise completed. This is, the optional promise returned just controls when the
+						end of processing gets signalled to the operating system, but not when the app is ready.</p>
+						<p>Also, care must be taken as processing of a push notification message must not exceed
+							more than 30s according to push plugin documentation at
+							<a href="https://github.com/phonegap/phonegap-plugin-push/blob/master/docs/PAYLOAD.md">https://github.com/phonegap/phonegap-plugin-push/blob/master/docs/PAYLOAD.md</a>.
+						For that reason it makes no sense to display some blocking user interface here!</p>
+						<p>If during any of these steps some error is detected, the callback is executed. This holds
+							even when during processing of a push notification message the callback itself signalled
+						an error. In this case, both parameters are supplied.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Error</span>, message<span class="tsd-signature-symbol">?: </span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">&gt;</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>error: <span class="tsd-signature-type">Error</span></h5>
+											</li>
+											<li>
+												<h5><span class="tsd-flag ts-flagOptional">Optional</span> message: <a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a>
+											<span class="tsd-signature-symbol"> | </span>
+											<span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">&gt;</span>
+										</h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="pushmessage" class="tsd-anchor"></a>
+					<h3>Push<wbr>Message</h3>
+					<div class="tsd-signature tsd-kind-icon">Push<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NotificationEventResponse</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in push/cordova.ts:31</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>an incoming push notification message.</p>
+						</div>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="cloneserverinitoptions" class="tsd-anchor"></a>
-					<h3>clone<wbr>Server<wbr>Init<wbr>Options</h3>
+					<a name="configurepushdevice" class="tsd-anchor"></a>
+					<h3>configure<wbr>Push<wbr>Device</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options<span class="tsd-signature-symbol">(</span>serverInitOptions<span class="tsd-signature-symbol">: </span><a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a></li>
+						<li class="tsd-signature tsd-kind-icon">configure<wbr>Push<wbr>Device<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_push_push_.registrationoptions.html" class="tsd-signature-type">RegistrationOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_push_push_.device.html" class="tsd-signature-type">Device</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/init.ts:125</li>
+									<li>Defined in push/cordova.ts:200</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>creates a deeply independent copy of some <a href="../interfaces/_core_init_.serverinitoptions.html">ServerInitOptions</a>.</p>
+									<p>authorizes current Relution server logged onto to send push notifications by transmitting the
+									registration token.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>serverInitOptions: <a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>to clone.</p>
-									</div>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <a href="../interfaces/_push_push_.registrationoptions.html" class="tsd-signature-type">RegistrationOptions</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-signature-type">ServerInitOptions</a></h4>
-							<p>cloned object.</p>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_push_push_.device.html" class="tsd-signature-type">Device</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="init" class="tsd-anchor"></a>
-					<h3>init</h3>
+					<a name="listenpushnotification" class="tsd-anchor"></a>
+					<h3>listen<wbr>Push<wbr>Notification</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_core_device_.information.html" class="tsd-signature-type">Information</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">listen<wbr>Push<wbr>Notification<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><a href="_push_cordova_.html#pushcallback" class="tsd-signature-type">PushCallback</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/init.ts:180</li>
+									<li>Defined in push/cordova.ts:130</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>(re)initializes the SDK providing global configuration parameters.</p>
+									<p>installs a callback for receiving push notification messages, and registers the device with the
+									3rd party push service provider.</p>
 								</div>
+								<p>Usually push configuration is provided to <code>init()</code> and a call to this method is chained passing
+									the sink callback. Application using an explicit login then call <code>configurePushDevice()</code> as part
+								of the <code>LogonCallback</code> while anonymous applications call the latter directly.</p>
+								<p>In general it is not wise to unregister from push messages. However, this functionality is
+								available by passing <code>undefined</code> as callback.</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_core_init_.initoptions.html" class="tsd-signature-type">InitOptions</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+									<h5>callback: <a href="_push_cordova_.html#pushcallback" class="tsd-signature-type">PushCallback</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>of configuration, often these are hardcoded values of the mobile client app.</p>
+										<p>to install, or undefined to unregister.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_core_device_.information.html" class="tsd-signature-type">Information</a><span class="tsd-signature-symbol">&gt;</span></h4>
-							<p>promise resolving to Information object as soon as the device is ready.</p>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>promise of registration, for informal purposes.</p>
 						</li>
 					</ul>
 				</section>
@@ -193,35 +237,23 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_core_init_.html">"core/init"</a>
+						<a href="_push_cordova_.html">"push/cordova"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.httpagentoptions.html" class="tsd-kind-icon">Http<wbr>Agent<wbr>Options</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_push_cordova_.html#pushcallback" class="tsd-kind-icon">Push<wbr>Callback</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.initoptions.html" class="tsd-kind-icon">Init<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.logoncallback.html" class="tsd-kind-icon">Logon<wbr>Callback</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.serverinitoptions.html" class="tsd-kind-icon">Server<wbr>Init<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_core_init_.serverurloptions.html" class="tsd-kind-icon">Server<wbr>Url<wbr>Options</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-						<a href="_core_init_.html#initoptions-1" class="tsd-kind-icon">init<wbr>Options</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_push_cordova_.html#pushmessage" class="tsd-kind-icon">Push<wbr>Message</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_core_init_.html#cloneserverinitoptions" class="tsd-kind-icon">clone<wbr>Server<wbr>Init<wbr>Options</a>
+						<a href="_push_cordova_.html#configurepushdevice" class="tsd-kind-icon">configure<wbr>Push<wbr>Device</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_core_init_.html#init" class="tsd-kind-icon">init</a>
+						<a href="_push_cordova_.html#listenpushnotification" class="tsd-kind-icon">listen<wbr>Push<wbr>Notification</a>
 					</li>
 				</ul>
 			</nav>
