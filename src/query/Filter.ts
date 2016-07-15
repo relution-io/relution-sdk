@@ -18,28 +18,70 @@
  * limitations under the License.
  */
 
+/**
+ * kind of Filter as defined by corresponding Java object model.
+ */
+export type FilterType =
+  'boolean' |
+  'containsString' |
+  'dateRange' |
+  'doubleRange' |
+  'like' |
+  'logOp' |
+  'longEnum' |
+  'longRange' |
+  'stringEnum' |
+  'string' |
+  'stringMap' |
+  'stringRange' |
+  'null';
+
+/**
+ * all known valid types of filters.
+ *
+ * @type {string[]} of all known types of filters.
+ */
+export const filterTypes = [
+  'boolean',
+  'containsString',
+  'dateRange',
+  'doubleRange',
+  'like',
+  'logOp',
+  'longEnum',
+  'longRange',
+  'stringEnum',
+  'string',
+  'stringMap',
+  'stringRange',
+  'null'
+];
+
+/**
+ * checks if a given type value is a valid FilterType value.
+ *
+ * @param type value to check.
+ * @return {boolean} whether type value is valid.
+ */
+export function isFilterType(type: any): type is FilterType {
+    return filterTypes.indexOf(type) >= 0;
+}
+
 export interface Filter {
   /**
    * kind of Filter as defined by corresponding Java object model.
-   *
-   * <p>
-   *  - boolean
-   *  - containsString
-   *  - dateRange
-   *  - doubleRange
-   *  - like
-   *  - logOp
-   *  - longEnum
-   *  - longRange
-   *  - stringEnum
-   *  - string
-   *  - stringMap
-   *  - stringRange
-   *  - null
-   *  - ...
-   * </p>
    */
-    type: string;
+  type: FilterType;
+}
+
+/**
+ * checks if an object is a Filter.
+ *
+ * @param filter object to check.
+ * @return {boolean} whether filter is a filter.
+ */
+export function isFilter(filter: any): filter is Filter {
+  return filter && isFilterType(filter.type);
 }
 
 export interface LogOpFilter extends Filter {

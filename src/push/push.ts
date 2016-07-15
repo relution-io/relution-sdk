@@ -27,7 +27,9 @@ import * as domain from '../core/domain';
 import * as init from '../core/init';
 import * as server from '../security/server';
 import * as web from '../web';
-import {Filter} from '../query/Filter';
+
+import {Filter, NullFilter, StringFilter, StringEnumFilter} from '../query/Filter';
+import {User} from '../security/roles';
 
 /**
  * endpoint URL of push REST API set up by CLI project generation by default.
@@ -232,6 +234,36 @@ export function registerPushDevice(registrationId: string,
  */
 export function postPushNotification(message: Job): Q.Promise<string[]> {
   return web.post<string[]>(pushUrl, message);
+}
+
+/**
+ * creates a device filter for the user attribute of push devices matching any of a given set of
+ * users.
+ *
+ * @param users* to filter on.
+ * @returns device filter matching devices of given users.
+ */
+export function pushDeviceFilterByUsers(...users: (User | string)[]): Filter {
+  if (users.length <= 0) {
+    return <NullFilter>{
+      type: 'null',
+      fieldName: 'user',
+      isNull: true
+    };
+  } else if (users.length === 1) {
+    return <StringFilter>{
+      type: 'string',
+      fieldName: 'user',
+      value: domain.uuidOf(users[0])
+    };
+  } else {
+    const uuids = users.map((user) => domain.uuidOf(user));
+    return <StringEnumFilter>{
+      type: 'stringEnum',
+      fieldName: 'user',
+      values: uuids
+    };
+  }
 }
 
 /**

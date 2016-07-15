@@ -67,3 +67,17 @@ export function freeze<T>(self: T): T {
   }
   return Object.freeze(anything);
 }
+
+/**
+ * extracts the uuid of a Referenceable.
+ *
+ * @param referenceable or string uuid.
+ * @return {string} uuid of referenceable.
+ */
+export function uuidOf(referenceable: Referenceable | string) {
+  if (_.isString(referenceable)) {
+    return referenceable;
+  } else if (referenceable) {
+    return referenceable.uuid;
+  }
+}

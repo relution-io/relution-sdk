@@ -21,6 +21,7 @@ import * as _ from 'lodash';
 import * as Q from 'q';
 import * as domain from '../core/domain';
 import { Filter } from '../query/Filter';
+import { User } from '../security/roles';
 /**
  * transmission status of a push Job.
  *
@@ -112,6 +113,14 @@ export interface RegistrationOptions {
  * 		target apps or devices exist at all.
  */
 export declare function postPushNotification(message: Job): Q.Promise<string[]>;
+/**
+ * creates a device filter for the user attribute of push devices matching any of a given set of
+ * users.
+ *
+ * @param users* to filter on.
+ * @returns device filter matching devices of given users.
+ */
+export declare function pushDeviceFilterByUsers(...users: (User | string)[]): Filter;
 /**
  * gets push notification status.
  *

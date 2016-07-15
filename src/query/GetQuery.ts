@@ -20,7 +20,7 @@
 
 import * as _ from 'lodash';
 
-import {Filter, LogOpFilter} from './Filter';
+import {isFilter, Filter, LogOpFilter} from './Filter';
 import {SortOrder} from './SortOrder';
 
 /**
@@ -91,7 +91,10 @@ export class GetQuery {
     this.offset = json.offset;
 
     this.sortOrder = json.sortOrder && new SortOrder().fromJSON(json.sortOrder);
-    this.filter = json.filter;
+    if (json.filter && !isFilter(json.filter)) {
+      throw new Error('unknown type of filter: ' + json.filter.type);
+    }
+    this.filter = <Filter>json.filter;
 
     this.fields = json.fields;
 
