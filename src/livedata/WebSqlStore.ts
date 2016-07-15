@@ -101,6 +101,11 @@ export function openDatabase(options: WebSqlOptions) {
 }
 
 /**
+ * matches char codes subject to https://issues.apache.org/jira/browse/CB-9435 Cordova iOS bug.
+ */
+const BAD_UNICODES = /[\u2028\u2029]/;
+
+/**
  * stores LiveData into the WebSQL database.
  *
  * @example
@@ -465,7 +470,12 @@ export class WebSqlStore extends Store {
         }
         var value = options.attrs || amodel.attributes;
         var keys = [ 'id', 'data' ];
-        var args = [ amodel.id, JSON.stringify(value) ];
+        var json = JSON.stringify(value);
+        while (BAD_UNICODES.test(json)) {
+          // workaround https://issues.apache.org/jira/browse/CB-9435 on iOS
+          json = json.replace('\u2028', '\\u2028').replace('\u2029', '\\u2029');
+        }
+        var args = [ amodel.id, json ];
         if (args.length > 0) {
           var values = new Array(args.length).join('?,') + '?';
           var columns = '\'' + keys.join('\',\'') + '\'';
@@ -586,6 +596,9 @@ export class WebSqlStore extends Store {
               diag.debug.info('sql statement: ' + statement);
               if (args) {
                 diag.debug.trace('    arguments: ' + JSON.stringify(args));
+                diag.debug.assert(() => {
+                  return !args.some((arg: any) => typeof arg === 'string' && BAD_UNICODES.test(arg));
+                }, 'https://issues.apache.org/jira/browse/CB-9435 iOS unicode issue!');
               }
             }
 
