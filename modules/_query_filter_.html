@@ -65,6 +65,27 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<dl class="tsd-comment-tags">
+						<dt>file</dt>
+						<dd><p>query/Filter.ts
+							Relution SDK</p>
+							<p>Created by Thomas Beckmann on 22.06.2015
+							Copyright 2016 M-Way Solutions GmbH</p>
+							<p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+								you may not use this file except in compliance with the License.
+							You may obtain a copy of the License at</p>
+							<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+							<p>Unless required by applicable law or agreed to in writing, software
+								distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+								WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+								See the License for the specific language governing permissions and
+							limitations under the License.</p>
+						</dd>
+					</dl>
+				</div>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
@@ -93,7 +114,134 @@
 								<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/_query_filter_.valuefilter.html" class="tsd-kind-icon">Value<wbr>Filter</a></li>
 							</ul>
 						</section>
+						<section class="tsd-index-section ">
+							<h3>Type aliases</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_query_filter_.html#filtertype" class="tsd-kind-icon">Filter<wbr>Type</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Variables</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_query_filter_.html#filtertypes" class="tsd-kind-icon">filter<wbr>Types</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_query_filter_.html#isfilter" class="tsd-kind-icon">is<wbr>Filter</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_query_filter_.html#isfiltertype" class="tsd-kind-icon">is<wbr>Filter<wbr>Type</a></li>
+							</ul>
+						</section>
 					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="filtertype" class="tsd-anchor"></a>
+					<h3>Filter<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">Filter<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"boolean"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"containsString"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"dateRange"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"doubleRange"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"like"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"logOp"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"longEnum"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"longRange"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"stringEnum"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"string"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"stringMap"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"stringRange"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"null"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in query/Filter.ts:24</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>kind of Filter as defined by corresponding Java object model.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Variables</h2>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+					<a name="filtertypes" class="tsd-anchor"></a>
+					<h3>filter<wbr>Types</h3>
+					<div class="tsd-signature tsd-kind-icon">filter<wbr>Types<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in query/Filter.ts:44</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>all known valid types of filters.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>type</dt>
+							<dd><p>{string[]} of all known types of filters.</p>
+							</dd>
+						</dl>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="isfilter" class="tsd-anchor"></a>
+					<h3>is<wbr>Filter</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>Filter<span class="tsd-signature-symbol">(</span>filter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/Filter.ts:83</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>checks if an object is a Filter.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>filter: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>object to check.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+							<p>whether filter is a filter.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="isfiltertype" class="tsd-anchor"></a>
+					<h3>is<wbr>Filter<wbr>Type</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>Filter<wbr>Type<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in query/Filter.ts:66</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>checks if a given type value is a valid FilterType value.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>type: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>value to check.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+							<p>whether type value is valid.</p>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -166,6 +314,18 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="../interfaces/_query_filter_.valuefilter.html" class="tsd-kind-icon">Value<wbr>Filter</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_query_filter_.html#filtertype" class="tsd-kind-icon">Filter<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="_query_filter_.html#filtertypes" class="tsd-kind-icon">filter<wbr>Types</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_query_filter_.html#isfilter" class="tsd-kind-icon">is<wbr>Filter</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_query_filter_.html#isfiltertype" class="tsd-kind-icon">is<wbr>Filter<wbr>Type</a>
 					</li>
 				</ul>
 			</nav>
