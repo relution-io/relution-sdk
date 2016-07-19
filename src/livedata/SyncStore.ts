@@ -36,13 +36,23 @@ import {Model, ModelCtor, isModel} from './Model';
 import {Collection, isCollection} from './Collection';
 
 /**
- * io of browser via script tag or via require socket.io-client.
+ * io of browser via script tag or via require socket.io-client, entirely optional.
+ *
+ * Notice, this module is entirely optional as the store may operate without it if socket
+ * notifications are not used.
  *
  * @internal Not public API, exported for testing purposes only!
  */
-export const io = global['io'] ||               // native implementation
-  process && !process['browser'] &&             // or when not in browser
-  (global['io'] = require('socket.io-client')); // required version
+export const io: SocketIOClientStatic = global['io'] || // native implementation
+  typeof require === 'function' &&                      // or when require is available
+  ((function requireSocketIo() {                        // required version
+    // here we are in an immediately invoked function requiring socket.io-client, if available
+    try {
+      return (global['io'] = require('socket.io-client'));
+    } catch (error) {
+      diag.debug.warn('optional socket.io-client module is not available: ' + error && error.message);
+    }
+  })());
 
 /**
  * connects a Model/Collection to a Relution server.

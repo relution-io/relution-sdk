@@ -30,10 +30,12 @@ import {Collection} from './Collection';
 /**
  * Backbone of browser via script tag or via require backbone.
  *
+ * Notice, Backbone module is a mandatory runtime dependency of the Relution SDK!
+ *
  * @internal Not public API, exported for testing purposes only!
  */
 export const Backbone = global['Backbone'] || // native implementation
-  process && !process['browser'] &&           // or when not in browser
+  typeof require === 'function' &&            // or when require is available
   (global['Backbone'] = require('backbone')); // required version
 
 /**

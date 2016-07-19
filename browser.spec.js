@@ -2827,7 +2827,7 @@ describe(module.filename || __filename, function () {
 
 }).call(this,"/lib\\livedata\\SyncStore-sync-model-to-server.spec.js")
 },{"./Model":16,"./SyncStore":26,"./WebSqlStore":28,"chai":119,"q":289}],26:[function(require,module,exports){
-(function (process,global){
+(function (global){
 /**
  * @file livedata/SyncStore.ts
  * Relution SDK
@@ -2868,13 +2868,24 @@ var LiveDataMessage_1 = require('./LiveDataMessage');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 /**
- * io of browser via script tag or via require socket.io-client.
+ * io of browser via script tag or via require socket.io-client, entirely optional.
+ *
+ * Notice, this module is entirely optional as the store may operate without it if socket
+ * notifications are not used.
  *
  * @internal Not public API, exported for testing purposes only!
  */
 exports.io = global['io'] ||
-    process && !process['browser'] &&
-        (global['io'] = require('socket.io-client')); // required version
+    typeof require === 'function' &&
+        ((function requireSocketIo() {
+            // here we are in an immediately invoked function requiring socket.io-client, if available
+            try {
+                return (global['io'] = require('socket.io-client'));
+            }
+            catch (error) {
+                diag.debug.warn('optional socket.io-client module is not available: ' + error && error.message);
+            }
+        })());
 /**
  * connects a Model/Collection to a Relution server.
  *
@@ -3976,8 +3987,8 @@ var syncStore = _.extend(SyncStore.prototype, {
 });
 diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.create(syncStore)); });
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"../core/objectid":10,"../query/GetQuery":34,"../security":43,"../web":49,"./Collection":13,"./LiveDataMessage":15,"./Model":16,"./Store":18,"./SyncContext":20,"./SyncEndpoint":22,"./WebSqlStore":28,"_process":281,"lodash":253,"q":289,"socket.io-client":undefined}],27:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/diag":4,"../core/objectid":10,"../query/GetQuery":34,"../security":43,"../web":49,"./Collection":13,"./LiveDataMessage":15,"./Model":16,"./Store":18,"./SyncContext":20,"./SyncEndpoint":22,"./WebSqlStore":28,"lodash":253,"q":289,"socket.io-client":undefined}],27:[function(require,module,exports){
 (function (__filename){
 /**
  * @file livedata/SyncStore.spec.ts
@@ -13470,7 +13481,7 @@ function makeApprovals() {
 exports.makeApprovals = makeApprovals;
 
 },{}],31:[function(require,module,exports){
-(function (process,global){
+(function (global){
 /**
  * @file livedata/rest.ts
  * Relution SDK
@@ -13497,10 +13508,12 @@ var web = require('../web');
 /**
  * Backbone of browser via script tag or via require backbone.
  *
+ * Notice, Backbone module is a mandatory runtime dependency of the Relution SDK!
+ *
  * @internal Not public API, exported for testing purposes only!
  */
 exports.Backbone = global['Backbone'] ||
-    process && !process['browser'] &&
+    typeof require === 'function' &&
         (global['Backbone'] = require('backbone')); // required version
 /**
  * options passed to Collection.fetch() preventing backbone.js from consuming the response.
@@ -13585,8 +13598,8 @@ function sync(method, model, options) {
 }
 exports.sync = sync;
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core/diag":4,"../web":49,"_process":281,"backbone":undefined,"q":289}],32:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../core/diag":4,"../web":49,"backbone":undefined,"q":289}],32:[function(require,module,exports){
 /**
  * @file query/Filter.ts
  * Relution SDK
