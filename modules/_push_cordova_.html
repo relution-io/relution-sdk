@@ -120,7 +120,7 @@
 						<ul class="tsd-parameters">
 							<li class="tsd-parameter-siganture">
 								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Error</span>, message<span class="tsd-signature-symbol">?: </span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">&gt;</span></li>
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Error</span>, pushMessage<span class="tsd-signature-symbol">?: </span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a><span class="tsd-signature-symbol">&gt;</span></li>
 								</ul>
 								<ul class="tsd-descriptions">
 									<li class="tsd-description">
@@ -130,7 +130,7 @@
 												<h5>error: <span class="tsd-signature-type">Error</span></h5>
 											</li>
 											<li>
-												<h5><span class="tsd-flag ts-flagOptional">Optional</span> message: <a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a></h5>
+												<h5><span class="tsd-flag ts-flagOptional">Optional</span> pushMessage: <a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a></h5>
 											</li>
 										</ul>
 										<h4 class="tsd-returns-title">Returns <a href="_push_cordova_.html#pushmessage" class="tsd-signature-type">PushMessage</a>
@@ -171,7 +171,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in push/cordova.ts:200</li>
+									<li>Defined in push/cordova.ts:218</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -194,13 +194,13 @@
 					<a name="listenpushnotification" class="tsd-anchor"></a>
 					<h3>listen<wbr>Push<wbr>Notification</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">listen<wbr>Push<wbr>Notification<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">: </span><a href="_push_cordova_.html#pushcallback" class="tsd-signature-type">PushCallback</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">listen<wbr>Push<wbr>Notification<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">?: </span><a href="_push_cordova_.html#pushcallback" class="tsd-signature-type">PushCallback</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in push/cordova.ts:130</li>
+									<li>Defined in push/cordova.ts:147</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -212,14 +212,14 @@
 									the sink callback. Application using an explicit login then call <code>configurePushDevice()</code> as part
 								of the <code>LogonCallback</code> while anonymous applications call the latter directly.</p>
 								<p>In general it is not wise to unregister from push messages. However, this functionality is
-								available by passing <code>undefined</code> as callback.</p>
+								available by passing <code>null</code> as callback.</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>callback: <a href="_push_cordova_.html#pushcallback" class="tsd-signature-type">PushCallback</a></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> callback: <a href="_push_cordova_.html#pushcallback" class="tsd-signature-type">PushCallback</a><span class="tsd-signature-symbol"> =&nbsp;defaultPushCallback</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>to install, or undefined to unregister.</p>
+										<p>to install, or explicitly null to unregister.</p>
 									</div>
 								</li>
 							</ul>
