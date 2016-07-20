@@ -43,7 +43,7 @@ export declare type PushMessage = PhonegapPluginPush.NotificationEventResponse;
  * even when during processing of a push notification message the callback itself signalled
  * an error. In this case, both parameters are supplied.
  */
-export declare type PushCallback = (error: Error, message?: PushMessage) => PushMessage | Q.Promise<PushMessage>;
+export declare type PushCallback = (error: Error, pushMessage?: PushMessage) => PushMessage | Q.Promise<PushMessage>;
 /**
  * installs a callback for receiving push notification messages, and registers the device with the
  * 3rd party push service provider.
@@ -53,12 +53,12 @@ export declare type PushCallback = (error: Error, message?: PushMessage) => Push
  * of the `LogonCallback` while anonymous applications call the latter directly.
  *
  * In general it is not wise to unregister from push messages. However, this functionality is
- * available by passing `undefined` as callback.
+ * available by passing `null` as callback.
  *
- * @param callback to install, or undefined to unregister.
+ * @param callback to install, or explicitly null to unregister.
  * @return promise of registration, for informal purposes.
  */
-export declare function listenPushNotification(callback: PushCallback): Q.Promise<PhonegapPluginPush.RegistrationEventResponse>;
+export declare function listenPushNotification(callback?: PushCallback): Q.Promise<PhonegapPluginPush.RegistrationEventResponse>;
 /**
  * authorizes current Relution server logged onto to send push notifications by transmitting the
  * registration token.

@@ -89,16 +89,18 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="io" class="tsd-anchor"></a>
 					<h3>io</h3>
-					<div class="tsd-signature tsd-kind-icon">io<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<div class="tsd-signature tsd-kind-icon">io<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">SocketIOClientStatic</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/SyncStore.ts:43</li>
+							<li>Defined in livedata/SyncStore.ts:46</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>io of browser via script tag or via require socket.io-client.</p>
+							<p>io of browser via script tag or via require socket.io-client, entirely optional.</p>
 						</div>
+						<p>Notice, this module is entirely optional as the store may operate without it if socket
+						notifications are not used.</p>
 						<dl class="tsd-comment-tags">
 							<dt>internal</dt>
 							<dd><p>Not public API, exported for testing purposes only!</p>

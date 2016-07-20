@@ -51,7 +51,7 @@ export type PushMessage = PhonegapPluginPush.NotificationEventResponse;
  * an error. In this case, both parameters are supplied.
  */
 export type PushCallback =
-  (error: Error, message?: PushMessage) => PushMessage | Q.Promise<PushMessage>;
+  (error: Error, pushMessage?: PushMessage) => PushMessage | Q.Promise<PushMessage>;
 
 // just keep track of plugin instance and callback
 let pushPlugin: PhonegapPluginPush.PushNotification;
@@ -114,6 +114,23 @@ function onPushNotificationNotification(response: PhonegapPluginPush.Notificatio
 }
 
 /**
+ * default implementation of PushCallback reporting errors and incoming messages to the console.
+ *
+ * @param error cause of failure.
+ * @param pushMessage incoming notification data.
+ *
+ * @return {PushMessage} same value as parameter causing confirmation of message.
+ */
+function defaultPushCallback(error: Error, pushMessage?: PushMessage) {
+  if (error) {
+    diag.debug.error('push failure', error);
+  } else if (pushMessage && pushMessage.message) {
+    diag.debug.info('push received', pushMessage.message);
+  }
+  return pushMessage;
+}
+
+/**
  * installs a callback for receiving push notification messages, and registers the device with the
  * 3rd party push service provider.
  *
@@ -122,12 +139,13 @@ function onPushNotificationNotification(response: PhonegapPluginPush.Notificatio
  * of the `LogonCallback` while anonymous applications call the latter directly.
  *
  * In general it is not wise to unregister from push messages. However, this functionality is
- * available by passing `undefined` as callback.
+ * available by passing `null` as callback.
  *
- * @param callback to install, or undefined to unregister.
+ * @param callback to install, or explicitly null to unregister.
  * @return promise of registration, for informal purposes.
  */
-export function listenPushNotification(callback: PushCallback): Q.Promise<PhonegapPluginPush.RegistrationEventResponse> {
+export function listenPushNotification(callback: PushCallback = defaultPushCallback):
+                                          Q.Promise<PhonegapPluginPush.RegistrationEventResponse> {
   if (resolveRegistrationEventResponse) {
     diag.debug.assert(!!rejectRegistrationEventResponse);
     resolveRegistrationEventResponse(undefined);
