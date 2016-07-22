@@ -690,6 +690,7 @@ __export(require('./device'));
 __export(require('./domain'));
 
 },{"./device":3,"./diag":4,"./domain":6,"./init":8}],8:[function(require,module,exports){
+(function (process){
 /**
  * @file core/init.ts
  * Relution SDK
@@ -714,6 +715,22 @@ var _ = require('lodash');
 var Q = require('q');
 var diag = require('./diag');
 var device = require('./device');
+// workaround Q promises being inherently incompatible with zone.js used by angular2
+Q.nextTick = (function detectNextTick() {
+    // requires use of Q's nextTick(cb)
+    Q.stopUnhandledRejectionTracking();
+    // Q's nextTick(cb) is not compatible with thread-locals,
+    // returned function must not be bound as zone.js reassigns global variables
+    if (process && !('browser' in process) && process.nextTick) {
+        return function (cb) { return process.nextTick(cb); };
+    }
+    else if (typeof 'setImmediate' === 'function') {
+        return function (cb) { return setImmediate(cb); };
+    }
+    else {
+        return function (cb) { return setTimeout(cb, 0); };
+    }
+})();
 // initialize to go in sync with init() call
 Q.longStackSupport = diag.debug.enabled;
 /**
@@ -768,7 +785,8 @@ function init(options) {
 }
 exports.init = init;
 
-},{"./device":3,"./diag":4,"lodash":253,"q":289}],9:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"./device":3,"./diag":4,"_process":281,"lodash":253,"q":289}],9:[function(require,module,exports){
 (function (__filename){
 /**
  * @file core/mocha.spec.ts
