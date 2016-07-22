@@ -25,6 +25,21 @@ import * as Q from 'q';
 import * as diag from './diag';
 import * as device from './device';
 
+// workaround Q promises being inherently incompatible with zone.js used by angular2
+Q.nextTick = (function detectNextTick(): typeof Q.nextTick {
+  // requires use of Q's nextTick(cb)
+  (<any>Q).stopUnhandledRejectionTracking();
+  // Q's nextTick(cb) is not compatible with thread-locals,
+  // returned function must not be bound as zone.js reassigns global variables
+  if (process && !('browser' in process) && process.nextTick) {
+    return (cb) => process.nextTick(cb);
+  } else if (typeof 'setImmediate' === 'function') {
+    return (cb) => setImmediate(cb);
+  } else {
+    return (cb) => setTimeout(cb, 0);
+  }
+})();
+
 // initialize to go in sync with init() call
 Q.longStackSupport = diag.debug.enabled;
 
