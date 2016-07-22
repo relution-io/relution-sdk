@@ -16,7 +16,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module.exports = require('./lib');
+if (typeof Object.setPrototypeOf === 'function') {
+  module.exports = require('./lib/index.lazy');
+} else {
+  module.exports = require('./lib');
+}
 
 if (!process || 'browser' in process) {
   // browser
