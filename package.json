@@ -11,6 +11,9 @@
     "offline",
     "mvc"
   ],
+  "bin": {
+    "installInfo": "./bin/installInfo.js"
+  },
   "main": "index.js",
   "scripts": {
     "precommit": "npm run tslint",
@@ -20,7 +23,7 @@
     "api": "typedoc --options %CD%/typedoc.json",
     "gh-pages": "git subtree push --prefix public/docs origin gh-pages",
     "watch": "tsc -p . -w",
-    "postinstall": "typings install",
+    "postinstall": "installInfo && typings install",
     "browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql",
     "testify": "browserify ./lib/index.spec.js -o browser.spec.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql"
   },
