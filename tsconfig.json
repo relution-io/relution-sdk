@@ -32,6 +32,7 @@
         "src/core/domain.ts",
         "src/core/index.ts",
         "src/core/init.ts",
+        "src/core/init.spec.ts",
         "src/core/mocha.spec.ts",
         "src/core/objectid.ts",
         "src/core/q.spec.ts",

@@ -202,7 +202,7 @@ export function init(options: InitOptions = {}) {
   if ('serverUrl' in options) {
     const myURL = url.parse(options.serverUrl);
     if (!myURL.protocol && !myURL.host) {
-      throw new Error(`${options.serverUrl} is not an accepted Url, please add a Host and a Protocol.`);
+      return Q.reject(new Error(`${options.serverUrl} is not an accepted Url, please add a Host and a Protocol.`));
     }
   }
 

@@ -19,7 +19,6 @@
  */
 import * as tls from 'tls';
 import * as Q from 'q';
-import * as device from './device';
 /**
  * applied on each successful authentication with the Relution server.
  *
@@ -133,4 +132,4 @@ export interface InitOptions extends ServerUrlOptions, ServerInitOptions {
  * @param options of configuration, often these are hardcoded values of the mobile client app.
  * @return promise resolving to Information object as soon as the device is ready.
  */
-export declare function init(options?: InitOptions): Q.Promise<device.Information>;
+export declare function init(options?: InitOptions): Q.Promise<{}>;
