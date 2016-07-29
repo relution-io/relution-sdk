@@ -12,7 +12,7 @@
     "mvc"
   ],
   "bin": {
-    "installInfo": "./bin/installInfo.js"
+    "installInfo": "bin/installInfo.js"
   },
   "main": "index.js",
   "scripts": {
