@@ -21,7 +21,7 @@
 import * as tls from 'tls';
 import * as _ from 'lodash';
 import * as Q from 'q';
-
+import * as url from 'url';
 import * as diag from './diag';
 import * as device from './device';
 
@@ -193,9 +193,17 @@ export let initOptions: InitOptions = {};
  * @return promise resolving to Information object as soon as the device is ready.
  */
 export function init(options: InitOptions = {}) {
+
   if ('debug' in options) {
     diag.debug.enabled = options.debug;
     Q.longStackSupport = options.debug;
+  }
+
+  if ('serverUrl' in options) {
+    const myURL = url.parse(options.serverUrl);
+    if (!myURL.protocol && !myURL.host) {
+      return Q.reject<device.Information>(new Error(`${options.serverUrl} is not an accepted Url, please add a Host and a Protocol.`));
+    }
   }
 
   _.assignWith(initOptions, cloneServerInitOptions(options),
