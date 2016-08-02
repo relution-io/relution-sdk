@@ -24,6 +24,7 @@ export default [
   require('./core/mocha.spec'),
   require('./core/q.spec'),
   require('./core/diag.spec'),
+  require('./core/init.spec'),
   require('./core/cipher.spec'),
 
   // security

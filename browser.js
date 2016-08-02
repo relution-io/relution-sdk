@@ -672,6 +672,7 @@ __export(require('./domain'));
 "use strict";
 var _ = require('lodash');
 var Q = require('q');
+var url = require('url');
 var diag = require('./diag');
 var device = require('./device');
 // workaround Q promises being inherently incompatible with zone.js used by angular2
@@ -736,6 +737,12 @@ function init(options) {
         diag.debug.enabled = options.debug;
         Q.longStackSupport = options.debug;
     }
+    if ('serverUrl' in options) {
+        var myURL = url.parse(options.serverUrl);
+        if (!myURL.protocol && !myURL.host) {
+            return Q.reject(new Error(options.serverUrl + " is not an accepted Url, please add a Host and a Protocol."));
+        }
+    }
     _.assignWith(exports.initOptions, cloneServerInitOptions(options), function (left, right) { return _.isUndefined(right) ? left : right; });
     if ('push' in options) {
         exports.initOptions.push = _.cloneDeep(options.push);
@@ -745,7 +752,7 @@ function init(options) {
 exports.init = init;
 
 }).call(this,require('_process'))
-},{"./device":5,"./diag":6,"_process":237,"lodash":209,"q":245}],10:[function(require,module,exports){
+},{"./device":5,"./diag":6,"_process":237,"lodash":209,"q":245,"url":327}],10:[function(require,module,exports){
 /**
  * @file core/objectid.ts
  * Relution SDK
