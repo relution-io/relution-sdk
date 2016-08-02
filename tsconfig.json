@@ -36,6 +36,7 @@
         "src/core/mocha.spec.ts",
         "src/core/objectid.ts",
         "src/core/q.spec.ts",
+        "src/index.lazy.ts",
         "src/index.spec.ts",
         "src/index.ts",
         "src/livedata/approvals.data.ts",

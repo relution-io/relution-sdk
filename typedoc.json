@@ -2,11 +2,11 @@
   "name": "Relution-SDK",
   "mode": "modules",
   "out": "public/docs",
-  "exclude": "**/*.+(d|spec|data).ts",
+  "exclude": "**/*.+(d|spec|data|lazy).ts",
   "theme": "default",
   "stripInternal": true,
   "includeDeclarations": true,
   "excludeExternals": true,
   "excludeNotExported": true,
-  "externalPattern": "**/*.+(d|spec|data).ts"
+  "externalPattern": "**/*.+(d|spec|data|lazy).ts"
 }
