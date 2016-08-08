@@ -18,8 +18,10 @@
   "homepage": "https://github.com/relution-io/relution-sdk",
   "ignore": [
     "**/.*",
+    ".*",
     "node_modules",
     "server",
+    "src",
     "typings",
     "public",
     "lib",
