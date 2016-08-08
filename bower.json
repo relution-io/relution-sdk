@@ -1,0 +1,31 @@
+{
+  "name": "relution-sdk",
+  "description": "Relution Software Development Kit for TypeScript and JavaScript",
+  "main": "browser.js",
+  "authors": [
+    "Thomas Beckmann"
+  ],
+  "license": "Apache License",
+  "keywords": [
+    "relution",
+    "livedata",
+    "backbone",
+    "framework",
+    "realtime",
+    "offline",
+    "mvc"
+  ],
+  "homepage": "https://github.com/relution-io/relution-sdk",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "server",
+    "typings",
+    "public",
+    "lib",
+    "localStorage",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
