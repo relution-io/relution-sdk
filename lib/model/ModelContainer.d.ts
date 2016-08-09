@@ -185,4 +185,5 @@ export declare class ModelFactory {
     constructor(ModelContainer: ModelFactoryCtor<ModelContainer>, MetaModel: ModelFactoryCtor<MetaModel>, FieldDefinition: ModelFactoryCtor<FieldDefinition>, EnumDefinition: ModelFactoryCtor<EnumDefinition>);
     static factoryOf<T>(obj: T): ModelFactory;
     fromJSON(json: string): ModelContainer;
+    fromJSON(json: any): ModelContainer;
 }

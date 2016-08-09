@@ -397,6 +397,7 @@ export class ModelFactory {
   }
 
   public fromJSON(json: string): ModelContainer;
+  public fromJSON(json: any): ModelContainer;
   public fromJSON(json: any): ModelContainer {
     return new this.ModelContainer().fromJSON(typeof json === 'string' ? JSON.parse(json) : json);
   }
