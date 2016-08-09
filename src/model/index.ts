@@ -19,3 +19,4 @@
  */
 
 export * from './ModelContainer';
+export * from './TypeScriptModelContainer';
