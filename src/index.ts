@@ -18,6 +18,19 @@
  * limitations under the License.
  */
 
+// make client compilation context contain globals
+/// <reference path="../typings/globals/backbone-global/index.d.ts" />
+/// <reference path="../typings/globals/backbone/index.d.ts" />
+/// <reference path="../typings/globals/cordova/plugins/device/index.d.ts" />
+/// <reference path="../typings/globals/jquery/index.d.ts" />
+/// <reference path="../typings/globals/mocha/index.d.ts" />
+/// <reference path="../typings/globals/node/index.d.ts" />
+/// <reference path="../typings/globals/phonegap-plugin-push/index.d.ts" />
+/// <reference path="../typings/globals/q/index.d.ts" />
+/// <reference path="../typings/globals/socket.io-client/index.d.ts" />
+/// <reference path="../typings/globals/underscore/index.d.ts" />
+/// <reference path="../typings/globals/websql/index.d.ts" />
+
 // version
 const pkgjson = require('../package.json');
 const version = pkgjson.version;
