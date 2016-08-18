@@ -1,4 +1,4 @@
-/**
+/*
  * @file core/objectid.ts
  * Relution SDK
  *
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 
 let machineId = parseInt('' + (Math.random() * Math.pow(16, 6)));
 let processId = parseInt('' + (Math.random() * Math.pow(16, 4)));

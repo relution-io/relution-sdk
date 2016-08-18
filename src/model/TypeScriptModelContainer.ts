@@ -1,5 +1,5 @@
-/**
- * model/TypeScriptModelContainer.ts
+/*
+ * @file model/TypeScriptModelContainer.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 09.08.2016
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module model
+ */
+/** */
 
 import {ModelFactory, ModelContainer, MetaModel, FieldDefinition, EnumDefinition} from './ModelContainer';
 

@@ -1,4 +1,4 @@
-/**
+/*
  * @file web/cipher.spec.ts
  * Relution SDK
  *
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 
 import * as Q from 'q';
 import * as assert from 'assert';

@@ -1,4 +1,4 @@
-/**
+/*
  * @file push/index.ts
  * Relution SDK
  *
@@ -17,6 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module push
+ * @preferred
+ */
+/** */
 
 export * from './push';
 export * from './cordova';

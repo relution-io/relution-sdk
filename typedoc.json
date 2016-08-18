@@ -8,5 +8,13 @@
   "includeDeclarations": true,
   "excludeExternals": true,
   "excludeNotExported": true,
-  "externalPattern": "**/*.+(d|spec|data|lazy).ts"
+  "externalPattern": "**/*.+(d|spec|data|lazy).ts",
+
+  "umlFormat": "png",
+  "umlLocation": "local",
+  "umlClassicHierarchy": "before",
+  "umlHierarchy": "detail",
+  "umlHierarchyDepthUp": 100,
+  "umlHierarchyDepthDown": 2,
+  "umlComplete": "none"
 }

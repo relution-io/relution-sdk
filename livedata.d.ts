@@ -1,4 +1,4 @@
-/**
+/*
  * Relution SDK
  *
  * Created by Thomas Beckmann on 27.06.2016

@@ -1,4 +1,4 @@
-/**
+/*
  * @file core/init.ts
  * Relution SDK
  *
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 
 import * as tls from 'tls';
 import * as _ from 'lodash';

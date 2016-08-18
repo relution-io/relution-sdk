@@ -1,5 +1,5 @@
-/**
- * model/ModelContainer.ts
+/*
+ * @file model/ModelContainer.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 25.01.2016
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module model
+ */
+/** */
 
 import * as _ from 'lodash';
 

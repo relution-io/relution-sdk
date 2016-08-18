@@ -1,4 +1,4 @@
-/**
+/*
  * @file livedata/Collection.ts
  * Relution SDK
  *
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 
 import * as _ from 'lodash';
 import * as url from 'url';

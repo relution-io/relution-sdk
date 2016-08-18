@@ -1,6 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process){
-/**
+/*
  * Relution SDK
  *
  * Created by Thomas Beckmann on 28.04.2016
@@ -33,7 +33,7 @@ if (!process || 'browser' in process) {
 
 }).call(this,require('_process'))
 },{"./lib":11,"./lib/index.lazy":12,"_process":238}],2:[function(require,module,exports){
-/**
+/*
  * @file connector/connector.ts
  * Relution SDK
  *
@@ -52,6 +52,10 @@ if (!process || 'browser' in process) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module connector
+ */
+/** */
 "use strict";
 var web = require('../web');
 /**
@@ -93,7 +97,7 @@ function runCall(name, call, input) {
 exports.runCall = runCall;
 
 },{"../web":42}],3:[function(require,module,exports){
-/**
+/*
  * @file connector/index.ts
  * Relution SDK
  *
@@ -112,6 +116,11 @@ exports.runCall = runCall;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module connector
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -120,7 +129,7 @@ __export(require('./connector'));
 
 },{"./connector":2}],4:[function(require,module,exports){
 (function (Buffer){
-/**
+/*
  * @file core/cipher.ts
  * Relution SDK
  *
@@ -139,6 +148,10 @@ __export(require('./connector'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 "use strict";
 var crypto = require('crypto');
 var Q = require('q');
@@ -271,7 +284,7 @@ exports.hashJson = hashJson;
 }).call(this,require("buffer").Buffer)
 },{"buffer":106,"crypto":117,"lodash":210,"q":246}],5:[function(require,module,exports){
 (function (process,global){
-/**
+/*
  * @file core/device.ts
  * Relution SDK
  *
@@ -290,6 +303,10 @@ exports.hashJson = hashJson;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 "use strict";
 var Q = require('q');
 var diag = require('./diag');
@@ -394,9 +411,12 @@ exports.ready.done(function (info) {
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./diag":6,"_process":238,"q":246}],6:[function(require,module,exports){
 (function (process){
-/**
- * Created by Pascal Brewing
-* Copyright 2016 M-Way Solutions GmbH
+/*
+ * @file core/diag.ts
+ * Relution SDK
+ *
+ * Created by Pascal Brewing, Thomas Beckmann
+ * Copyright 2016 M-Way Solutions GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -410,6 +430,10 @@ exports.ready.done(function (info) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var assert = require('assert');
@@ -561,7 +585,7 @@ exports.debug = new Diagnostics(true);
 
 }).call(this,require('_process'))
 },{"_process":238,"assert":68,"lodash":210}],7:[function(require,module,exports){
-/**
+/*
  * @file core/domain.ts
  * Relution SDK
  *
@@ -580,6 +604,10 @@ exports.debug = new Diagnostics(true);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 "use strict";
 /**
  * turns the object deeply immutable.
@@ -620,7 +648,7 @@ function uuidOf(referenceable) {
 exports.uuidOf = uuidOf;
 
 },{}],8:[function(require,module,exports){
-/**
+/*
  * @file core/index.ts
  * Relution SDK
  *
@@ -639,6 +667,11 @@ exports.uuidOf = uuidOf;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -650,7 +683,7 @@ __export(require('./domain'));
 
 },{"./device":5,"./diag":6,"./domain":7,"./init":9}],9:[function(require,module,exports){
 (function (process){
-/**
+/*
  * @file core/init.ts
  * Relution SDK
  *
@@ -669,6 +702,10 @@ __export(require('./domain'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var Q = require('q');
@@ -753,7 +790,7 @@ exports.init = init;
 
 }).call(this,require('_process'))
 },{"./device":5,"./diag":6,"_process":238,"lodash":210,"q":246,"url":328}],10:[function(require,module,exports){
-/**
+/*
  * @file core/objectid.ts
  * Relution SDK
  *
@@ -772,6 +809,10 @@ exports.init = init;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module core
+ */
+/** */
 "use strict";
 var machineId = parseInt('' + (Math.random() * Math.pow(16, 6)));
 var processId = parseInt('' + (Math.random() * Math.pow(16, 4)));
@@ -793,7 +834,7 @@ function makeObjectID() {
 exports.makeObjectID = makeObjectID;
 
 },{}],11:[function(require,module,exports){
-/**
+/*
  * @file index.ts
  * Relution SDK
  *
@@ -812,6 +853,11 @@ exports.makeObjectID = makeObjectID;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module Relution
+ * @preferred
+ */
+/** */
 "use strict";
 // make client compilation context contain globals
 /// <reference path="../typings/globals/backbone-global/index.d.ts" />
@@ -852,7 +898,7 @@ exports.connector = require('./connector');
 exports.livedata = require('./livedata');
 
 },{"../package.json":336,"./connector":3,"./core":8,"./core/diag":6,"./core/init":9,"./livedata":21,"./model":25,"./push":27,"./query":36,"./security":38,"./web":42}],12:[function(require,module,exports){
-/**
+/*
  * @file index.lazy.ts
  * Relution SDK
  *
@@ -871,6 +917,10 @@ exports.livedata = require('./livedata');
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module Relution
+ */
+/** */
 "use strict";
 var core = require('./core');
 /**
@@ -977,7 +1027,7 @@ var Relution = (function () {
 Object.setPrototypeOf(exports, new Relution());
 
 },{"../package.json":336,"./connector":3,"./core":8,"./livedata":21,"./model":25,"./push":27,"./query":36,"./security":38,"./web":42}],13:[function(require,module,exports){
-/**
+/*
  * @file livedata/Collection.ts
  * Relution SDK
  *
@@ -996,6 +1046,10 @@ Object.setPrototypeOf(exports, new Relution());
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1219,7 +1273,7 @@ var collection = _.extend(Collection.prototype, {
 diag.debug.assert(function () { return isCollection(Object.create(collection)); });
 
 },{"../core/diag":6,"./Model":15,"./rest":22,"lodash":210,"url":328}],14:[function(require,module,exports){
-/**
+/*
  * @file livedata/LiveDataMessage.ts
  * Relution SDK
  *
@@ -1238,6 +1292,10 @@ diag.debug.assert(function () { return isCollection(Object.create(collection)); 
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1272,7 +1330,7 @@ diag.debug.assert(function () { return LiveDataMessageModel.prototype.isPrototyp
 diag.debug.assert(function () { return new LiveDataMessageModel({ _id: 'check' }).id === 'check'; });
 
 },{"../core/diag":6,"./Model":15,"lodash":210}],15:[function(require,module,exports){
-/**
+/*
  * @file livedata/Model.ts
  * Relution SDK
  *
@@ -1291,6 +1349,10 @@ diag.debug.assert(function () { return new LiveDataMessageModel({ _id: 'check' }
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1393,7 +1455,7 @@ var model = _.extend(Model.prototype, {
 diag.debug.assert(function () { return isModel(Object.create(model)); });
 
 },{"../core/diag":6,"./rest":22,"lodash":210}],16:[function(require,module,exports){
-/**
+/*
  * @file livedata/Store.ts
  * Relution SDK
  *
@@ -1412,6 +1474,10 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
@@ -1502,7 +1568,7 @@ var store = _.extend(Store.prototype, Backbone.Events, {
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
 },{"../core/diag":6,"lodash":210}],17:[function(require,module,exports){
-/**
+/*
  * @file livedata/SyncContext.ts
  * Relution SDK
  *
@@ -1521,6 +1587,10 @@ diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.crea
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
@@ -1956,7 +2026,7 @@ var SyncContext = (function () {
 exports.SyncContext = SyncContext;
 
 },{"../core/diag":6,"../query/GetQuery":31,"../query/JsonFilterVisitor":32,"../query/SortOrderComparator":35,"lodash":210}],18:[function(require,module,exports){
-/**
+/*
  * @file livedata/SyncEndpoint.ts
  * Relution SDK
  *
@@ -1975,6 +2045,10 @@ exports.SyncContext = SyncContext;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var url = require('url');
 /**
@@ -2047,7 +2121,7 @@ exports.SyncEndpoint = SyncEndpoint;
 
 },{"url":328}],19:[function(require,module,exports){
 (function (global){
-/**
+/*
  * @file livedata/SyncStore.ts
  * Relution SDK
  *
@@ -2066,6 +2140,10 @@ exports.SyncEndpoint = SyncEndpoint;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -3209,7 +3287,7 @@ diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/diag":6,"../core/objectid":10,"../query/GetQuery":31,"../security":38,"../web":42,"./Collection":13,"./LiveDataMessage":14,"./Model":15,"./Store":16,"./SyncContext":17,"./SyncEndpoint":18,"./WebSqlStore":20,"lodash":210,"q":246,"socket.io-client":undefined}],20:[function(require,module,exports){
 (function (process,global){
-/**
+/*
  * @file livedata/WebSqlStore.ts
  * Relution SDK
  *
@@ -3228,6 +3306,10 @@ diag.debug.assert(function () { return SyncStore.prototype.isPrototypeOf(Object.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -3807,7 +3889,7 @@ diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Objec
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/cipher":4,"../core/diag":6,"../core/objectid":10,"./Collection":13,"./Model":15,"./Store":16,"_process":238,"lodash":210,"q":246,"websql":undefined}],21:[function(require,module,exports){
-/**
+/*
  * @file livedata/index.ts
  * Relution SDK
  *
@@ -3826,6 +3908,11 @@ diag.debug.assert(function () { return WebSqlStore.prototype.isPrototypeOf(Objec
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -3841,7 +3928,7 @@ __export(require('./WebSqlStore'));
 
 },{"./Collection":13,"./LiveDataMessage":14,"./Model":15,"./Store":16,"./SyncContext":17,"./SyncEndpoint":18,"./SyncStore":19,"./WebSqlStore":20}],22:[function(require,module,exports){
 (function (global){
-/**
+/*
  * @file livedata/rest.ts
  * Relution SDK
  *
@@ -3860,6 +3947,10 @@ __export(require('./WebSqlStore'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 "use strict";
 var diag = require('../core/diag');
 var Q = require('q');
@@ -3959,8 +4050,8 @@ exports.sync = sync;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/diag":6,"../web":42,"backbone":undefined,"q":246}],23:[function(require,module,exports){
-/**
- * model/ModelContainer.ts
+/*
+ * @file model/ModelContainer.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 25.01.2016
@@ -3978,6 +4069,10 @@ exports.sync = sync;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module model
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -4235,8 +4330,8 @@ var ModelFactory = (function () {
 exports.ModelFactory = ModelFactory;
 
 },{"../core/diag":6,"lodash":210}],24:[function(require,module,exports){
-/**
- * model/TypeScriptModelContainer.ts
+/*
+ * @file model/TypeScriptModelContainer.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 09.08.2016
@@ -4254,6 +4349,10 @@ exports.ModelFactory = ModelFactory;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module model
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -4347,7 +4446,7 @@ var TypeScriptModelFactory = (function (_super) {
 exports.TypeScriptModelFactory = TypeScriptModelFactory;
 
 },{"./ModelContainer":23}],25:[function(require,module,exports){
-/**
+/*
  * @file model/index.ts
  * Relution SDK
  *
@@ -4366,6 +4465,11 @@ exports.TypeScriptModelFactory = TypeScriptModelFactory;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module model
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -4375,8 +4479,8 @@ __export(require('./TypeScriptModelContainer'));
 
 },{"./ModelContainer":23,"./TypeScriptModelContainer":24}],26:[function(require,module,exports){
 (function (global){
-/**
- * @file push/registration.ts
+/*
+ * @file push/cordova.ts
  * Relution SDK
  *
  * Created by Thomas Beckmann on 08.07.2016
@@ -4394,6 +4498,10 @@ __export(require('./TypeScriptModelContainer'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module push
+ */
+/** */
 "use strict";
 var Q = require('q');
 var diag = require('../core/diag');
@@ -4573,7 +4681,7 @@ exports.configurePushDevice = configurePushDevice;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../core/device":5,"../core/diag":6,"../core/init":9,"./push":28,"q":246}],27:[function(require,module,exports){
-/**
+/*
  * @file push/index.ts
  * Relution SDK
  *
@@ -4592,6 +4700,11 @@ exports.configurePushDevice = configurePushDevice;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module push
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -4600,7 +4713,7 @@ __export(require('./push'));
 __export(require('./cordova'));
 
 },{"./cordova":26,"./push":28}],28:[function(require,module,exports){
-/**
+/*
  * @file push/push.ts
  * Relution SDK
  *
@@ -4619,6 +4732,10 @@ __export(require('./cordova'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module push
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var diag = require('../core/diag');
@@ -4769,7 +4886,7 @@ function fetchPushNotification(uuidOrMessage) {
 exports.fetchPushNotification = fetchPushNotification;
 
 },{"../core/device":5,"../core/diag":6,"../core/domain":7,"../core/init":9,"../security/server":40,"../web":42,"lodash":210}],29:[function(require,module,exports){
-/**
+/*
  * @file query/Filter.ts
  * Relution SDK
  *
@@ -4788,6 +4905,10 @@ exports.fetchPushNotification = fetchPushNotification;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 /**
  * all known valid types of filters.
@@ -4831,7 +4952,7 @@ function isFilter(filter) {
 exports.isFilter = isFilter;
 
 },{}],30:[function(require,module,exports){
-/**
+/*
  * @file query/FilterVisitor.ts
  * Relution SDK
  *
@@ -4850,6 +4971,10 @@ exports.isFilter = isFilter;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 var FilterVisitorBase = (function () {
     function FilterVisitorBase() {
@@ -4865,7 +4990,7 @@ var FilterVisitorBase = (function () {
 exports.FilterVisitorBase = FilterVisitorBase;
 
 },{}],31:[function(require,module,exports){
-/**
+/*
  * @file query/GetQuery.ts
  * Relution SDK
  *
@@ -4884,6 +5009,10 @@ exports.FilterVisitorBase = FilterVisitorBase;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var Filter_1 = require('./Filter');
@@ -5040,7 +5169,7 @@ var GetQuery = (function () {
 exports.GetQuery = GetQuery;
 
 },{"./Filter":29,"./SortOrder":34,"lodash":210}],32:[function(require,module,exports){
-/**
+/*
  * @file query/JsonFilterVisitor.ts
  * Relution SDK
  *
@@ -5059,6 +5188,10 @@ exports.GetQuery = GetQuery;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -5442,7 +5575,7 @@ var JsonFilterVisitor = (function (_super) {
 }(FilterVisitor_1.FilterVisitorBase));
 
 },{"./FilterVisitor":30,"./JsonPath":33,"lodash":210}],33:[function(require,module,exports){
-/**
+/*
  * @file query/JsonPath.ts
  * Relution SDK
  *
@@ -5461,6 +5594,10 @@ var JsonFilterVisitor = (function (_super) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 /**
  * external evaluation function of JSONPath library.
@@ -5516,7 +5653,7 @@ var JsonPath = (function () {
 exports.JsonPath = JsonPath;
 
 },{"JSONPath":46}],34:[function(require,module,exports){
-/**
+/*
  * @file query/SortOrder.ts
  * Relution SDK
  *
@@ -5535,6 +5672,10 @@ exports.JsonPath = JsonPath;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 /**
@@ -5648,7 +5789,7 @@ var SortField = (function () {
 exports.SortField = SortField;
 
 },{"lodash":210}],35:[function(require,module,exports){
-/**
+/*
  * @file query/SortOrderComparator.ts
  * Relution SDK
  *
@@ -5667,6 +5808,10 @@ exports.SortField = SortField;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var SortOrder_1 = require('./SortOrder');
@@ -5790,7 +5935,7 @@ var SortOrderComparator = (function () {
 }());
 
 },{"./JsonPath":33,"./SortOrder":34,"lodash":210}],36:[function(require,module,exports){
-/**
+/*
  * @file query/index.ts
  * Relution SDK
  *
@@ -5809,6 +5954,11 @@ var SortOrderComparator = (function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module query
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -5822,7 +5972,7 @@ __export(require('./SortOrder'));
 __export(require('./SortOrderComparator'));
 
 },{"./Filter":29,"./FilterVisitor":30,"./GetQuery":31,"./JsonFilterVisitor":32,"./JsonPath":33,"./SortOrder":34,"./SortOrderComparator":35}],37:[function(require,module,exports){
-/**
+/*
  * @file security/Authorization.ts
  * Relution SDK
  *
@@ -5841,6 +5991,10 @@ __export(require('./SortOrderComparator'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module security
+ */
+/** */
 "use strict";
 ;
 function cloneCredentials(credentials) {
@@ -5891,7 +6045,7 @@ exports.ANONYMOUS_AUTHORIZATION = freezeAuthorization({
 });
 
 },{}],38:[function(require,module,exports){
-/**
+/*
  * @file security/index.ts
  * Relution SDK
  *
@@ -5910,6 +6064,11 @@ exports.ANONYMOUS_AUTHORIZATION = freezeAuthorization({
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module security
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -5919,7 +6078,7 @@ __export(require('./roles'));
 __export(require('./server'));
 
 },{"./auth":37,"./roles":39,"./server":40}],39:[function(require,module,exports){
-/**
+/*
  * @file security/roles.ts
  * Relution SDK
  *
@@ -5938,6 +6097,10 @@ __export(require('./server'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module security
+ */
+/** */
 "use strict";
 var domain = require('../core/domain');
 /**
@@ -5981,7 +6144,7 @@ function freezeUser(user) {
 exports.freezeUser = freezeUser;
 
 },{"../core/domain":7}],40:[function(require,module,exports){
-/**
+/*
  * @file security/server.ts
  * Relution SDK
  *
@@ -6000,6 +6163,10 @@ exports.freezeUser = freezeUser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module security
+ */
+/** */
 "use strict";
 var assert = require('assert');
 var _ = require('lodash');
@@ -6199,7 +6366,7 @@ function getCurrentUser() {
 exports.getCurrentUser = getCurrentUser;
 
 },{"../core/diag":6,"../core/init":9,"./auth":37,"./roles":39,"assert":68,"lodash":210}],41:[function(require,module,exports){
-/**
+/*
  * @file web/http.ts
  * Relution SDK
  *
@@ -6218,6 +6385,10 @@ exports.getCurrentUser = getCurrentUser;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module web
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var Q = require('q');
@@ -6730,7 +6901,7 @@ function logout(logoutOptions) {
 exports.logout = logout;
 
 },{"../core/diag":6,"../core/init":9,"../security/auth":37,"../security/server":40,"./offline":43,"./urls":44,"http":306,"lodash":210,"q":246,"request":265}],42:[function(require,module,exports){
-/**
+/*
  * @file web/index.ts
  * Relution SDK
  *
@@ -6749,6 +6920,11 @@ exports.logout = logout;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module web
+ * @preferred
+ */
+/** */
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
@@ -6759,7 +6935,7 @@ __export(require('./verb'));
 
 },{"./http":41,"./urls":44,"./verb":45}],43:[function(require,module,exports){
 (function (process,global,__filename){
-/**
+/*
  * @file web/offline.ts
  * Relution SDK
  *
@@ -6778,6 +6954,10 @@ __export(require('./verb'));
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module web
+ */
+/** */
 "use strict";
 var Q = require('q');
 var cipher = require('../core/cipher');
@@ -6871,7 +7051,7 @@ exports.fetchOfflineLogin = fetchOfflineLogin;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
 },{"../core/cipher":4,"_process":238,"node-localstorage":undefined,"q":246}],44:[function(require,module,exports){
-/**
+/*
  * @file web/urls.ts
  * Relution SDK
  *
@@ -6890,6 +7070,10 @@ exports.fetchOfflineLogin = fetchOfflineLogin;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module web
+ */
+/** */
 "use strict";
 var url = require('url');
 var _ = require('lodash');
@@ -6997,7 +7181,7 @@ function resolveApp(baseAliasOrNameOrApp, options) {
 exports.resolveApp = resolveApp;
 
 },{"../core/init":9,"../security/server":40,"lodash":210,"url":328}],45:[function(require,module,exports){
-/**
+/*
  * @file web/verb.ts
  * Relution SDK
  *
@@ -7016,6 +7200,10 @@ exports.resolveApp = resolveApp;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module web
+ */
+/** */
 "use strict";
 var _ = require('lodash');
 var http = require('./http');
@@ -87666,13 +87854,15 @@ module.exports={
     "sinon": "^1.16.0",
     "tslint": "^3.8.1",
     "typedoc": "sierrasoftworks/typedoc#v1.8.10",
+    "typedoc-plantuml": "git+https://github.com/0815fox/typedoc-plantuml.git",
+    "typedoc-plugin-external-module-name": "^1.0.2",
     "typescript": "^1.8.10",
     "underscore": "~1.8.3"
   },
   "dependencies": {
     "backbone": "~1.2.1",
     "lodash": "^4.0.0",
-	"node-localstorage": "^1.3.0",
+    "node-localstorage": "^1.3.0",
     "q": "^1.4.1",
     "request": "^2.69.0",
     "socket.io-client": "~0.9.16",

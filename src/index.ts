@@ -1,4 +1,4 @@
-/**
+/*
  * @file index.ts
  * Relution SDK
  *
@@ -17,6 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module Relution
+ * @preferred
+ */
+/** */
 
 // make client compilation context contain globals
 /// <reference path="../typings/globals/backbone-global/index.d.ts" />

@@ -1,4 +1,4 @@
-/**
+/*
  * @file livedata/SyncStore-offline.spec.ts
  * Relution SDK
  *
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module livedata
+ */
+/** */
 
 import * as Q from 'q';
 import {assert} from 'chai';

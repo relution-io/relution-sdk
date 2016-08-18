@@ -1,4 +1,4 @@
-/**
+/*
  * @file web/index.ts
  * Relution SDK
  *
@@ -17,6 +17,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module web
+ * @preferred
+ */
+/** */
 
 export * from './urls';
 export * from './http';

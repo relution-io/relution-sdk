@@ -1,4 +1,4 @@
-/**
+/*
  * @file index.lazy.ts
  * Relution SDK
  *
@@ -17,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @module Relution
+ */
+/** */
 
 import * as index from './index';
 import * as core from './core';
