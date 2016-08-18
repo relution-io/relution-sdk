@@ -3,18 +3,18 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Relution-SDK</title>
+	<title>connector | Relution-SDK</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="assets/css/main.css">
-	<script src="assets/js/modernizr.js"></script>
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script src="../assets/js/modernizr.js"></script>
 </head>
 <body>
 <header>
 	<div class="tsd-page-toolbar">
 		<div class="container">
 			<div class="table-wrap">
-				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
 					<div class="field">
 						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
 						<input id="tsd-search-field" type="text" />
@@ -23,7 +23,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">Relution-SDK</a>
+					<a href="../index.html" class="title">Relution-SDK</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -52,76 +52,173 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="globals.html">Globals</a>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="connector.html">connector</a>
 				</li>
 			</ul>
-			<h1> Relution-SDK</h1>
+			<h1>External module connector</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<div class="tsd-panel tsd-typography">
-				<p>Relution SDK</p>
-				<h3 id="dev-guide">Dev Guide</h3>
-				<hr>
-				<h5 id="installation-for-development">Installation for development</h5>
-				<pre><code class="lang-bash">$: git <span class="hljs-built_in">clone</span> git@github.com:relution-io/relution-sdk.git
-
-$: <span class="hljs-built_in">cd</span> relution-sdk
-
-$: npm i
-
-$: npm link
-
-$: npm run watch
-</code></pre>
-				<h5 id="test">Test</h5>
-				<pre><code class="lang-bash">$: npm <span class="hljs-built_in">test</span>
-</code></pre>
-				<h5 id="api-reference">Api reference</h5>
-				<pre><code class="lang-bash">$: npm run api
-</code></pre>
-			</div>
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+				</div>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="connector.html#configuresession" class="tsd-kind-icon">configure<wbr>Session</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="connector.html#runcall" class="tsd-kind-icon">run<wbr>Call</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="configuresession" class="tsd-anchor"></a>
+					<h3>configure<wbr>Session</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">configure<wbr>Session<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, properties<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in connector/connector.ts:50</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>provides per-user connection properties to be stored as part of the session,
+									such as credentials for a given connection.</p>
+								</div>
+								<p>
+									All parameters in properties are copied to the transient session store,
+									overwriting any already existing values. To delete a previously stored
+									parameter, provide an empty value explicitly.
+								</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of connection.</p>
+									</div>
+								</li>
+								<li>
+									<h5>properties: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to store in session.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>promise of async execution.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="runcall" class="tsd-anchor"></a>
+					<h3>run<wbr>Call</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">run<wbr>Call<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, call<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, input<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in connector/connector.ts:63</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>executes a call on a connection.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of connection.</p>
+									</div>
+								</li>
+								<li>
+									<h5>call: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>name.</p>
+									</div>
+								</li>
+								<li>
+									<h5>input: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>data, i.e. an instance of a model or object compatible to the
+										model in terms of attributes defined.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>promise providing output/error.</p>
+						</li>
+					</ul>
+				</section>
+			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
 					<li class="globals  ">
-						<a href="globals.html"><em>Globals</em></a>
+						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/relution.html">Relution</a>
+						<a href="relution.html">Relution</a>
+					</li>
+					<li class="current tsd-kind-external-module">
+						<a href="connector.html">connector</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/connector.html">connector</a>
+						<a href="core.html">core</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/core.html">core</a>
+						<a href="livedata.html">livedata</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/livedata.html">livedata</a>
+						<a href="model.html">model</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/model.html">model</a>
+						<a href="push.html">push</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/push.html">push</a>
+						<a href="query.html">query</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/query.html">query</a>
+						<a href="security.html">security</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/security.html">security</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/web.html">web</a>
+						<a href="web.html">web</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="connector.html#configuresession" class="tsd-kind-icon">configure<wbr>Session</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="connector.html#runcall" class="tsd-kind-icon">run<wbr>Call</a>
+					</li>
 				</ul>
 			</nav>
 		</div>
@@ -190,7 +287,7 @@ $: npm run watch
 	<p>Generated using <a href="http://typedoc.io" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
-<script src="assets/js/main.js"></script>
-<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>
