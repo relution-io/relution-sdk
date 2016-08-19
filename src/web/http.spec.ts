@@ -50,7 +50,6 @@ export class TestServer {
   }
 
   public get login(): Q.Promise<web.LoginResponse> {
-    assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
     return this.resetProperty('login', web.login(this.credentials, {
       serverUrl: this.serverUrl
     }).catch((e: Error): web.LoginResponse => {
@@ -82,9 +81,10 @@ describe(module.filename || __filename, function() {
           assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
           assert(!security.getCurrentUser());
           return response;
-        }).finally(() => testServer.login = web.login(testServer.credentials, {
-          serverUrl: testServer.serverUrl
-        }));
+        });
+      }).finally(() => {
+        // forces relogin after test execution
+        return delete testServer.login;
       }).done((result) => done(), (error) => done(error));
     }),
 
