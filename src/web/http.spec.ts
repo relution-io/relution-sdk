@@ -31,22 +31,29 @@ import * as security from '../security';
 
 // connect to real server for testing purposes, used by all online tests
 export class TestServer {
+  private resetProperty<ValueT>(key: string, value: ValueT): ValueT {
+    Object.defineProperty(this, key, {
+      value: value
+    });
+    return value;
+  }
+
   public get serverUrl(): string {
-    return this.serverUrl = offline.localStorage().getItem('test.serverUrl') || 'http://localhost:8080';
+    return this.resetProperty('serverUrl', offline.localStorage().getItem('test.serverUrl') || 'http://localhost:8080');
   }
 
   public get credentials(): security.LoginObject {
-    return this.credentials = {
+    return this.resetProperty('credentials', {
       userName: offline.localStorage().getItem('test.userName') || 'relutionsdk',
       password: offline.localStorage().getItem('test.password') || 'relutionsdk'
-    };
+    });
   }
 
   public get login(): Q.Promise<web.LoginResponse> {
     assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
-    return this.login = web.login(this.credentials, {
+    return this.resetProperty('login', web.login(this.credentials, {
       serverUrl: this.serverUrl
-    });
+    }));
   }
 }
 export const testServer = new TestServer();
