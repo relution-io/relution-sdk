@@ -53,6 +53,9 @@ export class TestServer {
     assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
     return this.resetProperty('login', web.login(this.credentials, {
       serverUrl: this.serverUrl
+    }).catch((e: Error): web.LoginResponse => {
+      e.message += ' (' + this.credentials.userName + ' @ ' + this.serverUrl + ')';
+      throw e;
     }));
   }
 }
