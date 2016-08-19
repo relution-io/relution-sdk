@@ -29,7 +29,7 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
-var serverUrl = 'http://localhost:8200';
+import {testServer} from '../web/http.spec';
 
 function backbone_error(done: Function) {
   return function (model: Model | Collection, error: any) {
@@ -40,18 +40,25 @@ function backbone_error(done: Function) {
 describe(module.filename || __filename, function() {
   this.timeout(5000 * 1000);
 
-  var TEST: any = {
-    data: {
-      firstName: 'Max',
-      sureName: 'Mustermann',
-      age: 33
-    }
-  };
+  var TEST: any;
+
+  before(function() {
+    return testServer.login.then((result) => {
+      TEST = {
+        data: {
+          firstName: 'Max',
+          sureName: 'Mustermann',
+          age: 33
+        }
+      };
+      return result;
+    });
+  });
 
   return [
 
     it('creating store', () => {
-      assert.isString(serverUrl, 'Server url is defined.');
+      assert.isString(testServer.serverUrl, 'Server url is defined.');
 
       assert.isFunction(SyncStore, 'SyncStore is defined');
 
@@ -74,7 +81,7 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
 
-      TEST.url = serverUrl + '/relution/livedata/test/';
+      TEST.url = testServer.serverUrl + '/relution/livedata/test/';
 
       class TestsModelCollection extends Collection {}
       TestsModelCollection.prototype.model = TEST.TestModel;

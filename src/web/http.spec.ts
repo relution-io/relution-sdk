@@ -24,27 +24,45 @@
 
 import * as assert from 'assert';
 import * as web from './index';
+import * as offline from './offline';
 import {debug} from '../core/diag';
 
 import * as security from '../security';
 
-const credentials: security.LoginObject = {
-  userName: 't.beckmann',
-  password: 'mcap'
-};
+// connect to real server for testing purposes, used by all online tests
+export class TestServer {
+  public get serverUrl(): string {
+    return this.serverUrl = offline.localStorage().getItem('test.serverUrl') || 'http://localhost:8080';
+  }
+
+  public get credentials(): security.LoginObject {
+    return this.credentials = {
+      userName: offline.localStorage().getItem('test.userName') || 'relutionsdk',
+      password: offline.localStorage().getItem('test.password') || 'relutionsdk'
+    };
+  }
+
+  public get login(): Q.Promise<web.LoginResponse> {
+    assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
+    return this.login = web.login(this.credentials, {
+      serverUrl: this.serverUrl
+    });
+  }
+}
+export const testServer = new TestServer();
 
 describe(module.filename || __filename, function() {
   return [
 
     it('login/logout', (done) => {
-      return web.login(credentials, {
-        serverUrl: 'http://localhost:8080'
+      return web.login(testServer.credentials, {
+        serverUrl: testServer.serverUrl
       }).then((loginResp) => {
         // logged in
         assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
         const user = security.getCurrentUser();
         assert(!!user);
-        assert.equal(user.name, credentials.userName);
+        assert.equal(user.name, testServer.credentials.userName);
         return web.get<web.LoginResponse>('/gofer/system/security/currentAuthorization').then((currentAuthResp) => {
           assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
           assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
@@ -54,15 +72,16 @@ describe(module.filename || __filename, function() {
           assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
           assert(!security.getCurrentUser());
           return response;
-        });
+        }).finally(() => testServer.login = web.login(testServer.credentials, {
+          serverUrl: testServer.serverUrl
+        }));
       }).done((result) => done(), (error) => done(error));
     }),
 
     it('callback order', (done) => {
-      assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
       let state = 0;
       return web.get({
-        serverUrl: 'http://localhost:8080',
+        serverUrl: testServer.serverUrl,
         url: '/gofer/system/security/currentAuthorization',
         requestCallback: (request) => {
           debug.debug('request callback fired.');

@@ -31,24 +31,28 @@ import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
 import {makeApprovals} from './approvals.data';
-
-var serverUrl = 'http://localhost:8200';
+import {testServer} from '../web/http.spec';
 
 describe(module.filename || __filename, function() {
   this.timeout(60000);
 
   // prepare model/collection types
-  var store = new SyncStore({
-  });
-
-  class TestModel extends Model {}
+  class TestModel extends Model {
+  }
   TestModel.prototype.idAttribute = 'id';
   TestModel.prototype.entity = 'approval';
 
-  class TestCollection extends Collection {}
+  class TestCollection extends Collection {
+  }
   TestCollection.prototype.model = TestModel;
-  TestCollection.prototype.store = store;
-  TestCollection.prototype.url = serverUrl + '/relution/livedata/approvals/';
+
+  before(function() {
+    return testServer.login.then((result) => {
+      TestCollection.prototype.store = new SyncStore({});
+      TestCollection.prototype.url = testServer.serverUrl + '/relution/livedata/approvals/';
+      return result;
+    });
+  });
 
   // loads data using collection, returns promise on collection, collection is empty afterwards
   function loadCollection(collection: Collection, data: any[]): Q.Promise<Collection> {

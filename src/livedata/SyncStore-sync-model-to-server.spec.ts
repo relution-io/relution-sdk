@@ -28,8 +28,7 @@ import {assert} from 'chai';
 import {Model, ModelCtor} from './Model';
 import {SyncStore} from './SyncStore';
 import {openDatabase} from './WebSqlStore';
-
-var serverUrl = 'http://localhost:8200';
+import {testServer} from '../web/http.spec';
 
 describe(module.filename || __filename, function() {
   this.timeout(8000);
@@ -40,19 +39,24 @@ describe(module.filename || __filename, function() {
   var promise: Q.Promise<Model> = null;
 
   beforeEach(function () {
-    store = new SyncStore({
-      useLocalStore: true,
-      useSocketNotify: false
-    });
+    return testServer.login.then((result) => {
+      store = new SyncStore({
+        useLocalStore: true,
+        useSocketNotify: false
+      });
 
-    class ModelType extends Model {}
-    ModelType.prototype.idAttribute = 'id';
-    ModelType.prototype.entity = 'User';
-    ModelType.prototype.store = store;
-    ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
-    modelType = ModelType;
-    model = new modelType({ id: '12312' });
-    promise = Q(model.fetch()).thenResolve(model);
+      class ModelType extends Model {
+      }
+      ModelType.prototype.idAttribute = 'id';
+      ModelType.prototype.entity = 'User';
+      ModelType.prototype.store = store;
+      ModelType.prototype.urlRoot = testServer.serverUrl + '/relution/livedata/user/';
+      modelType = ModelType;
+      model = new modelType({id: '12312'});
+      promise = Q(model.fetch()).thenResolve(model);
+
+      return result;
+    });
   });
 
   return [
