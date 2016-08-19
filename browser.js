@@ -4418,8 +4418,8 @@ var TypeScriptFieldDefinition = (function (_super) {
         'java.lang.Boolean[]': 'boolean[]',
         'com.mwaysolutions.gofer2.file.domain.File': 'any',
         'com.mwaysolutions.gofer2.file.domain.File[]': 'any[]',
-        'java.util.Date': 'date',
-        'java.util.Date[]': 'date[]',
+        'java.util.Date': 'Date',
+        'java.util.Date[]': 'Date[]',
         'java.lang.Object': 'any',
         'java.lang.Object[]': 'any',
         '[B': 'any' // Binary Data
@@ -7049,7 +7049,7 @@ function fetchOfflineLogin(credentials, serverOptions) {
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib/web/offline.js")
 },{"../core/cipher":4,"_process":238,"node-localstorage":undefined,"q":246}],44:[function(require,module,exports){
 /*
  * @file web/urls.ts
@@ -8080,7 +8080,7 @@ module.exports = Node;
 var stateProps = [
   'enc', 'parent', 'children', 'tag', 'args', 'reverseArgs', 'choice',
   'optional', 'any', 'obj', 'use', 'alteredUse', 'key', 'default', 'explicit',
-  'implicit'
+  'implicit', 'contains'
 ];
 
 Node.prototype.clone = function clone() {
@@ -8285,17 +8285,17 @@ Node.prototype.contains = function contains(item) {
 // Decoding
 //
 
-Node.prototype._decode = function decode(input) {
+Node.prototype._decode = function decode(input, options) {
   var state = this._baseState;
 
   // Decode root node
   if (state.parent === null)
-    return input.wrapResult(state.children[0]._decode(input));
+    return input.wrapResult(state.children[0]._decode(input, options));
 
   var result = state['default'];
   var present = true;
 
-  var prevKey;
+  var prevKey = null;
   if (state.key !== null)
     prevKey = input.enterKey(state.key);
 
@@ -8314,9 +8314,9 @@ Node.prototype._decode = function decode(input) {
       var save = input.save();
       try {
         if (state.choice === null)
-          this._decodeGeneric(state.tag, input);
+          this._decodeGeneric(state.tag, input, options);
         else
-          this._decodeChoice(input);
+          this._decodeChoice(input, options);
         present = true;
       } catch (e) {
         present = false;
@@ -8344,6 +8344,8 @@ Node.prototype._decode = function decode(input) {
       input = explicit;
     }
 
+    var start = input.offset;
+
     // Unwrap implicit and normal values
     if (state.use === null && state.choice === null) {
       if (state.any)
@@ -8362,13 +8364,19 @@ Node.prototype._decode = function decode(input) {
         input = body;
     }
 
+    if (options && options.track && state.tag !== null)
+      options.track(input.path(), start, input.length, 'tagged');
+
+    if (options && options.track && state.tag !== null)
+      options.track(input.path(), input.offset, input.length, 'content');
+
     // Select proper method for tag
     if (state.any)
       result = result;
     else if (state.choice === null)
-      result = this._decodeGeneric(state.tag, input);
+      result = this._decodeGeneric(state.tag, input, options);
     else
-      result = this._decodeChoice(input);
+      result = this._decodeChoice(input, options);
 
     if (input.isError(result))
       return result;
@@ -8378,14 +8386,15 @@ Node.prototype._decode = function decode(input) {
       state.children.forEach(function decodeChildren(child) {
         // NOTE: We are ignoring errors here, to let parser continue with other
         // parts of encoded data
-        child._decode(input);
+        child._decode(input, options);
       });
     }
 
     // Decode contained/encoded by schema, only in bit or octet strings
     if (state.contains && (state.tag === 'octstr' || state.tag === 'bitstr')) {
       var data = new DecoderBuffer(result);
-      result = this._getUse(state.contains, input._reporterState.obj)._decode(data);
+      result = this._getUse(state.contains, input._reporterState.obj)
+          ._decode(data, options);
     }
   }
 
@@ -8396,35 +8405,40 @@ Node.prototype._decode = function decode(input) {
   // Set key
   if (state.key !== null && (result !== null || present === true))
     input.leaveKey(prevKey, state.key, result);
+  else if (prevKey !== null)
+    input.exitKey(prevKey);
 
   return result;
 };
 
-Node.prototype._decodeGeneric = function decodeGeneric(tag, input) {
+Node.prototype._decodeGeneric = function decodeGeneric(tag, input, options) {
   var state = this._baseState;
 
   if (tag === 'seq' || tag === 'set')
     return null;
   if (tag === 'seqof' || tag === 'setof')
-    return this._decodeList(input, tag, state.args[0]);
+    return this._decodeList(input, tag, state.args[0], options);
   else if (/str$/.test(tag))
-    return this._decodeStr(input, tag);
+    return this._decodeStr(input, tag, options);
   else if (tag === 'objid' && state.args)
-    return this._decodeObjid(input, state.args[0], state.args[1]);
+    return this._decodeObjid(input, state.args[0], state.args[1], options);
   else if (tag === 'objid')
-    return this._decodeObjid(input, null, null);
+    return this._decodeObjid(input, null, null, options);
   else if (tag === 'gentime' || tag === 'utctime')
-    return this._decodeTime(input, tag);
+    return this._decodeTime(input, tag, options);
   else if (tag === 'null_')
-    return this._decodeNull(input);
+    return this._decodeNull(input, options);
   else if (tag === 'bool')
-    return this._decodeBool(input);
+    return this._decodeBool(input, options);
   else if (tag === 'int' || tag === 'enum')
-    return this._decodeInt(input, state.args && state.args[0]);
-  else if (state.use !== null)
-    return this._getUse(state.use, input._reporterState.obj)._decode(input);
-  else
+    return this._decodeInt(input, state.args && state.args[0], options);
+
+  if (state.use !== null) {
+    return this._getUse(state.use, input._reporterState.obj)
+        ._decode(input, options);
+  } else {
     return input.error('unknown tag: ' + tag);
+  }
 };
 
 Node.prototype._getUse = function _getUse(entity, obj) {
@@ -8441,7 +8455,7 @@ Node.prototype._getUse = function _getUse(entity, obj) {
   return state.useDecoder;
 };
 
-Node.prototype._decodeChoice = function decodeChoice(input) {
+Node.prototype._decodeChoice = function decodeChoice(input, options) {
   var state = this._baseState;
   var result = null;
   var match = false;
@@ -8450,7 +8464,7 @@ Node.prototype._decodeChoice = function decodeChoice(input) {
     var save = input.save();
     var node = state.choice[key];
     try {
-      var value = node._decode(input);
+      var value = node._decode(input, options);
       if (input.isError(value))
         return false;
 
@@ -8665,12 +8679,22 @@ Reporter.prototype.enterKey = function enterKey(key) {
   return this._reporterState.path.push(key);
 };
 
-Reporter.prototype.leaveKey = function leaveKey(index, key, value) {
+Reporter.prototype.exitKey = function exitKey(index) {
   var state = this._reporterState;
 
   state.path = state.path.slice(0, index - 1);
+};
+
+Reporter.prototype.leaveKey = function leaveKey(index, key, value) {
+  var state = this._reporterState;
+
+  this.exitKey(index);
   if (state.obj !== null)
     state.obj[key] = value;
+};
+
+Reporter.prototype.path = function path() {
+  return this._reporterState.path.join('/');
 };
 
 Reporter.prototype.enterObject = function enterObject() {
@@ -8920,14 +8944,15 @@ DERNode.prototype._skipUntilEnd = function skipUntilEnd(buffer, fail) {
   }
 };
 
-DERNode.prototype._decodeList = function decodeList(buffer, tag, decoder) {
+DERNode.prototype._decodeList = function decodeList(buffer, tag, decoder,
+                                                    options) {
   var result = [];
   while (!buffer.isEmpty()) {
     var possibleEnd = this._peekTag(buffer, 'end');
     if (buffer.isError(possibleEnd))
       return possibleEnd;
 
-    var res = decoder.decode(buffer, 'der');
+    var res = decoder.decode(buffer, 'der', options);
     if (buffer.isError(res) && possibleEnd)
       break;
     result.push(res);
@@ -11823,8 +11848,12 @@ module.exports = BufferList
   }
 
   BN.isBN = function isBN (num) {
+    if (num instanceof BN) {
+      return true;
+    }
+
     return num !== null && typeof num === 'object' &&
-      num.constructor.name === 'BN' && Array.isArray(num.words);
+      num.constructor.wordSize === BN.wordSize && Array.isArray(num.words);
   };
 
   BN.max = function max (left, right) {
@@ -18210,7 +18239,9 @@ function fromArrayBuffer (that, array, byteOffset, length) {
     throw new RangeError('\'length\' is out of bounds')
   }
 
-  if (length === undefined) {
+  if (byteOffset === undefined && length === undefined) {
+    array = new Uint8Array(array)
+  } else if (length === undefined) {
     array = new Uint8Array(array, byteOffset)
   } else {
     array = new Uint8Array(array, byteOffset, length)
@@ -26680,14 +26711,15 @@ module.exports={
   "_args": [
     [
       {
-        "name": "elliptic",
         "raw": "elliptic@^6.0.0",
-        "rawSpec": "^6.0.0",
         "scope": null,
+        "escapedName": "elliptic",
+        "name": "elliptic",
+        "rawSpec": "^6.0.0",
         "spec": ">=6.0.0 <7.0.0",
         "type": "range"
       },
-      "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\browserify-sign"
+      "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/browserify-sign"
     ]
   ],
   "_from": "elliptic@>=6.0.0 <7.0.0",
@@ -26701,16 +26733,17 @@ module.exports={
     "tmp": "tmp/elliptic-6.3.1.tgz_1465921413402_0.5202967382501811"
   },
   "_npmUser": {
-    "email": "fedor@indutny.com",
-    "name": "indutny"
+    "name": "indutny",
+    "email": "fedor@indutny.com"
   },
   "_npmVersion": "3.8.6",
   "_phantomChildren": {},
   "_requested": {
-    "name": "elliptic",
     "raw": "elliptic@^6.0.0",
-    "rawSpec": "^6.0.0",
     "scope": null,
+    "escapedName": "elliptic",
+    "name": "elliptic",
+    "rawSpec": "^6.0.0",
     "spec": ">=6.0.0 <7.0.0",
     "type": "range"
   },
@@ -26722,10 +26755,10 @@ module.exports={
   "_shasum": "17781f2109ab0ec686b146bdcff5d2e8c6aeceda",
   "_shrinkwrap": null,
   "_spec": "elliptic@^6.0.0",
-  "_where": "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\browserify-sign",
+  "_where": "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/browserify-sign",
   "author": {
-    "email": "fedor@indutny.com",
-    "name": "Fedor Indutny"
+    "name": "Fedor Indutny",
+    "email": "fedor@indutny.com"
   },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
@@ -26772,8 +26805,8 @@ module.exports={
   "main": "lib/elliptic.js",
   "maintainers": [
     {
-      "email": "fedor@indutny.com",
-      "name": "indutny"
+      "name": "indutny",
+      "email": "fedor@indutny.com"
     }
   ],
   "name": "elliptic",
@@ -35710,7 +35743,7 @@ function mergeObjects(provided, overrides, defaults)
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.13.1';
+  var VERSION = '4.14.0';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -35724,7 +35757,7 @@ function mergeObjects(provided, overrides, defaults)
   /** Used as the internal argument placeholder. */
   var PLACEHOLDER = '__lodash_placeholder__';
 
-  /** Used to compose bitmasks for wrapper metadata. */
+  /** Used to compose bitmasks for function metadata. */
   var BIND_FLAG = 1,
       BIND_KEY_FLAG = 2,
       CURRY_BOUND_FLAG = 4,
@@ -35763,6 +35796,19 @@ function mergeObjects(provided, overrides, defaults)
   var MAX_ARRAY_LENGTH = 4294967295,
       MAX_ARRAY_INDEX = MAX_ARRAY_LENGTH - 1,
       HALF_MAX_ARRAY_LENGTH = MAX_ARRAY_LENGTH >>> 1;
+
+  /** Used to associate wrap methods with their bit flags. */
+  var wrapFlags = [
+    ['ary', ARY_FLAG],
+    ['bind', BIND_FLAG],
+    ['bindKey', BIND_KEY_FLAG],
+    ['curry', CURRY_FLAG],
+    ['curryRight', CURRY_RIGHT_FLAG],
+    ['flip', FLIP_FLAG],
+    ['partial', PARTIAL_FLAG],
+    ['partialRight', PARTIAL_RIGHT_FLAG],
+    ['rearg', REARG_FLAG]
+  ];
 
   /** `Object#toString` result references. */
   var argsTag = '[object Arguments]',
@@ -35827,6 +35873,11 @@ function mergeObjects(provided, overrides, defaults)
   var reTrim = /^\s+|\s+$/g,
       reTrimStart = /^\s+/,
       reTrimEnd = /\s+$/;
+
+  /** Used to match wrap detail comments. */
+  var reWrapComment = /\{(?:\n\/\* \[wrapped with .+\] \*\/)?\n?/,
+      reWrapDetails = /\{\n\/\* \[wrapped with (.+)\] \*/,
+      reSplitDetails = /,? & /;
 
   /** Used to match non-compound words composed of alphanumeric characters. */
   var reBasicWord = /[a-zA-Z0-9]+/g;
@@ -35947,7 +35998,7 @@ function mergeObjects(provided, overrides, defaults)
     'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
     'Promise', 'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError',
     'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
-    '_', 'isFinite', 'parseInt', 'setTimeout'
+    '_', 'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
   ];
 
   /** Used to make template sourceURLs easier to identify. */
@@ -36040,8 +36091,17 @@ function mergeObjects(provided, overrides, defaults)
   var freeParseFloat = parseFloat,
       freeParseInt = parseInt;
 
+  /** Detect free variable `global` from Node.js. */
+  var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+  /** Detect free variable `self`. */
+  var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+  /** Used as a reference to the global object. */
+  var root = freeGlobal || freeSelf || Function('return this')();
+
   /** Detect free variable `exports`. */
-  var freeExports = typeof exports == 'object' && exports;
+  var freeExports = freeGlobal && typeof exports == 'object' && exports;
 
   /** Detect free variable `module`. */
   var freeModule = freeExports && typeof module == 'object' && module;
@@ -36049,17 +36109,23 @@ function mergeObjects(provided, overrides, defaults)
   /** Detect the popular CommonJS extension `module.exports`. */
   var moduleExports = freeModule && freeModule.exports === freeExports;
 
-  /** Detect free variable `global` from Node.js. */
-  var freeGlobal = checkGlobal(typeof global == 'object' && global);
+  /** Detect free variable `process` from Node.js. */
+  var freeProcess = moduleExports && freeGlobal.process;
 
-  /** Detect free variable `self`. */
-  var freeSelf = checkGlobal(typeof self == 'object' && self);
+  /** Used to access faster Node.js helpers. */
+  var nodeUtil = (function() {
+    try {
+      return freeProcess && freeProcess.binding('util');
+    } catch (e) {}
+  }());
 
-  /** Detect `this` as the global object. */
-  var thisGlobal = checkGlobal(typeof this == 'object' && this);
-
-  /** Used as a reference to the global object. */
-  var root = freeGlobal || freeSelf || thisGlobal || Function('return this')();
+  /* Node.js helper references. */
+  var nodeIsArrayBuffer = nodeUtil && nodeUtil.isArrayBuffer,
+      nodeIsDate = nodeUtil && nodeUtil.isDate,
+      nodeIsMap = nodeUtil && nodeUtil.isMap,
+      nodeIsRegExp = nodeUtil && nodeUtil.isRegExp,
+      nodeIsSet = nodeUtil && nodeUtil.isSet,
+      nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
 
   /*--------------------------------------------------------------------------*/
 
@@ -36072,7 +36138,7 @@ function mergeObjects(provided, overrides, defaults)
    * @returns {Object} Returns `map`.
    */
   function addMapEntry(map, pair) {
-    // Don't return `Map#set` because it doesn't return the map instance in IE 11.
+    // Don't return `map.set` because it's not chainable in IE 11.
     map.set(pair[0], pair[1]);
     return map;
   }
@@ -36086,6 +36152,7 @@ function mergeObjects(provided, overrides, defaults)
    * @returns {Object} Returns `set`.
    */
   function addSetEntry(set, value) {
+    // Don't return `set.add` because it's not chainable in IE 11.
     set.add(value);
     return set;
   }
@@ -36101,8 +36168,7 @@ function mergeObjects(provided, overrides, defaults)
    * @returns {*} Returns the result of `func`.
    */
   function apply(func, thisArg, args) {
-    var length = args.length;
-    switch (length) {
+    switch (args.length) {
       case 0: return func.call(thisArg);
       case 1: return func.call(thisArg, args[0]);
       case 2: return func.call(thisArg, args[0], args[1]);
@@ -36419,7 +36485,7 @@ function mergeObjects(provided, overrides, defaults)
    */
   function baseIndexOf(array, value, fromIndex) {
     if (value !== value) {
-      return indexOfNaN(array, fromIndex);
+      return baseFindIndex(array, baseIsNaN, fromIndex);
     }
     var index = fromIndex - 1,
         length = array.length;
@@ -36455,6 +36521,17 @@ function mergeObjects(provided, overrides, defaults)
   }
 
   /**
+   * The base implementation of `_.isNaN` without support for number objects.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is `NaN`, else `false`.
+   */
+  function baseIsNaN(value) {
+    return value !== value;
+  }
+
+  /**
    * The base implementation of `_.mean` and `_.meanBy` without support for
    * iteratee shorthands.
    *
@@ -36466,6 +36543,32 @@ function mergeObjects(provided, overrides, defaults)
   function baseMean(array, iteratee) {
     var length = array ? array.length : 0;
     return length ? (baseSum(array, iteratee) / length) : NAN;
+  }
+
+  /**
+   * The base implementation of `_.property` without support for deep paths.
+   *
+   * @private
+   * @param {string} key The key of the property to get.
+   * @returns {Function} Returns the new accessor function.
+   */
+  function baseProperty(key) {
+    return function(object) {
+      return object == null ? undefined : object[key];
+    };
+  }
+
+  /**
+   * The base implementation of `_.propertyOf` without support for deep paths.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @returns {Function} Returns the new accessor function.
+   */
+  function basePropertyOf(object) {
+    return function(key) {
+      return object == null ? undefined : object[key];
+    };
   }
 
   /**
@@ -36568,7 +36671,7 @@ function mergeObjects(provided, overrides, defaults)
   }
 
   /**
-   * The base implementation of `_.unary` without support for storing wrapper metadata.
+   * The base implementation of `_.unary` without support for storing metadata.
    *
    * @private
    * @param {Function} func The function to cap arguments for.
@@ -36642,17 +36745,6 @@ function mergeObjects(provided, overrides, defaults)
   }
 
   /**
-   * Checks if `value` is a global object.
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @returns {null|Object} Returns `value` if it's a global object, else `null`.
-   */
-  function checkGlobal(value) {
-    return (value && value.Object === Object) ? value : null;
-  }
-
-  /**
    * Gets the number of `placeholder` occurrences in `array`.
    *
    * @private
@@ -36679,9 +36771,7 @@ function mergeObjects(provided, overrides, defaults)
    * @param {string} letter The matched letter to deburr.
    * @returns {string} Returns the deburred letter.
    */
-  function deburrLetter(letter) {
-    return deburredLetters[letter];
-  }
+  var deburrLetter = basePropertyOf(deburredLetters);
 
   /**
    * Used by `_.escape` to convert characters to HTML entities.
@@ -36690,9 +36780,7 @@ function mergeObjects(provided, overrides, defaults)
    * @param {string} chr The matched character to escape.
    * @returns {string} Returns the escaped character.
    */
-  function escapeHtmlChar(chr) {
-    return htmlEscapes[chr];
-  }
+  var escapeHtmlChar = basePropertyOf(htmlEscapes);
 
   /**
    * Used by `_.template` to escape characters for inclusion in compiled string literals.
@@ -36715,28 +36803,6 @@ function mergeObjects(provided, overrides, defaults)
    */
   function getValue(object, key) {
     return object == null ? undefined : object[key];
-  }
-
-  /**
-   * Gets the index at which the first occurrence of `NaN` is found in `array`.
-   *
-   * @private
-   * @param {Array} array The array to search.
-   * @param {number} fromIndex The index to search from.
-   * @param {boolean} [fromRight] Specify iterating from right to left.
-   * @returns {number} Returns the index of the matched `NaN`, else `-1`.
-   */
-  function indexOfNaN(array, fromIndex, fromRight) {
-    var length = array.length,
-        index = fromIndex + (fromRight ? 1 : -1);
-
-    while ((fromRight ? index-- : ++index < length)) {
-      var other = array[index];
-      if (other !== other) {
-        return index;
-      }
-    }
-    return -1;
   }
 
   /**
@@ -36790,6 +36856,20 @@ function mergeObjects(provided, overrides, defaults)
       result[++index] = [key, value];
     });
     return result;
+  }
+
+  /**
+   * Creates a function that invokes `func` with its first argument transformed.
+   *
+   * @private
+   * @param {Function} func The function to wrap.
+   * @param {Function} transform The argument transform.
+   * @returns {Function} Returns the new function.
+   */
+  function overArg(func, transform) {
+    return function(arg) {
+      return func(transform(arg));
+    };
   }
 
   /**
@@ -36887,9 +36967,7 @@ function mergeObjects(provided, overrides, defaults)
    * @param {string} chr The matched character to unescape.
    * @returns {string} Returns the unescaped character.
    */
-  function unescapeHtmlChar(chr) {
-    return htmlUnescapes[chr];
-  }
+  var unescapeHtmlChar = basePropertyOf(htmlUnescapes);
 
   /*--------------------------------------------------------------------------*/
 
@@ -36933,7 +37011,8 @@ function mergeObjects(provided, overrides, defaults)
     context = context ? _.defaults({}, context, _.pick(root, contextProps)) : root;
 
     /** Built-in constructor references. */
-    var Date = context.Date,
+    var Array = context.Array,
+        Date = context.Date,
         Error = context.Error,
         Math = context.Math,
         RegExp = context.RegExp,
@@ -36987,19 +37066,22 @@ function mergeObjects(provided, overrides, defaults)
         Symbol = context.Symbol,
         Uint8Array = context.Uint8Array,
         enumerate = Reflect ? Reflect.enumerate : undefined,
-        getOwnPropertySymbols = Object.getOwnPropertySymbols,
-        iteratorSymbol = typeof (iteratorSymbol = Symbol && Symbol.iterator) == 'symbol' ? iteratorSymbol : undefined,
-        objectCreate = Object.create,
+        iteratorSymbol = Symbol ? Symbol.iterator : undefined,
+        objectCreate = context.Object.create,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
-        splice = arrayProto.splice;
+        splice = arrayProto.splice,
+        spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
 
     /** Built-in method references that are mockable. */
-    var setTimeout = function(func, wait) { return context.setTimeout.call(root, func, wait); };
+    var clearTimeout = function(id) { return context.clearTimeout.call(root, id); },
+        setTimeout = function(func, wait) { return context.setTimeout.call(root, func, wait); };
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
     var nativeCeil = Math.ceil,
         nativeFloor = Math.floor,
         nativeGetPrototype = Object.getPrototypeOf,
+        nativeGetSymbols = Object.getOwnPropertySymbols,
+        nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined,
         nativeIsFinite = context.isFinite,
         nativeJoin = arrayProto.join,
         nativeKeys = Object.keys,
@@ -37017,7 +37099,15 @@ function mergeObjects(provided, overrides, defaults)
         Promise = getNative(context, 'Promise'),
         Set = getNative(context, 'Set'),
         WeakMap = getNative(context, 'WeakMap'),
-        nativeCreate = getNative(Object, 'create');
+        nativeCreate = getNative(context.Object, 'create');
+
+    /* Used to set `toString` methods. */
+    var defineProperty = (function() {
+      var func = getNative(context.Object, 'defineProperty'),
+          name = getNative.name;
+
+      return (name && name.length > 2) ? func : undefined;
+    }());
 
     /** Used to store function metadata. */
     var metaMap = WeakMap && new WeakMap;
@@ -37108,16 +37198,16 @@ function mergeObjects(provided, overrides, defaults)
      *
      * The wrapper methods that are **not** chainable by default are:
      * `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,
-     * `cloneDeep`, `cloneDeepWith`, `cloneWith`, `deburr`, `divide`, `each`,
-     * `eachRight`, `endsWith`, `eq`, `escape`, `escapeRegExp`, `every`, `find`,
-     * `findIndex`, `findKey`, `findLast`, `findLastIndex`, `findLastKey`, `first`,
-     * `floor`, `forEach`, `forEachRight`, `forIn`, `forInRight`, `forOwn`,
-     * `forOwnRight`, `get`, `gt`, `gte`, `has`, `hasIn`, `head`, `identity`,
-     * `includes`, `indexOf`, `inRange`, `invoke`, `isArguments`, `isArray`,
-     * `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
-     * `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`,
-     * `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMap`,
-     * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`,
+     * `cloneDeep`, `cloneDeepWith`, `cloneWith`, `conformsTo`, `deburr`,
+     * `defaultTo`, `divide`, `each`, `eachRight`, `endsWith`, `eq`, `escape`,
+     * `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`, `findLast`,
+     * `findLastIndex`, `findLastKey`, `first`, `floor`, `forEach`, `forEachRight`,
+     * `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`,
+     * `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`,
+     * `isArguments`, `isArray`, `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`,
+     * `isBoolean`, `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`,
+     * `isEqualWith`, `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`,
+     * `isMap`, `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`,
      * `isNumber`, `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`,
      * `isSafeInteger`, `isSet`, `isString`, `isUndefined`, `isTypedArray`,
      * `isWeakMap`, `isWeakSet`, `join`, `kebabCase`, `last`, `lastIndexOf`,
@@ -37820,8 +37910,13 @@ function mergeObjects(provided, overrides, defaults)
      */
     function stackSet(key, value) {
       var cache = this.__data__;
-      if (cache instanceof ListCache && cache.__data__.length == LARGE_ARRAY_SIZE) {
-        cache = this.__data__ = new MapCache(cache.__data__);
+      if (cache instanceof ListCache) {
+        var pairs = cache.__data__;
+        if (!Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
+          pairs.push([key, value]);
+          return this;
+        }
+        cache = this.__data__ = new MapCache(pairs);
       }
       cache.set(key, value);
       return this;
@@ -37958,7 +38053,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * The base implementation of `_.clamp` which doesn't coerce arguments to numbers.
+     * The base implementation of `_.clamp` which doesn't coerce arguments.
      *
      * @private
      * @param {number} number The number to clamp.
@@ -38042,14 +38137,17 @@ function mergeObjects(provided, overrides, defaults)
       if (!isArr) {
         var props = isFull ? getAllKeys(value) : keys(value);
       }
-      // Recursively populate clone (susceptible to call stack limits).
       arrayEach(props || value, function(subValue, key) {
         if (props) {
           key = subValue;
           subValue = value[key];
         }
+        // Recursively populate clone (susceptible to call stack limits).
         assignValue(result, key, baseClone(subValue, isDeep, isFull, customizer, key, value, stack));
       });
+      if (!isFull) {
+        stack['delete'](value);
+      }
       return result;
     }
 
@@ -38061,26 +38159,37 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new spec function.
      */
     function baseConforms(source) {
-      var props = keys(source),
-          length = props.length;
-
+      var props = keys(source);
       return function(object) {
-        if (object == null) {
-          return !length;
-        }
-        var index = length;
-        while (index--) {
-          var key = props[index],
-              predicate = source[key],
-              value = object[key];
-
-          if ((value === undefined &&
-              !(key in Object(object))) || !predicate(value)) {
-            return false;
-          }
-        }
-        return true;
+        return baseConformsTo(object, source, props);
       };
+    }
+
+    /**
+     * The base implementation of `_.conformsTo` which accepts `props` to check.
+     *
+     * @private
+     * @param {Object} object The object to inspect.
+     * @param {Object} source The object of property predicates to conform to.
+     * @returns {boolean} Returns `true` if `object` conforms, else `false`.
+     */
+    function baseConformsTo(object, source, props) {
+      var length = props.length;
+      if (object == null) {
+        return !length;
+      }
+      var index = length;
+      while (index--) {
+        var key = props[index],
+            predicate = source[key],
+            value = object[key];
+
+        if ((value === undefined &&
+            !(key in Object(object))) || !predicate(value)) {
+          return false;
+        }
+      }
+      return true;
     }
 
     /**
@@ -38096,13 +38205,13 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * The base implementation of `_.delay` and `_.defer` which accepts an array
-     * of `func` arguments.
+     * The base implementation of `_.delay` and `_.defer` which accepts `args`
+     * to provide to `func`.
      *
      * @private
      * @param {Function} func The function to delay.
      * @param {number} wait The number of milliseconds to delay invocation.
-     * @param {Object} args The arguments to provide to `func`.
+     * @param {Array} args The arguments to provide to `func`.
      * @returns {number} Returns the timer id.
      */
     function baseDelay(func, wait, args) {
@@ -38416,7 +38525,18 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * The base implementation of `_.gt` which doesn't coerce arguments to numbers.
+     * The base implementation of `getTag`.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @returns {string} Returns the `toStringTag`.
+     */
+    function baseGetTag(value) {
+      return objectToString.call(value);
+    }
+
+    /**
+     * The base implementation of `_.gt` which doesn't coerce arguments.
      *
      * @private
      * @param {*} value The value to compare.
@@ -38458,7 +38578,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * The base implementation of `_.inRange` which doesn't coerce arguments to numbers.
+     * The base implementation of `_.inRange` which doesn't coerce arguments.
      *
      * @private
      * @param {number} number The number to check.
@@ -38572,6 +38692,28 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * The base implementation of `_.isArrayBuffer` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is an array buffer, else `false`.
+     */
+    function baseIsArrayBuffer(value) {
+      return isObjectLike(value) && objectToString.call(value) == arrayBufferTag;
+    }
+
+    /**
+     * The base implementation of `_.isDate` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a date object, else `false`.
+     */
+    function baseIsDate(value) {
+      return isObjectLike(value) && objectToString.call(value) == dateTag;
+    }
+
+    /**
      * The base implementation of `_.isEqual` which supports partial comparisons
      * and tracks traversed objects.
      *
@@ -38655,6 +38797,17 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * The base implementation of `_.isMap` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a map, else `false`.
+     */
+    function baseIsMap(value) {
+      return isObjectLike(value) && getTag(value) == mapTag;
+    }
+
+    /**
      * The base implementation of `_.isMatch` without support for iteratee shorthands.
      *
      * @private
@@ -38725,6 +38878,40 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * The base implementation of `_.isRegExp` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a regexp, else `false`.
+     */
+    function baseIsRegExp(value) {
+      return isObject(value) && objectToString.call(value) == regexpTag;
+    }
+
+    /**
+     * The base implementation of `_.isSet` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a set, else `false`.
+     */
+    function baseIsSet(value) {
+      return isObjectLike(value) && getTag(value) == setTag;
+    }
+
+    /**
+     * The base implementation of `_.isTypedArray` without Node.js optimizations.
+     *
+     * @private
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+     */
+    function baseIsTypedArray(value) {
+      return isObjectLike(value) &&
+        isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
+    }
+
+    /**
      * The base implementation of `_.iteratee`.
      *
      * @private
@@ -38756,9 +38943,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of property names.
      */
-    function baseKeys(object) {
-      return nativeKeys(Object(object));
-    }
+    var baseKeys = overArg(nativeKeys, Object);
 
     /**
      * The base implementation of `_.keysIn` which doesn't skip the constructor
@@ -38786,7 +38971,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * The base implementation of `_.lt` which doesn't coerce arguments to numbers.
+     * The base implementation of `_.lt` which doesn't coerce arguments.
      *
      * @private
      * @param {*} value The value to compare.
@@ -38953,18 +39138,17 @@ function mergeObjects(provided, overrides, defaults)
           isCommon = false;
         }
       }
-      stack.set(srcValue, newValue);
-
       if (isCommon) {
         // Recursively merge objects and arrays (susceptible to call stack limits).
+        stack.set(srcValue, newValue);
         mergeFunc(newValue, srcValue, srcIndex, customizer, stack);
+        stack['delete'](srcValue);
       }
-      stack['delete'](srcValue);
       assignMergeValue(object, key, newValue);
     }
 
     /**
-     * The base implementation of `_.nth` which doesn't coerce `n` to an integer.
+     * The base implementation of `_.nth` which doesn't coerce arguments.
      *
      * @private
      * @param {Array} array The array to query.
@@ -39016,12 +39200,9 @@ function mergeObjects(provided, overrides, defaults)
      */
     function basePick(object, props) {
       object = Object(object);
-      return arrayReduce(props, function(result, key) {
-        if (key in object) {
-          result[key] = object[key];
-        }
-        return result;
-      }, {});
+      return basePickBy(object, props, function(value, key) {
+        return key in object;
+      });
     }
 
     /**
@@ -39029,12 +39210,12 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Object} object The source object.
+     * @param {string[]} props The property identifiers to pick from.
      * @param {Function} predicate The function invoked per property.
      * @returns {Object} Returns the new object.
      */
-    function basePickBy(object, predicate) {
+    function basePickBy(object, props, predicate) {
       var index = -1,
-          props = getAllKeysIn(object),
           length = props.length,
           result = {};
 
@@ -39047,19 +39228,6 @@ function mergeObjects(provided, overrides, defaults)
         }
       }
       return result;
-    }
-
-    /**
-     * The base implementation of `_.property` without support for deep paths.
-     *
-     * @private
-     * @param {string} key The key of the property to get.
-     * @returns {Function} Returns the new accessor function.
-     */
-    function baseProperty(key) {
-      return function(object) {
-        return object == null ? undefined : object[key];
-      };
     }
 
     /**
@@ -39164,7 +39332,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * The base implementation of `_.range` and `_.rangeRight` which doesn't
-     * coerce arguments to numbers.
+     * coerce arguments.
      *
      * @private
      * @param {number} start The start of the range.
@@ -39211,6 +39379,35 @@ function mergeObjects(provided, overrides, defaults)
       } while (n);
 
       return result;
+    }
+
+    /**
+     * The base implementation of `_.rest` which doesn't validate or coerce arguments.
+     *
+     * @private
+     * @param {Function} func The function to apply a rest parameter to.
+     * @param {number} [start=func.length-1] The start position of the rest parameter.
+     * @returns {Function} Returns the new function.
+     */
+    function baseRest(func, start) {
+      start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
+      return function() {
+        var args = arguments,
+            index = -1,
+            length = nativeMax(args.length - start, 0),
+            array = Array(length);
+
+        while (++index < length) {
+          array[index] = args[start + index];
+        }
+        index = -1;
+        var otherArgs = Array(start + 1);
+        while (++index < start) {
+          otherArgs[index] = args[index];
+        }
+        otherArgs[start] = array;
+        return apply(func, this, otherArgs);
+      };
     }
 
     /**
@@ -39992,9 +40189,9 @@ function mergeObjects(provided, overrides, defaults)
 
         var newValue = customizer
           ? customizer(object[key], source[key], key, object, source)
-          : source[key];
+          : undefined;
 
-        assignValue(object, key, newValue);
+        assignValue(object, key, newValue === undefined ? source[key] : newValue);
       }
       return object;
     }
@@ -40024,7 +40221,7 @@ function mergeObjects(provided, overrides, defaults)
         var func = isArray(collection) ? arrayAggregator : baseAggregator,
             accumulator = initializer ? initializer() : {};
 
-        return func(collection, setter, getIteratee(iteratee), accumulator);
+        return func(collection, setter, getIteratee(iteratee, 2), accumulator);
       };
     }
 
@@ -40036,7 +40233,7 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new assigner function.
      */
     function createAssigner(assigner) {
-      return rest(function(object, sources) {
+      return baseRest(function(object, sources) {
         var index = -1,
             length = sources.length,
             customizer = length > 1 ? sources[length - 1] : undefined,
@@ -40120,14 +40317,13 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function} func The function to wrap.
-     * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper`
-     *  for more details.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
      * @param {*} [thisArg] The `this` binding of `func`.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createBaseWrapper(func, bitmask, thisArg) {
+    function createBind(func, bitmask, thisArg) {
       var isBind = bitmask & BIND_FLAG,
-          Ctor = createCtorWrapper(func);
+          Ctor = createCtor(func);
 
       function wrapper() {
         var fn = (this && this !== root && this instanceof wrapper) ? Ctor : func;
@@ -40184,7 +40380,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {Function} Ctor The constructor to wrap.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createCtorWrapper(Ctor) {
+    function createCtor(Ctor) {
       return function() {
         // Use a `switch` statement to work with class constructors. See
         // http://ecma-international.org/ecma-262/6.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
@@ -40214,13 +40410,12 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function} func The function to wrap.
-     * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper`
-     *  for more details.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
      * @param {number} arity The arity of `func`.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createCurryWrapper(func, bitmask, arity) {
-      var Ctor = createCtorWrapper(func);
+    function createCurry(func, bitmask, arity) {
+      var Ctor = createCtor(func);
 
       function wrapper() {
         var length = arguments.length,
@@ -40237,8 +40432,8 @@ function mergeObjects(provided, overrides, defaults)
 
         length -= holders.length;
         if (length < arity) {
-          return createRecurryWrapper(
-            func, bitmask, createHybridWrapper, wrapper.placeholder, undefined,
+          return createRecurry(
+            func, bitmask, createHybrid, wrapper.placeholder, undefined,
             args, holders, undefined, undefined, arity - length);
         }
         var fn = (this && this !== root && this instanceof wrapper) ? Ctor : func;
@@ -40257,18 +40452,13 @@ function mergeObjects(provided, overrides, defaults)
     function createFind(findIndexFunc) {
       return function(collection, predicate, fromIndex) {
         var iterable = Object(collection);
-        predicate = getIteratee(predicate, 3);
         if (!isArrayLike(collection)) {
-          var props = keys(collection);
+          var iteratee = getIteratee(predicate, 3);
+          collection = keys(collection);
+          predicate = function(key) { return iteratee(iterable[key], key, iterable); };
         }
-        var index = findIndexFunc(props || collection, function(value, key) {
-          if (props) {
-            key = value;
-            value = iterable[key];
-          }
-          return predicate(value, key, iterable);
-        }, fromIndex);
-        return index > -1 ? collection[props ? props[index] : index] : undefined;
+        var index = findIndexFunc(collection, predicate, fromIndex);
+        return index > -1 ? iterable[iteratee ? collection[index] : index] : undefined;
       };
     }
 
@@ -40280,7 +40470,7 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new flow function.
      */
     function createFlow(fromRight) {
-      return rest(function(funcs) {
+      return baseRest(function(funcs) {
         funcs = baseFlatten(funcs, 1);
 
         var length = funcs.length,
@@ -40342,8 +40532,7 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function|string} func The function or method name to wrap.
-     * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper`
-     *  for more details.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
      * @param {*} [thisArg] The `this` binding of `func`.
      * @param {Array} [partials] The arguments to prepend to those provided to
      *  the new function.
@@ -40356,13 +40545,13 @@ function mergeObjects(provided, overrides, defaults)
      * @param {number} [arity] The arity of `func`.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createHybridWrapper(func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity) {
+    function createHybrid(func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity) {
       var isAry = bitmask & ARY_FLAG,
           isBind = bitmask & BIND_FLAG,
           isBindKey = bitmask & BIND_KEY_FLAG,
           isCurried = bitmask & (CURRY_FLAG | CURRY_RIGHT_FLAG),
           isFlip = bitmask & FLIP_FLAG,
-          Ctor = isBindKey ? undefined : createCtorWrapper(func);
+          Ctor = isBindKey ? undefined : createCtor(func);
 
       function wrapper() {
         var length = arguments.length,
@@ -40385,8 +40574,8 @@ function mergeObjects(provided, overrides, defaults)
         length -= holdersCount;
         if (isCurried && length < arity) {
           var newHolders = replaceHolders(args, placeholder);
-          return createRecurryWrapper(
-            func, bitmask, createHybridWrapper, wrapper.placeholder, thisArg,
+          return createRecurry(
+            func, bitmask, createHybrid, wrapper.placeholder, thisArg,
             args, newHolders, argPos, ary, arity - length
           );
         }
@@ -40403,7 +40592,7 @@ function mergeObjects(provided, overrides, defaults)
           args.length = ary;
         }
         if (this && this !== root && this instanceof wrapper) {
-          fn = Ctor || createCtorWrapper(fn);
+          fn = Ctor || createCtor(fn);
         }
         return fn.apply(thisBinding, args);
       }
@@ -40429,13 +40618,14 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function} operator The function to perform the operation.
+     * @param {number} [defaultValue] The value used for `undefined` arguments.
      * @returns {Function} Returns the new mathematical operation function.
      */
-    function createMathOperation(operator) {
+    function createMathOperation(operator, defaultValue) {
       return function(value, other) {
         var result;
         if (value === undefined && other === undefined) {
-          return 0;
+          return defaultValue;
         }
         if (value !== undefined) {
           result = value;
@@ -40465,12 +40655,12 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new over function.
      */
     function createOver(arrayFunc) {
-      return rest(function(iteratees) {
+      return baseRest(function(iteratees) {
         iteratees = (iteratees.length == 1 && isArray(iteratees[0]))
           ? arrayMap(iteratees[0], baseUnary(getIteratee()))
-          : arrayMap(baseFlatten(iteratees, 1, isFlattenableIteratee), baseUnary(getIteratee()));
+          : arrayMap(baseFlatten(iteratees, 1), baseUnary(getIteratee()));
 
-        return rest(function(args) {
+        return baseRest(function(args) {
           var thisArg = this;
           return arrayFunc(iteratees, function(iteratee) {
             return apply(iteratee, thisArg, args);
@@ -40507,16 +40697,15 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function} func The function to wrap.
-     * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper`
-     *  for more details.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
      * @param {*} thisArg The `this` binding of `func`.
      * @param {Array} partials The arguments to prepend to those provided to
      *  the new function.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createPartialWrapper(func, bitmask, thisArg, partials) {
+    function createPartial(func, bitmask, thisArg, partials) {
       var isBind = bitmask & BIND_FLAG,
-          Ctor = createCtorWrapper(func);
+          Ctor = createCtor(func);
 
       function wrapper() {
         var argsIndex = -1,
@@ -40585,8 +40774,7 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function} func The function to wrap.
-     * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper`
-     *  for more details.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
      * @param {Function} wrapFunc The function to create the `func` wrapper.
      * @param {*} placeholder The placeholder value.
      * @param {*} [thisArg] The `this` binding of `func`.
@@ -40598,7 +40786,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {number} [arity] The arity of `func`.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createRecurryWrapper(func, bitmask, wrapFunc, placeholder, thisArg, partials, holders, argPos, ary, arity) {
+    function createRecurry(func, bitmask, wrapFunc, placeholder, thisArg, partials, holders, argPos, ary, arity) {
       var isCurry = bitmask & CURRY_FLAG,
           newHolders = isCurry ? holders : undefined,
           newHoldersRight = isCurry ? undefined : holders,
@@ -40621,7 +40809,7 @@ function mergeObjects(provided, overrides, defaults)
         setData(result, newData);
       }
       result.placeholder = placeholder;
-      return result;
+      return setWrapToString(result, func, bitmask);
     }
 
     /**
@@ -40650,7 +40838,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Creates a set of `values`.
+     * Creates a set object of `values`.
      *
      * @private
      * @param {Array} values The values to add to the set.
@@ -40686,7 +40874,7 @@ function mergeObjects(provided, overrides, defaults)
      *
      * @private
      * @param {Function|string} func The function or method name to wrap.
-     * @param {number} bitmask The bitmask of wrapper flags.
+     * @param {number} bitmask The bitmask flags.
      *  The bitmask may be composed of the following flags:
      *     1 - `_.bind`
      *     2 - `_.bindKey`
@@ -40706,7 +40894,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {number} [arity] The arity of `func`.
      * @returns {Function} Returns the new wrapped function.
      */
-    function createWrapper(func, bitmask, thisArg, partials, holders, argPos, ary, arity) {
+    function createWrap(func, bitmask, thisArg, partials, holders, argPos, ary, arity) {
       var isBindKey = bitmask & BIND_KEY_FLAG;
       if (!isBindKey && typeof func != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
@@ -40749,16 +40937,16 @@ function mergeObjects(provided, overrides, defaults)
         bitmask &= ~(CURRY_FLAG | CURRY_RIGHT_FLAG);
       }
       if (!bitmask || bitmask == BIND_FLAG) {
-        var result = createBaseWrapper(func, bitmask, thisArg);
+        var result = createBind(func, bitmask, thisArg);
       } else if (bitmask == CURRY_FLAG || bitmask == CURRY_RIGHT_FLAG) {
-        result = createCurryWrapper(func, bitmask, arity);
+        result = createCurry(func, bitmask, arity);
       } else if ((bitmask == PARTIAL_FLAG || bitmask == (BIND_FLAG | PARTIAL_FLAG)) && !holders.length) {
-        result = createPartialWrapper(func, bitmask, thisArg, partials);
+        result = createPartial(func, bitmask, thisArg, partials);
       } else {
-        result = createHybridWrapper.apply(undefined, newData);
+        result = createHybrid.apply(undefined, newData);
       }
       var setter = data ? baseSetData : setData;
-      return setter(result, newData);
+      return setWrapToString(setter(result, newData), func, bitmask);
     }
 
     /**
@@ -40785,7 +40973,7 @@ function mergeObjects(provided, overrides, defaults)
       }
       // Assume cyclic values are equal.
       var stacked = stack.get(array);
-      if (stacked) {
+      if (stacked && stack.get(other)) {
         return stacked == other;
       }
       var index = -1,
@@ -40793,6 +40981,7 @@ function mergeObjects(provided, overrides, defaults)
           seen = (bitmask & UNORDERED_COMPARE_FLAG) ? new SetCache : undefined;
 
       stack.set(array, other);
+      stack.set(other, array);
 
       // Ignore non-index properties.
       while (++index < arrLength) {
@@ -40871,17 +41060,13 @@ function mergeObjects(provided, overrides, defaults)
 
         case boolTag:
         case dateTag:
-          // Coerce dates and booleans to numbers, dates to milliseconds and
-          // booleans to `1` or `0` treating invalid dates coerced to `NaN` as
-          // not equal.
-          return +object == +other;
+        case numberTag:
+          // Coerce booleans to `1` or `0` and dates to milliseconds.
+          // Invalid dates are coerced to `NaN`.
+          return eq(+object, +other);
 
         case errorTag:
           return object.name == other.name && object.message == other.message;
-
-        case numberTag:
-          // Treat `NaN` vs. `NaN` as equal.
-          return (object != +object) ? other != +other : object == +other;
 
         case regexpTag:
         case stringTag:
@@ -40906,10 +41091,12 @@ function mergeObjects(provided, overrides, defaults)
             return stacked == other;
           }
           bitmask |= UNORDERED_COMPARE_FLAG;
-          stack.set(object, other);
 
           // Recursively compare objects (susceptible to call stack limits).
-          return equalArrays(convert(object), convert(other), equalFunc, customizer, bitmask, stack);
+          stack.set(object, other);
+          var result = equalArrays(convert(object), convert(other), equalFunc, customizer, bitmask, stack);
+          stack['delete'](object);
+          return result;
 
         case symbolTag:
           if (symbolValueOf) {
@@ -40952,11 +41139,12 @@ function mergeObjects(provided, overrides, defaults)
       }
       // Assume cyclic values are equal.
       var stacked = stack.get(object);
-      if (stacked) {
+      if (stacked && stack.get(other)) {
         return stacked == other;
       }
       var result = true;
       stack.set(object, other);
+      stack.set(other, object);
 
       var skipCtor = isPartial;
       while (++index < objLength) {
@@ -41148,9 +41336,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {*} value The value to query.
      * @returns {null|Object} Returns the `[[Prototype]]`.
      */
-    function getPrototype(value) {
-      return nativeGetPrototype(Object(value));
-    }
+    var getPrototype = overArg(nativeGetPrototype, Object);
 
     /**
      * Creates an array of the own enumerable symbol properties of `object`.
@@ -41159,16 +41345,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of symbols.
      */
-    function getSymbols(object) {
-      // Coerce `object` to an object to avoid non-object errors in V8.
-      // See https://bugs.chromium.org/p/v8/issues/detail?id=3443 for more details.
-      return getOwnPropertySymbols(Object(object));
-    }
-
-    // Fallback for IE < 11.
-    if (!getOwnPropertySymbols) {
-      getSymbols = stubArray;
-    }
+    var getSymbols = nativeGetSymbols ? overArg(nativeGetSymbols, Object) : stubArray;
 
     /**
      * Creates an array of the own and inherited enumerable symbol properties
@@ -41178,7 +41355,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of symbols.
      */
-    var getSymbolsIn = !getOwnPropertySymbols ? getSymbols : function(object) {
+    var getSymbolsIn = !nativeGetSymbols ? getSymbols : function(object) {
       var result = [];
       while (object) {
         arrayPush(result, getSymbols(object));
@@ -41194,9 +41371,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {*} value The value to query.
      * @returns {string} Returns the `toStringTag`.
      */
-    function getTag(value) {
-      return objectToString.call(value);
-    }
+    var getTag = baseGetTag;
 
     // Fallback for data views, maps, sets, and weak maps in IE 11,
     // for data views in Edge, and promises in Node.js.
@@ -41249,6 +41424,18 @@ function mergeObjects(provided, overrides, defaults)
         }
       }
       return { 'start': start, 'end': end };
+    }
+
+    /**
+     * Extracts wrapper details from the `source` body comment.
+     *
+     * @private
+     * @param {string} source The source to inspect.
+     * @returns {Array} Returns the wrapper details.
+     */
+    function getWrapDetails(source) {
+      var match = source.match(reWrapDetails);
+      return match ? match[1].split(reSplitDetails) : [];
     }
 
     /**
@@ -41381,6 +41568,23 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * Inserts wrapper `details` in a comment at the top of the `source` body.
+     *
+     * @private
+     * @param {string} source The source to modify.
+     * @returns {Array} details The details to insert.
+     * @returns {string} Returns the modified source.
+     */
+    function insertWrapDetails(source, details) {
+      var length = details.length,
+          lastIndex = length - 1;
+
+      details[lastIndex] = (length > 1 ? '& ' : '') + details[lastIndex];
+      details = details.join(length > 2 ? ', ' : ' ');
+      return source.replace(reWrapComment, '{\n/* [wrapped with ' + details + '] */\n');
+    }
+
+    /**
      * Checks if `value` is a flattenable `arguments` object or array.
      *
      * @private
@@ -41388,19 +41592,8 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {boolean} Returns `true` if `value` is flattenable, else `false`.
      */
     function isFlattenable(value) {
-      return isArray(value) || isArguments(value);
-    }
-
-    /**
-     * Checks if `value` is a flattenable array and not a `_.matchesProperty`
-     * iteratee shorthand.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is flattenable, else `false`.
-     */
-    function isFlattenableIteratee(value) {
-      return isArray(value) && !(value.length == 2 && !isFunction(value[0]));
+      return isArray(value) || isArguments(value) ||
+        !!(spreadableSymbol && value && value[spreadableSymbol])
     }
 
     /**
@@ -41650,7 +41843,10 @@ function mergeObjects(provided, overrides, defaults)
      */
     function mergeDefaults(objValue, srcValue, key, object, source, stack) {
       if (isObject(objValue) && isObject(srcValue)) {
-        baseMerge(objValue, srcValue, undefined, mergeDefaults, stack.set(srcValue, objValue));
+        // Recursively merge objects and arrays (susceptible to call stack limits).
+        stack.set(srcValue, objValue);
+        baseMerge(objValue, srcValue, undefined, mergeDefaults, stack);
+        stack['delete'](srcValue);
       }
       return objValue;
     }
@@ -41724,6 +41920,25 @@ function mergeObjects(provided, overrides, defaults)
     }());
 
     /**
+     * Sets the `toString` method of `wrapper` to mimic the source of `reference`
+     * with wrapper details in a comment at the top of the source body.
+     *
+     * @private
+     * @param {Function} wrapper The function to modify.
+     * @param {Function} reference The reference function.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
+     * @returns {Function} Returns `wrapper`.
+     */
+    var setWrapToString = !defineProperty ? identity : function(wrapper, reference, bitmask) {
+      var source = (reference + '');
+      return defineProperty(wrapper, 'toString', {
+        'configurable': true,
+        'enumerable': false,
+        'value': constant(insertWrapDetails(source, updateWrapDetails(getWrapDetails(source), bitmask)))
+      });
+    };
+
+    /**
      * Converts `string` to a property path array.
      *
      * @private
@@ -41770,6 +41985,24 @@ function mergeObjects(provided, overrides, defaults)
         } catch (e) {}
       }
       return '';
+    }
+
+    /**
+     * Updates wrapper `details` based on `bitmask` flags.
+     *
+     * @private
+     * @returns {Array} details The details to modify.
+     * @param {number} bitmask The bitmask flags. See `createWrap` for more details.
+     * @returns {Array} Returns `details`.
+     */
+    function updateWrapDetails(details, bitmask) {
+      arrayEach(wrapFlags, function(pair) {
+        var value = '_.' + pair[0];
+        if ((bitmask & pair[1]) && !arrayIncludes(details, value)) {
+          details.push(value);
+        }
+      });
+      return details.sort();
     }
 
     /**
@@ -41900,10 +42133,12 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Creates an array of unique `array` values not included in the other given
-     * arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * Creates an array of `array` values not included in the other given arrays
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons. The order of result values is determined by the
      * order they occur in the first array.
+     *
+     * **Note:** Unlike `_.pullAll`, this method returns a new array.
      *
      * @static
      * @memberOf _
@@ -41918,7 +42153,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.difference([2, 1], [2, 3]);
      * // => [1]
      */
-    var difference = rest(function(array, values) {
+    var difference = baseRest(function(array, values) {
       return isArrayLikeObject(array)
         ? baseDifference(array, baseFlatten(values, 1, isArrayLikeObject, true))
         : [];
@@ -41930,14 +42165,15 @@ function mergeObjects(provided, overrides, defaults)
      * by which they're compared. Result values are chosen from the first array.
      * The iteratee is invoked with one argument: (value).
      *
+     * **Note:** Unlike `_.pullAllBy`, this method returns a new array.
+     *
      * @static
      * @memberOf _
      * @since 4.0.0
      * @category Array
      * @param {Array} array The array to inspect.
      * @param {...Array} [values] The values to exclude.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
@@ -41948,13 +42184,13 @@ function mergeObjects(provided, overrides, defaults)
      * _.differenceBy([{ 'x': 2 }, { 'x': 1 }], [{ 'x': 1 }], 'x');
      * // => [{ 'x': 2 }]
      */
-    var differenceBy = rest(function(array, values) {
+    var differenceBy = baseRest(function(array, values) {
       var iteratee = last(values);
       if (isArrayLikeObject(iteratee)) {
         iteratee = undefined;
       }
       return isArrayLikeObject(array)
-        ? baseDifference(array, baseFlatten(values, 1, isArrayLikeObject, true), getIteratee(iteratee))
+        ? baseDifference(array, baseFlatten(values, 1, isArrayLikeObject, true), getIteratee(iteratee, 2))
         : [];
     });
 
@@ -41963,6 +42199,8 @@ function mergeObjects(provided, overrides, defaults)
      * which is invoked to compare elements of `array` to `values`. Result values
      * are chosen from the first array. The comparator is invoked with two arguments:
      * (arrVal, othVal).
+     *
+     * **Note:** Unlike `_.pullAllWith`, this method returns a new array.
      *
      * @static
      * @memberOf _
@@ -41979,7 +42217,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.differenceWith(objects, [{ 'x': 1, 'y': 2 }], _.isEqual);
      * // => [{ 'x': 2, 'y': 1 }]
      */
-    var differenceWith = rest(function(array, values) {
+    var differenceWith = baseRest(function(array, values) {
       var comparator = last(values);
       if (isArrayLikeObject(comparator)) {
         comparator = undefined;
@@ -42068,8 +42306,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Array
      * @param {Array} array The array to query.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {Array} Returns the slice of `array`.
      * @example
      *
@@ -42110,7 +42347,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Array
      * @param {Array} array The array to query.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the slice of `array`.
      * @example
@@ -42192,7 +42429,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 1.1.0
      * @category Array
      * @param {Array} array The array to search.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=0] The index to search from.
      * @returns {number} Returns the index of the found element, else `-1`.
@@ -42240,7 +42477,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 2.0.0
      * @category Array
      * @param {Array} array The array to search.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=array.length-1] The index to search from.
      * @returns {number} Returns the index of the found element, else `-1`.
@@ -42361,8 +42598,8 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Object} Returns the new object.
      * @example
      *
-     * _.fromPairs([['fred', 30], ['barney', 40]]);
-     * // => { 'fred': 30, 'barney': 40 }
+     * _.fromPairs([['a', 1], ['b', 2]]);
+     * // => { 'a': 1, 'b': 2 }
      */
     function fromPairs(pairs) {
       var index = -1,
@@ -42468,7 +42705,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.intersection([2, 1], [2, 3]);
      * // => [2]
      */
-    var intersection = rest(function(arrays) {
+    var intersection = baseRest(function(arrays) {
       var mapped = arrayMap(arrays, castArrayLikeObject);
       return (mapped.length && mapped[0] === arrays[0])
         ? baseIntersection(mapped)
@@ -42486,8 +42723,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Array
      * @param {...Array} [arrays] The arrays to inspect.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {Array} Returns the new array of intersecting values.
      * @example
      *
@@ -42498,7 +42734,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.intersectionBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
      * // => [{ 'x': 1 }]
      */
-    var intersectionBy = rest(function(arrays) {
+    var intersectionBy = baseRest(function(arrays) {
       var iteratee = last(arrays),
           mapped = arrayMap(arrays, castArrayLikeObject);
 
@@ -42508,7 +42744,7 @@ function mergeObjects(provided, overrides, defaults)
         mapped.pop();
       }
       return (mapped.length && mapped[0] === arrays[0])
-        ? baseIntersection(mapped, getIteratee(iteratee))
+        ? baseIntersection(mapped, getIteratee(iteratee, 2))
         : [];
     });
 
@@ -42533,7 +42769,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.intersectionWith(objects, others, _.isEqual);
      * // => [{ 'x': 1, 'y': 2 }]
      */
-    var intersectionWith = rest(function(arrays) {
+    var intersectionWith = baseRest(function(arrays) {
       var comparator = last(arrays),
           mapped = arrayMap(arrays, castArrayLikeObject);
 
@@ -42621,7 +42857,7 @@ function mergeObjects(provided, overrides, defaults)
         ) + 1;
       }
       if (value !== value) {
-        return indexOfNaN(array, index - 1, true);
+        return baseFindIndex(array, baseIsNaN, index - 1, true);
       }
       while (index--) {
         if (array[index] === value) {
@@ -42679,7 +42915,7 @@ function mergeObjects(provided, overrides, defaults)
      * console.log(array);
      * // => ['b', 'b']
      */
-    var pull = rest(pullAll);
+    var pull = baseRest(pullAll);
 
     /**
      * This method is like `_.pull` except that it accepts an array of values to remove.
@@ -42720,7 +42956,7 @@ function mergeObjects(provided, overrides, defaults)
      * @category Array
      * @param {Array} array The array to modify.
      * @param {Array} values The values to remove.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee invoked per element.
      * @returns {Array} Returns `array`.
      * @example
@@ -42733,7 +42969,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function pullAllBy(array, values, iteratee) {
       return (array && array.length && values && values.length)
-        ? basePullAll(array, values, getIteratee(iteratee))
+        ? basePullAll(array, values, getIteratee(iteratee, 2))
         : array;
     }
 
@@ -42790,7 +43026,7 @@ function mergeObjects(provided, overrides, defaults)
      * console.log(pulled);
      * // => ['b', 'd']
      */
-    var pullAt = rest(function(array, indexes) {
+    var pullAt = baseRest(function(array, indexes) {
       indexes = baseFlatten(indexes, 1);
 
       var length = array ? array.length : 0,
@@ -42816,7 +43052,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 2.0.0
      * @category Array
      * @param {Array} array The array to modify.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the new array of removed elements.
      * @example
@@ -42944,7 +43180,7 @@ function mergeObjects(provided, overrides, defaults)
      * @category Array
      * @param {Array} array The sorted array to inspect.
      * @param {*} value The value to evaluate.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee invoked per element.
      * @returns {number} Returns the index at which `value` should be inserted
      *  into `array`.
@@ -42960,7 +43196,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => 0
      */
     function sortedIndexBy(array, value, iteratee) {
-      return baseSortedIndexBy(array, value, getIteratee(iteratee));
+      return baseSortedIndexBy(array, value, getIteratee(iteratee, 2));
     }
 
     /**
@@ -43023,7 +43259,7 @@ function mergeObjects(provided, overrides, defaults)
      * @category Array
      * @param {Array} array The sorted array to inspect.
      * @param {*} value The value to evaluate.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee invoked per element.
      * @returns {number} Returns the index at which `value` should be inserted
      *  into `array`.
@@ -43039,7 +43275,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => 1
      */
     function sortedLastIndexBy(array, value, iteratee) {
-      return baseSortedIndexBy(array, value, getIteratee(iteratee), true);
+      return baseSortedIndexBy(array, value, getIteratee(iteratee, 2), true);
     }
 
     /**
@@ -43108,7 +43344,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function sortedUniqBy(array, iteratee) {
       return (array && array.length)
-        ? baseSortedUniq(array, getIteratee(iteratee))
+        ? baseSortedUniq(array, getIteratee(iteratee, 2))
         : [];
     }
 
@@ -43208,7 +43444,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Array
      * @param {Array} array The array to query.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the slice of `array`.
      * @example
@@ -43250,7 +43486,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Array
      * @param {Array} array The array to query.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the slice of `array`.
      * @example
@@ -43298,14 +43534,15 @@ function mergeObjects(provided, overrides, defaults)
      * _.union([2], [1, 2]);
      * // => [2, 1]
      */
-    var union = rest(function(arrays) {
+    var union = baseRest(function(arrays) {
       return baseUniq(baseFlatten(arrays, 1, isArrayLikeObject, true));
     });
 
     /**
      * This method is like `_.union` except that it accepts `iteratee` which is
      * invoked for each element of each `arrays` to generate the criterion by
-     * which uniqueness is computed. The iteratee is invoked with one argument:
+     * which uniqueness is computed. Result values are chosen from the first
+     * array in which the value occurs. The iteratee is invoked with one argument:
      * (value).
      *
      * @static
@@ -43313,7 +43550,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Array
      * @param {...Array} [arrays] The arrays to inspect.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee invoked per element.
      * @returns {Array} Returns the new array of combined values.
      * @example
@@ -43325,17 +43562,18 @@ function mergeObjects(provided, overrides, defaults)
      * _.unionBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
      * // => [{ 'x': 1 }, { 'x': 2 }]
      */
-    var unionBy = rest(function(arrays) {
+    var unionBy = baseRest(function(arrays) {
       var iteratee = last(arrays);
       if (isArrayLikeObject(iteratee)) {
         iteratee = undefined;
       }
-      return baseUniq(baseFlatten(arrays, 1, isArrayLikeObject, true), getIteratee(iteratee));
+      return baseUniq(baseFlatten(arrays, 1, isArrayLikeObject, true), getIteratee(iteratee, 2));
     });
 
     /**
      * This method is like `_.union` except that it accepts `comparator` which
-     * is invoked to compare elements of `arrays`. The comparator is invoked
+     * is invoked to compare elements of `arrays`. Result values are chosen from
+     * the first array in which the value occurs. The comparator is invoked
      * with two arguments: (arrVal, othVal).
      *
      * @static
@@ -43353,7 +43591,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.unionWith(objects, others, _.isEqual);
      * // => [{ 'x': 1, 'y': 2 }, { 'x': 2, 'y': 1 }, { 'x': 1, 'y': 1 }]
      */
-    var unionWith = rest(function(arrays) {
+    var unionWith = baseRest(function(arrays) {
       var comparator = last(arrays);
       if (isArrayLikeObject(comparator)) {
         comparator = undefined;
@@ -43394,7 +43632,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Array
      * @param {Array} array The array to inspect.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee invoked per element.
      * @returns {Array} Returns the new duplicate free array.
      * @example
@@ -43408,7 +43646,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function uniqBy(array, iteratee) {
       return (array && array.length)
-        ? baseUniq(array, getIteratee(iteratee))
+        ? baseUniq(array, getIteratee(iteratee, 2))
         : [];
     }
 
@@ -43450,11 +43688,11 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Array} Returns the new array of regrouped elements.
      * @example
      *
-     * var zipped = _.zip(['fred', 'barney'], [30, 40], [true, false]);
-     * // => [['fred', 30, true], ['barney', 40, false]]
+     * var zipped = _.zip(['a', 'b'], [1, 2], [true, false]);
+     * // => [['a', 1, true], ['b', 2, false]]
      *
      * _.unzip(zipped);
-     * // => [['fred', 'barney'], [30, 40], [true, false]]
+     * // => [['a', 'b'], [1, 2], [true, false]]
      */
     function unzip(array) {
       if (!(array && array.length)) {
@@ -43511,6 +43749,8 @@ function mergeObjects(provided, overrides, defaults)
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * for equality comparisons.
      *
+     * **Note:** Unlike `_.pull`, this method returns a new array.
+     *
      * @static
      * @memberOf _
      * @since 0.1.0
@@ -43524,7 +43764,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.without([2, 1, 2, 3], 1, 2);
      * // => [3]
      */
-    var without = rest(function(array, values) {
+    var without = baseRest(function(array, values) {
       return isArrayLikeObject(array)
         ? baseDifference(array, values)
         : [];
@@ -43548,7 +43788,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.xor([2, 1], [2, 3]);
      * // => [1, 3]
      */
-    var xor = rest(function(arrays) {
+    var xor = baseRest(function(arrays) {
       return baseXor(arrayFilter(arrays, isArrayLikeObject));
     });
 
@@ -43563,7 +43803,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Array
      * @param {...Array} [arrays] The arrays to inspect.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee invoked per element.
      * @returns {Array} Returns the new array of filtered values.
      * @example
@@ -43575,12 +43815,12 @@ function mergeObjects(provided, overrides, defaults)
      * _.xorBy([{ 'x': 1 }], [{ 'x': 2 }, { 'x': 1 }], 'x');
      * // => [{ 'x': 2 }]
      */
-    var xorBy = rest(function(arrays) {
+    var xorBy = baseRest(function(arrays) {
       var iteratee = last(arrays);
       if (isArrayLikeObject(iteratee)) {
         iteratee = undefined;
       }
-      return baseXor(arrayFilter(arrays, isArrayLikeObject), getIteratee(iteratee));
+      return baseXor(arrayFilter(arrays, isArrayLikeObject), getIteratee(iteratee, 2));
     });
 
     /**
@@ -43603,7 +43843,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.xorWith(objects, others, _.isEqual);
      * // => [{ 'x': 2, 'y': 1 }, { 'x': 1, 'y': 1 }]
      */
-    var xorWith = rest(function(arrays) {
+    var xorWith = baseRest(function(arrays) {
       var comparator = last(arrays);
       if (isArrayLikeObject(comparator)) {
         comparator = undefined;
@@ -43624,10 +43864,10 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Array} Returns the new array of grouped elements.
      * @example
      *
-     * _.zip(['fred', 'barney'], [30, 40], [true, false]);
-     * // => [['fred', 30, true], ['barney', 40, false]]
+     * _.zip(['a', 'b'], [1, 2], [true, false]);
+     * // => [['a', 1, true], ['b', 2, false]]
      */
-    var zip = rest(unzip);
+    var zip = baseRest(unzip);
 
     /**
      * This method is like `_.fromPairs` except that it accepts two arrays,
@@ -43687,7 +43927,7 @@ function mergeObjects(provided, overrides, defaults)
      * });
      * // => [111, 222]
      */
-    var zipWith = rest(function(arrays) {
+    var zipWith = baseRest(function(arrays) {
       var length = arrays.length,
           iteratee = length > 1 ? arrays[length - 1] : undefined;
 
@@ -43803,7 +44043,7 @@ function mergeObjects(provided, overrides, defaults)
      * _(object).at(['a[0].b.c', 'a[1]']).value();
      * // => [3, 4]
      */
-    var wrapperAt = rest(function(paths) {
+    var wrapperAt = baseRest(function(paths) {
       paths = baseFlatten(paths, 1);
       var length = paths.length,
           start = length ? paths[0] : 0,
@@ -44056,7 +44296,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.5.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee to transform keys.
      * @returns {Object} Returns the composed aggregate object.
      * @example
@@ -44082,7 +44322,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
      * @returns {boolean} Returns `true` if all elements pass the predicate check,
@@ -44122,12 +44362,14 @@ function mergeObjects(provided, overrides, defaults)
      * `predicate` returns truthy for. The predicate is invoked with three
      * arguments: (value, index|key, collection).
      *
+     * **Note:** Unlike `_.remove`, this method returns a new array.
+     *
      * @static
      * @memberOf _
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the new filtered array.
      * @see _.reject
@@ -44168,7 +44410,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to search.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=0] The index to search from.
      * @returns {*} Returns the matched element, else `undefined`.
@@ -44206,7 +44448,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 2.0.0
      * @category Collection
      * @param {Array|Object} collection The collection to search.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
+     * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=collection.length-1] The index to search from.
      * @returns {*} Returns the matched element, else `undefined`.
@@ -44229,7 +44471,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the new flattened array.
      * @example
@@ -44254,7 +44496,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.7.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The function invoked per iteration.
      * @returns {Array} Returns the new flattened array.
      * @example
@@ -44279,7 +44521,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.7.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The function invoked per iteration.
      * @param {number} [depth=1] The maximum recursion depth.
      * @returns {Array} Returns the new flattened array.
@@ -44369,7 +44611,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee to transform keys.
      * @returns {Object} Returns the composed aggregate object.
      * @example
@@ -44413,10 +44655,10 @@ function mergeObjects(provided, overrides, defaults)
      * _.includes([1, 2, 3], 1, 2);
      * // => false
      *
-     * _.includes({ 'user': 'fred', 'age': 40 }, 'fred');
+     * _.includes({ 'a': 1, 'b': 2 }, 1);
      * // => true
      *
-     * _.includes('pebbles', 'eb');
+     * _.includes('abcd', 'bc');
      * // => true
      */
     function includes(collection, value, fromIndex, guard) {
@@ -44435,8 +44677,8 @@ function mergeObjects(provided, overrides, defaults)
     /**
      * Invokes the method at `path` of each element in `collection`, returning
      * an array of the results of each invoked method. Any additional arguments
-     * are provided to each invoked method. If `methodName` is a function, it's
-     * invoked for and `this` bound to, each element in `collection`.
+     * are provided to each invoked method. If `path` is a function, it's invoked
+     * for, and `this` bound to, each element in `collection`.
      *
      * @static
      * @memberOf _
@@ -44455,7 +44697,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.invokeMap([123, 456], String.prototype.split, '');
      * // => [['1', '2', '3'], ['4', '5', '6']]
      */
-    var invokeMap = rest(function(collection, path, args) {
+    var invokeMap = baseRest(function(collection, path, args) {
       var index = -1,
           isFunc = typeof path == 'function',
           isProp = isKey(path),
@@ -44479,7 +44721,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
+     * @param {Function} [iteratee=_.identity]
      *  The iteratee to transform keys.
      * @returns {Object} Returns the composed aggregate object.
      * @example
@@ -44520,8 +44762,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Array} Returns the new mapped array.
      * @example
      *
@@ -44603,8 +44844,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {Array} Returns the array of grouped elements.
      * @example
      *
@@ -44715,8 +44955,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {Array} Returns the new filtered array.
      * @see _.filter
      * @example
@@ -44743,10 +44982,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function reject(collection, predicate) {
       var func = isArray(collection) ? arrayFilter : baseFilter;
-      predicate = getIteratee(predicate, 3);
-      return func(collection, function(value, index, collection) {
-        return !predicate(value, index, collection);
-      });
+      return func(collection, negate(getIteratee(predicate, 3)));
     }
 
     /**
@@ -44879,8 +45115,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
      * @returns {boolean} Returns `true` if any element passes the predicate check,
      *  else `false`.
@@ -44925,8 +45160,8 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Collection
      * @param {Array|Object} collection The collection to iterate over.
-     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
-     *  [iteratees=[_.identity]] The iteratees to sort by.
+     * @param {...(Function|Function[])} [iteratees=[_.identity]]
+     *  The iteratees to sort by.
      * @returns {Array} Returns the new sorted array.
      * @example
      *
@@ -44948,7 +45183,7 @@ function mergeObjects(provided, overrides, defaults)
      * });
      * // => objects for [['barney', 36], ['barney', 34], ['fred', 48], ['fred', 40]]
      */
-    var sortBy = rest(function(collection, iteratees) {
+    var sortBy = baseRest(function(collection, iteratees) {
       if (collection == null) {
         return [];
       }
@@ -44958,11 +45193,7 @@ function mergeObjects(provided, overrides, defaults)
       } else if (length > 2 && isIterateeCall(iteratees[0], iteratees[1], iteratees[2])) {
         iteratees = [iteratees[0]];
       }
-      iteratees = (iteratees.length == 1 && isArray(iteratees[0]))
-        ? iteratees[0]
-        : baseFlatten(iteratees, 1, isFlattenableIteratee);
-
-      return baseOrderBy(collection, iteratees, []);
+      return baseOrderBy(collection, baseFlatten(iteratees, 1), []);
     });
 
     /*------------------------------------------------------------------------*/
@@ -45045,7 +45276,7 @@ function mergeObjects(provided, overrides, defaults)
     function ary(func, n, guard) {
       n = guard ? undefined : n;
       n = (func && n == null) ? func.length : n;
-      return createWrapper(func, ARY_FLAG, undefined, undefined, undefined, undefined, n);
+      return createWrap(func, ARY_FLAG, undefined, undefined, undefined, undefined, n);
     }
 
     /**
@@ -45063,7 +45294,7 @@ function mergeObjects(provided, overrides, defaults)
      * @example
      *
      * jQuery(element).on('click', _.before(5, addContactToList));
-     * // => allows adding up to 4 contacts to the list
+     * // => Allows adding up to 4 contacts to the list.
      */
     function before(n, func) {
       var result;
@@ -45102,9 +45333,9 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new bound function.
      * @example
      *
-     * var greet = function(greeting, punctuation) {
+     * function greet(greeting, punctuation) {
      *   return greeting + ' ' + this.user + punctuation;
-     * };
+     * }
      *
      * var object = { 'user': 'fred' };
      *
@@ -45117,13 +45348,13 @@ function mergeObjects(provided, overrides, defaults)
      * bound('hi');
      * // => 'hi fred!'
      */
-    var bind = rest(function(func, thisArg, partials) {
+    var bind = baseRest(function(func, thisArg, partials) {
       var bitmask = BIND_FLAG;
       if (partials.length) {
         var holders = replaceHolders(partials, getHolder(bind));
         bitmask |= PARTIAL_FLAG;
       }
-      return createWrapper(func, bitmask, thisArg, partials, holders);
+      return createWrap(func, bitmask, thisArg, partials, holders);
     });
 
     /**
@@ -45171,13 +45402,13 @@ function mergeObjects(provided, overrides, defaults)
      * bound('hi');
      * // => 'hiya fred!'
      */
-    var bindKey = rest(function(object, key, partials) {
+    var bindKey = baseRest(function(object, key, partials) {
       var bitmask = BIND_FLAG | BIND_KEY_FLAG;
       if (partials.length) {
         var holders = replaceHolders(partials, getHolder(bindKey));
         bitmask |= PARTIAL_FLAG;
       }
-      return createWrapper(key, bitmask, object, partials, holders);
+      return createWrap(key, bitmask, object, partials, holders);
     });
 
     /**
@@ -45223,7 +45454,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function curry(func, arity, guard) {
       arity = guard ? undefined : arity;
-      var result = createWrapper(func, CURRY_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
+      var result = createWrap(func, CURRY_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
       result.placeholder = curry.placeholder;
       return result;
     }
@@ -45268,7 +45499,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function curryRight(func, arity, guard) {
       arity = guard ? undefined : arity;
-      var result = createWrapper(func, CURRY_RIGHT_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
+      var result = createWrap(func, CURRY_RIGHT_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
       result.placeholder = curryRight.placeholder;
       return result;
     }
@@ -45406,6 +45637,9 @@ function mergeObjects(provided, overrides, defaults)
       }
 
       function cancel() {
+        if (timerId !== undefined) {
+          clearTimeout(timerId);
+        }
         lastInvokeTime = 0;
         lastArgs = lastCallTime = lastThis = timerId = undefined;
       }
@@ -45460,7 +45694,7 @@ function mergeObjects(provided, overrides, defaults)
      * }, 'deferred');
      * // => Logs 'deferred' after one or more milliseconds.
      */
-    var defer = rest(function(func, args) {
+    var defer = baseRest(function(func, args) {
       return baseDelay(func, 1, args);
     });
 
@@ -45483,7 +45717,7 @@ function mergeObjects(provided, overrides, defaults)
      * }, 1000, 'later');
      * // => Logs 'later' after one second.
      */
-    var delay = rest(function(func, wait, args) {
+    var delay = baseRest(function(func, wait, args) {
       return baseDelay(func, toNumber(wait) || 0, args);
     });
 
@@ -45506,7 +45740,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => ['d', 'c', 'b', 'a']
      */
     function flip(func) {
-      return createWrapper(func, FLIP_FLAG);
+      return createWrap(func, FLIP_FLAG);
     }
 
     /**
@@ -45601,7 +45835,14 @@ function mergeObjects(provided, overrides, defaults)
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       return function() {
-        return !predicate.apply(this, arguments);
+        var args = arguments;
+        switch (args.length) {
+          case 0: return !predicate.call(this);
+          case 1: return !predicate.call(this, args[0]);
+          case 2: return !predicate.call(this, args[0], args[1]);
+          case 3: return !predicate.call(this, args[0], args[1], args[2]);
+        }
+        return !predicate.apply(this, args);
       };
     }
 
@@ -45621,23 +45862,22 @@ function mergeObjects(provided, overrides, defaults)
      * var initialize = _.once(createApplication);
      * initialize();
      * initialize();
-     * // `initialize` invokes `createApplication` once
+     * // => `createApplication` is invoked once
      */
     function once(func) {
       return before(2, func);
     }
 
     /**
-     * Creates a function that invokes `func` with arguments transformed by
-     * corresponding `transforms`.
+     * Creates a function that invokes `func` with its arguments transformed.
      *
      * @static
      * @since 4.0.0
      * @memberOf _
      * @category Function
      * @param {Function} func The function to wrap.
-     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
-     *  [transforms[_.identity]] The functions to transform.
+     * @param {...(Function|Function[])} [transforms=[_.identity]]
+     *  The argument transforms.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -45659,13 +45899,13 @@ function mergeObjects(provided, overrides, defaults)
      * func(10, 5);
      * // => [100, 10]
      */
-    var overArgs = rest(function(func, transforms) {
+    var overArgs = baseRest(function(func, transforms) {
       transforms = (transforms.length == 1 && isArray(transforms[0]))
         ? arrayMap(transforms[0], baseUnary(getIteratee()))
-        : arrayMap(baseFlatten(transforms, 1, isFlattenableIteratee), baseUnary(getIteratee()));
+        : arrayMap(baseFlatten(transforms, 1), baseUnary(getIteratee()));
 
       var funcsLength = transforms.length;
-      return rest(function(args) {
+      return baseRest(function(args) {
         var index = -1,
             length = nativeMin(args.length, funcsLength);
 
@@ -45696,9 +45936,9 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new partially applied function.
      * @example
      *
-     * var greet = function(greeting, name) {
+     * function greet(greeting, name) {
      *   return greeting + ' ' + name;
-     * };
+     * }
      *
      * var sayHelloTo = _.partial(greet, 'hello');
      * sayHelloTo('fred');
@@ -45709,9 +45949,9 @@ function mergeObjects(provided, overrides, defaults)
      * greetFred('hi');
      * // => 'hi fred'
      */
-    var partial = rest(function(func, partials) {
+    var partial = baseRest(function(func, partials) {
       var holders = replaceHolders(partials, getHolder(partial));
-      return createWrapper(func, PARTIAL_FLAG, undefined, partials, holders);
+      return createWrap(func, PARTIAL_FLAG, undefined, partials, holders);
     });
 
     /**
@@ -45733,9 +45973,9 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new partially applied function.
      * @example
      *
-     * var greet = function(greeting, name) {
+     * function greet(greeting, name) {
      *   return greeting + ' ' + name;
-     * };
+     * }
      *
      * var greetFred = _.partialRight(greet, 'fred');
      * greetFred('hi');
@@ -45746,9 +45986,9 @@ function mergeObjects(provided, overrides, defaults)
      * sayHelloTo('fred');
      * // => 'hello fred'
      */
-    var partialRight = rest(function(func, partials) {
+    var partialRight = baseRest(function(func, partials) {
       var holders = replaceHolders(partials, getHolder(partialRight));
-      return createWrapper(func, PARTIAL_RIGHT_FLAG, undefined, partials, holders);
+      return createWrap(func, PARTIAL_RIGHT_FLAG, undefined, partials, holders);
     });
 
     /**
@@ -45773,8 +46013,8 @@ function mergeObjects(provided, overrides, defaults)
      * rearged('b', 'c', 'a')
      * // => ['a', 'b', 'c']
      */
-    var rearg = rest(function(func, indexes) {
-      return createWrapper(func, REARG_FLAG, undefined, undefined, undefined, baseFlatten(indexes, 1));
+    var rearg = baseRest(function(func, indexes) {
+      return createWrap(func, REARG_FLAG, undefined, undefined, undefined, baseFlatten(indexes, 1));
     });
 
     /**
@@ -45806,29 +46046,8 @@ function mergeObjects(provided, overrides, defaults)
       if (typeof func != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
-      start = nativeMax(start === undefined ? (func.length - 1) : toInteger(start), 0);
-      return function() {
-        var args = arguments,
-            index = -1,
-            length = nativeMax(args.length - start, 0),
-            array = Array(length);
-
-        while (++index < length) {
-          array[index] = args[start + index];
-        }
-        switch (start) {
-          case 0: return func.call(this, array);
-          case 1: return func.call(this, args[0], array);
-          case 2: return func.call(this, args[0], args[1], array);
-        }
-        var otherArgs = Array(start + 1);
-        index = -1;
-        while (++index < start) {
-          otherArgs[index] = args[index];
-        }
-        otherArgs[start] = array;
-        return apply(func, this, otherArgs);
-      };
+      start = start === undefined ? start : toInteger(start);
+      return baseRest(func, start);
     }
 
     /**
@@ -45870,7 +46089,7 @@ function mergeObjects(provided, overrides, defaults)
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       start = start === undefined ? 0 : nativeMax(toInteger(start), 0);
-      return rest(function(args) {
+      return baseRest(function(args) {
         var array = args[start],
             otherArgs = castSlice(args, 0, start);
 
@@ -45960,10 +46179,10 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Creates a function that provides `value` to the wrapper function as its
-     * first argument. Any additional arguments provided to the function are
-     * appended to those provided to the wrapper function. The wrapper is invoked
-     * with the `this` binding of the created function.
+     * Creates a function that provides `value` to `wrapper` as its first
+     * argument. Any additional arguments provided to the function are appended
+     * to those provided to the `wrapper`. The wrapper is invoked with the `this`
+     * binding of the created function.
      *
      * @static
      * @memberOf _
@@ -46149,6 +46368,32 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * Checks if `object` conforms to `source` by invoking the predicate properties
+     * of `source` with the corresponding property values of `object`. This method
+     * is equivalent to a `_.conforms` function when `source` is partially applied.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.14.0
+     * @category Lang
+     * @param {Object} object The object to inspect.
+     * @param {Object} source The object of property predicates to conform to.
+     * @returns {boolean} Returns `true` if `object` conforms, else `false`.
+     * @example
+     *
+     * var object = { 'a': 1, 'b': 2 };
+     *
+     * _.conformsTo(object, { 'b': function(n) { return n > 1; } });
+     * // => true
+     *
+     * _.conformsTo(object, { 'b': function(n) { return n > 2; } });
+     * // => false
+     */
+    function conformsTo(object, source) {
+      return source == null || baseConformsTo(object, source, keys(source));
+    }
+
+    /**
      * Performs a
      * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
      * comparison between two values to determine if they are equivalent.
@@ -46162,8 +46407,8 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
      * @example
      *
-     * var object = { 'user': 'fred' };
-     * var other = { 'user': 'fred' };
+     * var object = { 'a': 1 };
+     * var other = { 'a': 1 };
      *
      * _.eq(object, object);
      * // => true
@@ -46244,7 +46489,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
+     * @returns {boolean} Returns `true` if `value` is an `arguments` object,
      *  else `false`.
      * @example
      *
@@ -46266,11 +46511,9 @@ function mergeObjects(provided, overrides, defaults)
      * @static
      * @memberOf _
      * @since 0.1.0
-     * @type {Function}
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is an array, else `false`.
      * @example
      *
      * _.isArray([1, 2, 3]);
@@ -46295,8 +46538,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.3.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is an array buffer, else `false`.
      * @example
      *
      * _.isArrayBuffer(new ArrayBuffer(2));
@@ -46305,9 +46547,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isArrayBuffer(new Array(2));
      * // => false
      */
-    function isArrayBuffer(value) {
-      return isObjectLike(value) && objectToString.call(value) == arrayBufferTag;
-    }
+    var isArrayBuffer = nodeIsArrayBuffer ? baseUnary(nodeIsArrayBuffer) : baseIsArrayBuffer;
 
     /**
      * Checks if `value` is array-like. A value is considered array-like if it's
@@ -46375,8 +46615,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a boolean, else `false`.
      * @example
      *
      * _.isBoolean(false);
@@ -46407,9 +46646,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isBuffer(new Uint8Array(2));
      * // => false
      */
-    var isBuffer = !Buffer ? stubFalse : function(value) {
-      return value instanceof Buffer;
-    };
+    var isBuffer = nativeIsBuffer || stubFalse;
 
     /**
      * Checks if `value` is classified as a `Date` object.
@@ -46419,8 +46656,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a date object, else `false`.
      * @example
      *
      * _.isDate(new Date);
@@ -46429,9 +46665,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isDate('Mon April 23 2012');
      * // => false
      */
-    function isDate(value) {
-      return isObjectLike(value) && objectToString.call(value) == dateTag;
-    }
+    var isDate = nodeIsDate ? baseUnary(nodeIsDate) : baseIsDate;
 
     /**
      * Checks if `value` is likely a DOM element.
@@ -46528,8 +46762,8 @@ function mergeObjects(provided, overrides, defaults)
      *  else `false`.
      * @example
      *
-     * var object = { 'user': 'fred' };
-     * var other = { 'user': 'fred' };
+     * var object = { 'a': 1 };
+     * var other = { 'a': 1 };
      *
      * _.isEqual(object, other);
      * // => true
@@ -46646,8 +46880,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a function, else `false`.
      * @example
      *
      * _.isFunction(_);
@@ -46792,8 +47025,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.3.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a map, else `false`.
      * @example
      *
      * _.isMap(new Map);
@@ -46802,9 +47034,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isMap(new WeakMap);
      * // => false
      */
-    function isMap(value) {
-      return isObjectLike(value) && getTag(value) == mapTag;
-    }
+    var isMap = nodeIsMap ? baseUnary(nodeIsMap) : baseIsMap;
 
     /**
      * Performs a partial deep comparison between `object` and `source` to
@@ -46822,12 +47052,12 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {boolean} Returns `true` if `object` is a match, else `false`.
      * @example
      *
-     * var object = { 'user': 'fred', 'age': 40 };
+     * var object = { 'a': 1, 'b': 2 };
      *
-     * _.isMatch(object, { 'age': 40 });
+     * _.isMatch(object, { 'b': 2 });
      * // => true
      *
-     * _.isMatch(object, { 'age': 36 });
+     * _.isMatch(object, { 'b': 1 });
      * // => false
      */
     function isMatch(object, source) {
@@ -46909,13 +47139,13 @@ function mergeObjects(provided, overrides, defaults)
     /**
      * Checks if `value` is a pristine native function.
      *
-     * **Note:** This method can't reliably detect native functions in the
-     * presence of the `core-js` package because `core-js` circumvents this kind
-     * of detection. Despite multiple requests, the `core-js` maintainer has made
-     * it clear: any attempt to fix the detection will be obstructed. As a result,
-     * we're left with little choice but to throw an error. Unfortunately, this
-     * also affects packages, like [babel-polyfill](https://www.npmjs.com/package/babel-polyfill),
-     * which rely on `core-js`.
+     * **Note:** This method can't reliably detect native functions in the presence
+     * of the core-js package because core-js circumvents this kind of detection.
+     * Despite multiple requests, the core-js maintainer has made it clear: any
+     * attempt to fix the detection will be obstructed. As a result, we're left
+     * with little choice but to throw an error. Unfortunately, this also affects
+     * packages, like [babel-polyfill](https://www.npmjs.com/package/babel-polyfill),
+     * which rely on core-js.
      *
      * @static
      * @memberOf _
@@ -46934,7 +47164,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function isNative(value) {
       if (isMaskable(value)) {
-        throw new Error('This method is not supported with `core-js`. Try https://github.com/es-shims.');
+        throw new Error('This method is not supported with core-js. Try https://github.com/es-shims.');
       }
       return baseIsNative(value);
     }
@@ -46995,8 +47225,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a number, else `false`.
      * @example
      *
      * _.isNumber(3);
@@ -47067,8 +47296,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a regexp, else `false`.
      * @example
      *
      * _.isRegExp(/abc/);
@@ -47077,9 +47305,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isRegExp('/abc/');
      * // => false
      */
-    function isRegExp(value) {
-      return isObject(value) && objectToString.call(value) == regexpTag;
-    }
+    var isRegExp = nodeIsRegExp ? baseUnary(nodeIsRegExp) : baseIsRegExp;
 
     /**
      * Checks if `value` is a safe integer. An integer is safe if it's an IEEE-754
@@ -47121,8 +47347,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.3.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a set, else `false`.
      * @example
      *
      * _.isSet(new Set);
@@ -47131,9 +47356,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isSet(new WeakSet);
      * // => false
      */
-    function isSet(value) {
-      return isObjectLike(value) && getTag(value) == setTag;
-    }
+    var isSet = nodeIsSet ? baseUnary(nodeIsSet) : baseIsSet;
 
     /**
      * Checks if `value` is classified as a `String` primitive or object.
@@ -47143,8 +47366,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a string, else `false`.
      * @example
      *
      * _.isString('abc');
@@ -47166,8 +47388,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
      * @example
      *
      * _.isSymbol(Symbol.iterator);
@@ -47189,8 +47410,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
      * @example
      *
      * _.isTypedArray(new Uint8Array);
@@ -47199,10 +47419,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.isTypedArray([]);
      * // => false
      */
-    function isTypedArray(value) {
-      return isObjectLike(value) &&
-        isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
-    }
+    var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
 
     /**
      * Checks if `value` is `undefined`.
@@ -47233,8 +47450,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.3.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a weak map, else `false`.
      * @example
      *
      * _.isWeakMap(new WeakMap);
@@ -47255,8 +47471,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.3.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is correctly classified,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a weak set, else `false`.
      * @example
      *
      * _.isWeakSet(new WeakSet);
@@ -47605,18 +47820,18 @@ function mergeObjects(provided, overrides, defaults)
      * @example
      *
      * function Foo() {
-     *   this.c = 3;
+     *   this.a = 1;
      * }
      *
      * function Bar() {
-     *   this.e = 5;
+     *   this.c = 3;
      * }
      *
-     * Foo.prototype.d = 4;
-     * Bar.prototype.f = 6;
+     * Foo.prototype.b = 2;
+     * Bar.prototype.d = 4;
      *
-     * _.assign({ 'a': 1 }, new Foo, new Bar);
-     * // => { 'a': 1, 'c': 3, 'e': 5 }
+     * _.assign({ 'a': 0 }, new Foo, new Bar);
+     * // => { 'a': 1, 'c': 3 }
      */
     var assign = createAssigner(function(object, source) {
       if (nonEnumShadows || isPrototype(source) || isArrayLike(source)) {
@@ -47648,18 +47863,18 @@ function mergeObjects(provided, overrides, defaults)
      * @example
      *
      * function Foo() {
-     *   this.b = 2;
+     *   this.a = 1;
      * }
      *
      * function Bar() {
-     *   this.d = 4;
+     *   this.c = 3;
      * }
      *
-     * Foo.prototype.c = 3;
-     * Bar.prototype.e = 5;
+     * Foo.prototype.b = 2;
+     * Bar.prototype.d = 4;
      *
-     * _.assignIn({ 'a': 1 }, new Foo, new Bar);
-     * // => { 'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5 }
+     * _.assignIn({ 'a': 0 }, new Foo, new Bar);
+     * // => { 'a': 1, 'b': 2, 'c': 3, 'd': 4 }
      */
     var assignIn = createAssigner(function(object, source) {
       if (nonEnumShadows || isPrototype(source) || isArrayLike(source)) {
@@ -47753,7 +47968,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.at(object, ['a[0].b.c', 'a[1]']);
      * // => [3, 4]
      */
-    var at = rest(function(object, paths) {
+    var at = baseRest(function(object, paths) {
       return baseAt(object, baseFlatten(paths, 1));
     });
 
@@ -47814,10 +48029,10 @@ function mergeObjects(provided, overrides, defaults)
      * @see _.defaultsDeep
      * @example
      *
-     * _.defaults({ 'user': 'barney' }, { 'age': 36 }, { 'user': 'fred' });
-     * // => { 'user': 'barney', 'age': 36 }
+     * _.defaults({ 'a': 1 }, { 'b': 2 }, { 'a': 3 });
+     * // => { 'a': 1, 'b': 2 }
      */
-    var defaults = rest(function(args) {
+    var defaults = baseRest(function(args) {
       args.push(undefined, assignInDefaults);
       return apply(assignInWith, undefined, args);
     });
@@ -47838,11 +48053,10 @@ function mergeObjects(provided, overrides, defaults)
      * @see _.defaults
      * @example
      *
-     * _.defaultsDeep({ 'user': { 'name': 'barney' } }, { 'user': { 'name': 'fred', 'age': 36 } });
-     * // => { 'user': { 'name': 'barney', 'age': 36 } }
-     *
+     * _.defaultsDeep({ 'a': { 'b': 2 } }, { 'a': { 'b': 1, 'c': 3 } });
+     * // => { 'a': { 'b': 2, 'c': 3 } }
      */
-    var defaultsDeep = rest(function(args) {
+    var defaultsDeep = baseRest(function(args) {
       args.push(undefined, mergeDefaults);
       return apply(mergeWith, undefined, args);
     });
@@ -47856,8 +48070,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 1.1.0
      * @category Object
      * @param {Object} object The object to search.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {string|undefined} Returns the key of the matched element,
      *  else `undefined`.
      * @example
@@ -47896,8 +48109,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 2.0.0
      * @category Object
      * @param {Object} object The object to search.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {string|undefined} Returns the key of the matched element,
      *  else `undefined`.
      * @example
@@ -48111,7 +48323,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Gets the value at `path` of `object`. If the resolved value is
-     * `undefined`, the `defaultValue` is used in its place.
+     * `undefined`, the `defaultValue` is returned in its place.
      *
      * @static
      * @memberOf _
@@ -48234,8 +48446,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.1.0
      * @category Object
      * @param {Object} object The object to invert.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {Object} Returns the new inverted object.
      * @example
      *
@@ -48275,7 +48486,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.invoke(object, 'a[0].b.c.slice', 1, 3);
      * // => [2, 3]
      */
-    var invoke = rest(baseInvoke);
+    var invoke = baseRest(baseInvoke);
 
     /**
      * Creates an array of the own enumerable property names of `object`.
@@ -48379,8 +48590,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.8.0
      * @category Object
      * @param {Object} object The object to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Object} Returns the new mapped object.
      * @see _.mapValues
      * @example
@@ -48411,8 +48621,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 2.4.0
      * @category Object
      * @param {Object} object The object to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The function invoked per iteration.
+     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
      * @returns {Object} Returns the new mapped object.
      * @see _.mapKeys
      * @example
@@ -48459,16 +48668,16 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Object} Returns `object`.
      * @example
      *
-     * var users = {
-     *   'data': [{ 'user': 'barney' }, { 'user': 'fred' }]
+     * var object = {
+     *   'a': [{ 'b': 2 }, { 'd': 4 }]
      * };
      *
-     * var ages = {
-     *   'data': [{ 'age': 36 }, { 'age': 40 }]
+     * var other = {
+     *   'a': [{ 'c': 3 }, { 'e': 5 }]
      * };
      *
-     * _.merge(users, ages);
-     * // => { 'data': [{ 'user': 'barney', 'age': 36 }, { 'user': 'fred', 'age': 40 }] }
+     * _.merge(object, other);
+     * // => { 'a': [{ 'b': 2, 'c': 3 }, { 'd': 4, 'e': 5 }] }
      */
     var merge = createAssigner(function(object, source, srcIndex) {
       baseMerge(object, source, srcIndex);
@@ -48499,18 +48708,11 @@ function mergeObjects(provided, overrides, defaults)
      *   }
      * }
      *
-     * var object = {
-     *   'fruits': ['apple'],
-     *   'vegetables': ['beet']
-     * };
-     *
-     * var other = {
-     *   'fruits': ['banana'],
-     *   'vegetables': ['carrot']
-     * };
+     * var object = { 'a': [1], 'b': [2] };
+     * var other = { 'a': [3], 'b': [4] };
      *
      * _.mergeWith(object, other, customizer);
-     * // => { 'fruits': ['apple', 'banana'], 'vegetables': ['beet', 'carrot'] }
+     * // => { 'a': [1, 3], 'b': [2, 4] }
      */
     var mergeWith = createAssigner(function(object, source, srcIndex, customizer) {
       baseMerge(object, source, srcIndex, customizer);
@@ -48535,7 +48737,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.omit(object, ['a', 'c']);
      * // => { 'b': '2' }
      */
-    var omit = rest(function(object, props) {
+    var omit = baseRest(function(object, props) {
       if (object == null) {
         return {};
       }
@@ -48554,8 +48756,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Object
      * @param {Object} object The source object.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per property.
+     * @param {Function} [predicate=_.identity] The function invoked per property.
      * @returns {Object} Returns the new object.
      * @example
      *
@@ -48565,10 +48766,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => { 'b': '2' }
      */
     function omitBy(object, predicate) {
-      predicate = getIteratee(predicate);
-      return basePickBy(object, function(value, key) {
-        return !predicate(value, key);
-      });
+      return pickBy(object, negate(getIteratee(predicate)));
     }
 
     /**
@@ -48588,7 +48786,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.pick(object, ['a', 'c']);
      * // => { 'a': 1, 'c': 3 }
      */
-    var pick = rest(function(object, props) {
+    var pick = baseRest(function(object, props) {
       return object == null ? {} : basePick(object, arrayMap(baseFlatten(props, 1), toKey));
     });
 
@@ -48601,8 +48799,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Object
      * @param {Object} object The source object.
-     * @param {Array|Function|Object|string} [predicate=_.identity]
-     *  The function invoked per property.
+     * @param {Function} [predicate=_.identity] The function invoked per property.
      * @returns {Object} Returns the new object.
      * @example
      *
@@ -48612,7 +48809,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => { 'a': 1, 'c': 3 }
      */
     function pickBy(object, predicate) {
-      return object == null ? {} : basePickBy(object, getIteratee(predicate));
+      return object == null ? {} : basePickBy(object, getAllKeysIn(object), getIteratee(predicate));
     }
 
     /**
@@ -49237,8 +49434,9 @@ function mergeObjects(provided, overrides, defaults)
         ? length
         : baseClamp(toInteger(position), 0, length);
 
+      var end = position;
       position -= target.length;
-      return position >= 0 && string.indexOf(target, position) == position;
+      return position >= 0 && string.slice(position, end) == target;
     }
 
     /**
@@ -49686,7 +49884,8 @@ function mergeObjects(provided, overrides, defaults)
     function startsWith(string, target, position) {
       string = toString(string);
       position = baseClamp(toInteger(position), 0, string.length);
-      return string.lastIndexOf(baseToString(target), position) == position;
+      target = baseToString(target);
+      return string.slice(position, position + target.length) == target;
     }
 
     /**
@@ -50269,7 +50468,7 @@ function mergeObjects(provided, overrides, defaults)
      *   elements = [];
      * }
      */
-    var attempt = rest(function(func, args) {
+    var attempt = baseRest(function(func, args) {
       try {
         return apply(func, undefined, args);
       } catch (e) {
@@ -50294,16 +50493,16 @@ function mergeObjects(provided, overrides, defaults)
      *
      * var view = {
      *   'label': 'docs',
-     *   'onClick': function() {
+     *   'click': function() {
      *     console.log('clicked ' + this.label);
      *   }
      * };
      *
-     * _.bindAll(view, ['onClick']);
-     * jQuery(element).on('click', view.onClick);
+     * _.bindAll(view, ['click']);
+     * jQuery(element).on('click', view.click);
      * // => Logs 'clicked docs' when clicked.
      */
-    var bindAll = rest(function(object, methodNames) {
+    var bindAll = baseRest(function(object, methodNames) {
       arrayEach(baseFlatten(methodNames, 1), function(key) {
         key = toKey(key);
         object[key] = bind(object[key], object);
@@ -50328,7 +50527,7 @@ function mergeObjects(provided, overrides, defaults)
      * var func = _.cond([
      *   [_.matches({ 'a': 1 }),           _.constant('matches A')],
      *   [_.conforms({ 'b': _.isNumber }), _.constant('matches B')],
-     *   [_.constant(true),                _.constant('no match')]
+     *   [_.stubTrue,                      _.constant('no match')]
      * ]);
      *
      * func({ 'a': 1, 'b': 2 });
@@ -50351,7 +50550,7 @@ function mergeObjects(provided, overrides, defaults)
         return [toIteratee(pair[0]), pair[1]];
       });
 
-      return rest(function(args) {
+      return baseRest(function(args) {
         var index = -1;
         while (++index < length) {
           var pair = pairs[index];
@@ -50375,13 +50574,13 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new spec function.
      * @example
      *
-     * var users = [
-     *   { 'user': 'barney', 'age': 36 },
-     *   { 'user': 'fred',   'age': 40 }
+     * var objects = [
+     *   { 'a': 2, 'b': 1 },
+     *   { 'a': 1, 'b': 2 }
      * ];
      *
-     * _.filter(users, _.conforms({ 'age': function(n) { return n > 38; } }));
-     * // => [{ 'user': 'fred', 'age': 40 }]
+     * _.filter(objects, _.conforms({ 'b': function(n) { return n > 1; } }));
+     * // => [{ 'a': 1, 'b': 2 }]
      */
     function conforms(source) {
       return baseConforms(baseClone(source, true));
@@ -50413,6 +50612,30 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * Checks `value` to determine whether a default value should be returned in
+     * its place. The `defaultValue` is returned if `value` is `NaN`, `null`,
+     * or `undefined`.
+     *
+     * @static
+     * @memberOf _
+     * @since 4.14.0
+     * @category Util
+     * @param {*} value The value to check.
+     * @param {*} defaultValue The default value.
+     * @returns {*} Returns the resolved value.
+     * @example
+     *
+     * _.defaultTo(1, 10);
+     * // => 1
+     *
+     * _.defaultTo(undefined, 10);
+     * // => 10
+     */
+    function defaultTo(value, defaultValue) {
+      return (value == null || value !== value) ? defaultValue : value;
+    }
+
+    /**
      * Creates a function that returns the result of invoking the given functions
      * with the `this` binding of the created function, where each successive
      * invocation is supplied the return value of the previous.
@@ -50421,7 +50644,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 3.0.0
      * @category Util
-     * @param {...(Function|Function[])} [funcs] Functions to invoke.
+     * @param {...(Function|Function[])} [funcs] The functions to invoke.
      * @returns {Function} Returns the new composite function.
      * @see _.flowRight
      * @example
@@ -50444,7 +50667,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @memberOf _
      * @category Util
-     * @param {...(Function|Function[])} [funcs] Functions to invoke.
+     * @param {...(Function|Function[])} [funcs] The functions to invoke.
      * @returns {Function} Returns the new composite function.
      * @see _.flow
      * @example
@@ -50460,7 +50683,7 @@ function mergeObjects(provided, overrides, defaults)
     var flowRight = createFlow(true);
 
     /**
-     * This method returns the first argument given to it.
+     * This method returns the first argument it receives.
      *
      * @static
      * @since 0.1.0
@@ -50470,7 +50693,7 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {*} Returns `value`.
      * @example
      *
-     * var object = { 'user': 'fred' };
+     * var object = { 'a': 1 };
      *
      * console.log(_.identity(object) === object);
      * // => true
@@ -50541,13 +50764,13 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new spec function.
      * @example
      *
-     * var users = [
-     *   { 'user': 'barney', 'age': 36, 'active': true },
-     *   { 'user': 'fred',   'age': 40, 'active': false }
+     * var objects = [
+     *   { 'a': 1, 'b': 2, 'c': 3 },
+     *   { 'a': 4, 'b': 5, 'c': 6 }
      * ];
      *
-     * _.filter(users, _.matches({ 'age': 40, 'active': false }));
-     * // => [{ 'user': 'fred', 'age': 40, 'active': false }]
+     * _.filter(objects, _.matches({ 'a': 4, 'c': 6 }));
+     * // => [{ 'a': 4, 'b': 5, 'c': 6 }]
      */
     function matches(source) {
       return baseMatches(baseClone(source, true));
@@ -50569,13 +50792,13 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Function} Returns the new spec function.
      * @example
      *
-     * var users = [
-     *   { 'user': 'barney' },
-     *   { 'user': 'fred' }
+     * var objects = [
+     *   { 'a': 1, 'b': 2, 'c': 3 },
+     *   { 'a': 4, 'b': 5, 'c': 6 }
      * ];
      *
-     * _.find(users, _.matchesProperty('user', 'fred'));
-     * // => { 'user': 'fred' }
+     * _.find(objects, _.matchesProperty('a', 4));
+     * // => { 'a': 4, 'b': 5, 'c': 6 }
      */
     function matchesProperty(path, srcValue) {
       return baseMatchesProperty(path, baseClone(srcValue, true));
@@ -50605,7 +50828,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.map(objects, _.method(['a', 'b']));
      * // => [2, 1]
      */
-    var method = rest(function(path, args) {
+    var method = baseRest(function(path, args) {
       return function(object) {
         return baseInvoke(object, path, args);
       };
@@ -50634,7 +50857,7 @@ function mergeObjects(provided, overrides, defaults)
      * _.map([['a', '2'], ['c', '0']], _.methodOf(object));
      * // => [2, 0]
      */
-    var methodOf = rest(function(object, args) {
+    var methodOf = baseRest(function(object, args) {
       return function(path) {
         return baseInvoke(object, path, args);
       };
@@ -50733,7 +50956,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * A method that returns `undefined`.
+     * This method returns `undefined`.
      *
      * @static
      * @memberOf _
@@ -50770,7 +50993,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function nthArg(n) {
       n = toInteger(n);
-      return rest(function(args) {
+      return baseRest(function(args) {
         return baseNth(args, n);
       });
     }
@@ -50783,8 +51006,8 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
-     *  [iteratees=[_.identity]] The iteratees to invoke.
+     * @param {...(Function|Function[])} [iteratees=[_.identity]]
+     *  The iteratees to invoke.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -50803,8 +51026,8 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
-     *  [predicates=[_.identity]] The predicates to check.
+     * @param {...(Function|Function[])} [predicates=[_.identity]]
+     *  The predicates to check.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -50829,8 +51052,8 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 4.0.0
      * @category Util
-     * @param {...(Array|Array[]|Function|Function[]|Object|Object[]|string|string[])}
-     *  [predicates=[_.identity]] The predicates to check.
+     * @param {...(Function|Function[])} [predicates=[_.identity]]
+     *  The predicates to check.
      * @returns {Function} Returns the new function.
      * @example
      *
@@ -50982,7 +51205,7 @@ function mergeObjects(provided, overrides, defaults)
     var rangeRight = createRange(true);
 
     /**
-     * A method that returns a new empty array.
+     * This method returns a new empty array.
      *
      * @static
      * @memberOf _
@@ -51004,7 +51227,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * A method that returns `false`.
+     * This method returns `false`.
      *
      * @static
      * @memberOf _
@@ -51021,7 +51244,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * A method that returns a new empty object.
+     * This method returns a new empty object.
      *
      * @static
      * @memberOf _
@@ -51043,7 +51266,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * A method that returns an empty string.
+     * This method returns an empty string.
      *
      * @static
      * @memberOf _
@@ -51060,7 +51283,7 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * A method that returns `true`.
+     * This method returns `true`.
      *
      * @static
      * @memberOf _
@@ -51178,7 +51401,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     var add = createMathOperation(function(augend, addend) {
       return augend + addend;
-    });
+    }, 0);
 
     /**
      * Computes `number` rounded up to `precision`.
@@ -51220,7 +51443,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     var divide = createMathOperation(function(dividend, divisor) {
       return dividend / divisor;
-    });
+    }, 1);
 
     /**
      * Computes `number` rounded down to `precision`.
@@ -51279,8 +51502,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Math
      * @param {Array} array The array to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {*} Returns the maximum value.
      * @example
      *
@@ -51295,7 +51517,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function maxBy(array, iteratee) {
       return (array && array.length)
-        ? baseExtremum(array, getIteratee(iteratee), baseGt)
+        ? baseExtremum(array, getIteratee(iteratee, 2), baseGt)
         : undefined;
     }
 
@@ -51327,8 +51549,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.7.0
      * @category Math
      * @param {Array} array The array to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {number} Returns the mean.
      * @example
      *
@@ -51342,7 +51563,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => 5
      */
     function meanBy(array, iteratee) {
-      return baseMean(array, getIteratee(iteratee));
+      return baseMean(array, getIteratee(iteratee, 2));
     }
 
     /**
@@ -51379,8 +51600,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Math
      * @param {Array} array The array to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {*} Returns the minimum value.
      * @example
      *
@@ -51395,7 +51615,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function minBy(array, iteratee) {
       return (array && array.length)
-        ? baseExtremum(array, getIteratee(iteratee), baseLt)
+        ? baseExtremum(array, getIteratee(iteratee, 2), baseLt)
         : undefined;
     }
 
@@ -51416,7 +51636,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     var multiply = createMathOperation(function(multiplier, multiplicand) {
       return multiplier * multiplicand;
-    });
+    }, 1);
 
     /**
      * Computes `number` rounded to `precision`.
@@ -51458,7 +51678,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     var subtract = createMathOperation(function(minuend, subtrahend) {
       return minuend - subtrahend;
-    });
+    }, 0);
 
     /**
      * Computes the sum of the values in `array`.
@@ -51490,8 +51710,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Math
      * @param {Array} array The array to iterate over.
-     * @param {Array|Function|Object|string} [iteratee=_.identity]
-     *  The iteratee invoked per element.
+     * @param {Function} [iteratee=_.identity] The iteratee invoked per element.
      * @returns {number} Returns the sum.
      * @example
      *
@@ -51506,7 +51725,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function sumBy(array, iteratee) {
       return (array && array.length)
-        ? baseSum(array, getIteratee(iteratee))
+        ? baseSum(array, getIteratee(iteratee, 2))
         : 0;
     }
 
@@ -51685,7 +51904,9 @@ function mergeObjects(provided, overrides, defaults)
     lodash.cloneDeep = cloneDeep;
     lodash.cloneDeepWith = cloneDeepWith;
     lodash.cloneWith = cloneWith;
+    lodash.conformsTo = conformsTo;
     lodash.deburr = deburr;
+    lodash.defaultTo = defaultTo;
     lodash.divide = divide;
     lodash.endsWith = endsWith;
     lodash.eq = eq;
@@ -51926,7 +52147,7 @@ function mergeObjects(provided, overrides, defaults)
       return this.reverse().find(predicate);
     };
 
-    LazyWrapper.prototype.invokeMap = rest(function(path, args) {
+    LazyWrapper.prototype.invokeMap = baseRest(function(path, args) {
       if (typeof path == 'function') {
         return new LazyWrapper(this);
       }
@@ -51936,10 +52157,7 @@ function mergeObjects(provided, overrides, defaults)
     });
 
     LazyWrapper.prototype.reject = function(predicate) {
-      predicate = getIteratee(predicate, 3);
-      return this.filter(function(value) {
-        return !predicate(value);
-      });
+      return this.filter(negate(getIteratee(predicate)));
     };
 
     LazyWrapper.prototype.slice = function(start, end) {
@@ -52043,7 +52261,7 @@ function mergeObjects(provided, overrides, defaults)
       }
     });
 
-    realNames[createHybridWrapper(undefined, BIND_KEY_FLAG).name] = [{
+    realNames[createHybrid(undefined, BIND_KEY_FLAG).name] = [{
       'name': 'wrapper',
       'func': undefined
     }];
@@ -52062,6 +52280,9 @@ function mergeObjects(provided, overrides, defaults)
     lodash.prototype.reverse = wrapperReverse;
     lodash.prototype.toJSON = lodash.prototype.valueOf = lodash.prototype.value = wrapperValue;
 
+    // Add lazy aliases.
+    lodash.prototype.first = lodash.prototype.head;
+
     if (iteratorSymbol) {
       lodash.prototype[iteratorSymbol] = wrapperToIterator;
     }
@@ -52073,22 +52294,21 @@ function mergeObjects(provided, overrides, defaults)
   // Export lodash.
   var _ = runInContext();
 
-  // Expose Lodash on the free variable `window` or `self` when available so it's
-  // globally accessible, even when bundled with Browserify, Webpack, etc. This
-  // also prevents errors in cases where Lodash is loaded by a script tag in the
-  // presence of an AMD loader. See http://requirejs.org/docs/errors.html#mismatch
-  // for more details. Use `_.noConflict` to remove Lodash from the global object.
-  (freeSelf || {})._ = _;
-
-  // Some AMD build optimizers like r.js check for condition patterns like the following:
+  // Some AMD build optimizers, like r.js, check for condition patterns like:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    // Expose Lodash on the global object to prevent errors when Lodash is
+    // loaded by a script tag in the presence of an AMD loader.
+    // See http://requirejs.org/docs/errors.html#mismatch for more details.
+    // Use `_.noConflict` to remove Lodash from the global object.
+    root._ = _;
+
     // Define as an anonymous module so, through path mapping, it can be
     // referenced as the "underscore" module.
     define(function() {
       return _;
     });
   }
-  // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
+  // Check for `exports` after `define` in case a build optimizer adds it.
   else if (freeModule) {
     // Export for Node.js.
     (freeModule.exports = _)._ = _;
@@ -59518,28 +59738,28 @@ exports.shrinkBuf = function (buf, size) {
 var fnTyped = {
   arraySet: function (dest, src, src_offs, len, dest_offs) {
     if (src.subarray && dest.subarray) {
-      dest.set(src.subarray(src_offs, src_offs+len), dest_offs);
+      dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
       return;
     }
     // Fallback to ordinary array
-    for (var i=0; i<len; i++) {
+    for (var i = 0; i < len; i++) {
       dest[dest_offs + i] = src[src_offs + i];
     }
   },
   // Join array of chunks to single array.
-  flattenChunks: function(chunks) {
+  flattenChunks: function (chunks) {
     var i, l, len, pos, chunk, result;
 
     // calculate data length
     len = 0;
-    for (i=0, l=chunks.length; i<l; i++) {
+    for (i = 0, l = chunks.length; i < l; i++) {
       len += chunks[i].length;
     }
 
     // join chunks
     result = new Uint8Array(len);
     pos = 0;
-    for (i=0, l=chunks.length; i<l; i++) {
+    for (i = 0, l = chunks.length; i < l; i++) {
       chunk = chunks[i];
       result.set(chunk, pos);
       pos += chunk.length;
@@ -59551,12 +59771,12 @@ var fnTyped = {
 
 var fnUntyped = {
   arraySet: function (dest, src, src_offs, len, dest_offs) {
-    for (var i=0; i<len; i++) {
+    for (var i = 0; i < len; i++) {
       dest[dest_offs + i] = src[src_offs + i];
     }
   },
   // Join array of chunks to single array.
-  flattenChunks: function(chunks) {
+  flattenChunks: function (chunks) {
     return [].concat.apply([], chunks);
   }
 };
@@ -59615,6 +59835,9 @@ function adler32(adler, buf, len, pos) {
 module.exports = adler32;
 
 },{}],220:[function(require,module,exports){
+'use strict';
+
+
 module.exports = {
 
   /* Allowed flush values; see deflate() and inflate() below for details */
@@ -59675,10 +59898,10 @@ module.exports = {
 function makeTable() {
   var c, table = [];
 
-  for (var n =0; n < 256; n++) {
+  for (var n = 0; n < 256; n++) {
     c = n;
-    for (var k =0; k < 8; k++) {
-      c = ((c&1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+    for (var k = 0; k < 8; k++) {
+      c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
     }
     table[n] = c;
   }
@@ -59694,7 +59917,7 @@ function crc32(crc, buf, len, pos) {
   var t = crcTable,
       end = pos + len;
 
-  crc = crc ^ (-1);
+  crc ^= -1;
 
   for (var i = pos; i < end; i++) {
     crc = (crc >>> 8) ^ t[(crc ^ buf[i]) & 0xFF];
@@ -59713,7 +59936,7 @@ var utils   = require('../utils/common');
 var trees   = require('./trees');
 var adler32 = require('./adler32');
 var crc32   = require('./crc32');
-var msg   = require('./messages');
+var msg     = require('./messages');
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -59786,7 +60009,7 @@ var D_CODES       = 30;
 /* number of distance codes */
 var BL_CODES      = 19;
 /* number of codes used to transfer the bit lengths */
-var HEAP_SIZE     = 2*L_CODES + 1;
+var HEAP_SIZE     = 2 * L_CODES + 1;
 /* maximum heap size */
 var MAX_BITS  = 15;
 /* All codes must not exceed MAX_BITS bits */
@@ -59852,7 +60075,7 @@ function flush_pending(strm) {
 }
 
 
-function flush_block_only (s, last) {
+function flush_block_only(s, last) {
   trees._tr_flush_block(s, (s.block_start >= 0 ? s.block_start : -1), s.strstart - s.block_start, last);
   s.block_start = s.strstart;
   flush_pending(s.strm);
@@ -59892,6 +60115,7 @@ function read_buf(strm, buf, start, size) {
 
   strm.avail_in -= len;
 
+  // zmemcpy(buf, strm->next_in, len);
   utils.arraySet(buf, strm.input, strm.next_in, len, start);
   if (strm.state.wrap === 1) {
     strm.adler = adler32(strm.adler, buf, len, start);
@@ -60122,7 +60346,7 @@ function fill_window(s) {
 //#endif
       while (s.insert) {
         /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
-        s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH-1]) & s.hash_mask;
+        s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH - 1]) & s.hash_mask;
 
         s.prev[str & s.w_mask] = s.head[s.ins_h];
         s.head[s.ins_h] = str;
@@ -60386,7 +60610,7 @@ function deflate_fast(s, flush) {
       /***/
     }
   }
-  s.insert = ((s.strstart < (MIN_MATCH-1)) ? s.strstart : MIN_MATCH-1);
+  s.insert = ((s.strstart < (MIN_MATCH - 1)) ? s.strstart : MIN_MATCH - 1);
   if (flush === Z_FINISH) {
     /*** FLUSH_BLOCK(s, 1); ***/
     flush_block_only(s, true);
@@ -60449,10 +60673,10 @@ function deflate_slow(s, flush) {
      */
     s.prev_length = s.match_length;
     s.prev_match = s.match_start;
-    s.match_length = MIN_MATCH-1;
+    s.match_length = MIN_MATCH - 1;
 
     if (hash_head !== 0/*NIL*/ && s.prev_length < s.max_lazy_match &&
-        s.strstart - hash_head <= (s.w_size-MIN_LOOKAHEAD)/*MAX_DIST(s)*/) {
+        s.strstart - hash_head <= (s.w_size - MIN_LOOKAHEAD)/*MAX_DIST(s)*/) {
       /* To simplify the code, we prevent matches with the string
        * of window index 0 (in particular we have to avoid a match
        * of the string with itself at the start of the input file).
@@ -60466,7 +60690,7 @@ function deflate_slow(s, flush) {
         /* If prev_match is also MIN_MATCH, match_start is garbage
          * but we will ignore the current match anyway.
          */
-        s.match_length = MIN_MATCH-1;
+        s.match_length = MIN_MATCH - 1;
       }
     }
     /* If there was a match at the previous step and the current
@@ -60480,13 +60704,13 @@ function deflate_slow(s, flush) {
 
       /***_tr_tally_dist(s, s.strstart - 1 - s.prev_match,
                      s.prev_length - MIN_MATCH, bflush);***/
-      bflush = trees._tr_tally(s, s.strstart - 1- s.prev_match, s.prev_length - MIN_MATCH);
+      bflush = trees._tr_tally(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH);
       /* Insert in hash table all strings up to the end of the match.
        * strstart-1 and strstart are already inserted. If there is not
        * enough lookahead, the last two strings are not inserted in
        * the hash table.
        */
-      s.lookahead -= s.prev_length-1;
+      s.lookahead -= s.prev_length - 1;
       s.prev_length -= 2;
       do {
         if (++s.strstart <= max_insert) {
@@ -60498,7 +60722,7 @@ function deflate_slow(s, flush) {
         }
       } while (--s.prev_length !== 0);
       s.match_available = 0;
-      s.match_length = MIN_MATCH-1;
+      s.match_length = MIN_MATCH - 1;
       s.strstart++;
 
       if (bflush) {
@@ -60517,7 +60741,7 @@ function deflate_slow(s, flush) {
        */
       //Tracevv((stderr,"%c", s->window[s->strstart-1]));
       /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-      bflush = trees._tr_tally(s, 0, s.window[s.strstart-1]);
+      bflush = trees._tr_tally(s, 0, s.window[s.strstart - 1]);
 
       if (bflush) {
         /*** FLUSH_BLOCK_ONLY(s, 0) ***/
@@ -60542,11 +60766,11 @@ function deflate_slow(s, flush) {
   if (s.match_available) {
     //Tracevv((stderr,"%c", s->window[s->strstart-1]));
     /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-    bflush = trees._tr_tally(s, 0, s.window[s.strstart-1]);
+    bflush = trees._tr_tally(s, 0, s.window[s.strstart - 1]);
 
     s.match_available = 0;
   }
-  s.insert = s.strstart < MIN_MATCH-1 ? s.strstart : MIN_MATCH-1;
+  s.insert = s.strstart < MIN_MATCH - 1 ? s.strstart : MIN_MATCH - 1;
   if (flush === Z_FINISH) {
     /*** FLUSH_BLOCK(s, 1); ***/
     flush_block_only(s, true);
@@ -60726,13 +60950,13 @@ function deflate_huff(s, flush) {
  * exclude worst case performance for pathological files. Better values may be
  * found for specific files.
  */
-var Config = function (good_length, max_lazy, nice_length, max_chain, func) {
+function Config(good_length, max_lazy, nice_length, max_chain, func) {
   this.good_length = good_length;
   this.max_lazy = max_lazy;
   this.nice_length = nice_length;
   this.max_chain = max_chain;
   this.func = func;
-};
+}
 
 var configuration_table;
 
@@ -60882,8 +61106,8 @@ function DeflateState() {
   // Use flat array of DOUBLE size, with interleaved fata,
   // because JS does not support effective
   this.dyn_ltree  = new utils.Buf16(HEAP_SIZE * 2);
-  this.dyn_dtree  = new utils.Buf16((2*D_CODES+1) * 2);
-  this.bl_tree    = new utils.Buf16((2*BL_CODES+1) * 2);
+  this.dyn_dtree  = new utils.Buf16((2 * D_CODES + 1) * 2);
+  this.bl_tree    = new utils.Buf16((2 * BL_CODES + 1) * 2);
   zero(this.dyn_ltree);
   zero(this.dyn_dtree);
   zero(this.bl_tree);
@@ -60893,11 +61117,11 @@ function DeflateState() {
   this.bl_desc  = null;         /* desc. for bit length tree */
 
   //ush bl_count[MAX_BITS+1];
-  this.bl_count = new utils.Buf16(MAX_BITS+1);
+  this.bl_count = new utils.Buf16(MAX_BITS + 1);
   /* number of codes at each bit length for an optimal tree */
 
   //int heap[2*L_CODES+1];      /* heap used to build the Huffman trees */
-  this.heap = new utils.Buf16(2*L_CODES+1);  /* heap used to build the Huffman trees */
+  this.heap = new utils.Buf16(2 * L_CODES + 1);  /* heap used to build the Huffman trees */
   zero(this.heap);
 
   this.heap_len = 0;               /* number of elements in the heap */
@@ -60906,7 +61130,7 @@ function DeflateState() {
    * The same heap array is used to build all trees.
    */
 
-  this.depth = new utils.Buf16(2*L_CODES+1); //uch depth[2*L_CODES+1];
+  this.depth = new utils.Buf16(2 * L_CODES + 1); //uch depth[2*L_CODES+1];
   zero(this.depth);
   /* Depth of each subtree used as tie breaker for trees of equal frequency
    */
@@ -61072,9 +61296,16 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   s.lit_bufsize = 1 << (memLevel + 6); /* 16K elements by default */
 
   s.pending_buf_size = s.lit_bufsize * 4;
+
+  //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
+  //s->pending_buf = (uchf *) overlay;
   s.pending_buf = new utils.Buf8(s.pending_buf_size);
 
-  s.d_buf = s.lit_bufsize >> 1;
+  // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
+  //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
+  s.d_buf = 1 * s.lit_bufsize;
+
+  //s->l_buf = s->pending_buf + (1+sizeof(ush))*s->lit_bufsize;
   s.l_buf = (1 + 2) * s.lit_bufsize;
 
   s.level = level;
@@ -61447,12 +61678,94 @@ function deflateEnd(strm) {
   return status === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK;
 }
 
+
 /* =========================================================================
- * Copy the source state to the destination state
+ * Initializes the compression dictionary from the given byte
+ * sequence without producing any compressed output.
  */
-//function deflateCopy(dest, source) {
-//
-//}
+function deflateSetDictionary(strm, dictionary) {
+  var dictLength = dictionary.length;
+
+  var s;
+  var str, n;
+  var wrap;
+  var avail;
+  var next;
+  var input;
+  var tmpDict;
+
+  if (!strm/*== Z_NULL*/ || !strm.state/*== Z_NULL*/) {
+    return Z_STREAM_ERROR;
+  }
+
+  s = strm.state;
+  wrap = s.wrap;
+
+  if (wrap === 2 || (wrap === 1 && s.status !== INIT_STATE) || s.lookahead) {
+    return Z_STREAM_ERROR;
+  }
+
+  /* when using zlib wrappers, compute Adler-32 for provided dictionary */
+  if (wrap === 1) {
+    /* adler32(strm->adler, dictionary, dictLength); */
+    strm.adler = adler32(strm.adler, dictionary, dictLength, 0);
+  }
+
+  s.wrap = 0;   /* avoid computing Adler-32 in read_buf */
+
+  /* if dictionary would fill window, just replace the history */
+  if (dictLength >= s.w_size) {
+    if (wrap === 0) {            /* already empty otherwise */
+      /*** CLEAR_HASH(s); ***/
+      zero(s.head); // Fill with NIL (= 0);
+      s.strstart = 0;
+      s.block_start = 0;
+      s.insert = 0;
+    }
+    /* use the tail */
+    // dictionary = dictionary.slice(dictLength - s.w_size);
+    tmpDict = new utils.Buf8(s.w_size);
+    utils.arraySet(tmpDict, dictionary, dictLength - s.w_size, s.w_size, 0);
+    dictionary = tmpDict;
+    dictLength = s.w_size;
+  }
+  /* insert dictionary into window and hash */
+  avail = strm.avail_in;
+  next = strm.next_in;
+  input = strm.input;
+  strm.avail_in = dictLength;
+  strm.next_in = 0;
+  strm.input = dictionary;
+  fill_window(s);
+  while (s.lookahead >= MIN_MATCH) {
+    str = s.strstart;
+    n = s.lookahead - (MIN_MATCH - 1);
+    do {
+      /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
+      s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH - 1]) & s.hash_mask;
+
+      s.prev[str & s.w_mask] = s.head[s.ins_h];
+
+      s.head[s.ins_h] = str;
+      str++;
+    } while (--n);
+    s.strstart = str;
+    s.lookahead = MIN_MATCH - 1;
+    fill_window(s);
+  }
+  s.strstart += s.lookahead;
+  s.block_start = s.strstart;
+  s.insert = s.lookahead;
+  s.lookahead = 0;
+  s.match_length = s.prev_length = MIN_MATCH - 1;
+  s.match_available = 0;
+  strm.next_in = next;
+  strm.input = input;
+  strm.avail_in = avail;
+  s.wrap = wrap;
+  return Z_OK;
+}
+
 
 exports.deflateInit = deflateInit;
 exports.deflateInit2 = deflateInit2;
@@ -61461,12 +61774,12 @@ exports.deflateResetKeep = deflateResetKeep;
 exports.deflateSetHeader = deflateSetHeader;
 exports.deflate = deflate;
 exports.deflateEnd = deflateEnd;
+exports.deflateSetDictionary = deflateSetDictionary;
 exports.deflateInfo = 'pako deflate (from Nodeca project)';
 
 /* Not implemented
 exports.deflateBound = deflateBound;
 exports.deflateCopy = deflateCopy;
-exports.deflateSetDictionary = deflateSetDictionary;
 exports.deflateParams = deflateParams;
 exports.deflatePending = deflatePending;
 exports.deflatePrime = deflatePrime;
@@ -61805,10 +62118,10 @@ module.exports = function inflate_fast(strm, start) {
 'use strict';
 
 
-var utils = require('../utils/common');
-var adler32 = require('./adler32');
-var crc32   = require('./crc32');
-var inflate_fast = require('./inffast');
+var utils         = require('../utils/common');
+var adler32       = require('./adler32');
+var crc32         = require('./crc32');
+var inflate_fast  = require('./inffast');
 var inflate_table = require('./inftrees');
 
 var CODES = 0;
@@ -61896,7 +62209,7 @@ var MAX_WBITS = 15;
 var DEF_WBITS = MAX_WBITS;
 
 
-function ZSWAP32(q) {
+function zswap32(q) {
   return  (((q >>> 24) & 0xff) +
           ((q >>> 8) & 0xff00) +
           ((q & 0xff00) << 8) +
@@ -62089,13 +62402,13 @@ function fixedtables(state) {
     while (sym < 280) { state.lens[sym++] = 7; }
     while (sym < 288) { state.lens[sym++] = 8; }
 
-    inflate_table(LENS,  state.lens, 0, 288, lenfix,   0, state.work, {bits: 9});
+    inflate_table(LENS,  state.lens, 0, 288, lenfix,   0, state.work, { bits: 9 });
 
     /* distance table */
     sym = 0;
     while (sym < 32) { state.lens[sym++] = 5; }
 
-    inflate_table(DISTS, state.lens, 0, 32,   distfix, 0, state.work, {bits: 5});
+    inflate_table(DISTS, state.lens, 0, 32,   distfix, 0, state.work, { bits: 5 });
 
     /* do this just once */
     virgin = false;
@@ -62137,7 +62450,7 @@ function updatewindow(strm, src, end, copy) {
 
   /* copy state->wsize or less output bytes into the circular window */
   if (copy >= state.wsize) {
-    utils.arraySet(state.window,src, end - state.wsize, state.wsize, 0);
+    utils.arraySet(state.window, src, end - state.wsize, state.wsize, 0);
     state.wnext = 0;
     state.whave = state.wsize;
   }
@@ -62147,11 +62460,11 @@ function updatewindow(strm, src, end, copy) {
       dist = copy;
     }
     //zmemcpy(state->window + state->wnext, end - copy, dist);
-    utils.arraySet(state.window,src, end - copy, dist, state.wnext);
+    utils.arraySet(state.window, src, end - copy, dist, state.wnext);
     copy -= dist;
     if (copy) {
       //zmemcpy(state->window, end - copy, copy);
-      utils.arraySet(state.window,src, end - copy, copy, 0);
+      utils.arraySet(state.window, src, end - copy, copy, 0);
       state.wnext = copy;
       state.whave = state.wsize;
     }
@@ -62188,7 +62501,7 @@ function inflate(strm, flush) {
   var n; // temporary var for NEED_BITS
 
   var order = /* permutation of code lengths */
-    [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+    [ 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 ];
 
 
   if (!strm || !strm.state || !strm.output ||
@@ -62515,7 +62828,7 @@ function inflate(strm, flush) {
         state.head.hcrc = ((state.flags >> 9) & 1);
         state.head.done = true;
       }
-      strm.adler = state.check = 0 /*crc32(0L, Z_NULL, 0)*/;
+      strm.adler = state.check = 0;
       state.mode = TYPE;
       break;
     case DICTID:
@@ -62527,7 +62840,7 @@ function inflate(strm, flush) {
         bits += 8;
       }
       //===//
-      strm.adler = state.check = ZSWAP32(hold);
+      strm.adler = state.check = zswap32(hold);
       //=== INITBITS();
       hold = 0;
       bits = 0;
@@ -62719,7 +63032,7 @@ function inflate(strm, flush) {
       state.lencode = state.lendyn;
       state.lenbits = 7;
 
-      opts = {bits: state.lenbits};
+      opts = { bits: state.lenbits };
       ret = inflate_table(CODES, state.lens, 0, 19, state.lencode, 0, state.work, opts);
       state.lenbits = opts.bits;
 
@@ -62850,7 +63163,7 @@ function inflate(strm, flush) {
          concerning the ENOUGH constants, which depend on those values */
       state.lenbits = 9;
 
-      opts = {bits: state.lenbits};
+      opts = { bits: state.lenbits };
       ret = inflate_table(LENS, state.lens, 0, state.nlen, state.lencode, 0, state.work, opts);
       // We have separate tables & no pointers. 2 commented lines below not needed.
       // state.next_index = opts.table_index;
@@ -62867,7 +63180,7 @@ function inflate(strm, flush) {
       //state.distcode.copy(state.codes);
       // Switch to use dynamic table
       state.distcode = state.distdyn;
-      opts = {bits: state.distbits};
+      opts = { bits: state.distbits };
       ret = inflate_table(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
       // We have separate tables & no pointers. 2 commented lines below not needed.
       // state.next_index = opts.table_index;
@@ -62915,7 +63228,7 @@ function inflate(strm, flush) {
       }
       state.back = 0;
       for (;;) {
-        here = state.lencode[hold & ((1 << state.lenbits) -1)];  /*BITS(state.lenbits)*/
+        here = state.lencode[hold & ((1 << state.lenbits) - 1)];  /*BITS(state.lenbits)*/
         here_bits = here >>> 24;
         here_op = (here >>> 16) & 0xff;
         here_val = here & 0xffff;
@@ -62934,7 +63247,7 @@ function inflate(strm, flush) {
         last_val = here_val;
         for (;;) {
           here = state.lencode[last_val +
-                  ((hold & ((1 << (last_bits + last_op)) -1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+                  ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
           here_bits = here >>> 24;
           here_op = (here >>> 16) & 0xff;
           here_val = here & 0xffff;
@@ -62991,7 +63304,7 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        state.length += hold & ((1 << state.extra) -1)/*BITS(state.extra)*/;
+        state.length += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
         //--- DROPBITS(state.extra) ---//
         hold >>>= state.extra;
         bits -= state.extra;
@@ -63004,7 +63317,7 @@ function inflate(strm, flush) {
       /* falls through */
     case DIST:
       for (;;) {
-        here = state.distcode[hold & ((1 << state.distbits) -1)];/*BITS(state.distbits)*/
+        here = state.distcode[hold & ((1 << state.distbits) - 1)];/*BITS(state.distbits)*/
         here_bits = here >>> 24;
         here_op = (here >>> 16) & 0xff;
         here_val = here & 0xffff;
@@ -63023,7 +63336,7 @@ function inflate(strm, flush) {
         last_val = here_val;
         for (;;) {
           here = state.distcode[last_val +
-                  ((hold & ((1 << (last_bits + last_op)) -1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+                  ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
           here_bits = here >>> 24;
           here_op = (here >>> 16) & 0xff;
           here_val = here & 0xffff;
@@ -63067,7 +63380,7 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        state.offset += hold & ((1 << state.extra) -1)/*BITS(state.extra)*/;
+        state.offset += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
         //--- DROPBITS(state.extra) ---//
         hold >>>= state.extra;
         bits -= state.extra;
@@ -63161,8 +63474,8 @@ function inflate(strm, flush) {
 
         }
         _out = left;
-        // NB: crc32 stored as signed 32-bit int, ZSWAP32 returns signed too
-        if ((state.flags ? hold : ZSWAP32(hold)) !== state.check) {
+        // NB: crc32 stored as signed 32-bit int, zswap32 returns signed too
+        if ((state.flags ? hold : zswap32(hold)) !== state.check) {
           strm.msg = 'incorrect data check';
           state.mode = BAD;
           break;
@@ -63284,6 +63597,41 @@ function inflateGetHeader(strm, head) {
   return Z_OK;
 }
 
+function inflateSetDictionary(strm, dictionary) {
+  var dictLength = dictionary.length;
+
+  var state;
+  var dictid;
+  var ret;
+
+  /* check state */
+  if (!strm /* == Z_NULL */ || !strm.state /* == Z_NULL */) { return Z_STREAM_ERROR; }
+  state = strm.state;
+
+  if (state.wrap !== 0 && state.mode !== DICT) {
+    return Z_STREAM_ERROR;
+  }
+
+  /* check for correct dictionary identifier */
+  if (state.mode === DICT) {
+    dictid = 1; /* adler32(0, null, 0)*/
+    /* dictid = adler32(dictid, dictionary, dictLength); */
+    dictid = adler32(dictid, dictionary, dictLength, 0);
+    if (dictid !== state.check) {
+      return Z_DATA_ERROR;
+    }
+  }
+  /* copy dictionary to window using updatewindow(), which will amend the
+   existing dictionary if appropriate */
+  ret = updatewindow(strm, dictionary, dictLength, dictLength);
+  if (ret) {
+    state.mode = MEM;
+    return Z_MEM_ERROR;
+  }
+  state.havedict = 1;
+  // Tracev((stderr, "inflate:   dictionary set\n"));
+  return Z_OK;
+}
 
 exports.inflateReset = inflateReset;
 exports.inflateReset2 = inflateReset2;
@@ -63293,6 +63641,7 @@ exports.inflateInit2 = inflateInit2;
 exports.inflate = inflate;
 exports.inflateEnd = inflateEnd;
 exports.inflateGetHeader = inflateGetHeader;
+exports.inflateSetDictionary = inflateSetDictionary;
 exports.inflateInfo = 'pako inflate (from Nodeca project)';
 
 /* Not implemented
@@ -63300,7 +63649,6 @@ exports.inflateCopy = inflateCopy;
 exports.inflateGetDictionary = inflateGetDictionary;
 exports.inflateMark = inflateMark;
 exports.inflatePrime = inflatePrime;
-exports.inflateSetDictionary = inflateSetDictionary;
 exports.inflateSync = inflateSync;
 exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
@@ -63366,8 +63714,8 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   var base_index = 0;
 //  var shoextra;    /* extra bits table to use */
   var end;                    /* use base and extra for symbol > end */
-  var count = new utils.Buf16(MAXBITS+1); //[MAXBITS+1];    /* number of codes of each length */
-  var offs = new utils.Buf16(MAXBITS+1); //[MAXBITS+1];     /* offsets in table for each length */
+  var count = new utils.Buf16(MAXBITS + 1); //[MAXBITS+1];    /* number of codes of each length */
+  var offs = new utils.Buf16(MAXBITS + 1); //[MAXBITS+1];     /* offsets in table for each length */
   var extra = null;
   var extra_index = 0;
 
@@ -63536,7 +63884,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
     return 1;
   }
 
-  var i=0;
+  var i = 0;
   /* process all codes and make table entries */
   for (;;) {
     i++;
@@ -63639,9 +63987,9 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
 'use strict';
 
 module.exports = {
-  '2':    'need dictionary',     /* Z_NEED_DICT       2  */
-  '1':    'stream end',          /* Z_STREAM_END      1  */
-  '0':    '',                    /* Z_OK              0  */
+  2:      'need dictionary',     /* Z_NEED_DICT       2  */
+  1:      'stream end',          /* Z_STREAM_END      1  */
+  0:      '',                    /* Z_OK              0  */
   '-1':   'file error',          /* Z_ERRNO         (-1) */
   '-2':   'stream error',        /* Z_STREAM_ERROR  (-2) */
   '-3':   'data error',          /* Z_DATA_ERROR    (-3) */
@@ -63708,7 +64056,7 @@ var D_CODES       = 30;
 var BL_CODES      = 19;
 /* number of codes used to transfer the bit lengths */
 
-var HEAP_SIZE     = 2*L_CODES + 1;
+var HEAP_SIZE     = 2 * L_CODES + 1;
 /* maximum heap size */
 
 var MAX_BITS      = 15;
@@ -63737,6 +64085,7 @@ var REPZ_3_10   = 17;
 var REPZ_11_138 = 18;
 /* repeat a zero length 11-138 times  (7 bits of repeat count) */
 
+/* eslint-disable comma-spacing,array-bracket-spacing */
 var extra_lbits =   /* extra bits for each length code */
   [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
 
@@ -63748,6 +64097,8 @@ var extra_blbits =  /* extra bits for each bit length code */
 
 var bl_order =
   [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+/* eslint-enable comma-spacing,array-bracket-spacing */
+
 /* The lengths of the bit length codes are sent in order of decreasing
  * probability, to avoid transmitting the lengths for unused bit length codes.
  */
@@ -63761,7 +64112,7 @@ var bl_order =
 var DIST_CODE_LEN = 512; /* see definition of array dist_code below */
 
 // !!!! Use flat array insdead of structure, Freq = i*2, Len = i*2+1
-var static_ltree  = new Array((L_CODES+2) * 2);
+var static_ltree  = new Array((L_CODES + 2) * 2);
 zero(static_ltree);
 /* The static literal tree. Since the bit lengths are imposed, there is no
  * need for the L_CODES extra codes used during heap construction. However
@@ -63782,7 +64133,7 @@ zero(_dist_code);
  * the 15 bit distances.
  */
 
-var _length_code  = new Array(MAX_MATCH-MIN_MATCH+1);
+var _length_code  = new Array(MAX_MATCH - MIN_MATCH + 1);
 zero(_length_code);
 /* length code for each normalized match length (0 == MIN_MATCH) */
 
@@ -63795,7 +64146,7 @@ zero(base_dist);
 /* First normalized distance for each code (0 = distance of 1) */
 
 
-var StaticTreeDesc = function (static_tree, extra_bits, extra_base, elems, max_length) {
+function StaticTreeDesc(static_tree, extra_bits, extra_base, elems, max_length) {
 
   this.static_tree  = static_tree;  /* static tree or NULL */
   this.extra_bits   = extra_bits;   /* extra bits for each code or NULL */
@@ -63805,7 +64156,7 @@ var StaticTreeDesc = function (static_tree, extra_bits, extra_base, elems, max_l
 
   // show if `static_tree` has data or dummy - needed for monomorphic objects
   this.has_stree    = static_tree && static_tree.length;
-};
+}
 
 
 var static_l_desc;
@@ -63813,11 +64164,11 @@ var static_d_desc;
 var static_bl_desc;
 
 
-var TreeDesc = function(dyn_tree, stat_desc) {
+function TreeDesc(dyn_tree, stat_desc) {
   this.dyn_tree = dyn_tree;     /* the dynamic tree */
   this.max_code = 0;            /* largest code with non zero frequency */
   this.stat_desc = stat_desc;   /* the corresponding static tree */
-};
+}
 
 
 
@@ -63830,7 +64181,7 @@ function d_code(dist) {
  * Output a short LSB first on the stream.
  * IN assertion: there is enough room in pendingBuf.
  */
-function put_short (s, w) {
+function put_short(s, w) {
 //    put_byte(s, (uch)((w) & 0xff));
 //    put_byte(s, (uch)((ush)(w) >> 8));
   s.pending_buf[s.pending++] = (w) & 0xff;
@@ -63856,7 +64207,7 @@ function send_bits(s, value, length) {
 
 
 function send_code(s, c, tree) {
-  send_bits(s, tree[c*2]/*.Code*/, tree[c*2 + 1]/*.Len*/);
+  send_bits(s, tree[c * 2]/*.Code*/, tree[c * 2 + 1]/*.Len*/);
 }
 
 
@@ -63928,16 +64279,16 @@ function gen_bitlen(s, desc)
   /* In a first pass, compute the optimal bit lengths (which may
    * overflow in the case of the bit length tree).
    */
-  tree[s.heap[s.heap_max]*2 + 1]/*.Len*/ = 0; /* root of the heap */
+  tree[s.heap[s.heap_max] * 2 + 1]/*.Len*/ = 0; /* root of the heap */
 
-  for (h = s.heap_max+1; h < HEAP_SIZE; h++) {
+  for (h = s.heap_max + 1; h < HEAP_SIZE; h++) {
     n = s.heap[h];
-    bits = tree[tree[n*2 +1]/*.Dad*/ * 2 + 1]/*.Len*/ + 1;
+    bits = tree[tree[n * 2 + 1]/*.Dad*/ * 2 + 1]/*.Len*/ + 1;
     if (bits > max_length) {
       bits = max_length;
       overflow++;
     }
-    tree[n*2 + 1]/*.Len*/ = bits;
+    tree[n * 2 + 1]/*.Len*/ = bits;
     /* We overwrite tree[n].Dad which is no longer needed */
 
     if (n > max_code) { continue; } /* not a leaf node */
@@ -63945,12 +64296,12 @@ function gen_bitlen(s, desc)
     s.bl_count[bits]++;
     xbits = 0;
     if (n >= base) {
-      xbits = extra[n-base];
+      xbits = extra[n - base];
     }
     f = tree[n * 2]/*.Freq*/;
     s.opt_len += f * (bits + xbits);
     if (has_stree) {
-      s.static_len += f * (stree[n*2 + 1]/*.Len*/ + xbits);
+      s.static_len += f * (stree[n * 2 + 1]/*.Len*/ + xbits);
     }
   }
   if (overflow === 0) { return; }
@@ -63960,10 +64311,10 @@ function gen_bitlen(s, desc)
 
   /* Find the first bit length which could increase: */
   do {
-    bits = max_length-1;
+    bits = max_length - 1;
     while (s.bl_count[bits] === 0) { bits--; }
     s.bl_count[bits]--;      /* move one leaf down the tree */
-    s.bl_count[bits+1] += 2; /* move one overflow item as its brother */
+    s.bl_count[bits + 1] += 2; /* move one overflow item as its brother */
     s.bl_count[max_length]--;
     /* The brother of the overflow item also moves one step up,
      * but this does not affect bl_count[max_length]
@@ -63981,10 +64332,10 @@ function gen_bitlen(s, desc)
     while (n !== 0) {
       m = s.heap[--h];
       if (m > max_code) { continue; }
-      if (tree[m*2 + 1]/*.Len*/ !== bits) {
+      if (tree[m * 2 + 1]/*.Len*/ !== bits) {
         // Trace((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
-        s.opt_len += (bits - tree[m*2 + 1]/*.Len*/)*tree[m*2]/*.Freq*/;
-        tree[m*2 + 1]/*.Len*/ = bits;
+        s.opt_len += (bits - tree[m * 2 + 1]/*.Len*/) * tree[m * 2]/*.Freq*/;
+        tree[m * 2 + 1]/*.Len*/ = bits;
       }
       n--;
     }
@@ -64005,7 +64356,7 @@ function gen_codes(tree, max_code, bl_count)
 //    int max_code;              /* largest code with non zero frequency */
 //    ushf *bl_count;            /* number of codes at each bit length */
 {
-  var next_code = new Array(MAX_BITS+1); /* next code value for each bit length */
+  var next_code = new Array(MAX_BITS + 1); /* next code value for each bit length */
   var code = 0;              /* running code value */
   var bits;                  /* bit index */
   var n;                     /* code index */
@@ -64014,7 +64365,7 @@ function gen_codes(tree, max_code, bl_count)
    * without bit reversal.
    */
   for (bits = 1; bits <= MAX_BITS; bits++) {
-    next_code[bits] = code = (code + bl_count[bits-1]) << 1;
+    next_code[bits] = code = (code + bl_count[bits - 1]) << 1;
   }
   /* Check that the bit counts in bl_count are consistent. The last code
    * must be all ones.
@@ -64024,10 +64375,10 @@ function gen_codes(tree, max_code, bl_count)
   //Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
 
   for (n = 0;  n <= max_code; n++) {
-    var len = tree[n*2 + 1]/*.Len*/;
+    var len = tree[n * 2 + 1]/*.Len*/;
     if (len === 0) { continue; }
     /* Now reverse the bits */
-    tree[n*2]/*.Code*/ = bi_reverse(next_code[len]++, len);
+    tree[n * 2]/*.Code*/ = bi_reverse(next_code[len]++, len);
 
     //Tracecv(tree != static_ltree, (stderr,"\nn %3d %c l %2d c %4x (%x) ",
     //     n, (isgraph(n) ? n : ' '), len, tree[n].Code, next_code[len]-1));
@@ -64044,7 +64395,7 @@ function tr_static_init() {
   var length;   /* length value */
   var code;     /* code value */
   var dist;     /* distance index */
-  var bl_count = new Array(MAX_BITS+1);
+  var bl_count = new Array(MAX_BITS + 1);
   /* number of codes at each bit length for an optimal tree */
 
   // do check in _tr_init()
@@ -64061,9 +64412,9 @@ function tr_static_init() {
 
   /* Initialize the mapping length (0..255) -> length code (0..28) */
   length = 0;
-  for (code = 0; code < LENGTH_CODES-1; code++) {
+  for (code = 0; code < LENGTH_CODES - 1; code++) {
     base_length[code] = length;
-    for (n = 0; n < (1<<extra_lbits[code]); n++) {
+    for (n = 0; n < (1 << extra_lbits[code]); n++) {
       _length_code[length++] = code;
     }
   }
@@ -64072,13 +64423,13 @@ function tr_static_init() {
    * in two different ways: code 284 + 5 bits or code 285, so we
    * overwrite length_code[255] to use the best encoding:
    */
-  _length_code[length-1] = code;
+  _length_code[length - 1] = code;
 
   /* Initialize the mapping dist (0..32K) -> dist code (0..29) */
   dist = 0;
-  for (code = 0 ; code < 16; code++) {
+  for (code = 0; code < 16; code++) {
     base_dist[code] = dist;
-    for (n = 0; n < (1<<extra_dbits[code]); n++) {
+    for (n = 0; n < (1 << extra_dbits[code]); n++) {
       _dist_code[dist++] = code;
     }
   }
@@ -64086,7 +64437,7 @@ function tr_static_init() {
   dist >>= 7; /* from now on, all distances are divided by 128 */
   for (; code < D_CODES; code++) {
     base_dist[code] = dist << 7;
-    for (n = 0; n < (1<<(extra_dbits[code]-7)); n++) {
+    for (n = 0; n < (1 << (extra_dbits[code] - 7)); n++) {
       _dist_code[256 + dist++] = code;
     }
   }
@@ -64099,22 +64450,22 @@ function tr_static_init() {
 
   n = 0;
   while (n <= 143) {
-    static_ltree[n*2 + 1]/*.Len*/ = 8;
+    static_ltree[n * 2 + 1]/*.Len*/ = 8;
     n++;
     bl_count[8]++;
   }
   while (n <= 255) {
-    static_ltree[n*2 + 1]/*.Len*/ = 9;
+    static_ltree[n * 2 + 1]/*.Len*/ = 9;
     n++;
     bl_count[9]++;
   }
   while (n <= 279) {
-    static_ltree[n*2 + 1]/*.Len*/ = 7;
+    static_ltree[n * 2 + 1]/*.Len*/ = 7;
     n++;
     bl_count[7]++;
   }
   while (n <= 287) {
-    static_ltree[n*2 + 1]/*.Len*/ = 8;
+    static_ltree[n * 2 + 1]/*.Len*/ = 8;
     n++;
     bl_count[8]++;
   }
@@ -64122,18 +64473,18 @@ function tr_static_init() {
    * tree construction to get a canonical Huffman tree (longest code
    * all ones)
    */
-  gen_codes(static_ltree, L_CODES+1, bl_count);
+  gen_codes(static_ltree, L_CODES + 1, bl_count);
 
   /* The static distance tree is trivial: */
   for (n = 0; n < D_CODES; n++) {
-    static_dtree[n*2 + 1]/*.Len*/ = 5;
-    static_dtree[n*2]/*.Code*/ = bi_reverse(n, 5);
+    static_dtree[n * 2 + 1]/*.Len*/ = 5;
+    static_dtree[n * 2]/*.Code*/ = bi_reverse(n, 5);
   }
 
   // Now data ready and we can init static trees
-  static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS);
+  static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS + 1, L_CODES, MAX_BITS);
   static_d_desc = new StaticTreeDesc(static_dtree, extra_dbits, 0,          D_CODES, MAX_BITS);
-  static_bl_desc =new StaticTreeDesc(new Array(0), extra_blbits, 0,         BL_CODES, MAX_BL_BITS);
+  static_bl_desc = new StaticTreeDesc(new Array(0), extra_blbits, 0,         BL_CODES, MAX_BL_BITS);
 
   //static_init_done = true;
 }
@@ -64146,11 +64497,11 @@ function init_block(s) {
   var n; /* iterates over tree elements */
 
   /* Initialize the trees. */
-  for (n = 0; n < L_CODES;  n++) { s.dyn_ltree[n*2]/*.Freq*/ = 0; }
-  for (n = 0; n < D_CODES;  n++) { s.dyn_dtree[n*2]/*.Freq*/ = 0; }
-  for (n = 0; n < BL_CODES; n++) { s.bl_tree[n*2]/*.Freq*/ = 0; }
+  for (n = 0; n < L_CODES;  n++) { s.dyn_ltree[n * 2]/*.Freq*/ = 0; }
+  for (n = 0; n < D_CODES;  n++) { s.dyn_dtree[n * 2]/*.Freq*/ = 0; }
+  for (n = 0; n < BL_CODES; n++) { s.bl_tree[n * 2]/*.Freq*/ = 0; }
 
-  s.dyn_ltree[END_BLOCK*2]/*.Freq*/ = 1;
+  s.dyn_ltree[END_BLOCK * 2]/*.Freq*/ = 1;
   s.opt_len = s.static_len = 0;
   s.last_lit = s.matches = 0;
 }
@@ -64199,8 +64550,8 @@ function copy_block(s, buf, len, header)
  * the subtrees have equal frequency. This minimizes the worst case length.
  */
 function smaller(tree, n, m, depth) {
-  var _n2 = n*2;
-  var _m2 = m*2;
+  var _n2 = n * 2;
+  var _m2 = m * 2;
   return (tree[_n2]/*.Freq*/ < tree[_m2]/*.Freq*/ ||
          (tree[_n2]/*.Freq*/ === tree[_m2]/*.Freq*/ && depth[n] <= depth[m]));
 }
@@ -64221,7 +64572,7 @@ function pqdownheap(s, tree, k)
   while (j <= s.heap_len) {
     /* Set j to the smallest of the two sons: */
     if (j < s.heap_len &&
-      smaller(tree, s.heap[j+1], s.heap[j], s.depth)) {
+      smaller(tree, s.heap[j + 1], s.heap[j], s.depth)) {
       j++;
     }
     /* Exit if v is smaller than both sons */
@@ -64257,7 +64608,7 @@ function compress_block(s, ltree, dtree)
 
   if (s.last_lit !== 0) {
     do {
-      dist = (s.pending_buf[s.d_buf + lx*2] << 8) | (s.pending_buf[s.d_buf + lx*2 + 1]);
+      dist = (s.pending_buf[s.d_buf + lx * 2] << 8) | (s.pending_buf[s.d_buf + lx * 2 + 1]);
       lc = s.pending_buf[s.l_buf + lx];
       lx++;
 
@@ -64267,7 +64618,7 @@ function compress_block(s, ltree, dtree)
       } else {
         /* Here, lc is the match length - MIN_MATCH */
         code = _length_code[lc];
-        send_code(s, code+LITERALS+1, ltree); /* send the length code */
+        send_code(s, code + LITERALS + 1, ltree); /* send the length code */
         extra = extra_lbits[code];
         if (extra !== 0) {
           lc -= base_length[code];
@@ -64329,7 +64680,7 @@ function build_tree(s, desc)
       s.depth[n] = 0;
 
     } else {
-      tree[n*2 + 1]/*.Len*/ = 0;
+      tree[n * 2 + 1]/*.Len*/ = 0;
     }
   }
 
@@ -64345,7 +64696,7 @@ function build_tree(s, desc)
     s.opt_len--;
 
     if (has_stree) {
-      s.static_len -= stree[node*2 + 1]/*.Len*/;
+      s.static_len -= stree[node * 2 + 1]/*.Len*/;
     }
     /* node is 0 or 1 so it does not have extra bits */
   }
@@ -64376,7 +64727,7 @@ function build_tree(s, desc)
     /* Create a new node father of n and m */
     tree[node * 2]/*.Freq*/ = tree[n * 2]/*.Freq*/ + tree[m * 2]/*.Freq*/;
     s.depth[node] = (s.depth[n] >= s.depth[m] ? s.depth[n] : s.depth[m]) + 1;
-    tree[n*2 + 1]/*.Dad*/ = tree[m*2 + 1]/*.Dad*/ = node;
+    tree[n * 2 + 1]/*.Dad*/ = tree[m * 2 + 1]/*.Dad*/ = node;
 
     /* and insert the new node in the heap */
     s.heap[1/*SMALLEST*/] = node++;
@@ -64409,7 +64760,7 @@ function scan_tree(s, tree, max_code)
   var prevlen = -1;          /* last emitted length */
   var curlen;                /* length of current code */
 
-  var nextlen = tree[0*2 + 1]/*.Len*/; /* length of next code */
+  var nextlen = tree[0 * 2 + 1]/*.Len*/; /* length of next code */
 
   var count = 0;             /* repeat count of the current code */
   var max_count = 7;         /* max repeat count */
@@ -64419,11 +64770,11 @@ function scan_tree(s, tree, max_code)
     max_count = 138;
     min_count = 3;
   }
-  tree[(max_code+1)*2 + 1]/*.Len*/ = 0xffff; /* guard */
+  tree[(max_code + 1) * 2 + 1]/*.Len*/ = 0xffff; /* guard */
 
   for (n = 0; n <= max_code; n++) {
     curlen = nextlen;
-    nextlen = tree[(n+1)*2 + 1]/*.Len*/;
+    nextlen = tree[(n + 1) * 2 + 1]/*.Len*/;
 
     if (++count < max_count && curlen === nextlen) {
       continue;
@@ -64434,13 +64785,13 @@ function scan_tree(s, tree, max_code)
     } else if (curlen !== 0) {
 
       if (curlen !== prevlen) { s.bl_tree[curlen * 2]/*.Freq*/++; }
-      s.bl_tree[REP_3_6*2]/*.Freq*/++;
+      s.bl_tree[REP_3_6 * 2]/*.Freq*/++;
 
     } else if (count <= 10) {
-      s.bl_tree[REPZ_3_10*2]/*.Freq*/++;
+      s.bl_tree[REPZ_3_10 * 2]/*.Freq*/++;
 
     } else {
-      s.bl_tree[REPZ_11_138*2]/*.Freq*/++;
+      s.bl_tree[REPZ_11_138 * 2]/*.Freq*/++;
     }
 
     count = 0;
@@ -64475,7 +64826,7 @@ function send_tree(s, tree, max_code)
   var prevlen = -1;          /* last emitted length */
   var curlen;                /* length of current code */
 
-  var nextlen = tree[0*2 + 1]/*.Len*/; /* length of next code */
+  var nextlen = tree[0 * 2 + 1]/*.Len*/; /* length of next code */
 
   var count = 0;             /* repeat count of the current code */
   var max_count = 7;         /* max repeat count */
@@ -64489,7 +64840,7 @@ function send_tree(s, tree, max_code)
 
   for (n = 0; n <= max_code; n++) {
     curlen = nextlen;
-    nextlen = tree[(n+1)*2 + 1]/*.Len*/;
+    nextlen = tree[(n + 1) * 2 + 1]/*.Len*/;
 
     if (++count < max_count && curlen === nextlen) {
       continue;
@@ -64504,15 +64855,15 @@ function send_tree(s, tree, max_code)
       }
       //Assert(count >= 3 && count <= 6, " 3_6?");
       send_code(s, REP_3_6, s.bl_tree);
-      send_bits(s, count-3, 2);
+      send_bits(s, count - 3, 2);
 
     } else if (count <= 10) {
       send_code(s, REPZ_3_10, s.bl_tree);
-      send_bits(s, count-3, 3);
+      send_bits(s, count - 3, 3);
 
     } else {
       send_code(s, REPZ_11_138, s.bl_tree);
-      send_bits(s, count-11, 7);
+      send_bits(s, count - 11, 7);
     }
 
     count = 0;
@@ -64554,13 +64905,13 @@ function build_bl_tree(s) {
    * requires that at least 4 bit length codes be sent. (appnote.txt says
    * 3 but the actual value used is 4.)
    */
-  for (max_blindex = BL_CODES-1; max_blindex >= 3; max_blindex--) {
-    if (s.bl_tree[bl_order[max_blindex]*2 + 1]/*.Len*/ !== 0) {
+  for (max_blindex = BL_CODES - 1; max_blindex >= 3; max_blindex--) {
+    if (s.bl_tree[bl_order[max_blindex] * 2 + 1]/*.Len*/ !== 0) {
       break;
     }
   }
   /* Update opt_len to include the bit length tree and counts */
-  s.opt_len += 3*(max_blindex+1) + 5+5+4;
+  s.opt_len += 3 * (max_blindex + 1) + 5 + 5 + 4;
   //Tracev((stderr, "\ndyn trees: dyn %ld, stat %ld",
   //        s->opt_len, s->static_len));
 
@@ -64583,19 +64934,19 @@ function send_all_trees(s, lcodes, dcodes, blcodes)
   //Assert (lcodes <= L_CODES && dcodes <= D_CODES && blcodes <= BL_CODES,
   //        "too many codes");
   //Tracev((stderr, "\nbl counts: "));
-  send_bits(s, lcodes-257, 5); /* not +255 as stated in appnote.txt */
-  send_bits(s, dcodes-1,   5);
-  send_bits(s, blcodes-4,  4); /* not -3 as stated in appnote.txt */
+  send_bits(s, lcodes - 257, 5); /* not +255 as stated in appnote.txt */
+  send_bits(s, dcodes - 1,   5);
+  send_bits(s, blcodes - 4,  4); /* not -3 as stated in appnote.txt */
   for (rank = 0; rank < blcodes; rank++) {
     //Tracev((stderr, "\nbl code %2d ", bl_order[rank]));
-    send_bits(s, s.bl_tree[bl_order[rank]*2 + 1]/*.Len*/, 3);
+    send_bits(s, s.bl_tree[bl_order[rank] * 2 + 1]/*.Len*/, 3);
   }
   //Tracev((stderr, "\nbl tree: sent %ld", s->bits_sent));
 
-  send_tree(s, s.dyn_ltree, lcodes-1); /* literal tree */
+  send_tree(s, s.dyn_ltree, lcodes - 1); /* literal tree */
   //Tracev((stderr, "\nlit tree: sent %ld", s->bits_sent));
 
-  send_tree(s, s.dyn_dtree, dcodes-1); /* distance tree */
+  send_tree(s, s.dyn_dtree, dcodes - 1); /* distance tree */
   //Tracev((stderr, "\ndist tree: sent %ld", s->bits_sent));
 }
 
@@ -64623,7 +64974,7 @@ function detect_data_type(s) {
 
   /* Check for non-textual ("black-listed") bytes. */
   for (n = 0; n <= 31; n++, black_mask >>>= 1) {
-    if ((black_mask & 1) && (s.dyn_ltree[n*2]/*.Freq*/ !== 0)) {
+    if ((black_mask & 1) && (s.dyn_ltree[n * 2]/*.Freq*/ !== 0)) {
       return Z_BINARY;
     }
   }
@@ -64680,7 +65031,7 @@ function _tr_stored_block(s, buf, stored_len, last)
 //ulg stored_len;   /* length of input block */
 //int last;         /* one if this is the last block for a file */
 {
-  send_bits(s, (STORED_BLOCK<<1)+(last ? 1 : 0), 3);    /* send block type */
+  send_bits(s, (STORED_BLOCK << 1) + (last ? 1 : 0), 3);    /* send block type */
   copy_block(s, buf, stored_len, true); /* with header */
 }
 
@@ -64690,7 +65041,7 @@ function _tr_stored_block(s, buf, stored_len, last)
  * This takes 10 bits, of which 7 may remain in the bit buffer.
  */
 function _tr_align(s) {
-  send_bits(s, STATIC_TREES<<1, 3);
+  send_bits(s, STATIC_TREES << 1, 3);
   send_code(s, END_BLOCK, static_ltree);
   bi_flush(s);
 }
@@ -64735,8 +65086,8 @@ function _tr_flush_block(s, buf, stored_len, last)
     max_blindex = build_bl_tree(s);
 
     /* Determine the best encoding. Compute the block lengths in bytes. */
-    opt_lenb = (s.opt_len+3+7) >>> 3;
-    static_lenb = (s.static_len+3+7) >>> 3;
+    opt_lenb = (s.opt_len + 3 + 7) >>> 3;
+    static_lenb = (s.static_len + 3 + 7) >>> 3;
 
     // Tracev((stderr, "\nopt %lu(%lu) stat %lu(%lu) stored %lu lit %u ",
     //        opt_lenb, s->opt_len, static_lenb, s->static_len, stored_len,
@@ -64749,7 +65100,7 @@ function _tr_flush_block(s, buf, stored_len, last)
     opt_lenb = static_lenb = stored_len + 5; /* force a stored block */
   }
 
-  if ((stored_len+4 <= opt_lenb) && (buf !== -1)) {
+  if ((stored_len + 4 <= opt_lenb) && (buf !== -1)) {
     /* 4: two words for the lengths */
 
     /* The test buf != NULL is only necessary if LIT_BUFSIZE > WSIZE.
@@ -64762,12 +65113,12 @@ function _tr_flush_block(s, buf, stored_len, last)
 
   } else if (s.strategy === Z_FIXED || static_lenb === opt_lenb) {
 
-    send_bits(s, (STATIC_TREES<<1) + (last ? 1 : 0), 3);
+    send_bits(s, (STATIC_TREES << 1) + (last ? 1 : 0), 3);
     compress_block(s, static_ltree, static_dtree);
 
   } else {
-    send_bits(s, (DYN_TREES<<1) + (last ? 1 : 0), 3);
-    send_all_trees(s, s.l_desc.max_code+1, s.d_desc.max_code+1, max_blindex+1);
+    send_bits(s, (DYN_TREES << 1) + (last ? 1 : 0), 3);
+    send_all_trees(s, s.l_desc.max_code + 1, s.d_desc.max_code + 1, max_blindex + 1);
     compress_block(s, s.dyn_ltree, s.dyn_dtree);
   }
   // Assert (s->compressed_len == s->bits_sent, "bad compressed size");
@@ -64802,7 +65153,7 @@ function _tr_tally(s, dist, lc)
 
   if (dist === 0) {
     /* lc is the unmatched char */
-    s.dyn_ltree[lc*2]/*.Freq*/++;
+    s.dyn_ltree[lc * 2]/*.Freq*/++;
   } else {
     s.matches++;
     /* Here, lc is the match length - MIN_MATCH */
@@ -64811,7 +65162,7 @@ function _tr_tally(s, dist, lc)
     //       (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
     //       (ush)d_code(dist) < (ush)D_CODES,  "_tr_tally: bad match");
 
-    s.dyn_ltree[(_length_code[lc]+LITERALS+1) * 2]/*.Freq*/++;
+    s.dyn_ltree[(_length_code[lc] + LITERALS + 1) * 2]/*.Freq*/++;
     s.dyn_dtree[d_code(dist) * 2]/*.Freq*/++;
   }
 
@@ -64838,7 +65189,7 @@ function _tr_tally(s, dist, lc)
 //  }
 //#endif
 
-  return (s.last_lit === s.lit_bufsize-1);
+  return (s.last_lit === s.lit_bufsize - 1);
   /* We avoid equality with lit_bufsize because of wraparound at 64K
    * on 16 bit machines and because stored blocks are restricted to
    * 64K-1 bytes.
@@ -65867,7 +66218,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = cachedSetTimeout(cleanUpNextTick);
+    var timeout = cachedSetTimeout.call(null, cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -65884,7 +66235,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    cachedClearTimeout(timeout);
+    cachedClearTimeout.call(null, timeout);
 }
 
 process.nextTick = function (fun) {
@@ -65896,7 +66247,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        cachedSetTimeout(drainQueue, 0);
+        cachedSetTimeout.call(null, drainQueue, 0);
     }
 };
 
@@ -68801,7 +69152,9 @@ module.exports = {
 
 var Utils = require('./utils');
 
-var internals = {
+var has = Object.prototype.hasOwnProperty;
+
+var defaults = {
     delimiter: '&',
     depth: 5,
     arrayLimit: 20,
@@ -68809,10 +69162,11 @@ var internals = {
     strictNullHandling: false,
     plainObjects: false,
     allowPrototypes: false,
-    allowDots: false
+    allowDots: false,
+    decoder: Utils.decode
 };
 
-internals.parseValues = function (str, options) {
+var parseValues = function parseValues(str, options) {
     var obj = {};
     var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
 
@@ -68820,28 +69174,25 @@ internals.parseValues = function (str, options) {
         var part = parts[i];
         var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
 
+        var key, val;
         if (pos === -1) {
-            obj[Utils.decode(part)] = '';
-
-            if (options.strictNullHandling) {
-                obj[Utils.decode(part)] = null;
-            }
+            key = options.decoder(part);
+            val = options.strictNullHandling ? null : '';
         } else {
-            var key = Utils.decode(part.slice(0, pos));
-            var val = Utils.decode(part.slice(pos + 1));
-
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                obj[key] = [].concat(obj[key]).concat(val);
-            } else {
-                obj[key] = val;
-            }
+            key = options.decoder(part.slice(0, pos));
+            val = options.decoder(part.slice(pos + 1));
+        }
+        if (has.call(obj, key)) {
+            obj[key] = [].concat(obj[key]).concat(val);
+        } else {
+            obj[key] = val;
         }
     }
 
     return obj;
 };
 
-internals.parseObject = function (chain, val, options) {
+var parseObject = function parseObject(chain, val, options) {
     if (!chain.length) {
         return val;
     }
@@ -68851,7 +69202,7 @@ internals.parseObject = function (chain, val, options) {
     var obj;
     if (root === '[]') {
         obj = [];
-        obj = obj.concat(internals.parseObject(chain, val, options));
+        obj = obj.concat(parseObject(chain, val, options));
     } else {
         obj = options.plainObjects ? Object.create(null) : {};
         var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
@@ -68864,16 +69215,16 @@ internals.parseObject = function (chain, val, options) {
             (options.parseArrays && index <= options.arrayLimit)
         ) {
             obj = [];
-            obj[index] = internals.parseObject(chain, val, options);
+            obj[index] = parseObject(chain, val, options);
         } else {
-            obj[cleanRoot] = internals.parseObject(chain, val, options);
+            obj[cleanRoot] = parseObject(chain, val, options);
         }
     }
 
     return obj;
 };
 
-internals.parseKeys = function (givenKey, val, options) {
+var parseKeys = function parseKeys(givenKey, val, options) {
     if (!givenKey) {
         return;
     }
@@ -68896,7 +69247,7 @@ internals.parseKeys = function (givenKey, val, options) {
     if (segment[1]) {
         // If we aren't using plain objects, optionally prefix keys
         // that would overwrite object prototype properties
-        if (!options.plainObjects && Object.prototype.hasOwnProperty(segment[1])) {
+        if (!options.plainObjects && has.call(Object.prototype, segment[1])) {
             if (!options.allowPrototypes) {
                 return;
             }
@@ -68910,7 +69261,7 @@ internals.parseKeys = function (givenKey, val, options) {
     var i = 0;
     while ((segment = child.exec(key)) !== null && i < options.depth) {
         i += 1;
-        if (!options.plainObjects && Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
+        if (!options.plainObjects && has.call(Object.prototype, segment[1].replace(/\[|\]/g, ''))) {
             if (!options.allowPrototypes) {
                 continue;
             }
@@ -68924,30 +69275,32 @@ internals.parseKeys = function (givenKey, val, options) {
         keys.push('[' + key.slice(segment.index) + ']');
     }
 
-    return internals.parseObject(keys, val, options);
+    return parseObject(keys, val, options);
 };
 
 module.exports = function (str, opts) {
     var options = opts || {};
-    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
-    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
-    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
-    options.parseArrays = options.parseArrays !== false;
-    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : internals.allowDots;
-    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : internals.plainObjects;
-    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : internals.allowPrototypes;
-    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
-    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
 
-    if (
-        str === '' ||
-        str === null ||
-        typeof str === 'undefined'
-    ) {
+    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {
+        throw new TypeError('Decoder has to be a function.');
+    }
+
+    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;
+    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;
+    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;
+    options.parseArrays = options.parseArrays !== false;
+    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;
+    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : defaults.allowDots;
+    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;
+    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;
+    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;
+    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+
+    if (str === '' || str === null || typeof str === 'undefined') {
         return options.plainObjects ? Object.create(null) : {};
     }
 
-    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
+    var tempObj = typeof str === 'string' ? parseValues(str, options) : str;
     var obj = options.plainObjects ? Object.create(null) : {};
 
     // Iterate over the keys and setup the new object
@@ -68955,7 +69308,7 @@ module.exports = function (str, opts) {
     var keys = Object.keys(tempObj);
     for (var i = 0; i < keys.length; ++i) {
         var key = keys[i];
-        var newObj = internals.parseKeys(key, tempObj[key], options);
+        var newObj = parseKeys(key, tempObj[key], options);
         obj = Utils.merge(obj, newObj, options);
     }
 
@@ -68967,45 +69320,45 @@ module.exports = function (str, opts) {
 
 var Utils = require('./utils');
 
-var internals = {
-    delimiter: '&',
-    arrayPrefixGenerators: {
-        brackets: function (prefix) {
-            return prefix + '[]';
-        },
-        indices: function (prefix, key) {
-            return prefix + '[' + key + ']';
-        },
-        repeat: function (prefix) {
-            return prefix;
-        }
+var arrayPrefixGenerators = {
+    brackets: function brackets(prefix) {
+        return prefix + '[]';
     },
-    strictNullHandling: false,
-    skipNulls: false,
-    encode: true
+    indices: function indices(prefix, key) {
+        return prefix + '[' + key + ']';
+    },
+    repeat: function repeat(prefix) {
+        return prefix;
+    }
 };
 
-internals.stringify = function (object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots) {
+var defaults = {
+    delimiter: '&',
+    strictNullHandling: false,
+    skipNulls: false,
+    encode: true,
+    encoder: Utils.encode
+};
+
+var stringify = function stringify(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots) {
     var obj = object;
     if (typeof filter === 'function') {
         obj = filter(prefix, obj);
-    } else if (Utils.isBuffer(obj)) {
-        obj = String(obj);
     } else if (obj instanceof Date) {
         obj = obj.toISOString();
     } else if (obj === null) {
         if (strictNullHandling) {
-            return encode ? Utils.encode(prefix) : prefix;
+            return encoder ? encoder(prefix) : prefix;
         }
 
         obj = '';
     }
 
-    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
-        if (encode) {
-            return [Utils.encode(prefix) + '=' + Utils.encode(obj)];
+    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean' || Utils.isBuffer(obj)) {
+        if (encoder) {
+            return [encoder(prefix) + '=' + encoder(obj)];
         }
-        return [prefix + '=' + obj];
+        return [prefix + '=' + String(obj)];
     }
 
     var values = [];
@@ -69030,9 +69383,9 @@ internals.stringify = function (object, prefix, generateArrayPrefix, strictNullH
         }
 
         if (Array.isArray(obj)) {
-            values = values.concat(internals.stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
+            values = values.concat(stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
         } else {
-            values = values.concat(internals.stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
+            values = values.concat(stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
         }
     }
 
@@ -69042,14 +69395,20 @@ internals.stringify = function (object, prefix, generateArrayPrefix, strictNullH
 module.exports = function (object, opts) {
     var obj = object;
     var options = opts || {};
-    var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
-    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
-    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : internals.skipNulls;
-    var encode = typeof options.encode === 'boolean' ? options.encode : internals.encode;
+    var delimiter = typeof options.delimiter === 'undefined' ? defaults.delimiter : options.delimiter;
+    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : defaults.skipNulls;
+    var encode = typeof options.encode === 'boolean' ? options.encode : defaults.encode;
+    var encoder = encode ? (typeof options.encoder === 'function' ? options.encoder : defaults.encoder) : null;
     var sort = typeof options.sort === 'function' ? options.sort : null;
     var allowDots = typeof options.allowDots === 'undefined' ? false : options.allowDots;
     var objKeys;
     var filter;
+
+    if (options.encoder !== null && options.encoder !== undefined && typeof options.encoder !== 'function') {
+        throw new TypeError('Encoder has to be a function.');
+    }
+
     if (typeof options.filter === 'function') {
         filter = options.filter;
         obj = filter('', obj);
@@ -69064,7 +69423,7 @@ module.exports = function (object, opts) {
     }
 
     var arrayFormat;
-    if (options.arrayFormat in internals.arrayPrefixGenerators) {
+    if (options.arrayFormat in arrayPrefixGenerators) {
         arrayFormat = options.arrayFormat;
     } else if ('indices' in options) {
         arrayFormat = options.indices ? 'indices' : 'repeat';
@@ -69072,7 +69431,7 @@ module.exports = function (object, opts) {
         arrayFormat = 'indices';
     }
 
-    var generateArrayPrefix = internals.arrayPrefixGenerators[arrayFormat];
+    var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
 
     if (!objKeys) {
         objKeys = Object.keys(obj);
@@ -69089,7 +69448,7 @@ module.exports = function (object, opts) {
             continue;
         }
 
-        keys = keys.concat(internals.stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
+        keys = keys.concat(stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
     }
 
     return keys.join(delimiter);
@@ -69144,7 +69503,7 @@ exports.merge = function (target, source, options) {
         mergeTarget = exports.arrayToObject(target, options);
     }
 
-	return Object.keys(source).reduce(function (acc, key) {
+    return Object.keys(source).reduce(function (acc, key) {
         var value = source[key];
 
         if (Object.prototype.hasOwnProperty.call(acc, key)) {
@@ -69152,7 +69511,7 @@ exports.merge = function (target, source, options) {
         } else {
             acc[key] = value;
         }
-		return acc;
+        return acc;
     }, mergeTarget);
 };
 
@@ -69207,7 +69566,7 @@ exports.encode = function (str) {
 
         i += 1;
         c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
-        out += (hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
+        out += hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)];
     }
 
     return out;
@@ -69230,7 +69589,9 @@ exports.compact = function (obj, references) {
         var compacted = [];
 
         for (var i = 0; i < obj.length; ++i) {
-            if (typeof obj[i] !== 'undefined') {
+            if (obj[i] && typeof obj[i] === 'object') {
+                compacted.push(exports.compact(obj[i], refs));
+            } else if (typeof obj[i] !== 'undefined') {
                 compacted.push(obj[i]);
             }
         }
@@ -72604,6 +72965,7 @@ var http = require('http')
   , bl = require('bl')
   , hawk = require('hawk')
   , aws2 = require('aws-sign2')
+  , aws4 = require('aws4')
   , httpSignature = require('http-signature')
   , mime = require('mime-types')
   , stringstream = require('stringstream')
@@ -72663,20 +73025,6 @@ function filterOutReservedFunctions(reserved, options) {
   }
   return object
 
-}
-
-// Function for properly handling a connection error
-function connectionErrorHandler(error) {
-  var socket = this
-  if (socket.res) {
-    if (socket.res.request) {
-      socket.res.request.emit('error', error)
-    } else {
-      socket.res.emit('error', error)
-    }
-  } else {
-    socket._httpMessage.emit('error', error)
-  }
 }
 
 // Return a simpler request object to allow serialization
@@ -72930,7 +73278,7 @@ Request.prototype.init = function (options) {
     var formData = options.formData
     var requestForm = self.form()
     var appendFormValue = function (key, value) {
-      if (value.hasOwnProperty('value') && value.hasOwnProperty('options')) {
+      if (value && value.hasOwnProperty('value') && value.hasOwnProperty('options')) {
         requestForm.append(key, value.value, value.options)
       } else {
         requestForm.append(key, value)
@@ -73399,11 +73747,6 @@ Request.prototype.start = function () {
     self.emit('socket', socket)
   })
 
-  self.on('end', function() {
-    if ( self.req.connection ) {
-      self.req.connection.removeListener('error', connectionErrorHandler)
-    }
-  })
   self.emit('request', self.req)
 }
 
@@ -73438,11 +73781,6 @@ Request.prototype.onRequestResponse = function (response) {
     debug('response end', self.uri.href, response.statusCode, response.headers)
   })
 
-  // The check on response.connection is a workaround for browserify.
-  if (response.connection && response.connection.listeners('error').indexOf(connectionErrorHandler) === -1) {
-    response.connection.setMaxListeners(0)
-    response.connection.once('error', connectionErrorHandler)
-  }
   if (self._aborted) {
     debug('aborted', self.uri.href)
     response.resume()
@@ -73859,10 +74197,9 @@ Request.prototype.aws = function (opts, now) {
     self._aws = opts
     return self
   }
-  
+
   if (opts.sign_version == 4 || opts.sign_version == '4') {
-    var aws4 = require('aws4')
-    // use aws4  
+    // use aws4
     var options = {
       host: self.uri.host,
       path: self.uri.path,
@@ -81541,9 +81878,6 @@ var LOOSE_COOKIE_PAIR = /^((?:=)?([^=;]*)\s*=\s*)?([^\n\r\0]*)/;
 // Note ';' is \x3B
 var PATH_VALUE = /[\x20-\x3A\x3C-\x7E]+/;
 
-// Used for checking whether or not there is a trailing semi-colon
-var TRAILING_SEMICOLON = /;+$/;
-
 var DAY_OF_MONTH = /^(\d{1,2})[^\d]*$/;
 var TIME = /^(\d{1,2})[^\d]*:(\d{1,2})[^\d]*:(\d{1,2})[^\d]*$/;
 var MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i;
@@ -81800,12 +82134,6 @@ function parse(str, options) {
   }
   str = str.trim();
 
-  // S4.1.1 Trailing semi-colons are not part of the specification.
-  var semiColonCheck = TRAILING_SEMICOLON.exec(str);
-  if (semiColonCheck) {
-    str = str.slice(0, semiColonCheck.index);
-  }
-
   // We use a regex to parse the "name-value-pair" part of S5.2
   var firstSemi = str.indexOf(';'); // S5.2 step 1
   var pairRe = options.loose ? LOOSE_COOKIE_PAIR : COOKIE_PAIR;
@@ -81835,7 +82163,7 @@ function parse(str, options) {
   // S5.2.3 "unparsed-attributes consist of the remainder of the set-cookie-string
   // (including the %x3B (";") in question)." plus later on in the same section
   // "discard the first ";" and trim".
-  var unparsed = str.slice(firstSemi).replace(/^\s*;\s*/,'').trim();
+  var unparsed = str.slice(firstSemi + 1).trim();
 
   // "If the unparsed-attributes string is empty, skip the rest of these
   // steps."
@@ -81851,9 +82179,12 @@ function parse(str, options) {
    * cookie-attribute-list".  Therefore, in this implementation, we overwrite
    * the previous value.
    */
-  var cookie_avs = unparsed.split(/\s*;\s*/);
+  var cookie_avs = unparsed.split(';');
   while (cookie_avs.length) {
-    var av = cookie_avs.shift();
+    var av = cookie_avs.shift().trim();
+    if (av.length === 0) { // happens if ";;" appears
+      continue;
+    }
     var av_sep = av.indexOf('=');
     var av_key, av_value;
 
@@ -83285,51 +83616,53 @@ module.exports={
   "_args": [
     [
       {
-        "name": "tough-cookie",
-        "raw": "tough-cookie@~2.2.0",
-        "rawSpec": "~2.2.0",
+        "raw": "tough-cookie@~2.3.0",
         "scope": null,
-        "spec": ">=2.2.0 <2.3.0",
+        "escapedName": "tough-cookie",
+        "name": "tough-cookie",
+        "rawSpec": "~2.3.0",
+        "spec": ">=2.3.0 <2.4.0",
         "type": "range"
       },
-      "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\request"
+      "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/request"
     ]
   ],
-  "_from": "tough-cookie@>=2.2.0 <2.3.0",
-  "_id": "tough-cookie@2.2.2",
+  "_from": "tough-cookie@>=2.3.0 <2.4.0",
+  "_id": "tough-cookie@2.3.1",
   "_inCache": true,
   "_installable": true,
   "_location": "/tough-cookie",
-  "_nodeVersion": "5.1.1",
+  "_nodeVersion": "6.3.1",
   "_npmOperationalInternal": {
-    "host": "packages-13-west.internal.npmjs.com",
-    "tmp": "tmp/tough-cookie-2.2.2.tgz_1457564639182_0.5129188685677946"
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/tough-cookie-2.3.1.tgz_1469494891088_0.8524557144846767"
   },
   "_npmUser": {
-    "email": "jstash@gmail.com",
-    "name": "jstash"
+    "name": "jstash",
+    "email": "jstash@gmail.com"
   },
-  "_npmVersion": "3.3.12",
+  "_npmVersion": "3.10.3",
   "_phantomChildren": {},
   "_requested": {
-    "name": "tough-cookie",
-    "raw": "tough-cookie@~2.2.0",
-    "rawSpec": "~2.2.0",
+    "raw": "tough-cookie@~2.3.0",
     "scope": null,
-    "spec": ">=2.2.0 <2.3.0",
+    "escapedName": "tough-cookie",
+    "name": "tough-cookie",
+    "rawSpec": "~2.3.0",
+    "spec": ">=2.3.0 <2.4.0",
     "type": "range"
   },
   "_requiredBy": [
     "/request"
   ],
-  "_resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.2.2.tgz",
-  "_shasum": "c83a1830f4e5ef0b93ef2a3488e724f8de016ac7",
+  "_resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.3.1.tgz",
+  "_shasum": "99c77dfbb7d804249e8a299d4cb0fd81fef083fd",
   "_shrinkwrap": null,
-  "_spec": "tough-cookie@~2.2.0",
-  "_where": "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\request",
+  "_spec": "tough-cookie@~2.3.0",
+  "_where": "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/request",
   "author": {
-    "email": "jstashewsky@salesforce.com",
-    "name": "Jeremy Stashewsky"
+    "name": "Jeremy Stashewsky",
+    "email": "jstashewsky@salesforce.com"
   },
   "bugs": {
     "url": "https://github.com/SalesforceEng/tough-cookie/issues"
@@ -83358,20 +83691,21 @@ module.exports={
   "description": "RFC6265 Cookies and Cookie Jar for node.js",
   "devDependencies": {
     "async": "^1.4.2",
+    "string.prototype.repeat": "^0.2.0",
     "vows": "^0.8.1"
   },
   "directories": {},
   "dist": {
-    "shasum": "c83a1830f4e5ef0b93ef2a3488e724f8de016ac7",
-    "tarball": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.2.2.tgz"
+    "shasum": "99c77dfbb7d804249e8a299d4cb0fd81fef083fd",
+    "tarball": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.3.1.tgz"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=0.8"
   },
   "files": [
     "lib"
   ],
-  "gitHead": "cc46628c4d7d2e8c372ecba29293ca8a207ec192",
+  "gitHead": "c11a2d11d12348a35ef595c809e30e641a804a7d",
   "homepage": "https://github.com/SalesforceEng/tough-cookie",
   "keywords": [
     "HTTP",
@@ -83387,12 +83721,12 @@ module.exports={
   "main": "./lib/cookie",
   "maintainers": [
     {
-      "email": "jeremy@goinstant.com",
-      "name": "jstash"
+      "name": "jstash",
+      "email": "jstash@gmail.com"
     },
     {
-      "email": "services@goinstant.com",
-      "name": "goinstant"
+      "name": "nexxy",
+      "email": "emily@contactvibe.com"
     }
   ],
   "name": "tough-cookie",
@@ -83406,7 +83740,7 @@ module.exports={
     "suffixup": "curl -o public_suffix_list.dat https://publicsuffix.org/list/public_suffix_list.dat && ./generate-pubsuffix.js",
     "test": "vows test/*_test.js"
   },
-  "version": "2.2.2"
+  "version": "2.3.1"
 }
 
 },{}],326:[function(require,module,exports){
