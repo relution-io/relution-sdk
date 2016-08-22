@@ -1,4 +1,4 @@
-/*
+/**
  * @file core/device.ts
  * Relution SDK
  *
@@ -17,10 +17,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @module core
- */
-/** */
 
 import * as Q from 'q';
 
@@ -105,6 +101,11 @@ export const ready = (() => {
   // must be extracted from global scope object as otherwise we get ReferenceError in node.js
   const document: Document = global['document'];
   const window: Window = global['window'];
+  const callback = () => {
+    document.removeEventListener('load', callback);
+    document.removeEventListener('DOMContentLoaded', callback);
+    return Q.resolve(document);
+  };
 
   return Q.Promise((resolve, reject) => {
     // resolves to document once the DOM is loaded
@@ -112,12 +113,6 @@ export const ready = (() => {
       if (!document || document.readyState === 'complete') {
         resolve(document);
         return;
-      }
-
-      function callback() {
-        resolve(document);
-        document.removeEventListener('load', callback);
-        document.removeEventListener('DOMContentLoaded', callback);
       }
       document.addEventListener('DOMContentLoaded', callback, false);
       document.addEventListener('load', callback, false); // fallback
@@ -136,14 +131,11 @@ export const ready = (() => {
           resolve(window);
           return;
         }
-
         // see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-        function callback() {
-          resolve(window);
-          document.removeEventListener('deviceready', callback);
-        }
-
-        document.addEventListener('deviceready', callback, false);
+        document.addEventListener('deviceready', () => {
+            document.removeEventListener('deviceready', callback);
+            resolve(window);
+        }, false);
       } catch (error) {
         reject(error);
       }
