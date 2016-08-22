@@ -58,8 +58,6 @@ describe(module.filename || __filename, function() {
 
     it('creating websql store', function () {
 
-      assert.typeOf((<any>global).openDatabase, 'function', 'Browser supports WebSql');
-
       assert.typeOf(WebSqlStore, 'function', 'WebSqlStore is defined');
 
       TEST.store = new WebSqlStore();

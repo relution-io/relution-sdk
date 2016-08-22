@@ -66,8 +66,8 @@ export class TypeScriptFieldDefinition extends FieldDefinition {
     'java.lang.Boolean[]': 'boolean[]',
     'com.mwaysolutions.gofer2.file.domain.File': 'any',
     'com.mwaysolutions.gofer2.file.domain.File[]': 'any[]',
-    'java.util.Date': 'date',
-    'java.util.Date[]': 'date[]',
+    'java.util.Date': 'Date',
+    'java.util.Date[]': 'Date[]',
     'java.lang.Object': 'any',
     'java.lang.Object[]': 'any',
     '[B': 'any' // Binary Data
