@@ -284,7 +284,7 @@ exports.hashJson = hashJson;
 }).call(this,require("buffer").Buffer)
 },{"buffer":106,"crypto":117,"lodash":210,"q":246}],5:[function(require,module,exports){
 (function (process,global){
-/*
+/**
  * @file core/device.ts
  * Relution SDK
  *
@@ -303,10 +303,6 @@ exports.hashJson = hashJson;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @module core
- */
-/** */
 "use strict";
 var Q = require('q');
 var diag = require('./diag');
@@ -319,17 +315,17 @@ exports.ready = (function () {
     // must be extracted from global scope object as otherwise we get ReferenceError in node.js
     var document = global['document'];
     var window = global['window'];
+    var callback = function () {
+        document.removeEventListener('load', callback);
+        document.removeEventListener('DOMContentLoaded', callback);
+        return Q.resolve(document);
+    };
     return Q.Promise(function (resolve, reject) {
         // resolves to document once the DOM is loaded
         try {
             if (!document || document.readyState === 'complete') {
                 resolve(document);
                 return;
-            }
-            function callback() {
-                resolve(document);
-                document.removeEventListener('load', callback);
-                document.removeEventListener('DOMContentLoaded', callback);
             }
             document.addEventListener('DOMContentLoaded', callback, false);
             document.addEventListener('load', callback, false); // fallback
@@ -348,11 +344,10 @@ exports.ready = (function () {
                     return;
                 }
                 // see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-                function callback() {
-                    resolve(window);
+                document.addEventListener('deviceready', function () {
                     document.removeEventListener('deviceready', callback);
-                }
-                document.addEventListener('deviceready', callback, false);
+                    resolve(window);
+                }, false);
             }
             catch (error) {
                 reject(error);
@@ -5996,7 +5991,6 @@ __export(require('./SortOrderComparator'));
  */
 /** */
 "use strict";
-;
 function cloneCredentials(credentials) {
     return JSON.parse(JSON.stringify(credentials));
 }
