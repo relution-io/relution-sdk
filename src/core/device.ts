@@ -1,3 +1,4 @@
+import {IPromise} from '..';
 /**
  * @file core/device.ts
  * Relution SDK
@@ -17,7 +18,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @module core
+ */
+/** */
 import * as Q from 'q';
 
 import * as diag from './diag';
@@ -101,10 +105,12 @@ export const ready = (() => {
   // must be extracted from global scope object as otherwise we get ReferenceError in node.js
   const document: Document = global['document'];
   const window: Window = global['window'];
+  let _loadResolve: (val: Document | IPromise<Document>) => void;
+
   const callback = () => {
     document.removeEventListener('load', callback);
     document.removeEventListener('DOMContentLoaded', callback);
-    return Q.resolve(document);
+    return _loadResolve(document);
   };
 
   return Q.Promise((resolve, reject) => {
@@ -114,6 +120,7 @@ export const ready = (() => {
         resolve(document);
         return;
       }
+      _loadResolve = resolve;
       document.addEventListener('DOMContentLoaded', callback, false);
       document.addEventListener('load', callback, false); // fallback
     } catch (error) {
