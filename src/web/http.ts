@@ -314,11 +314,13 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
               serverObj.sessionUserUuid = null;
               diag.debug.assert(() => !!error);
               diag.debug.warn('server session is lost!', error);
-              if (serverObj.credentials) {
+			  const credentials = serverObj.credentials;
+              if (credentials) {
                 // recover by attempting login,
                 // here promiseResponse must have been resolved already,
                 // we chain anyways because of error propagation
-                promiseResponse.thenResolve(login(serverObj.credentials, {
+				serverObj.credentials = null;
+                promiseResponse.thenResolve(login(credentials, {
                   serverUrl: serverUrl
                 }).then(() => {
                   diag.debug.assert(() => !!serverObj.sessionUserUuid);
