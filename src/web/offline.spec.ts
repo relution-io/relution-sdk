@@ -101,8 +101,8 @@ function makeLoginResponse(): http.LoginResponse {
       'propertyMap': {},
       'defaultRoles': ['cfbb22c5-c708-4711-931f-831afc93940a']
     },
-    'roles': {
-      'roles': [{
+    'roles': /*{
+      'roles':*/ [{
         'uuid': '905f5e11-2a2b-4711-b82a-e3f443c3073b',
         'name': 'Developer',
         'type': 'GROUP',
@@ -300,7 +300,7 @@ function makeLoginResponse(): http.LoginResponse {
         'type': 'USER',
         'systemPermission': false
       }]
-    },
+    /*}*/,
     'licenseInfos': {
       'licenseModelName': 'Enterprise',
       'licenseInfos': {

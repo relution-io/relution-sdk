@@ -1,4 +1,3 @@
-import {IPromise} from '..';
 /**
  * @file core/device.ts
  * Relution SDK
@@ -105,14 +104,13 @@ export const ready = (() => {
   // must be extracted from global scope object as otherwise we get ReferenceError in node.js
   const document: Document = global['document'];
   const window: Window = global['window'];
-  let _loadResolve: (val: Document | IPromise<Document>) => void;
 
+  let resolveDocument: (val: Document | Q.Promise<Document>) => void;
   const callback = () => {
     document.removeEventListener('load', callback);
     document.removeEventListener('DOMContentLoaded', callback);
-    return _loadResolve(document);
+    return resolveDocument(document);
   };
-
   return Q.Promise((resolve, reject) => {
     // resolves to document once the DOM is loaded
     try {
@@ -120,7 +118,7 @@ export const ready = (() => {
         resolve(document);
         return;
       }
-      _loadResolve = resolve;
+      resolveDocument = resolve;
       document.addEventListener('DOMContentLoaded', callback, false);
       document.addEventListener('load', callback, false); // fallback
     } catch (error) {

@@ -30,7 +30,9 @@ import * as http from 'http';
 
 import * as diag from '../core/diag';
 import * as init from '../core/init';
+import * as domain from '../core/domain';
 import * as auth from '../security/auth';
+import * as roles from '../security/roles';
 import * as server from '../security/server';
 import * as urls from './urls';
 import * as offline from './offline';
@@ -314,11 +316,13 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
               serverObj.sessionUserUuid = null;
               diag.debug.assert(() => !!error);
               diag.debug.warn('server session is lost!', error);
-              if (serverObj.credentials) {
+              const credentials = serverObj.credentials;
+              if (credentials) {
                 // recover by attempting login,
                 // here promiseResponse must have been resolved already,
                 // we chain anyways because of error propagation
-                promiseResponse.thenResolve(login(serverObj.credentials, {
+                serverObj.credentials = null;
+                promiseResponse.thenResolve(login(credentials, {
                   serverUrl: serverUrl
                 }).then(() => {
                   diag.debug.assert(() => !!serverObj.sessionUserUuid);
@@ -376,10 +380,20 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
  * This is equivalent to UserInfoWrapper in Java code.
  */
 export interface LoginResponse {
-  user: any;
-  roles: any;
-  organization: any;
-  licenseInfos: any;
+  // com.mwaysolutions.gofer2.security.domain.UserInfoWrapper
+  user: roles.User;
+  roles: roles.RoleDto[];
+  organization: roles.Organization;
+
+  licenseInfos: {
+    // com.mwaysolutions.gofer2.security.domain.LicenseInfos
+    licenseModelName: string;
+    licenseInfos: _.Dictionary<any>
+  };
+  /**
+   * lists experimental features enabled on the server.
+   */
+  activeFeatureToggles?: string[];
 
   /**
    * eventually returned data of the LogonCallback is stored here.
@@ -536,9 +550,13 @@ export function login(credentials: auth.Credentials,
     return Q.reject<LoginResponse>(error);
   }).then((response) => {
     // switch current server
+    if ('roles' in response.roles) {
+      // fixes a defect of Java implementation
+      response.roles = response.roles['roles'];
+    }
     serverObj.authorization = {
       name: response.user.uuid,
-      roles: _.map(response.roles.roles, (role: any) => role.uuid)
+      roles: _.map(response.roles, (role: roles.RoleDto) => role.uuid)
     };
     serverObj.organization = response.organization;
     serverObj.user = response.user;
