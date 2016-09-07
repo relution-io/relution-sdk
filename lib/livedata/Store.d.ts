@@ -1,3 +1,4 @@
+import * as Q from 'q';
 import { Model } from './Model';
 import { Collection } from './Collection';
 import { CollectionCtor } from "./Collection";

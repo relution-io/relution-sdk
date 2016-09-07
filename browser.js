@@ -1482,6 +1482,7 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
 /** */
 "use strict";
 var _ = require('lodash');
+var Q = require('q');
 var diag = require('../core/diag');
 /**
  * tests whether a given object is a Store.
@@ -1569,7 +1570,7 @@ var store = _.extend(Store.prototype, Backbone.Events, {
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
-},{"../core/diag":6,"lodash":210}],17:[function(require,module,exports){
+},{"../core/diag":6,"lodash":210,"q":246}],17:[function(require,module,exports){
 /*
  * @file livedata/SyncContext.ts
  * Relution SDK

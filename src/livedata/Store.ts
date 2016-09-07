@@ -23,7 +23,7 @@
 /** */
 
 import * as _ from 'lodash';
-
+import * as Q from 'q';
 import * as diag from '../core/diag';
 
 import {Model} from './Model';
