@@ -31,7 +31,7 @@ import {Store} from './Store';
 import {Model, ModelCtor} from './Model';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
-
+import * as Q from 'q';
 import {ajax, sync} from './rest';
 
 /**
