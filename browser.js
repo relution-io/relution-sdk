@@ -88163,7 +88163,7 @@ function extend() {
 },{}],336:[function(require,module,exports){
 module.exports={
   "name": "relution-sdk",
-  "version": "0.0.3",
+  "version": "0.1.1",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
     "relution",

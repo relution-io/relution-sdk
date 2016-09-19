@@ -25,7 +25,9 @@ bumpClass.bump(defVer)
     (log) => {
       console.log(log);
     },
-    (e) => console.error(e),
+    (e) => {
+      console.error(e)
+    },
     () => {
       console.log(bumpClass.packages);
       console.log('the new Version is now available at npm.');
