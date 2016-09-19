@@ -5,7 +5,7 @@ const path = require('path');
 const Observable = require('@reactivex/rxjs').Observable;
 const semver = require('semver');
 
-class Bump {
+module.exports.Bump = class Bump {
   constructor(defaultType = 'patch', packages = [`${process.cwd()}/package.json`]) {
     this.packages = [];
     this.types = [
@@ -68,7 +68,7 @@ class Bump {
   }
 }
 
-class TagRepo {
+module.exports.TagRepo = class TagRepo {
 
   constructor( message = 'v', repoPath = path.resolve(`${process.cwd()}`), commit = process.argv[3] ? process.argv[3] : false) {
     this.simpleGit = require('simple-git')(repoPath);
@@ -91,28 +91,3 @@ class TagRepo {
     })
   }
 }
-
-const Semver = new Bump();
-const GitRepo = new TagRepo();
-let defVer = Semver.defaultType;
-if (process.argv[2]) {
-  defVer = process.argv[2];
-  console.log(defVer);
-}
-
-Semver
-  .bump(defVer)
-  .last()
-  .mergeMap((version) => {
-    console.log('version', version);
-    return GitRepo.addTag(version, defVer);
-  })
-  .subscribe(
-    (log) => {
-      console.log(log);
-    },
-    (e) => console.error(e),
-    () => {
-      // console.log(Semver.packages);
-    }
-  );

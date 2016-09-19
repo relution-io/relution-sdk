@@ -88163,7 +88163,7 @@ function extend() {
 },{}],336:[function(require,module,exports){
 module.exports={
   "name": "relution-sdk",
-  "version": "0.0.1",
+  "version": "0.0.7",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
     "relution",
@@ -88190,6 +88190,9 @@ module.exports={
   "author": "Thomas Beckmann",
   "license": "Apache License",
   "devDependencies": {
+    "@reactivex/rxjs": "^5.0.0-beta.11",
+    "semver": "^5.3.0",
+    "simple-git": "^1.47.0",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",
@@ -88212,5 +88215,4 @@ module.exports={
     "JSONPath": "^0.11.2"
   }
 }
-
 },{}]},{},[1]);
