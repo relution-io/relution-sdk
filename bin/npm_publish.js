@@ -7,15 +7,15 @@ const taggingClass = new TagRepo();
 const spawn = require('child_process').spawn;
 const _browserify = spawn('npm', ['run', 'browserify']);
 let defVer = bumpClass.defaultType;
-
+let patchVersion = null;
 bumpClass.bump(defVer)
   .last()
   .mergeMap((version) => {
+    patchVersion = version;
     return Observable.fromEvent(_browserify, 'close')
   })
   .mergeMap((version) => {
-    console.log('version', version);
-    return taggingClass.addTag(version, defVer);
+    return taggingClass.addTag(patchVersion, defVer);
   })
   .mergeMap(() => {
     const npmPublish = spawn('npm', ['publish']);
