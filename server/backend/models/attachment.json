@@ -1,0 +1,32 @@
+{
+  "name": "attachment",
+  "label": "attachment",
+  "description": "Document Approval data of an attachment",
+  "attributes": [
+    {
+      "name": "description",
+      "description": "Textual description of attachment",
+      "type": "String"
+    },
+    {
+      "name": "mimeType",
+      "description": "MIME media type of attachment",
+      "type": "String"
+    },
+    {
+      "name": "hrefUrl",
+      "description": "URL of attachment",
+      "type": "String"
+    },
+    {
+      "name": "extension",
+      "description": "extension of the file",
+      "type": "String"
+    },
+    {
+      "name": "fileName",
+      "description": "name of the file",
+      "type": "String"
+    }
+  ]
+}

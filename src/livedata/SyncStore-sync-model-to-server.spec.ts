@@ -28,6 +28,7 @@ import {assert} from 'chai';
 import {Model, ModelCtor} from './Model';
 import {SyncStore} from './SyncStore';
 import {openDatabase} from './WebSqlStore';
+import * as urls from '../web/urls';
 import {testServer} from '../web/http.spec';
 
 describe(module.filename || __filename, function() {
@@ -50,7 +51,10 @@ describe(module.filename || __filename, function() {
       ModelType.prototype.idAttribute = 'id';
       ModelType.prototype.entity = 'User';
       ModelType.prototype.store = store;
-      ModelType.prototype.urlRoot = testServer.serverUrl + '/relution/livedata/user/';
+      ModelType.prototype.urlRoot = urls.resolveUrl('api/v1/user/', {
+        serverUrl: testServer.serverUrl,
+        application: 'relutionsdk'
+      });
       modelType = ModelType;
       model = new modelType({id: '12312'});
       promise = Q(model.fetch()).thenResolve(model);

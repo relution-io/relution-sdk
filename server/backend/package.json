@@ -1,0 +1,35 @@
+{
+  "name": "relutionsdk",
+  "version": "0.0.1",
+  "main": "app.js",
+  "description": "Auto description app",
+  "dependencies": {
+    "lodash": "~4.5.1",
+    "q": "~1.4.1",
+    "body-parser": "^1.10.0",
+    "errorhandler": "^1.1.1",
+    "express": "^4.10.5",
+    "express-session": "^1.7.2",
+    "jade": "^0.1.0",
+    "method-override": "^2.1.2",
+    "morgan": "^1.2.2",
+    "multer": "^0.1.3",
+    "serve-favicon": "^2.0.1"
+  },
+  "engines": {
+    "node": ">=4.4.0"
+  },
+  "devDependencies": {
+    "tslint": "^3.8.1",
+    "typedoc": "github:sierrasoftworks/typedoc#v1.8.10",
+    "typescript": "^1.8.10"
+  },
+  "scripts": {
+    "precommit": "npm run tslint",
+    "tslint": "tslint src/**/*.ts",
+    "build": "tsc -p .",
+    "api": "typedoc -p . --rootDir src --out www --module commonjs --stripInternal --name relutionsdk --exclude **/*.spec.ts src typings/main.d.ts",
+    "serve-api": "http-server public/docs",
+    "watch": "tsc -p . -w"
+  }
+}

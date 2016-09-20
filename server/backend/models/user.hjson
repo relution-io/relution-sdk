@@ -1,0 +1,24 @@
+{
+	name: user
+	label: user
+	description: Entity used by livedata/SyncStore-offline.spec.ts and livedata/SyncStore-sync-model-to-server.spec.ts
+	attributes: [
+    {
+			name: id
+			description: ID of entity
+			type: String
+			key: true
+    }
+
+
+
+    {
+			name: username
+			type: String
+    }
+    {
+			name: password
+			type: String
+    }
+  ]
+}

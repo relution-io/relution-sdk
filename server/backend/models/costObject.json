@@ -1,0 +1,42 @@
+{
+  "name": "costObject",
+  "label": "costObject",
+  "description": "Accounting Information per Item",
+  "attributes": [
+    {
+      "name": "accountingObject",
+      "description": "Accounting category: ZCC, WBS, etc.",
+      "type": "String"
+    },
+    {
+      "name": "accountingObjectDescription",
+      "description": "Description: Example: Cost center, profit center, etc.",
+      "type": "String"
+    },
+    {
+      "name": "accountingValue",
+      "description": "Accounting value: 7777",
+      "type": "String"
+    },
+    {
+      "name": "accountingNo",
+      "description": "Accounting split line: if split based on quantity the split line number",
+      "type": "String"
+    },
+    {
+      "name": "distributionPercentage",
+      "description": "Percentage distribution: By default it is 100%",
+      "type": "BigDecimal"
+    },
+    {
+      "name": "distributionQuantity",
+      "description": "Quantity distribution: Total split should be equivalent to the quantity being ordered.",
+      "type": "BigDecimal"
+    },
+    {
+      "name": "glAccount",
+      "description": "General ledger account",
+      "type": "String"
+    }
+  ]
+}

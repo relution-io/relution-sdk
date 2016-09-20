@@ -1,0 +1,107 @@
+{
+  "name": "item",
+  "label": "item",
+  "description": "Item",
+  "attributes": [
+    {
+      "name": "itemId",
+      "description": "id of item",
+      "type": "String",
+      "mandatory": true,
+      "key": true
+    },
+    {
+      "name": "description",
+      "description": "Item description",
+      "type": "String"
+    },
+    {
+      "name": "price",
+      "description": "",
+      "type": "BigDecimal"
+    },
+    {
+      "name": "quantity",
+      "description": "number of pieces ordered",
+      "type": "String"
+    },
+    {
+      "name": "receivedQuantity",
+      "description": "number of pieces ordered",
+      "type": "String"
+    },
+    {
+      "name": "priceUnit",
+      "description": "",
+      "type": "String"
+    },
+    {
+      "name": "netValue",
+      "description": "Item Net value incl. tax",
+      "type": "String"
+    },
+    {
+      "name": "currency",
+      "description": "",
+      "type": "String"
+    },
+    {
+      "name": "unit",
+      "description": "",
+      "type": "String"
+    },
+    {
+      "name": "categoryId",
+      "description": "Product category",
+      "type": "String"
+    },
+    {
+      "name": "deliveryDate",
+      "description": "Delivery date",
+      "type": "Date"
+    },
+    {
+      "name": "vendorId",
+      "description": "Supplier",
+      "type": "String"
+    },
+    {
+      "name": "vendorName",
+      "description": "Supplier Description",
+      "type": "String"
+    },
+    {
+      "name": "goodsRecipient",
+      "description": "Goods receipient",
+      "type": "String"
+    },
+    {
+      "name": "shipToAddress",
+      "description": "Shipping Information",
+      "type": "shipToAddress",
+      "mandatory": true
+    },
+    {
+      "name": "costObjects",
+      "description": "Accounting Information",
+      "type": "costObject[]",
+      "mandatory": true
+    },
+    {
+      "name": "status",
+      "description": "whether the item was changed by approval, relevant for accept-changes notifications only",
+      "type": "String",
+      "mandatory": false,
+      "enum": [
+        "deleted",
+        "rejected"
+      ]
+    },
+    {
+      "name": "attachments",
+      "description": "attachments incl. external URL",
+      "type": "attachment[]",
+      "mandatory": false
+    }
+  ]
+}

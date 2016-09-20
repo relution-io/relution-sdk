@@ -45,7 +45,7 @@ export class TestServer {
   public get credentials(): security.LoginObject {
     return this.resetProperty('credentials', {
       userName: offline.localStorage().getItem('test.userName') || 'relutionsdk',
-      password: offline.localStorage().getItem('test.password') || 'relutionsdk'
+      password: offline.localStorage().getItem('test.password') || 'relutionsdk123'
     });
   }
 

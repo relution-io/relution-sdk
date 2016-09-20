@@ -31,6 +31,7 @@ import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
 import {makeApprovals} from './approvals.data';
+import * as urls from '../web/urls';
 import {testServer} from '../web/http.spec';
 
 describe(module.filename || __filename, function() {
@@ -49,7 +50,10 @@ describe(module.filename || __filename, function() {
   before(function() {
     return testServer.login.then((result) => {
       TestCollection.prototype.store = new SyncStore({});
-      TestCollection.prototype.url = testServer.serverUrl + '/relution/livedata/approvals/';
+      TestCollection.prototype.url = urls.resolveUrl('api/v1/approvals/', {
+        serverUrl: testServer.serverUrl,
+        application: 'relutionsdk'
+      });
       return result;
     });
   });

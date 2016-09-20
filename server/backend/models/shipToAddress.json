@@ -1,0 +1,79 @@
+{
+  "name": "shipToAddress",
+  "label": "shipToAddress",
+  "description": "Ship to Address per Item",
+  "attributes": [
+    {
+      "name": "name1",
+      "type": "String"
+    },
+    {
+      "name": "name2",
+      "type": "String"
+    },
+    {
+      "name": "nameCo",
+      "type": "String"
+    },
+    {
+      "name": "street",
+      "type": "String"
+    },
+    {
+      "name": "houseNum1",
+      "type": "String"
+    },
+    {
+      "name": "postCode1",
+      "type": "String"
+    },
+    {
+      "name": "city1",
+      "type": "String"
+    },
+    {
+      "name": "country",
+      "type": "String"
+    },
+    {
+      "name": "countryName",
+      "type": "String"
+    },
+    {
+      "name": "region",
+      "type": "String"
+    },
+    {
+      "name": "regionName",
+      "type": "String"
+    },
+    {
+      "name": "telNumber",
+      "type": "String"
+    },
+    {
+      "name": "telExtens",
+      "type": "String"
+    },
+    {
+      "name": "email",
+      "type": "String"
+    },
+    {
+      "name": "coCode",
+      "type": "String"
+    },
+    {
+      "name": "building",
+      "type": "String"
+    },
+    {
+      "name": "floor",
+      "type": "String"
+    },
+    {
+      "name": "room",
+      "type": "String"
+    }
+  ]
+}
