@@ -22,6 +22,7 @@
  */
 /** */
 
+import * as Backbone from 'backbone';
 import * as _ from 'lodash';
 
 import * as diag from '../core/diag';

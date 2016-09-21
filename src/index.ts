@@ -24,10 +24,7 @@
 /** */
 
 // make client compilation context contain globals
-/// <reference path="../typings/globals/backbone-global/index.d.ts" />
-/// <reference path="../typings/globals/backbone/index.d.ts" />
 /// <reference path="../typings/globals/cordova/plugins/device/index.d.ts" />
-/// <reference path="../typings/globals/jquery/index.d.ts" />
 /// <reference path="../typings/globals/phonegap-plugin-push/index.d.ts" />
 /// <reference path="../typings/globals/q/index.d.ts" />
 /// <reference path="../typings/globals/socket.io-client/index.d.ts" />

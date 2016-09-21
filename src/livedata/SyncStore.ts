@@ -22,6 +22,7 @@
  */
 /** */
 
+import * as Backbone from 'backbone';
 import * as Q from 'q';
 import * as _ from 'lodash';
 
