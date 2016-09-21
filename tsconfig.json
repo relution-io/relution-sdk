@@ -17,11 +17,9 @@
     },
     "filesGlob": [
         "src/**/*.ts",
-        "!src/**/*.d.ts",
-        "typings/index.d.ts"
+        "!src/**/*.d.ts"
     ],
     "files": [
-        "typings/index.d.ts",
         "src/connector/connector.ts",
         "src/connector/index.ts",
         "src/core/cipher.spec.ts",
