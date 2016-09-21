@@ -1,18 +1,7 @@
 {
   "name": "relution-sdk",
   "version": false,
-  "devDependencies": {
-    "chai": "registry:npm/chai#3.5.0+20160415060238",
-    "sinon": "registry:npm/sinon#1.16.0+20160309002336"
-  },
-  "globalDependencies": {
-    "cordova/plugins/device": "registry:dt/cordova/plugins/device#0.0.0+20160316155526",
-    "phonegap-plugin-push": "registry:dt/phonegap-plugin-push#0.0.0+20160501153936",
-    "q": "registry:dt/q#0.0.0+20160417152954",
-    "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
-    "websql": "registry:dt/websql#0.0.0+20160316155526"
-  },
-  "dependencies": {
-    "request": "registry:npm/request#2.69.0+20160304121250"
-  }
+  "devDependencies": {},
+  "globalDependencies": {},
+  "dependencies": {}
 }
