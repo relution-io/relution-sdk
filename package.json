@@ -12,6 +12,7 @@
     "mvc"
   ],
   "main": "index.js",
+  "browser": "browser.js",
   "scripts": {
     "precommit": "npm run tslint",
     "tslint": "tslint src/**/*.ts",
@@ -20,8 +21,8 @@
     "api": "typedoc --options %CD%/typedoc.json",
     "gh-pages": "git subtree push --prefix public/docs origin gh-pages",
     "watch": "tsc -p . -w",
-    "browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql",
-    "testify": "browserify ./lib/index.spec.js -o browser.spec.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql"
+    "browserify": "browserify ./lib/index.lazy.js --standalone Relution --debug -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql | exorcist browser.js.map > browser.js",
+    "testify": "browserify ./lib/index.spec.js --standalone Relution --debug -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql | exorcist browser.spec.js.map > browser.spec.js"
   },
   "author": "Thomas Beckmann",
   "license": "Apache License",
@@ -32,6 +33,7 @@
     "@types/sinon": "^1.16.30",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
+    "exorcist": "^0.4.0",
     "mocha": "^2.4.5",
     "semver": "^5.3.0",
     "simple-git": "^1.47.0",
