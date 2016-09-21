@@ -10,16 +10,12 @@
     "backbone-global": "registry:dt/backbone-global#1.0.0+20160626232945",
     "cordova/plugins/device": "registry:dt/cordova/plugins/device#0.0.0+20160316155526",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
-    "mocha": "registry:dt/mocha#2.2.5+20160317120654",
-    "node": "registry:dt/node#4.0.0+20160423143914",
     "phonegap-plugin-push": "registry:dt/phonegap-plugin-push#0.0.0+20160501153936",
     "q": "registry:dt/q#0.0.0+20160417152954",
     "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
-    "underscore": "registry:dt/underscore#1.7.0+20160622050840",
     "websql": "registry:dt/websql#0.0.0+20160316155526"
   },
   "dependencies": {
-    "lodash": "registry:npm/lodash#4.0.0+20160416211519",
     "request": "registry:npm/request#2.69.0+20160304121250"
   }
 }
