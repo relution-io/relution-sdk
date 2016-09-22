@@ -22,6 +22,8 @@
  */
 /** */
 
+import * as Q from 'q';
+
 import * as assert from 'assert';
 import * as web from './index';
 import * as offline from './offline';
