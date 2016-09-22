@@ -153,11 +153,12 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', (done) => {
 
-      class TestModel2 extends Model {}
-      TestModel2.prototype.url = TEST.url;
-      TestModel2.prototype.idAttribute = '_id';
-      TestModel2.prototype.store = TEST.store;
-      TestModel2.prototype.entity = 'test';
+      class TestModel2 extends Model.defaults({
+        url: TEST.url,
+        idAttribute: '_id',
+        store: TEST.store,
+        entity: 'test'
+      }) {}
       TEST.TestModel2 = TestModel2;
 
       var data = { _id: TEST.id };
@@ -181,11 +182,12 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with no id using callbacks', (done) => {
-      class TestModel3 extends Model {}
-      TestModel3.prototype.url = TEST.url;
-      TestModel3.prototype.idAttribute = '_id';
-      TestModel3.prototype.store = TEST.store;
-      TestModel3.prototype.entity = 'test';
+      class TestModel3 extends Model.defaults({
+        url: TEST.url,
+        idAttribute: '_id',
+        store: TEST.store,
+        entity: 'test'
+      }) {}
       TEST.TestModel3 = TestModel3;
 
       var model = new TEST.TestModel3({});
@@ -200,11 +202,12 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with empty-string id using promises', (done) => {
-      class TestModel4 extends Model {}
-      TestModel4.prototype.url = TEST.url;
-      TestModel4.prototype.idAttribute = '_id';
-      TestModel4.prototype.store = TEST.store;
-      TestModel4.prototype.entity =  'test';
+      class TestModel4 extends Model.defaults({
+        url: TEST.url,
+        idAttribute: '_id',
+        store: TEST.store,
+        entity: 'test'
+      }) {}
       TEST.TestModel4 = TestModel4;
 
       var model = new TEST.TestModel4({
@@ -267,7 +270,12 @@ describe(module.filename || __filename, function() {
       var oldId = model.id;
       var newId = '4711-' + oldId;
 
-      class TestModel5 extends Model {
+      class TestModel5 extends Model.defaults({
+        url: TEST.url,
+        idAttribute: '_id',
+        store: TEST.store,
+        entity: 'test'
+      }) {
         constructor(attrs: any) {
           super(attrs);
           this.ajax = this.ajax.bind(this);
@@ -285,10 +293,6 @@ describe(module.filename || __filename, function() {
           });
         }
       }
-      TestModel5.prototype.url = TEST.url;
-      TestModel5.prototype.idAttribute = '_id';
-      TestModel5.prototype.store = TEST.store;
-      TestModel5.prototype.entity = 'test';
 
       var testModel = new TestModel5(model.attributes);
 

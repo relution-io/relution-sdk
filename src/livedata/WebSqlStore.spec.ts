@@ -70,16 +70,18 @@ describe(module.filename || __filename, function() {
 
     it('simple websql store', function (done) {
 
-      class SimpleModel extends Model {}
-      SimpleModel.prototype.idAttribute = 'key';
+      class SimpleModel extends Model.defaults({
+        idAttribute: 'key'
+      }) {}
       TEST.SimpleModel = SimpleModel;
 
       assert.typeOf(TEST.SimpleModel, 'function', 'SimpleModel model successfully extended.');
 
-      class SimpleModelCollection extends Collection {}
-      SimpleModelCollection.prototype.model = TEST.SimpleModel;
-      SimpleModelCollection.prototype.store = new WebSqlStore();
-      SimpleModelCollection.prototype.entity = 'test';
+      class SimpleModelCollection extends Collection.defaults({
+        model: TEST.SimpleModel,
+        store: new WebSqlStore(),
+        entity: 'test'
+      }) {}
       TEST.SimpleModelCollection = SimpleModelCollection;
 
       assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
@@ -111,16 +113,18 @@ describe(module.filename || __filename, function() {
 
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
-      class TestModel extends Model {}
-      TestModel.prototype.idAttribute = 'key';
-      TestModel.prototype.entity = 'test';
+      class TestModel extends Model.defaults({
+        idAttribute: 'key',
+        entity: 'test'
+      }) {}
       TEST.TestModel = TestModel;
 
       assert.typeOf(TEST.TestModel, 'function', 'TestModel model successfully extended.');
 
-      class TestModelCollection extends Collection {}
-      TestModelCollection.prototype.model = TEST.TestModel;
-      TestModelCollection.prototype.store = TEST.store;
+      class TestModelCollection extends Collection.defaults({
+        model: TEST.TestModel,
+        store: TEST.store
+      }) {}
       TEST.TestModelCollection = TestModelCollection;
 
       assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
@@ -182,10 +186,11 @@ describe(module.filename || __filename, function() {
 
     it('fetching data with new model', function (done) {
 
-      class TestModel2 extends Model {}
-      TestModel2.prototype.idAttribute = 'key';
-      TestModel2.prototype.store = TEST.store;
-      TestModel2.prototype.entity = 'test';
+      class TestModel2 extends Model.defaults({
+        idAttribute: 'key',
+        store: TEST.store,
+        entity: 'test'
+      }) {}
       TEST.TestModel2 = TestModel2;
 
       var model = new TEST.TestModel2({
@@ -254,10 +259,11 @@ describe(module.filename || __filename, function() {
       // recreate store type to drop schema information
       TEST.store = new WebSqlStore(undefined);
 
-      class TestModel2 extends Model {}
-      TestModel2.prototype.idAttribute = 'key';
-      TestModel2.prototype.store = TEST.store;
-      TestModel2.prototype.entity = 'test';
+      class TestModel2 extends Model.defaults({
+        idAttribute: 'key',
+        store: TEST.store,
+        entity: 'test'
+      }) {}
       TEST.TestModel2 = TestModel2;
 
       TEST.Tests2 = new Collection(undefined, {
