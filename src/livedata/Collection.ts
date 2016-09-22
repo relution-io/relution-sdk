@@ -99,6 +99,10 @@ export class Collection extends Backbone.Collection<Model> {
     this.init(models, options);
   }
 
+  public static defaults(properties: any, classProperties?: any): CollectionCtor {
+    return super['extend'](properties, classProperties);
+  }
+
   protected init(models?: any, options?: any) {
     options = options || {};
     this.store = options.store || this.store || (this.model ? this.model.prototype.store : null);

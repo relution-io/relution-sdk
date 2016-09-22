@@ -75,9 +75,10 @@ describe(module.filename || __filename, function() {
     it('creating collection', () => {
       assert.isFunction(Collection, 'Collection is defined');
 
-      class TestModel extends Model {}
-      TestModel.prototype.idAttribute = '_id';
-      TestModel.prototype.entity = 'test';
+      class TestModel extends Model.defaults({
+        idAttribute: '_id',
+        entity: 'test'
+      }) {}
       TEST.TestModel = TestModel;
 
       assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
@@ -87,15 +88,16 @@ describe(module.filename || __filename, function() {
         application: 'relutionsdk'
       });
 
-      class TestsModelCollection extends Collection {}
-      TestsModelCollection.prototype.model = TEST.TestModel;
-      TestsModelCollection.prototype.url = TEST.url;
-      TestsModelCollection.prototype.store = TEST.store;
-      TestsModelCollection.prototype.options = {
-        sort: { sureName: 1 },
-        fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
-        query: { age: { $gte: 25 } }
-      };
+      class TestsModelCollection extends Collection.defaults({
+        model: TEST.TestModel,
+        url: TEST.url,
+        store: TEST.store,
+        options: {
+          sort: { sureName: 1 },
+          fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
+          query: { age: { $gte: 25 } }
+        }
+      }) {}
       TEST.TestsModelCollection = TestsModelCollection;
 
       assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');

@@ -91,6 +91,10 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
     this.init(attributes, options);
   }
 
+  public static defaults(properties: any, classProperties?: any): ModelCtor {
+    return super['extend'](properties, classProperties);
+  }
+
   protected init(attributes?: any, options?: any) {
     options = options || {};
 
