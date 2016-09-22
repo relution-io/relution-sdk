@@ -415,7 +415,7 @@ describe(module.filename || __filename, () => {
         credentials.password = 'Test123#!';
         return offline.fetchOfflineLogin(credentials, serverOptions);
       }).then((): boolean => {
-        assert.fail('fetch succeeded although passwords differ!');
+        assert(false, 'fetch succeeded although passwords differ!');
         throw new Error('never reached');
       }, () => {
         return true; // expected failure
