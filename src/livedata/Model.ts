@@ -34,6 +34,27 @@ import {SyncEndpoint} from './SyncEndpoint';
 import {ajax, sync} from './rest';
 
 /**
+ * prototype properties specified when subclassing using Model.defaults().
+ */
+export interface ModelProps {
+  type?: {
+      container: string;
+      model: string;
+  } | string;
+  entity?: string;
+  tenancy?: 'USER' | 'ORGANIZATION' | 'SCOPE'; // com.mwaysolutions.gofer2.bikini.domain.LiveDataTenancy
+
+  idAttribute?: string;
+  aclAttribute?: string;
+
+  defaults?: any;
+
+  url?: string | (() => string);
+  urlRoot?: string | (() => string);
+  store?: Store;
+}
+
+/**
  * constructor function of Model.
  */
 export interface ModelCtor {
@@ -91,8 +112,13 @@ export class Model/*<AttributesType extends Object>*/ extends Backbone.Model {
     this.init(attributes, options);
   }
 
-  public static defaults(properties: any, classProperties?: any): ModelCtor {
-    return super['extend'](properties, classProperties);
+  /**
+   * sets up prototype properties when defining a Model subclass.
+   * 
+   * @param {ModelProps} properties of prototype to set.
+   */
+  public static defaults(properties: ModelProps): ModelCtor {
+    return super['extend'](properties);
   }
 
   protected init(attributes?: any, options?: any) {
