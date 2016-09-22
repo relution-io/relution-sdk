@@ -1,7 +1,10 @@
+/// <reference types="backbone" />
+/// <reference types="lodash" />
 /**
  * @module livedata
  */
 /** */
+import * as Backbone from 'backbone';
 import * as _ from 'lodash';
 import { Store } from './Store';
 import { Model, ModelCtor } from './Model';
@@ -47,7 +50,6 @@ export declare class Collection extends Backbone.Collection<Model> {
     channel: string;
     constructor(models?: any, options?: any);
     protected init(models?: any, options?: any): void;
-    modelId: (attrs: any) => any;
     ajax(options: any): any;
     sync(method: string, model: Backbone.ModelBase, options?: any): any;
     private _entityFromUrl(urlStr);

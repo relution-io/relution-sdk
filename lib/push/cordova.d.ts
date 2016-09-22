@@ -1,3 +1,6 @@
+/// <reference types="phonegap-plugin-push" />
+/// <reference types="node" />
+/// <reference types="q" />
 /**
  * @module push
  */

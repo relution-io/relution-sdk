@@ -1,3 +1,7 @@
+/// <reference types="q" />
+/// <reference types="request" />
+/// <reference types="node" />
+/// <reference types="lodash" />
 /**
  * @module web
  */

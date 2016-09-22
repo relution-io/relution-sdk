@@ -1,3 +1,5 @@
+/// <reference types="lodash" />
+/// <reference types="q" />
 /**
  * @module push
  */

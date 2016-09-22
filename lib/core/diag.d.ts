@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as assert from 'assert';
 /**
  * expression validating an assumption of the calling code, typically an arrow-function expression.

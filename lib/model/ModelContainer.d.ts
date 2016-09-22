@@ -1,3 +1,4 @@
+/// <reference types="lodash" />
 /**
  * @module model
  */
@@ -40,7 +41,7 @@ export interface ArrayLookup<T> extends Array<T> {
  */
 export declare class ModelContainer {
     static factory: ModelFactory;
-    factory: ModelFactory;
+    readonly factory: ModelFactory;
     uuid: string;
     version: number;
     bundle: string;
@@ -62,7 +63,7 @@ export declare class ModelContainer {
  */
 export declare class MetaModel {
     static factory: ModelFactory;
-    factory: ModelFactory;
+    readonly factory: ModelFactory;
     uuid: string;
     version: number;
     bundle: string;
@@ -85,7 +86,7 @@ export declare class MetaModel {
  */
 export declare class FieldDefinition {
     static factory: ModelFactory;
-    factory: ModelFactory;
+    readonly factory: ModelFactory;
     name: string;
     label: string;
     description: string;
@@ -101,7 +102,7 @@ export declare class FieldDefinition {
     maxSize: number;
     regexp: string;
     propertyMap: any;
-    dataTypeNormalized: string;
+    readonly dataTypeNormalized: string;
     constructor(other?: FieldDefinition);
     fromJSON(json: FieldDefinition): this;
 }
@@ -110,7 +111,7 @@ export declare class FieldDefinition {
  */
 export declare class EnumDefinition {
     static factory: ModelFactory;
-    factory: ModelFactory;
+    readonly factory: ModelFactory;
     items: ArrayLookup<Item>;
     enumerable: string;
     strict: boolean;

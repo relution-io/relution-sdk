@@ -1,3 +1,4 @@
+/// <reference types="q" />
 import * as Q from 'q';
 import * as http from './http';
 /**

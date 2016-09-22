@@ -1,3 +1,6 @@
+/// <reference types="node" />
+/// <reference types="websql" />
+/// <reference types="q" />
 import * as Q from 'q';
 import { Store } from './Store';
 import { Model } from './Model';

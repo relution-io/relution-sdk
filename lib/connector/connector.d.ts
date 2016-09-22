@@ -1,3 +1,4 @@
+/// <reference types="q" />
 /**
  * @module connector
  */

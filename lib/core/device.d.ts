@@ -1,3 +1,4 @@
+/// <reference types="cordova-plugin-device" />
 import * as domain from './domain';
 /**
  * platform IDs compatible to constants of ionic.

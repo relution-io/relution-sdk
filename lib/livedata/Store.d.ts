@@ -1,3 +1,11 @@
+/// <reference types="q" />
+/// <reference types="backbone" />
+/// <reference types="node" />
+/**
+ * @module livedata
+ */
+/** */
+import * as Backbone from 'backbone';
 import * as Q from 'q';
 import { Model } from './Model';
 import { Collection } from './Collection';

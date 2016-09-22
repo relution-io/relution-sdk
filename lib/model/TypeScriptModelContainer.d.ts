@@ -48,7 +48,7 @@ export declare class TypeScriptFieldDefinition extends FieldDefinition {
         '[B': string;
     };
     model: TypeScriptMetaModel;
-    dataTypeTS: string;
+    readonly dataTypeTS: string;
 }
 export declare class TypeScriptEnumDefinition extends EnumDefinition {
     static factory: TypeScriptModelFactory;

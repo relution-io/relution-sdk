@@ -1,7 +1,6 @@
-/**
- * @module livedata
- */
-/** */
+/// <reference types="q" />
+/// <reference types="socket.io-client" />
+/// <reference types="node" />
 import * as Q from 'q';
 import { Store, StoreCtor } from './Store';
 import { SyncEndpoint } from './SyncEndpoint';

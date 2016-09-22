@@ -1,3 +1,9 @@
+/// <reference types="backbone" />
+/**
+ * @module livedata
+ */
+/** */
+import * as Backbone from 'backbone';
 import { Store } from './Store';
 import { Collection } from './Collection';
 import { SyncEndpoint } from './SyncEndpoint';

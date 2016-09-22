@@ -1,3 +1,5 @@
+/// <reference types="q" />
+/// <reference types="socket.io-client" />
 import { Store } from './Store';
 import { Model, ModelCtor } from './Model';
 import { Collection } from './Collection';
