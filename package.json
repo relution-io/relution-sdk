@@ -18,11 +18,12 @@
     "tslint": "tslint src/**/*.ts",
     "test": "npm run build && mocha lib/**/*.spec.js",
     "build": "tsc -p .",
-    "api": "typedoc --options %CD%/typedoc.json",
+    "api-win": "typedoc --options %CD%/typedoc.json",
+    "api-mac": "typedoc --options $PWD/typedoc.json",
     "gh-pages": "git subtree push --prefix public/docs origin gh-pages",
     "watch": "tsc -p . -w",
-    "browserify": "browserify ./lib/index.lazy.js --standalone Relution --debug -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql | exorcist browser.js.map > browser.js",
-    "testify": "browserify ./lib/index.spec.js --standalone Relution --debug -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql | exorcist browser.spec.js.map > browser.spec.js"
+    "browserify": "browserify ./lib/index.lazy.js --standalone Relution --debug -u jquery -u socket.io-client -u node-localstorage -u websql | exorcist browser.js.map > browser.js",
+    "testify": "browserify ./lib/index.spec.js --standalone Relution --debug -u jquery -u socket.io-client -u node-localstorage -u websql | exorcist browser.spec.js.map > browser.spec.js"
   },
   "author": "Thomas Beckmann",
   "license": "Apache License",

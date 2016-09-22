@@ -60,6 +60,17 @@ export const io: SocketIOClientStatic = global['io'] || // native implementation
   })());
 
 /**
+ * localStorage of browser or via require node-localstorage.
+ *
+ * @internal Not public API, exported for testing purposes only!
+ */
+export function localStorage() {
+  return global['localStorage'] ||
+    process && !process['browser'] && (global['localStorage'] =
+      new (require('node-localstorage').LocalStorage)('localStorage')); // required version
+}
+
+/**
  * connects a Model/Collection to a Relution server.
  *
  * This will give you an online and offline store with live data updates.
@@ -138,7 +149,6 @@ export class SyncStore extends Store {
     if (this.orderOfflineChanges) {
       this.orderOfflineChanges = _.clone(this.orderOfflineChanges);
     }
-    diag.debug.trace('SyncStore', options);
 
     if (this.useSocketNotify && typeof io !== 'object') {
       diag.debug.warning('Socket.IO not present !!');
@@ -317,14 +327,14 @@ export class SyncStore extends Store {
       return this.lastMesgTime[channel];
     }
     // the | 0 below turns strings into numbers
-    var time = localStorage.getItem('__' + channel + 'lastMesgTime') || 0;
+    var time = localStorage().getItem('__' + channel + 'lastMesgTime') || 0;
     this.lastMesgTime[channel] = time;
     return time;
   }
 
   setLastMessageTime(channel: string, time: any): void {
     if (!time || time > this.getLastMessageTime(channel)) {
-      localStorage.setItem('__' + channel + 'lastMesgTime', time);
+      localStorage().setItem('__' + channel + 'lastMesgTime', time);
       this.lastMesgTime[channel] = time;
     }
   }
