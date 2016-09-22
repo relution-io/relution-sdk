@@ -31,6 +31,7 @@ import * as objectid from '../core/objectid';
 import * as security from '../security';
 import * as web from '../web';
 
+import {localStorage} from '../web/offline';
 import {GetQuery} from '../query/GetQuery';
 import {Store, StoreCtor} from './Store';
 import {WebSqlStore} from './WebSqlStore';
@@ -58,17 +59,6 @@ export const io: SocketIOClientStatic = global['io'] || // native implementation
       diag.debug.warn('optional socket.io-client module is not available: ' + error && error.message);
     }
   })());
-
-/**
- * localStorage of browser or via require node-localstorage.
- *
- * @internal Not public API, exported for testing purposes only!
- */
-export function localStorage() {
-  return global['localStorage'] ||
-    process && !process['browser'] && (global['localStorage'] =
-      new (require('node-localstorage').LocalStorage)('localStorage')); // required version
-}
 
 /**
  * connects a Model/Collection to a Relution server.
