@@ -55,7 +55,7 @@ describe(module.filename || __filename, function() {
       return cipher.encryptJson(password, someData).then((encryptedData) => {
         return cipher.decryptJson('Test123#!', encryptedData);
       }).then((): boolean => {
-        assert.fail('decryption succeeded although passwords differ!');
+        assert(false, 'decryption succeeded although passwords differ!');
         throw new Error('never reached');
       }, () => {
         return true; // expected failure
@@ -122,7 +122,7 @@ describe(module.filename || __filename, function() {
 
     it('hash Q library', () => {
       return cipher.hashJson(Q, 'sha256').then(() => {
-        assert.fail('hashing functions should not really work!');
+        assert(false, 'hashing functions should not really work!');
         return false; // never reached
       }, () => {
         return true; // absolutely acceptable
