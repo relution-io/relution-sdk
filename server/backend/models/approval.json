@@ -1,0 +1,76 @@
+{
+  "name": "approval",
+  "label": "approval",
+  "description": "Approval Model representing a single workitem in approval workflow",
+  "attributes": [
+    {
+      "name": "id",
+      "description": "Combination of workitemid and userid",
+      "type": "String",
+      "mandatory": true,
+      "key": true
+    },
+    {
+      "name": "provider",
+      "description": "Selector of provider implementation communicating with backend",
+      "type": "String",
+      "mandatory": true
+    },
+    {
+      "name": "state",
+      "description": "Action to set when approving or rejecting this workitem",
+      "type": "String",
+      "mandatory": true,
+      "enum": [
+        "open",
+        "approved",
+        "rejected"
+      ]
+    },
+    {
+      "name": "comment",
+      "description": "Reason to set when approving of rejecting this workitem",
+      "type": "String",
+      "mandatory:": false
+    },
+    {
+      "name": "aclEntries",
+      "description": "Determines who may see and modify this workitem",
+      "type": "String Array",
+      "mandatory": true
+    },
+    {
+      "name": "approver",
+      "description": "Metadata of approver and overall approval",
+      "type": "approver[]",
+      "mandatory": true
+    },
+	{
+	  "name": "current",
+	  "description": "Index of current step in approver array, zero based.",
+	  "type": "Integer"
+	},
+    {
+      "name": "requester",
+      "description": "Information on requester of approval",
+      "type": "requester",
+      "mandatory": true
+    },
+    {
+      "name": "items",
+      "type": "item[]"
+    },
+    {
+      "name": "header",
+      "description": "General information",
+      "type": "header",
+      "mandatory": true
+    },
+    {
+      "name": "attachments",
+      "description": "attachments incl. external URL",
+      "type": "attachment[]",
+      "mandatory": false
+    }
+  ]
+}

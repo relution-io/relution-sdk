@@ -279,8 +279,7 @@ describe(module.filename || __filename, function () {
 }).call(this,"/lib\\core\\cipher.spec.js")
 },{"./cipher":1,"assert":78,"q":290}],3:[function(require,module,exports){
 (function (process,global){
-"use strict";
-/**
+/*
  * @file core/device.ts
  * Relution SDK
  *
@@ -303,6 +302,7 @@ describe(module.filename || __filename, function () {
  * @module core
  */
 /** */
+"use strict";
 var Q = require('q');
 var diag = require('./diag');
 /**
@@ -314,12 +314,6 @@ exports.ready = (function () {
     // must be extracted from global scope object as otherwise we get ReferenceError in node.js
     var document = global['document'];
     var window = global['window'];
-    var resolveDocument;
-    var callback = function () {
-        document.removeEventListener('load', callback);
-        document.removeEventListener('DOMContentLoaded', callback);
-        return resolveDocument(document);
-    };
     return Q.Promise(function (resolve, reject) {
         // resolves to document once the DOM is loaded
         try {
@@ -327,7 +321,11 @@ exports.ready = (function () {
                 resolve(document);
                 return;
             }
-            resolveDocument = resolve;
+            function callback() {
+                resolve(document);
+                document.removeEventListener('load', callback);
+                document.removeEventListener('DOMContentLoaded', callback);
+            }
             document.addEventListener('DOMContentLoaded', callback, false);
             document.addEventListener('load', callback, false); // fallback
         }
@@ -345,10 +343,11 @@ exports.ready = (function () {
                     return;
                 }
                 // see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-                document.addEventListener('deviceready', function () {
-                    document.removeEventListener('deviceready', callback);
+                function callback() {
                     resolve(window);
-                }, false);
+                    document.removeEventListener('deviceready', callback);
+                }
+                document.addEventListener('deviceready', callback, false);
             }
             catch (error) {
                 reject(error);
@@ -2441,11 +2440,11 @@ var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var SyncStore_1 = require('./SyncStore');
 var approvals_data_1 = require('./approvals.data');
-var serverUrl = 'http://localhost:8200';
+var urls = require('../web/urls');
+var http_spec_1 = require('../web/http.spec');
 describe(module.filename || __filename, function () {
     this.timeout(60000);
     // prepare model/collection types
-    var store = new SyncStore_1.SyncStore({});
     var TestModel = (function (_super) {
         __extends(TestModel, _super);
         function TestModel() {
@@ -2463,8 +2462,16 @@ describe(module.filename || __filename, function () {
         return TestCollection;
     }(Collection_1.Collection));
     TestCollection.prototype.model = TestModel;
-    TestCollection.prototype.store = store;
-    TestCollection.prototype.url = serverUrl + '/relution/livedata/approvals/';
+    before(function () {
+        return http_spec_1.testServer.login.then(function (result) {
+            TestCollection.prototype.store = new SyncStore_1.SyncStore({});
+            TestCollection.prototype.url = urls.resolveUrl('api/v1/approvals/', {
+                serverUrl: http_spec_1.testServer.serverUrl,
+                application: 'relutionsdk'
+            });
+            return result;
+        });
+    });
     // loads data using collection, returns promise on collection, collection is empty afterwards
     function loadCollection(collection, data) {
         return Q(collection.fetch()).then(function () {
@@ -2589,7 +2596,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncContext.spec.js")
-},{"./Collection":14,"./Model":17,"./SyncStore":27,"./approvals.data":31,"chai":120,"q":290}],23:[function(require,module,exports){
+},{"../web/http.spec":49,"../web/urls":53,"./Collection":14,"./Model":17,"./SyncStore":27,"./approvals.data":31,"chai":120,"q":290}],23:[function(require,module,exports){
 /*
  * @file livedata/SyncEndpoint.ts
  * Relution SDK
@@ -2770,38 +2777,45 @@ var diag_1 = require('../core/diag');
 var Model_1 = require('./Model');
 var SyncStore_1 = require('./SyncStore');
 var WebSqlStore_1 = require('./WebSqlStore');
-var serverUrl = "http://localhost:8200";
+var urls = require('../web/urls');
+var http_spec_1 = require('../web/http.spec');
 describe(module.filename || __filename, function () {
     this.timeout(8000);
     var model = null;
     var store = null;
     var modelType = null;
     before(function () {
-        store = new SyncStore_1.SyncStore({
-            useLocalStore: true,
-            useSocketNotify: false
-        });
-        var ModelType = (function (_super) {
-            __extends(ModelType, _super);
-            function ModelType() {
-                _super.apply(this, arguments);
-            }
-            ModelType.prototype.ajax = function () {
-                diag_1.debug.info('offline');
-                return Q.reject(new Error('Not Online'));
+        return http_spec_1.testServer.login.then(function (result) {
+            store = new SyncStore_1.SyncStore({
+                useLocalStore: true,
+                useSocketNotify: false
+            });
+            var ModelType = (function (_super) {
+                __extends(ModelType, _super);
+                function ModelType() {
+                    _super.apply(this, arguments);
+                }
+                ModelType.prototype.ajax = function () {
+                    diag_1.debug.info('offline');
+                    return Q.reject(new Error('Not Online'));
+                };
+                return ModelType;
+            }(Model_1.Model));
+            ModelType.prototype.idAttribute = 'id';
+            ModelType.prototype.entity = 'User';
+            ModelType.prototype.store = store;
+            ModelType.prototype.urlRoot = urls.resolveUrl('api/v1/user/', {
+                serverUrl: http_spec_1.testServer.serverUrl,
+                application: 'relutionsdk'
+            });
+            ModelType.prototype.defaults = {
+                username: 'admin',
+                password: 'admin'
             };
-            return ModelType;
-        }(Model_1.Model));
-        ModelType.prototype.idAttribute = 'id';
-        ModelType.prototype.entity = 'User';
-        ModelType.prototype.store = store;
-        ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
-        ModelType.prototype.defaults = {
-            username: 'admin',
-            password: 'admin'
-        };
-        modelType = ModelType;
-        model = new modelType({ id: '12312' });
+            modelType = ModelType;
+            model = new modelType({ id: '12312' });
+            return result;
+        });
     });
     return [
         it('check model has attributes', function () {
@@ -2879,7 +2893,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncStore-offline.spec.js")
-},{"../core/diag":4,"./Model":17,"./SyncStore":27,"./WebSqlStore":29,"chai":120,"q":290}],26:[function(require,module,exports){
+},{"../core/diag":4,"../web/http.spec":49,"../web/urls":53,"./Model":17,"./SyncStore":27,"./WebSqlStore":29,"chai":120,"q":290}],26:[function(require,module,exports){
 (function (__filename){
 /*
  * @file livedata/SyncStore-sync-model-to-server.spec.ts
@@ -2915,7 +2929,8 @@ var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var SyncStore_1 = require('./SyncStore');
 var WebSqlStore_1 = require('./WebSqlStore');
-var serverUrl = 'http://localhost:8200';
+var urls = require('../web/urls');
+var http_spec_1 = require('../web/http.spec');
 describe(module.filename || __filename, function () {
     this.timeout(8000);
     var model = null;
@@ -2923,24 +2938,30 @@ describe(module.filename || __filename, function () {
     var modelType = null;
     var promise = null;
     beforeEach(function () {
-        store = new SyncStore_1.SyncStore({
-            useLocalStore: true,
-            useSocketNotify: false
+        return http_spec_1.testServer.login.then(function (result) {
+            store = new SyncStore_1.SyncStore({
+                useLocalStore: true,
+                useSocketNotify: false
+            });
+            var ModelType = (function (_super) {
+                __extends(ModelType, _super);
+                function ModelType() {
+                    _super.apply(this, arguments);
+                }
+                return ModelType;
+            }(Model_1.Model));
+            ModelType.prototype.idAttribute = 'id';
+            ModelType.prototype.entity = 'User';
+            ModelType.prototype.store = store;
+            ModelType.prototype.urlRoot = urls.resolveUrl('api/v1/user/', {
+                serverUrl: http_spec_1.testServer.serverUrl,
+                application: 'relutionsdk'
+            });
+            modelType = ModelType;
+            model = new modelType({ id: '12312' });
+            promise = Q(model.fetch()).thenResolve(model);
+            return result;
         });
-        var ModelType = (function (_super) {
-            __extends(ModelType, _super);
-            function ModelType() {
-                _super.apply(this, arguments);
-            }
-            return ModelType;
-        }(Model_1.Model));
-        ModelType.prototype.idAttribute = 'id';
-        ModelType.prototype.entity = 'User';
-        ModelType.prototype.store = store;
-        ModelType.prototype.urlRoot = serverUrl + '/relution/livedata/user/';
-        modelType = ModelType;
-        model = new modelType({ id: '12312' });
-        promise = Q(model.fetch()).thenResolve(model);
     });
     return [
         it('fetch model sync to server', function () {
@@ -3019,7 +3040,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncStore-sync-model-to-server.spec.js")
-},{"./Model":17,"./SyncStore":27,"./WebSqlStore":29,"chai":120,"q":290}],27:[function(require,module,exports){
+},{"../web/http.spec":49,"../web/urls":53,"./Model":17,"./SyncStore":27,"./WebSqlStore":29,"chai":120,"q":290}],27:[function(require,module,exports){
 (function (global){
 /*
  * @file livedata/SyncStore.ts
@@ -4221,7 +4242,8 @@ var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var SyncStore_1 = require('./SyncStore');
-var serverUrl = 'http://localhost:8200';
+var urls = require('../web/urls');
+var http_spec_1 = require('../web/http.spec');
 function backbone_error(done) {
     return function (model, error) {
         done(error instanceof Error ? error : new Error(JSON.stringify(error)));
@@ -4229,16 +4251,22 @@ function backbone_error(done) {
 }
 describe(module.filename || __filename, function () {
     this.timeout(5000 * 1000);
-    var TEST = {
-        data: {
-            firstName: 'Max',
-            sureName: 'Mustermann',
-            age: 33
-        }
-    };
+    var TEST;
+    before(function () {
+        return http_spec_1.testServer.login.then(function (result) {
+            TEST = {
+                data: {
+                    firstName: 'Max',
+                    sureName: 'Mustermann',
+                    age: 33
+                }
+            };
+            return result;
+        });
+    });
     return [
         it('creating store', function () {
-            chai_1.assert.isString(serverUrl, 'Server url is defined.');
+            chai_1.assert.isString(http_spec_1.testServer.serverUrl, 'Server url is defined.');
             chai_1.assert.isFunction(SyncStore_1.SyncStore, 'SyncStore is defined');
             TEST.store = new SyncStore_1.SyncStore({
                 useLocalStore: true,
@@ -4261,7 +4289,10 @@ describe(module.filename || __filename, function () {
             TestModel.prototype.entity = 'test';
             TEST.TestModel = TestModel;
             chai_1.assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
-            TEST.url = serverUrl + '/relution/livedata/test/';
+            TEST.url = urls.resolveUrl('api/v1/test/', {
+                serverUrl: http_spec_1.testServer.serverUrl,
+                application: 'relutionsdk'
+            });
             var TestsModelCollection = (function (_super) {
                 __extends(TestsModelCollection, _super);
                 function TestsModelCollection() {
@@ -4339,19 +4370,19 @@ describe(module.filename || __filename, function () {
             });
         }),
         it('fetching model with no id using callbacks', function (done) {
-            var TestModel2 = (function (_super) {
-                __extends(TestModel2, _super);
-                function TestModel2() {
+            var TestModel3 = (function (_super) {
+                __extends(TestModel3, _super);
+                function TestModel3() {
                     _super.apply(this, arguments);
                 }
-                return TestModel2;
+                return TestModel3;
             }(Model_1.Model));
-            TestModel2.prototype.url = TEST.url;
-            TestModel2.prototype.idAttribute = '_id';
-            TestModel2.prototype.store = TEST.store;
-            TestModel2.prototype.entity = 'test';
-            TEST.TestModel2 = TestModel2;
-            var model = new TEST.TestModel2({});
+            TestModel3.prototype.url = TEST.url;
+            TestModel3.prototype.idAttribute = '_id';
+            TestModel3.prototype.store = TEST.store;
+            TestModel3.prototype.entity = 'test';
+            TEST.TestModel3 = TestModel3;
+            var model = new TEST.TestModel3({});
             model.fetch({
                 success: function (model2) {
                     backbone_error(done)(model2, new Error('this should have failed!'));
@@ -4362,19 +4393,19 @@ describe(module.filename || __filename, function () {
             });
         }),
         it('fetching model with empty-string id using promises', function (done) {
-            var TestModel2 = (function (_super) {
-                __extends(TestModel2, _super);
-                function TestModel2() {
+            var TestModel4 = (function (_super) {
+                __extends(TestModel4, _super);
+                function TestModel4() {
                     _super.apply(this, arguments);
                 }
-                return TestModel2;
+                return TestModel4;
             }(Model_1.Model));
-            TestModel2.prototype.url = TEST.url;
-            TestModel2.prototype.idAttribute = '_id';
-            TestModel2.prototype.store = TEST.store;
-            TestModel2.prototype.entity = 'test';
-            TEST.TestModel2 = TestModel2;
-            var model = new TEST.TestModel2({
+            TestModel4.prototype.url = TEST.url;
+            TestModel4.prototype.idAttribute = '_id';
+            TestModel4.prototype.store = TEST.store;
+            TestModel4.prototype.entity = 'test';
+            TEST.TestModel4 = TestModel4;
+            var model = new TEST.TestModel4({
                 _id: ''
             });
             model.fetch().then(function () {
@@ -4425,30 +4456,32 @@ describe(module.filename || __filename, function () {
             chai_1.assert.ok(model, 'record found');
             var oldId = model.id;
             var newId = '4711-' + oldId;
-            var TestModel = (function (_super) {
-                __extends(TestModel, _super);
-                function TestModel() {
-                    _super.apply(this, arguments);
+            var TestModel5 = (function (_super) {
+                __extends(TestModel5, _super);
+                function TestModel5(attrs) {
+                    _super.call(this, attrs);
+                    this.ajax = this.ajax.bind(this);
                 }
-                TestModel.prototype.ajax = function (options) {
+                TestModel5.prototype.ajax = function (options) {
+                    var _this = this;
                     // following simulates server reassigning ID value
                     return Model_1.Model.prototype.ajax.apply(this, arguments).then(function (response) {
-                        if (response._id === oldId) {
+                        if (_this.id === oldId) {
                             response._id = newId;
                         }
-                        else if (response._id === newId) {
+                        else if (_this.id === newId) {
                             response._id = oldId;
                         }
                         return response;
                     });
                 };
-                return TestModel;
+                return TestModel5;
             }(Model_1.Model));
-            TestModel.prototype.url = TEST.url;
-            TestModel.prototype.idAttribute = '_id';
-            TestModel.prototype.store = TEST.store;
-            TestModel.prototype.entity = 'test';
-            var testModel = new TestModel(model.attributes);
+            TestModel5.prototype.url = TEST.url;
+            TestModel5.prototype.idAttribute = '_id';
+            TestModel5.prototype.store = TEST.store;
+            TestModel5.prototype.entity = 'test';
+            var testModel = new TestModel5(model.attributes);
             var options = {
                 wait: true
             };
@@ -4460,6 +4493,7 @@ describe(module.filename || __filename, function () {
                 chai_1.assert.isUndefined(TEST.Tests.get(oldId), 'model is missing in collection by old id.');
             }).then(function () {
                 // reverts local changes
+                options['url'] = TEST.url + oldId; // must fix up URL as we hacked it
                 return testModel.save(undefined, options).then(function () {
                     chai_1.assert.ok(testModel.id, 'record has an id.');
                     chai_1.assert.equal(testModel.id, oldId, 'record has new id.');
@@ -4486,11 +4520,13 @@ describe(module.filename || __filename, function () {
             }
             else {
                 var hasError = false, isDone = false;
+                var count = 0;
                 TEST.Tests.models.forEach(function (model) {
                     if (!hasError) {
+                        ++count;
                         model.destroy({
                             success: function () {
-                                if (TEST.Tests.length == 0 && !isDone) {
+                                if (--count === 0 && !isDone) {
                                     isDone = true;
                                     chai_1.assert.equal(TEST.Tests.length, 0, 'collection is empty');
                                     done();
@@ -4509,7 +4545,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\livedata\\SyncStore.spec.js")
-},{"./Collection":14,"./Model":17,"./SyncStore":27,"chai":120,"lodash":254}],29:[function(require,module,exports){
+},{"../web/http.spec":49,"../web/urls":53,"./Collection":14,"./Model":17,"./SyncStore":27,"chai":120,"lodash":254}],29:[function(require,module,exports){
 (function (process,global){
 /*
  * @file livedata/WebSqlStore.ts
@@ -5643,7 +5679,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000060102",
+            "_id": "000000060102",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -5675,7 +5711,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000060102",
+            "id": "000000060102",
             "items": []
         },
         {
@@ -5752,7 +5788,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000063413",
+            "_id": "000000063413",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -5808,7 +5844,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000063413",
+            "id": "000000063413",
             "items": [
                 {
                     "priceUnit": "1",
@@ -5859,7 +5895,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000061886",
+            "_id": "000000061886",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -5915,7 +5951,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000061886",
+            "id": "000000061886",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6058,7 +6094,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000060531",
+            "_id": "000000060531",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6114,7 +6150,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000060531",
+            "id": "000000060531",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6165,7 +6201,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000060522",
+            "_id": "000000060522",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6221,7 +6257,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000060522",
+            "id": "000000060522",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6272,7 +6308,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000060231",
+            "_id": "000000060231",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6328,7 +6364,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000060231",
+            "id": "000000060231",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6379,7 +6415,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000060094",
+            "_id": "000000060094",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6435,7 +6471,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000060094",
+            "id": "000000060094",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6532,7 +6568,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000058926",
+            "_id": "000000058926",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6588,7 +6624,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000058926",
+            "id": "000000058926",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6639,7 +6675,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000058771",
+            "_id": "000000058771",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6703,7 +6739,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000058771",
+            "id": "000000058771",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6754,7 +6790,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000058470",
+            "_id": "000000058470",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -6810,7 +6846,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000058470",
+            "id": "000000058470",
             "items": [
                 {
                     "priceUnit": "1",
@@ -6953,7 +6989,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000057908",
+            "_id": "000000057908",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -7009,7 +7045,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000057908",
+            "id": "000000057908",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7060,7 +7096,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000057370",
+            "_id": "000000057370",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -7116,7 +7152,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000057370",
+            "id": "000000057370",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7167,7 +7203,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000056453",
+            "_id": "000000056453",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -7223,7 +7259,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000056453",
+            "id": "000000056453",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7366,7 +7402,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000056346",
+            "_id": "000000056346",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -7422,7 +7458,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000056346",
+            "id": "000000056346",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7565,7 +7601,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000053451",
+            "_id": "000000053451",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -7629,7 +7665,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000053451",
+            "id": "000000053451",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7772,7 +7808,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000743803",
+            "_id": "000000743803",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -7828,7 +7864,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000743803",
+            "id": "000000743803",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7879,7 +7915,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000746076",
+            "_id": "000000746076",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -7935,7 +7971,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000746076",
+            "id": "000000746076",
             "items": [
                 {
                     "priceUnit": "1",
@@ -7986,7 +8022,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745383",
+            "_id": "000000745383",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8042,7 +8078,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745383",
+            "id": "000000745383",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8093,7 +8129,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745385",
+            "_id": "000000745385",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8149,7 +8185,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745385",
+            "id": "000000745385",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8200,7 +8236,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745401",
+            "_id": "000000745401",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8256,7 +8292,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745401",
+            "id": "000000745401",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8307,7 +8343,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745407",
+            "_id": "000000745407",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8363,7 +8399,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745407",
+            "id": "000000745407",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8414,7 +8450,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745432",
+            "_id": "000000745432",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8470,7 +8506,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745432",
+            "id": "000000745432",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8521,7 +8557,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745678",
+            "_id": "000000745678",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8577,7 +8613,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745678",
+            "id": "000000745678",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8628,7 +8664,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745683",
+            "_id": "000000745683",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8684,7 +8720,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745683",
+            "id": "000000745683",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8735,7 +8771,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745685",
+            "_id": "000000745685",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8791,7 +8827,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745685",
+            "id": "000000745685",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8842,7 +8878,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745686",
+            "_id": "000000745686",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -8898,7 +8934,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745686",
+            "id": "000000745686",
             "items": [
                 {
                     "priceUnit": "1",
@@ -8949,7 +8985,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745691",
+            "_id": "000000745691",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -9005,7 +9041,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745691",
+            "id": "000000745691",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9056,7 +9092,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000746297",
+            "_id": "000000746297",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -9112,7 +9148,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000746297",
+            "id": "000000746297",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9163,7 +9199,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000746516",
+            "_id": "000000746516",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -9219,7 +9255,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000746516",
+            "id": "000000746516",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9270,7 +9306,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747090",
+            "_id": "000000747090",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -9342,7 +9378,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747090",
+            "id": "000000747090",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9402,7 +9438,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747211",
+            "_id": "000000747211",
             "approver": [
                 {
                     "name": "Sweden manager1",
@@ -9450,7 +9486,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747211",
+            "id": "000000747211",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9501,7 +9537,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747224",
+            "_id": "000000747224",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -9581,7 +9617,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747224",
+            "id": "000000747224",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9641,7 +9677,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747514",
+            "_id": "000000747514",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -9721,7 +9757,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747514",
+            "id": "000000747514",
             "items": [
                 {
                     "priceUnit": "1",
@@ -9836,7 +9872,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747527",
+            "_id": "000000747527",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -9916,7 +9952,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747527",
+            "id": "000000747527",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10031,7 +10067,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747540",
+            "_id": "000000747540",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -10111,7 +10147,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747540",
+            "id": "000000747540",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10226,7 +10262,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747577",
+            "_id": "000000747577",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -10314,7 +10350,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747577",
+            "id": "000000747577",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10374,7 +10410,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000747629",
+            "_id": "000000747629",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -10414,7 +10450,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000747629",
+            "id": "000000747629",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10474,7 +10510,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000748133",
+            "_id": "000000748133",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -10562,7 +10598,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000748133",
+            "id": "000000748133",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10677,7 +10713,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000748164",
+            "_id": "000000748164",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -10757,7 +10793,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000748164",
+            "id": "000000748164",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10872,7 +10908,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000749560",
+            "_id": "000000749560",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -10912,7 +10948,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000749560",
+            "id": "000000749560",
             "items": [
                 {
                     "priceUnit": "1",
@@ -10972,7 +11008,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000749562",
+            "_id": "000000749562",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -11012,7 +11048,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000749562",
+            "id": "000000749562",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11072,7 +11108,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000749564",
+            "_id": "000000749564",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -11112,7 +11148,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000749564",
+            "id": "000000749564",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11172,7 +11208,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000749566",
+            "_id": "000000749566",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -11212,7 +11248,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000749566",
+            "id": "000000749566",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11272,7 +11308,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000750006",
+            "_id": "000000750006",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -11312,7 +11348,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000750006",
+            "id": "000000750006",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11481,7 +11517,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000750047",
+            "_id": "000000750047",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -11521,7 +11557,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000750047",
+            "id": "000000750047",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11581,7 +11617,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000751265",
+            "_id": "000000751265",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -11621,7 +11657,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000751265",
+            "id": "000000751265",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11681,7 +11717,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000751959",
+            "_id": "000000751959",
             "approver": [
                 {
                     "name": "Sweden manager2",
@@ -11753,7 +11789,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000751959",
+            "id": "000000751959",
             "items": [
                 {
                     "priceUnit": "0",
@@ -11812,7 +11848,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000752424",
+            "_id": "000000752424",
             "approver": [
                 {
                     "name": "Sweden Manager 1",
@@ -11860,7 +11896,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000752424",
+            "id": "000000752424",
             "items": [
                 {
                     "priceUnit": "1",
@@ -11920,7 +11956,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000752443",
+            "_id": "000000752443",
             "approver": [
                 {
                     "name": "Sweden manager2",
@@ -11960,7 +11996,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000752443",
+            "id": "000000752443",
             "items": [
                 {
                     "priceUnit": "0",
@@ -12019,7 +12055,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000752729",
+            "_id": "000000752729",
             "approver": [
                 {
                     "name": "Sweden manager2",
@@ -12083,7 +12119,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000752729",
+            "id": "000000752729",
             "items": [
                 {
                     "priceUnit": "0",
@@ -12142,7 +12178,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000753091",
+            "_id": "000000753091",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12182,7 +12218,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "approved",
-            "id": "srm-E7D110-000000753091",
+            "id": "000000753091",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12242,7 +12278,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745161",
+            "_id": "000000745161",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12298,7 +12334,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745161",
+            "id": "000000745161",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12349,7 +12385,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000745160",
+            "_id": "000000745160",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12405,7 +12441,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000745160",
+            "id": "000000745160",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12456,7 +12492,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000744028",
+            "_id": "000000744028",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12512,7 +12548,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000744028",
+            "id": "000000744028",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12563,7 +12599,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000743851",
+            "_id": "000000743851",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12619,7 +12655,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000743851",
+            "id": "000000743851",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12670,7 +12706,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000743996",
+            "_id": "000000743996",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12726,7 +12762,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000743996",
+            "id": "000000743996",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12777,7 +12813,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000744009",
+            "_id": "000000744009",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12833,7 +12869,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000744009",
+            "id": "000000744009",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12884,7 +12920,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000744011",
+            "_id": "000000744011",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -12940,7 +12976,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000744011",
+            "id": "000000744011",
             "items": [
                 {
                     "priceUnit": "1",
@@ -12991,7 +13027,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000744017",
+            "_id": "000000744017",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -13047,7 +13083,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000744017",
+            "id": "000000744017",
             "items": [
                 {
                     "priceUnit": "1",
@@ -13098,7 +13134,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000744026",
+            "_id": "000000744026",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -13154,7 +13190,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000744026",
+            "id": "000000744026",
             "items": [
                 {
                     "priceUnit": "1",
@@ -13205,7 +13241,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000743832",
+            "_id": "000000743832",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -13261,7 +13297,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000743832",
+            "id": "000000743832",
             "items": [
                 {
                     "priceUnit": "1",
@@ -13312,7 +13348,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000743709",
+            "_id": "000000743709",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -13368,7 +13404,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000743709",
+            "id": "000000743709",
             "items": [
                 {
                     "priceUnit": "1",
@@ -13419,7 +13455,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000743790",
+            "_id": "000000743790",
             "approver": [
                 {
                     "name": "Sweden test manager2 fullname",
@@ -13475,7 +13511,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000743790",
+            "id": "000000743790",
             "items": [
                 {
                     "priceUnit": "1",
@@ -13526,7 +13562,7 @@ function makeApprovals() {
             ]
         },
         {
-            "_id": "srm-E7D110-000000756591",
+            "_id": "000000756591",
             "approver": [
                 {
                     "name": "",
@@ -13574,7 +13610,7 @@ function makeApprovals() {
                 "companyCodeDescription": "Name 2 testing"
             },
             "state": "open",
-            "id": "srm-E7D110-000000756591",
+            "id": "000000756591",
             "items": [
                 {
                     "priceUnit": "1",
@@ -19103,13 +19139,11 @@ function ajax(options) {
                             serverObj.sessionUserUuid = null;
                             diag.debug.assert(function () { return !!error; });
                             diag.debug.warn('server session is lost!', error);
-                            var credentials = serverObj.credentials;
-                            if (credentials) {
+                            if (serverObj.credentials) {
                                 // recover by attempting login,
                                 // here promiseResponse must have been resolved already,
                                 // we chain anyways because of error propagation
-                                serverObj.credentials = null;
-                                promiseResponse.thenResolve(login(credentials, {
+                                promiseResponse.thenResolve(login(serverObj.credentials, {
                                     serverUrl: serverUrl
                                 }).then(function () {
                                     diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
@@ -19162,8 +19196,6 @@ function ajax(options) {
     });
 }
 exports.ajax = ajax;
-;
-;
 /**
  * logs into a Relution server.
  *
@@ -19446,23 +19478,64 @@ exports.logout = logout;
 "use strict";
 var assert = require('assert');
 var web = require('./index');
+var offline = require('./offline');
 var diag_1 = require('../core/diag');
 var security = require('../security');
-var credentials = {
-    userName: 't.beckmann',
-    password: 'mcap'
-};
+// connect to real server for testing purposes, used by all online tests
+var TestServer = (function () {
+    function TestServer() {
+    }
+    TestServer.prototype.resetProperty = function (key, value) {
+        Object.defineProperty(this, key, {
+            value: value
+        });
+        return value;
+    };
+    Object.defineProperty(TestServer.prototype, "serverUrl", {
+        get: function () {
+            return this.resetProperty('serverUrl', offline.localStorage().getItem('test.serverUrl') || 'http://localhost:8080');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestServer.prototype, "credentials", {
+        get: function () {
+            return this.resetProperty('credentials', {
+                userName: offline.localStorage().getItem('test.userName') || 'relutionsdk',
+                password: offline.localStorage().getItem('test.password') || 'relutionsdk123'
+            });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(TestServer.prototype, "login", {
+        get: function () {
+            var _this = this;
+            return this.resetProperty('login', web.login(this.credentials, {
+                serverUrl: this.serverUrl
+            }).catch(function (e) {
+                e.message += ' (' + _this.credentials.userName + ' @ ' + _this.serverUrl + ')';
+                throw e;
+            }));
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return TestServer;
+}());
+exports.TestServer = TestServer;
+exports.testServer = new TestServer();
 describe(module.filename || __filename, function () {
     return [
         it('login/logout', function (done) {
-            return web.login(credentials, {
-                serverUrl: 'http://localhost:8080'
+            return web.login(exports.testServer.credentials, {
+                serverUrl: exports.testServer.serverUrl
             }).then(function (loginResp) {
                 // logged in
                 assert.notEqual(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
                 var user = security.getCurrentUser();
                 assert(!!user);
-                assert.equal(user.name, credentials.userName);
+                assert.equal(user.name, exports.testServer.credentials.userName);
                 return web.get('/gofer/system/security/currentAuthorization').then(function (currentAuthResp) {
                     assert.equal(currentAuthResp.user.uuid, loginResp.user.uuid);
                     assert.equal(currentAuthResp.organization.uuid, loginResp.organization.uuid);
@@ -19473,13 +19546,15 @@ describe(module.filename || __filename, function () {
                     assert(!security.getCurrentUser());
                     return response;
                 });
+            }).finally(function () {
+                // forces relogin after test execution
+                return delete exports.testServer.login;
             }).done(function (result) { return done(); }, function (error) { return done(error); });
         }),
         it('callback order', function (done) {
-            assert.equal(security.getCurrentAuthorization(), security.ANONYMOUS_AUTHORIZATION);
             var state = 0;
             return web.get({
-                serverUrl: 'http://localhost:8080',
+                serverUrl: exports.testServer.serverUrl,
                 url: '/gofer/system/security/currentAuthorization',
                 requestCallback: function (request) {
                     diag_1.debug.debug('request callback fired.');
@@ -19501,7 +19576,7 @@ describe(module.filename || __filename, function () {
 });
 
 }).call(this,"/lib\\web\\http.spec.js")
-},{"../core/diag":4,"../security":44,"./index":50,"assert":78}],50:[function(require,module,exports){
+},{"../core/diag":4,"../security":44,"./index":50,"./offline":51,"assert":78}],50:[function(require,module,exports){
 /*
  * @file web/index.ts
  * Relution SDK
@@ -20263,6 +20338,12 @@ var assert = require('assert');
 var core = require('../core');
 var urls = require('./urls');
 describe(module.filename || __filename, function () {
+    after(function () {
+        core.init({
+            tenantOrga: null,
+            application: null
+        });
+    });
     return [
         it('resolveServer', function () {
             core.init({

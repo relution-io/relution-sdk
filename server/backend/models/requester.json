@@ -1,0 +1,26 @@
+{
+  "name": "requester",
+  "label": "requester",
+  "description": "Requester Model",
+  "attributes": [
+    {
+      "name": "id",
+      "description": "Some userid of foreign system, informal only, not a user of the app",
+      "type": "String",
+      "mandatory": true,
+      "key": true
+    },
+    {
+      "name": "name",
+      "type": "String"
+    },
+    {
+      "name": "email",
+      "type": "String"
+    },
+    {
+      "name": "phone",
+      "type": "String"
+    }
+  ]
+}

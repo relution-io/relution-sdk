@@ -1,0 +1,38 @@
+{
+  "name": "approver",
+  "label": "approver",
+  "description": "Approver Model",
+  "attributes": [
+    {
+      "name": "ids",
+      "description": "Approver id: Userid of approver, a user of the app. This lists all users that should be able to see the approval incl. substitute approvers. The backend must use this for ACL computations!",
+      "type": "String[]",
+      "mandatory": true
+    },
+    {
+      "name": "names",
+      "description": "Includes first name and last name. Same order as ids but eventually without names of substitute approvers. The UI must use this for display!",
+      "type": "String[]"
+    },
+    {
+      "name": "type",
+      "description": "Approval Type: Ex: Financial approver, category approver",
+      "type": "String"
+    },
+    {
+      "name": "status",
+      "description": "Approval Status of overall process spanning several workitems: Active, open, Approved, Rejected, Partially approved",
+      "type": "String"
+    },
+    {
+      "name": "receivedDate",
+      "description": "When the workitem reached the approver",
+      "type": "Date"
+    },
+    {
+      "name": "processedDate",
+      "description": "When the approver processed the workitem",
+      "type": "Date"
+    }
+  ]
+}

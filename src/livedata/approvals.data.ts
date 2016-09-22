@@ -265,7 +265,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000060102",
+      "_id": "000000060102",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -298,7 +298,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000060102",
+      "id": "000000060102",
       "items": []
     },
     {
@@ -376,7 +376,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000063413",
+      "_id": "000000063413",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -433,7 +433,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000063413",
+      "id": "000000063413",
       "items": [
         {
           "priceUnit": "1",
@@ -484,7 +484,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000061886",
+      "_id": "000000061886",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -541,7 +541,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000061886",
+      "id": "000000061886",
       "items": [
         {
           "priceUnit": "1",
@@ -684,7 +684,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000060531",
+      "_id": "000000060531",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -741,7 +741,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000060531",
+      "id": "000000060531",
       "items": [
         {
           "priceUnit": "1",
@@ -792,7 +792,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000060522",
+      "_id": "000000060522",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -849,7 +849,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000060522",
+      "id": "000000060522",
       "items": [
         {
           "priceUnit": "1",
@@ -900,7 +900,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000060231",
+      "_id": "000000060231",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -957,7 +957,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000060231",
+      "id": "000000060231",
       "items": [
         {
           "priceUnit": "1",
@@ -1008,7 +1008,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000060094",
+      "_id": "000000060094",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1065,7 +1065,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000060094",
+      "id": "000000060094",
       "items": [
         {
           "priceUnit": "1",
@@ -1162,7 +1162,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000058926",
+      "_id": "000000058926",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1219,7 +1219,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000058926",
+      "id": "000000058926",
       "items": [
         {
           "priceUnit": "1",
@@ -1270,7 +1270,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000058771",
+      "_id": "000000058771",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1335,7 +1335,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000058771",
+      "id": "000000058771",
       "items": [
         {
           "priceUnit": "1",
@@ -1386,7 +1386,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000058470",
+      "_id": "000000058470",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1443,7 +1443,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000058470",
+      "id": "000000058470",
       "items": [
         {
           "priceUnit": "1",
@@ -1586,7 +1586,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000057908",
+      "_id": "000000057908",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1643,7 +1643,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000057908",
+      "id": "000000057908",
       "items": [
         {
           "priceUnit": "1",
@@ -1694,7 +1694,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000057370",
+      "_id": "000000057370",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1751,7 +1751,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000057370",
+      "id": "000000057370",
       "items": [
         {
           "priceUnit": "1",
@@ -1802,7 +1802,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000056453",
+      "_id": "000000056453",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -1859,7 +1859,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000056453",
+      "id": "000000056453",
       "items": [
         {
           "priceUnit": "1",
@@ -2002,7 +2002,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000056346",
+      "_id": "000000056346",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -2059,7 +2059,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000056346",
+      "id": "000000056346",
       "items": [
         {
           "priceUnit": "1",
@@ -2202,7 +2202,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000053451",
+      "_id": "000000053451",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -2267,7 +2267,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000053451",
+      "id": "000000053451",
       "items": [
         {
           "priceUnit": "1",
@@ -2410,7 +2410,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000743803",
+      "_id": "000000743803",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -2467,7 +2467,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000743803",
+      "id": "000000743803",
       "items": [
         {
           "priceUnit": "1",
@@ -2518,7 +2518,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000746076",
+      "_id": "000000746076",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -2575,7 +2575,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000746076",
+      "id": "000000746076",
       "items": [
         {
           "priceUnit": "1",
@@ -2626,7 +2626,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745383",
+      "_id": "000000745383",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -2683,7 +2683,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745383",
+      "id": "000000745383",
       "items": [
         {
           "priceUnit": "1",
@@ -2734,7 +2734,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745385",
+      "_id": "000000745385",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -2791,7 +2791,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745385",
+      "id": "000000745385",
       "items": [
         {
           "priceUnit": "1",
@@ -2842,7 +2842,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745401",
+      "_id": "000000745401",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -2899,7 +2899,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745401",
+      "id": "000000745401",
       "items": [
         {
           "priceUnit": "1",
@@ -2950,7 +2950,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745407",
+      "_id": "000000745407",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3007,7 +3007,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745407",
+      "id": "000000745407",
       "items": [
         {
           "priceUnit": "1",
@@ -3058,7 +3058,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745432",
+      "_id": "000000745432",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3115,7 +3115,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745432",
+      "id": "000000745432",
       "items": [
         {
           "priceUnit": "1",
@@ -3166,7 +3166,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745678",
+      "_id": "000000745678",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3223,7 +3223,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745678",
+      "id": "000000745678",
       "items": [
         {
           "priceUnit": "1",
@@ -3274,7 +3274,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745683",
+      "_id": "000000745683",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3331,7 +3331,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745683",
+      "id": "000000745683",
       "items": [
         {
           "priceUnit": "1",
@@ -3382,7 +3382,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745685",
+      "_id": "000000745685",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3439,7 +3439,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745685",
+      "id": "000000745685",
       "items": [
         {
           "priceUnit": "1",
@@ -3490,7 +3490,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745686",
+      "_id": "000000745686",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3547,7 +3547,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745686",
+      "id": "000000745686",
       "items": [
         {
           "priceUnit": "1",
@@ -3598,7 +3598,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745691",
+      "_id": "000000745691",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3655,7 +3655,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745691",
+      "id": "000000745691",
       "items": [
         {
           "priceUnit": "1",
@@ -3706,7 +3706,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000746297",
+      "_id": "000000746297",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3763,7 +3763,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000746297",
+      "id": "000000746297",
       "items": [
         {
           "priceUnit": "1",
@@ -3814,7 +3814,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000746516",
+      "_id": "000000746516",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -3871,7 +3871,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000746516",
+      "id": "000000746516",
       "items": [
         {
           "priceUnit": "1",
@@ -3922,7 +3922,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747090",
+      "_id": "000000747090",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -3995,7 +3995,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747090",
+      "id": "000000747090",
       "items": [
         {
           "priceUnit": "1",
@@ -4055,7 +4055,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747211",
+      "_id": "000000747211",
       "approver": [
         {
           "name": "Sweden manager1",
@@ -4104,7 +4104,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747211",
+      "id": "000000747211",
       "items": [
         {
           "priceUnit": "1",
@@ -4155,7 +4155,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747224",
+      "_id": "000000747224",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -4236,7 +4236,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747224",
+      "id": "000000747224",
       "items": [
         {
           "priceUnit": "1",
@@ -4296,7 +4296,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747514",
+      "_id": "000000747514",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -4377,7 +4377,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747514",
+      "id": "000000747514",
       "items": [
         {
           "priceUnit": "1",
@@ -4492,7 +4492,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747527",
+      "_id": "000000747527",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -4573,7 +4573,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747527",
+      "id": "000000747527",
       "items": [
         {
           "priceUnit": "1",
@@ -4688,7 +4688,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747540",
+      "_id": "000000747540",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -4769,7 +4769,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747540",
+      "id": "000000747540",
       "items": [
         {
           "priceUnit": "1",
@@ -4884,7 +4884,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747577",
+      "_id": "000000747577",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -4973,7 +4973,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747577",
+      "id": "000000747577",
       "items": [
         {
           "priceUnit": "1",
@@ -5033,7 +5033,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000747629",
+      "_id": "000000747629",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -5074,7 +5074,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000747629",
+      "id": "000000747629",
       "items": [
         {
           "priceUnit": "1",
@@ -5134,7 +5134,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000748133",
+      "_id": "000000748133",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -5223,7 +5223,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000748133",
+      "id": "000000748133",
       "items": [
         {
           "priceUnit": "1",
@@ -5338,7 +5338,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000748164",
+      "_id": "000000748164",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -5419,7 +5419,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000748164",
+      "id": "000000748164",
       "items": [
         {
           "priceUnit": "1",
@@ -5534,7 +5534,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000749560",
+      "_id": "000000749560",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -5575,7 +5575,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000749560",
+      "id": "000000749560",
       "items": [
         {
           "priceUnit": "1",
@@ -5635,7 +5635,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000749562",
+      "_id": "000000749562",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -5676,7 +5676,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000749562",
+      "id": "000000749562",
       "items": [
         {
           "priceUnit": "1",
@@ -5736,7 +5736,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000749564",
+      "_id": "000000749564",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -5777,7 +5777,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000749564",
+      "id": "000000749564",
       "items": [
         {
           "priceUnit": "1",
@@ -5837,7 +5837,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000749566",
+      "_id": "000000749566",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -5878,7 +5878,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000749566",
+      "id": "000000749566",
       "items": [
         {
           "priceUnit": "1",
@@ -5938,7 +5938,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000750006",
+      "_id": "000000750006",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -5979,7 +5979,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000750006",
+      "id": "000000750006",
       "items": [
         {
           "priceUnit": "1",
@@ -6148,7 +6148,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000750047",
+      "_id": "000000750047",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -6189,7 +6189,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000750047",
+      "id": "000000750047",
       "items": [
         {
           "priceUnit": "1",
@@ -6249,7 +6249,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000751265",
+      "_id": "000000751265",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -6290,7 +6290,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000751265",
+      "id": "000000751265",
       "items": [
         {
           "priceUnit": "1",
@@ -6350,7 +6350,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000751959",
+      "_id": "000000751959",
       "approver": [
         {
           "name": "Sweden manager2",
@@ -6423,7 +6423,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000751959",
+      "id": "000000751959",
       "items": [
         {
           "priceUnit": "0",
@@ -6482,7 +6482,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000752424",
+      "_id": "000000752424",
       "approver": [
         {
           "name": "Sweden Manager 1",
@@ -6531,7 +6531,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000752424",
+      "id": "000000752424",
       "items": [
         {
           "priceUnit": "1",
@@ -6591,7 +6591,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000752443",
+      "_id": "000000752443",
       "approver": [
         {
           "name": "Sweden manager2",
@@ -6632,7 +6632,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000752443",
+      "id": "000000752443",
       "items": [
         {
           "priceUnit": "0",
@@ -6691,7 +6691,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000752729",
+      "_id": "000000752729",
       "approver": [
         {
           "name": "Sweden manager2",
@@ -6756,7 +6756,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000752729",
+      "id": "000000752729",
       "items": [
         {
           "priceUnit": "0",
@@ -6815,7 +6815,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000753091",
+      "_id": "000000753091",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -6856,7 +6856,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "approved",
-      "id": "srm-E7D110-000000753091",
+      "id": "000000753091",
       "items": [
         {
           "priceUnit": "1",
@@ -6916,7 +6916,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745161",
+      "_id": "000000745161",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -6973,7 +6973,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745161",
+      "id": "000000745161",
       "items": [
         {
           "priceUnit": "1",
@@ -7024,7 +7024,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000745160",
+      "_id": "000000745160",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7081,7 +7081,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000745160",
+      "id": "000000745160",
       "items": [
         {
           "priceUnit": "1",
@@ -7132,7 +7132,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000744028",
+      "_id": "000000744028",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7189,7 +7189,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000744028",
+      "id": "000000744028",
       "items": [
         {
           "priceUnit": "1",
@@ -7240,7 +7240,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000743851",
+      "_id": "000000743851",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7297,7 +7297,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000743851",
+      "id": "000000743851",
       "items": [
         {
           "priceUnit": "1",
@@ -7348,7 +7348,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000743996",
+      "_id": "000000743996",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7405,7 +7405,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000743996",
+      "id": "000000743996",
       "items": [
         {
           "priceUnit": "1",
@@ -7456,7 +7456,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000744009",
+      "_id": "000000744009",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7513,7 +7513,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000744009",
+      "id": "000000744009",
       "items": [
         {
           "priceUnit": "1",
@@ -7564,7 +7564,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000744011",
+      "_id": "000000744011",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7621,7 +7621,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000744011",
+      "id": "000000744011",
       "items": [
         {
           "priceUnit": "1",
@@ -7672,7 +7672,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000744017",
+      "_id": "000000744017",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7729,7 +7729,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000744017",
+      "id": "000000744017",
       "items": [
         {
           "priceUnit": "1",
@@ -7780,7 +7780,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000744026",
+      "_id": "000000744026",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7837,7 +7837,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000744026",
+      "id": "000000744026",
       "items": [
         {
           "priceUnit": "1",
@@ -7888,7 +7888,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000743832",
+      "_id": "000000743832",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -7945,7 +7945,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000743832",
+      "id": "000000743832",
       "items": [
         {
           "priceUnit": "1",
@@ -7996,7 +7996,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000743709",
+      "_id": "000000743709",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -8053,7 +8053,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000743709",
+      "id": "000000743709",
       "items": [
         {
           "priceUnit": "1",
@@ -8104,7 +8104,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000743790",
+      "_id": "000000743790",
       "approver": [
         {
           "name": "Sweden test manager2 fullname",
@@ -8161,7 +8161,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000743790",
+      "id": "000000743790",
       "items": [
         {
           "priceUnit": "1",
@@ -8212,7 +8212,7 @@ export function makeApprovals(): any[] {
       ]
     },
     {
-      "_id": "srm-E7D110-000000756591",
+      "_id": "000000756591",
       "approver": [
         {
           "name": "",
@@ -8261,7 +8261,7 @@ export function makeApprovals(): any[] {
         "companyCodeDescription": "Name 2 testing"
       },
       "state": "open",
-      "id": "srm-E7D110-000000756591",
+      "id": "000000756591",
       "items": [
         {
           "priceUnit": "1",

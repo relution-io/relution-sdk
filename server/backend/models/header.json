@@ -1,0 +1,63 @@
+{
+  "name": "header",
+  "label": "header",
+  "description": "Header Model",
+  "attributes": [
+	{
+	  "name": "objectType",
+	  "description": "Indicates whether this is a shopping card (SC), purchase order (PO) or goods receipt (GR)",
+	  "type": "String"
+	},
+    {
+      "name": "typeOfMail",
+      "description": "Kind of email: Whether is approve/reject or Accept.",
+      "type": "String",
+      "mandatory": true,
+      "enum": [
+        "approve_or_reject",
+        "accept_only",
+        "confirm_only"
+      ]
+    },
+    {
+      "name": "sourceSystem",
+      "description": "Identify from which system we have received this mail",
+      "type": "String"
+    },
+    {
+      "name": "approvalMessage",
+      "description": "Decision message can be displayed in the information tab and will not be mixed with Approver-model",
+      "type": "String"
+    },
+    {
+      "name": "totalValue",
+      "description": "Total price of shopping cart/PO price",
+      "type": "BigDecimal"
+    },
+    {
+      "name": "currency",
+      "description": "Displayed currency of totalValue",
+      "type": "String"
+    },
+    {
+      "name": "companyCode",
+      "description": "Company of the SC/PO",
+      "type": "String"
+    },
+    {
+      "name": "companyCodeDescription",
+      "description": "Company description of the SC/PO",
+      "type": "String"
+    },
+    {
+      "name": "objectId",
+      "description": "ID of SC or PO",
+      "type": "String"
+    },
+    {
+      "name": "objectName",
+      "description": "Name of the SC or PO: Description of the SC provided by user",
+      "type": "String"
+    }
+  ]
+}

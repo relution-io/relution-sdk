@@ -28,6 +28,12 @@ import * as core from '../core';
 import * as urls from './urls';
 
 describe(module.filename || __filename, function() {
+  after(() => {
+    core.init({
+      tenantOrga: null,
+      application: null
+    });
+  });
   return [
 
     it('resolveServer', () => {

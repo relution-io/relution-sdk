@@ -1,0 +1,18 @@
+{
+  //app name
+  name: relutionsdk
+  //description for the project
+  description: Auto Generated Description for relutionsdk.
+  //on which baseAlias the app is available
+  baseAlias: /relutionsdk
+  //uuid identifier dont touch it!!!
+  uuid: 5b717350-7f03-11e6-b2f5-3fa3535891df
+  //static files root folder to your client application
+  client: ./www
+  //node start script
+  server: ./app.js
+  //shows directoryIndex on the Server good for debugging
+  //directoryIndex: true
+  //if this attribute is set to true no anonymous user can see the app
+  private: false
+}

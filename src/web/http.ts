@@ -421,13 +421,13 @@ export interface LogonOptions extends init.ServerUrlOptions {
    */
   offlineCapable?: boolean;
 
-};
+}
 
 /**
  * options specific to [[login]] function.
  */
 export interface LoginOptions extends LogonOptions, init.ServerInitOptions {
-};
+}
 
 /**
  * logs into a Relution server.

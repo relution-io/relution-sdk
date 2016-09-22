@@ -1,0 +1,28 @@
+{
+	name: test
+	label: test
+	description: Entity used by livedata/SyncStore.spec.ts
+	attributes: [
+    {
+			name: _id
+			description: ID of entity
+			type: String
+			key: true
+    }
+
+
+
+    {
+			name: firstName
+			type: String
+    }
+    {
+			name: sureName
+			type: String
+    }
+    {
+			name: age
+			type: Integer
+    }
+  ]
+}

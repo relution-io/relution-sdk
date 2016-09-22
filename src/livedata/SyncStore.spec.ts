@@ -29,7 +29,8 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
-var serverUrl = 'http://localhost:8200';
+import * as urls from '../web/urls';
+import {testServer} from '../web/http.spec';
 
 function backbone_error(done: Function) {
   return function (model: Model | Collection, error: any) {
@@ -40,18 +41,25 @@ function backbone_error(done: Function) {
 describe(module.filename || __filename, function() {
   this.timeout(5000 * 1000);
 
-  var TEST: any = {
-    data: {
-      firstName: 'Max',
-      sureName: 'Mustermann',
-      age: 33
-    }
-  };
+  var TEST: any;
+
+  before(function() {
+    return testServer.login.then((result) => {
+      TEST = {
+        data: {
+          firstName: 'Max',
+          sureName: 'Mustermann',
+          age: 33
+        }
+      };
+      return result;
+    });
+  });
 
   return [
 
     it('creating store', () => {
-      assert.isString(serverUrl, 'Server url is defined.');
+      assert.isString(testServer.serverUrl, 'Server url is defined.');
 
       assert.isFunction(SyncStore, 'SyncStore is defined');
 
@@ -74,7 +82,10 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
 
-      TEST.url = serverUrl + '/relution/livedata/test/';
+      TEST.url = urls.resolveUrl('api/v1/test/', {
+        serverUrl: testServer.serverUrl,
+        application: 'relutionsdk'
+      });
 
       class TestsModelCollection extends Collection {}
       TestsModelCollection.prototype.model = TEST.TestModel;
@@ -168,14 +179,14 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with no id using callbacks', (done) => {
-      class TestModel2 extends Model {}
-      TestModel2.prototype.url = TEST.url;
-      TestModel2.prototype.idAttribute = '_id';
-      TestModel2.prototype.store = TEST.store;
-      TestModel2.prototype.entity = 'test';
-      TEST.TestModel2 = TestModel2;
+      class TestModel3 extends Model {}
+      TestModel3.prototype.url = TEST.url;
+      TestModel3.prototype.idAttribute = '_id';
+      TestModel3.prototype.store = TEST.store;
+      TestModel3.prototype.entity = 'test';
+      TEST.TestModel3 = TestModel3;
 
-      var model = new TEST.TestModel2({});
+      var model = new TEST.TestModel3({});
       model.fetch({
         success: function(model2: Model) {
           backbone_error(done)(model2, new Error('this should have failed!'));
@@ -187,14 +198,14 @@ describe(module.filename || __filename, function() {
     }),
 
     it('fetching model with empty-string id using promises', (done) => {
-      class TestModel2 extends Model {}
-      TestModel2.prototype.url = TEST.url;
-      TestModel2.prototype.idAttribute = '_id';
-      TestModel2.prototype.store = TEST.store;
-      TestModel2.prototype.entity =  'test';
-      TEST.TestModel2 = TestModel2;
+      class TestModel4 extends Model {}
+      TestModel4.prototype.url = TEST.url;
+      TestModel4.prototype.idAttribute = '_id';
+      TestModel4.prototype.store = TEST.store;
+      TestModel4.prototype.entity =  'test';
+      TEST.TestModel4 = TestModel4;
 
-      var model = new TEST.TestModel2({
+      var model = new TEST.TestModel4({
         _id: ''
       });
       model.fetch().then(function() {
@@ -254,25 +265,30 @@ describe(module.filename || __filename, function() {
       var oldId = model.id;
       var newId = '4711-' + oldId;
 
-      class TestModel extends Model {
+      class TestModel5 extends Model {
+        constructor(attrs: any) {
+          super(attrs);
+          this.ajax = this.ajax.bind(this);
+        }
+
         ajax(options?: any) {
           // following simulates server reassigning ID value
-          return Model.prototype.ajax.apply(this, arguments).then(function(response: any) {
-            if (response._id === oldId) {
+          return Model.prototype.ajax.apply(this, arguments).then((response: any) => {
+            if (this.id === oldId) {
               response._id = newId;
-            } else if (response._id === newId) {
+            } else if (this.id === newId) {
               response._id = oldId;
             }
             return response;
           });
         }
       }
-      TestModel.prototype.url = TEST.url;
-      TestModel.prototype.idAttribute = '_id';
-      TestModel.prototype.store = TEST.store;
-      TestModel.prototype.entity = 'test';
+      TestModel5.prototype.url = TEST.url;
+      TestModel5.prototype.idAttribute = '_id';
+      TestModel5.prototype.store = TEST.store;
+      TestModel5.prototype.entity = 'test';
 
-      var testModel = new TestModel(model.attributes);
+      var testModel = new TestModel5(model.attributes);
 
       var options = {
         wait: true
@@ -285,6 +301,7 @@ describe(module.filename || __filename, function() {
         assert.isUndefined(TEST.Tests.get(oldId), 'model is missing in collection by old id.');
       }).then(function() {
         // reverts local changes
+        options['url'] = TEST.url + oldId; // must fix up URL as we hacked it
         return testModel.save(undefined, options).then(function() {
           assert.ok(testModel.id, 'record has an id.');
           assert.equal(testModel.id, oldId, 'record has new id.');
@@ -316,11 +333,13 @@ describe(module.filename || __filename, function() {
         done();
       } else {
         var hasError = false, isDone = false;
+        var count = 0;
         TEST.Tests.models.forEach(function(model: Model) {
           if (!hasError) {
+            ++count;
             model.destroy({
               success: function() {
-                if (TEST.Tests.length == 0 && !isDone) {
+                if (--count === 0 && !isDone) {
                   isDone = true;
                   assert.equal(TEST.Tests.length, 0, 'collection is empty');
                   done();

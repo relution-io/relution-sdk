@@ -284,8 +284,7 @@ exports.hashJson = hashJson;
 }).call(this,require("buffer").Buffer)
 },{"buffer":106,"crypto":117,"lodash":210,"q":246}],5:[function(require,module,exports){
 (function (process,global){
-"use strict";
-/**
+/*
  * @file core/device.ts
  * Relution SDK
  *
@@ -308,6 +307,7 @@ exports.hashJson = hashJson;
  * @module core
  */
 /** */
+"use strict";
 var Q = require('q');
 var diag = require('./diag');
 /**
@@ -319,12 +319,6 @@ exports.ready = (function () {
     // must be extracted from global scope object as otherwise we get ReferenceError in node.js
     var document = global['document'];
     var window = global['window'];
-    var resolveDocument;
-    var callback = function () {
-        document.removeEventListener('load', callback);
-        document.removeEventListener('DOMContentLoaded', callback);
-        return resolveDocument(document);
-    };
     return Q.Promise(function (resolve, reject) {
         // resolves to document once the DOM is loaded
         try {
@@ -332,7 +326,11 @@ exports.ready = (function () {
                 resolve(document);
                 return;
             }
-            resolveDocument = resolve;
+            function callback() {
+                resolve(document);
+                document.removeEventListener('load', callback);
+                document.removeEventListener('DOMContentLoaded', callback);
+            }
             document.addEventListener('DOMContentLoaded', callback, false);
             document.addEventListener('load', callback, false); // fallback
         }
@@ -350,10 +348,11 @@ exports.ready = (function () {
                     return;
                 }
                 // see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-                document.addEventListener('deviceready', function () {
-                    document.removeEventListener('deviceready', callback);
+                function callback() {
                     resolve(window);
-                }, false);
+                    document.removeEventListener('deviceready', callback);
+                }
+                document.addEventListener('deviceready', callback, false);
             }
             catch (error) {
                 reject(error);
@@ -1061,7 +1060,6 @@ var _ = require('lodash');
 var url = require('url');
 var diag = require('../core/diag');
 var Model_1 = require('./Model');
-var Q = require('q');
 var rest_1 = require('./rest');
 /**
  * tests whether a given object is a Collection.
@@ -1274,7 +1272,7 @@ var collection = _.extend(Collection.prototype, {
 });
 diag.debug.assert(function () { return isCollection(Object.create(collection)); });
 
-},{"../core/diag":6,"./Model":15,"./rest":22,"lodash":210,"q":246,"url":328}],14:[function(require,module,exports){
+},{"../core/diag":6,"./Model":15,"./rest":22,"lodash":210,"url":328}],14:[function(require,module,exports){
 /*
  * @file livedata/LiveDataMessage.ts
  * Relution SDK
@@ -1482,7 +1480,6 @@ diag.debug.assert(function () { return isModel(Object.create(model)); });
 /** */
 "use strict";
 var _ = require('lodash');
-var Q = require('q');
 var diag = require('../core/diag');
 /**
  * tests whether a given object is a Store.
@@ -1570,7 +1567,7 @@ var store = _.extend(Store.prototype, Backbone.Events, {
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
 
-},{"../core/diag":6,"lodash":210,"q":246}],17:[function(require,module,exports){
+},{"../core/diag":6,"lodash":210}],17:[function(require,module,exports){
 /*
  * @file livedata/SyncContext.ts
  * Relution SDK
@@ -6589,13 +6586,11 @@ function ajax(options) {
                             serverObj.sessionUserUuid = null;
                             diag.debug.assert(function () { return !!error; });
                             diag.debug.warn('server session is lost!', error);
-                            var credentials = serverObj.credentials;
-                            if (credentials) {
+                            if (serverObj.credentials) {
                                 // recover by attempting login,
                                 // here promiseResponse must have been resolved already,
                                 // we chain anyways because of error propagation
-                                serverObj.credentials = null;
-                                promiseResponse.thenResolve(login(credentials, {
+                                promiseResponse.thenResolve(login(serverObj.credentials, {
                                     serverUrl: serverUrl
                                 }).then(function () {
                                     diag.debug.assert(function () { return !!serverObj.sessionUserUuid; });
@@ -6648,8 +6643,6 @@ function ajax(options) {
     });
 }
 exports.ajax = ajax;
-;
-;
 /**
  * logs into a Relution server.
  *
@@ -6771,13 +6764,9 @@ function login(credentials, loginOptions) {
         return Q.reject(error);
     }).then(function (response) {
         // switch current server
-        if ('roles' in response.roles) {
-            // fixes a defect of Java implementation
-            response.roles = response.roles['roles'];
-        }
         serverObj.authorization = {
             name: response.user.uuid,
-            roles: _.map(response.roles, function (role) { return role.uuid; })
+            roles: _.map(response.roles.roles, function (role) { return role.uuid; })
         };
         serverObj.organization = response.organization;
         serverObj.user = response.user;
@@ -7057,7 +7046,7 @@ function fetchOfflineLogin(credentials, serverOptions) {
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
 
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib/web/offline.js")
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
 },{"../core/cipher":4,"_process":238,"node-localstorage":undefined,"q":246}],44:[function(require,module,exports){
 /*
  * @file web/urls.ts
@@ -8088,7 +8077,7 @@ module.exports = Node;
 var stateProps = [
   'enc', 'parent', 'children', 'tag', 'args', 'reverseArgs', 'choice',
   'optional', 'any', 'obj', 'use', 'alteredUse', 'key', 'default', 'explicit',
-  'implicit', 'contains'
+  'implicit'
 ];
 
 Node.prototype.clone = function clone() {
@@ -8293,17 +8282,17 @@ Node.prototype.contains = function contains(item) {
 // Decoding
 //
 
-Node.prototype._decode = function decode(input, options) {
+Node.prototype._decode = function decode(input) {
   var state = this._baseState;
 
   // Decode root node
   if (state.parent === null)
-    return input.wrapResult(state.children[0]._decode(input, options));
+    return input.wrapResult(state.children[0]._decode(input));
 
   var result = state['default'];
   var present = true;
 
-  var prevKey = null;
+  var prevKey;
   if (state.key !== null)
     prevKey = input.enterKey(state.key);
 
@@ -8322,9 +8311,9 @@ Node.prototype._decode = function decode(input, options) {
       var save = input.save();
       try {
         if (state.choice === null)
-          this._decodeGeneric(state.tag, input, options);
+          this._decodeGeneric(state.tag, input);
         else
-          this._decodeChoice(input, options);
+          this._decodeChoice(input);
         present = true;
       } catch (e) {
         present = false;
@@ -8352,8 +8341,6 @@ Node.prototype._decode = function decode(input, options) {
       input = explicit;
     }
 
-    var start = input.offset;
-
     // Unwrap implicit and normal values
     if (state.use === null && state.choice === null) {
       if (state.any)
@@ -8372,19 +8359,13 @@ Node.prototype._decode = function decode(input, options) {
         input = body;
     }
 
-    if (options && options.track && state.tag !== null)
-      options.track(input.path(), start, input.length, 'tagged');
-
-    if (options && options.track && state.tag !== null)
-      options.track(input.path(), input.offset, input.length, 'content');
-
     // Select proper method for tag
     if (state.any)
       result = result;
     else if (state.choice === null)
-      result = this._decodeGeneric(state.tag, input, options);
+      result = this._decodeGeneric(state.tag, input);
     else
-      result = this._decodeChoice(input, options);
+      result = this._decodeChoice(input);
 
     if (input.isError(result))
       return result;
@@ -8394,15 +8375,14 @@ Node.prototype._decode = function decode(input, options) {
       state.children.forEach(function decodeChildren(child) {
         // NOTE: We are ignoring errors here, to let parser continue with other
         // parts of encoded data
-        child._decode(input, options);
+        child._decode(input);
       });
     }
 
     // Decode contained/encoded by schema, only in bit or octet strings
     if (state.contains && (state.tag === 'octstr' || state.tag === 'bitstr')) {
       var data = new DecoderBuffer(result);
-      result = this._getUse(state.contains, input._reporterState.obj)
-          ._decode(data, options);
+      result = this._getUse(state.contains, input._reporterState.obj)._decode(data);
     }
   }
 
@@ -8413,40 +8393,35 @@ Node.prototype._decode = function decode(input, options) {
   // Set key
   if (state.key !== null && (result !== null || present === true))
     input.leaveKey(prevKey, state.key, result);
-  else if (prevKey !== null)
-    input.exitKey(prevKey);
 
   return result;
 };
 
-Node.prototype._decodeGeneric = function decodeGeneric(tag, input, options) {
+Node.prototype._decodeGeneric = function decodeGeneric(tag, input) {
   var state = this._baseState;
 
   if (tag === 'seq' || tag === 'set')
     return null;
   if (tag === 'seqof' || tag === 'setof')
-    return this._decodeList(input, tag, state.args[0], options);
+    return this._decodeList(input, tag, state.args[0]);
   else if (/str$/.test(tag))
-    return this._decodeStr(input, tag, options);
+    return this._decodeStr(input, tag);
   else if (tag === 'objid' && state.args)
-    return this._decodeObjid(input, state.args[0], state.args[1], options);
+    return this._decodeObjid(input, state.args[0], state.args[1]);
   else if (tag === 'objid')
-    return this._decodeObjid(input, null, null, options);
+    return this._decodeObjid(input, null, null);
   else if (tag === 'gentime' || tag === 'utctime')
-    return this._decodeTime(input, tag, options);
+    return this._decodeTime(input, tag);
   else if (tag === 'null_')
-    return this._decodeNull(input, options);
+    return this._decodeNull(input);
   else if (tag === 'bool')
-    return this._decodeBool(input, options);
+    return this._decodeBool(input);
   else if (tag === 'int' || tag === 'enum')
-    return this._decodeInt(input, state.args && state.args[0], options);
-
-  if (state.use !== null) {
-    return this._getUse(state.use, input._reporterState.obj)
-        ._decode(input, options);
-  } else {
+    return this._decodeInt(input, state.args && state.args[0]);
+  else if (state.use !== null)
+    return this._getUse(state.use, input._reporterState.obj)._decode(input);
+  else
     return input.error('unknown tag: ' + tag);
-  }
 };
 
 Node.prototype._getUse = function _getUse(entity, obj) {
@@ -8463,7 +8438,7 @@ Node.prototype._getUse = function _getUse(entity, obj) {
   return state.useDecoder;
 };
 
-Node.prototype._decodeChoice = function decodeChoice(input, options) {
+Node.prototype._decodeChoice = function decodeChoice(input) {
   var state = this._baseState;
   var result = null;
   var match = false;
@@ -8472,7 +8447,7 @@ Node.prototype._decodeChoice = function decodeChoice(input, options) {
     var save = input.save();
     var node = state.choice[key];
     try {
-      var value = node._decode(input, options);
+      var value = node._decode(input);
       if (input.isError(value))
         return false;
 
@@ -8687,22 +8662,12 @@ Reporter.prototype.enterKey = function enterKey(key) {
   return this._reporterState.path.push(key);
 };
 
-Reporter.prototype.exitKey = function exitKey(index) {
-  var state = this._reporterState;
-
-  state.path = state.path.slice(0, index - 1);
-};
-
 Reporter.prototype.leaveKey = function leaveKey(index, key, value) {
   var state = this._reporterState;
 
-  this.exitKey(index);
+  state.path = state.path.slice(0, index - 1);
   if (state.obj !== null)
     state.obj[key] = value;
-};
-
-Reporter.prototype.path = function path() {
-  return this._reporterState.path.join('/');
 };
 
 Reporter.prototype.enterObject = function enterObject() {
@@ -8952,15 +8917,14 @@ DERNode.prototype._skipUntilEnd = function skipUntilEnd(buffer, fail) {
   }
 };
 
-DERNode.prototype._decodeList = function decodeList(buffer, tag, decoder,
-                                                    options) {
+DERNode.prototype._decodeList = function decodeList(buffer, tag, decoder) {
   var result = [];
   while (!buffer.isEmpty()) {
     var possibleEnd = this._peekTag(buffer, 'end');
     if (buffer.isError(possibleEnd))
       return possibleEnd;
 
-    var res = decoder.decode(buffer, 'der', options);
+    var res = decoder.decode(buffer, 'der');
     if (buffer.isError(res) && possibleEnd)
       break;
     result.push(res);
@@ -11856,12 +11820,8 @@ module.exports = BufferList
   }
 
   BN.isBN = function isBN (num) {
-    if (num instanceof BN) {
-      return true;
-    }
-
     return num !== null && typeof num === 'object' &&
-      num.constructor.wordSize === BN.wordSize && Array.isArray(num.words);
+      num.constructor.name === 'BN' && Array.isArray(num.words);
   };
 
   BN.max = function max (left, right) {
@@ -18247,9 +18207,7 @@ function fromArrayBuffer (that, array, byteOffset, length) {
     throw new RangeError('\'length\' is out of bounds')
   }
 
-  if (byteOffset === undefined && length === undefined) {
-    array = new Uint8Array(array)
-  } else if (length === undefined) {
+  if (length === undefined) {
     array = new Uint8Array(array, byteOffset)
   } else {
     array = new Uint8Array(array, byteOffset, length)
@@ -26719,15 +26677,14 @@ module.exports={
   "_args": [
     [
       {
-        "raw": "elliptic@^6.0.0",
-        "scope": null,
-        "escapedName": "elliptic",
         "name": "elliptic",
+        "raw": "elliptic@^6.0.0",
         "rawSpec": "^6.0.0",
+        "scope": null,
         "spec": ">=6.0.0 <7.0.0",
         "type": "range"
       },
-      "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/browserify-sign"
+      "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\browserify-sign"
     ]
   ],
   "_from": "elliptic@>=6.0.0 <7.0.0",
@@ -26741,17 +26698,16 @@ module.exports={
     "tmp": "tmp/elliptic-6.3.1.tgz_1465921413402_0.5202967382501811"
   },
   "_npmUser": {
-    "name": "indutny",
-    "email": "fedor@indutny.com"
+    "email": "fedor@indutny.com",
+    "name": "indutny"
   },
   "_npmVersion": "3.8.6",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "elliptic@^6.0.0",
-    "scope": null,
-    "escapedName": "elliptic",
     "name": "elliptic",
+    "raw": "elliptic@^6.0.0",
     "rawSpec": "^6.0.0",
+    "scope": null,
     "spec": ">=6.0.0 <7.0.0",
     "type": "range"
   },
@@ -26763,10 +26719,10 @@ module.exports={
   "_shasum": "17781f2109ab0ec686b146bdcff5d2e8c6aeceda",
   "_shrinkwrap": null,
   "_spec": "elliptic@^6.0.0",
-  "_where": "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/browserify-sign",
+  "_where": "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\browserify-sign",
   "author": {
-    "name": "Fedor Indutny",
-    "email": "fedor@indutny.com"
+    "email": "fedor@indutny.com",
+    "name": "Fedor Indutny"
   },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
@@ -26813,8 +26769,8 @@ module.exports={
   "main": "lib/elliptic.js",
   "maintainers": [
     {
-      "name": "indutny",
-      "email": "fedor@indutny.com"
+      "email": "fedor@indutny.com",
+      "name": "indutny"
     }
   ],
   "name": "elliptic",
@@ -35751,7 +35707,7 @@ function mergeObjects(provided, overrides, defaults)
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.14.0';
+  var VERSION = '4.15.0';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -35868,11 +35824,12 @@ function mergeObjects(provided, overrides, defaults)
   /** Used to match property names within property paths. */
   var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
       reIsPlainProp = /^\w*$/,
-      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(\.|\[\])(?:\4|$))/g;
+      reLeadingDot = /^\./,
+      rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 
   /**
    * Used to match `RegExp`
-   * [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns).
+   * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
    */
   var reRegExpChar = /[\\^$.*+?()[\]{}|]/g,
       reHasRegExpChar = RegExp(reRegExpChar.source);
@@ -35887,15 +35844,15 @@ function mergeObjects(provided, overrides, defaults)
       reWrapDetails = /\{\n\/\* \[wrapped with (.+)\] \*/,
       reSplitDetails = /,? & /;
 
-  /** Used to match non-compound words composed of alphanumeric characters. */
-  var reBasicWord = /[a-zA-Z0-9]+/g;
+  /** Used to match words composed of alphanumeric characters. */
+  var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
 
   /** Used to match backslashes in property paths. */
   var reEscapeChar = /\\(\\)?/g;
 
   /**
    * Used to match
-   * [ES template delimiters](http://ecma-international.org/ecma-262/6.0/#sec-template-literal-lexical-components).
+   * [ES template delimiters](http://ecma-international.org/ecma-262/7.0/#sec-template-literal-lexical-components).
    */
   var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
 
@@ -35920,8 +35877,8 @@ function mergeObjects(provided, overrides, defaults)
   /** Used to detect unsigned integer values. */
   var reIsUint = /^(?:0|[1-9]\d*)$/;
 
-  /** Used to match latin-1 supplementary letters (excluding mathematical operators). */
-  var reLatin1 = /[\xc0-\xd6\xd8-\xde\xdf-\xf6\xf8-\xff]/g;
+  /** Used to match Latin Unicode letters (excluding mathematical operators). */
+  var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
 
   /** Used to ensure capturing order of template delimiters. */
   var reNoMatch = /($^)/;
@@ -35982,10 +35939,10 @@ function mergeObjects(provided, overrides, defaults)
   var reComboMark = RegExp(rsCombo, 'g');
 
   /** Used to match [string symbols](https://mathiasbynens.be/notes/javascript-unicode). */
-  var reComplexSymbol = RegExp(rsFitz + '(?=' + rsFitz + ')|' + rsSymbol + rsSeq, 'g');
+  var reUnicode = RegExp(rsFitz + '(?=' + rsFitz + ')|' + rsSymbol + rsSeq, 'g');
 
   /** Used to match complex or compound words. */
-  var reComplexWord = RegExp([
+  var reUnicodeWord = RegExp([
     rsUpper + '?' + rsLower + '+' + rsOptLowerContr + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
     rsUpperMisc + '+' + rsOptUpperContr + '(?=' + [rsBreak, rsUpper + rsLowerMisc, '$'].join('|') + ')',
     rsUpper + '?' + rsLowerMisc + '+' + rsOptLowerContr,
@@ -35995,17 +35952,17 @@ function mergeObjects(provided, overrides, defaults)
   ].join('|'), 'g');
 
   /** Used to detect strings with [zero-width joiners or code points from the astral planes](http://eev.ee/blog/2015/09/12/dark-corners-of-unicode/). */
-  var reHasComplexSymbol = RegExp('[' + rsZWJ + rsAstralRange  + rsComboMarksRange + rsComboSymbolsRange + rsVarRange + ']');
+  var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboMarksRange + rsComboSymbolsRange + rsVarRange + ']');
 
   /** Used to detect strings that need a more robust regexp to match words. */
-  var reHasComplexWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+  var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2,}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
     'Array', 'Buffer', 'DataView', 'Date', 'Error', 'Float32Array', 'Float64Array',
     'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
-    'Promise', 'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError',
-    'Uint8Array', 'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
+    'Promise', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError', 'Uint8Array',
+    'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap',
     '_', 'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
   ];
 
@@ -36044,16 +36001,17 @@ function mergeObjects(provided, overrides, defaults)
   cloneableTags[errorTag] = cloneableTags[funcTag] =
   cloneableTags[weakMapTag] = false;
 
-  /** Used to map latin-1 supplementary letters to basic latin letters. */
+  /** Used to map Latin Unicode letters to basic Latin letters. */
   var deburredLetters = {
+    // Latin-1 Supplement block.
     '\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
     '\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',
     '\xc7': 'C',  '\xe7': 'c',
     '\xd0': 'D',  '\xf0': 'd',
     '\xc8': 'E',  '\xc9': 'E', '\xca': 'E', '\xcb': 'E',
     '\xe8': 'e',  '\xe9': 'e', '\xea': 'e', '\xeb': 'e',
-    '\xcC': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
-    '\xeC': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
+    '\xcc': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
+    '\xec': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
     '\xd1': 'N',  '\xf1': 'n',
     '\xd2': 'O',  '\xd3': 'O', '\xd4': 'O', '\xd5': 'O', '\xd6': 'O', '\xd8': 'O',
     '\xf2': 'o',  '\xf3': 'o', '\xf4': 'o', '\xf5': 'o', '\xf6': 'o', '\xf8': 'o',
@@ -36062,7 +36020,43 @@ function mergeObjects(provided, overrides, defaults)
     '\xdd': 'Y',  '\xfd': 'y', '\xff': 'y',
     '\xc6': 'Ae', '\xe6': 'ae',
     '\xde': 'Th', '\xfe': 'th',
-    '\xdf': 'ss'
+    '\xdf': 'ss',
+    // Latin Extended-A block.
+    '\u0100': 'A',  '\u0102': 'A', '\u0104': 'A',
+    '\u0101': 'a',  '\u0103': 'a', '\u0105': 'a',
+    '\u0106': 'C',  '\u0108': 'C', '\u010a': 'C', '\u010c': 'C',
+    '\u0107': 'c',  '\u0109': 'c', '\u010b': 'c', '\u010d': 'c',
+    '\u010e': 'D',  '\u0110': 'D', '\u010f': 'd', '\u0111': 'd',
+    '\u0112': 'E',  '\u0114': 'E', '\u0116': 'E', '\u0118': 'E', '\u011a': 'E',
+    '\u0113': 'e',  '\u0115': 'e', '\u0117': 'e', '\u0119': 'e', '\u011b': 'e',
+    '\u011c': 'G',  '\u011e': 'G', '\u0120': 'G', '\u0122': 'G',
+    '\u011d': 'g',  '\u011f': 'g', '\u0121': 'g', '\u0123': 'g',
+    '\u0124': 'H',  '\u0126': 'H', '\u0125': 'h', '\u0127': 'h',
+    '\u0128': 'I',  '\u012a': 'I', '\u012c': 'I', '\u012e': 'I', '\u0130': 'I',
+    '\u0129': 'i',  '\u012b': 'i', '\u012d': 'i', '\u012f': 'i', '\u0131': 'i',
+    '\u0134': 'J',  '\u0135': 'j',
+    '\u0136': 'K',  '\u0137': 'k', '\u0138': 'k',
+    '\u0139': 'L',  '\u013b': 'L', '\u013d': 'L', '\u013f': 'L', '\u0141': 'L',
+    '\u013a': 'l',  '\u013c': 'l', '\u013e': 'l', '\u0140': 'l', '\u0142': 'l',
+    '\u0143': 'N',  '\u0145': 'N', '\u0147': 'N', '\u014a': 'N',
+    '\u0144': 'n',  '\u0146': 'n', '\u0148': 'n', '\u014b': 'n',
+    '\u014c': 'O',  '\u014e': 'O', '\u0150': 'O',
+    '\u014d': 'o',  '\u014f': 'o', '\u0151': 'o',
+    '\u0154': 'R',  '\u0156': 'R', '\u0158': 'R',
+    '\u0155': 'r',  '\u0157': 'r', '\u0159': 'r',
+    '\u015a': 'S',  '\u015c': 'S', '\u015e': 'S', '\u0160': 'S',
+    '\u015b': 's',  '\u015d': 's', '\u015f': 's', '\u0161': 's',
+    '\u0162': 'T',  '\u0164': 'T', '\u0166': 'T',
+    '\u0163': 't',  '\u0165': 't', '\u0167': 't',
+    '\u0168': 'U',  '\u016a': 'U', '\u016c': 'U', '\u016e': 'U', '\u0170': 'U', '\u0172': 'U',
+    '\u0169': 'u',  '\u016b': 'u', '\u016d': 'u', '\u016f': 'u', '\u0171': 'u', '\u0173': 'u',
+    '\u0174': 'W',  '\u0175': 'w',
+    '\u0176': 'Y',  '\u0177': 'y', '\u0178': 'Y',
+    '\u0179': 'Z',  '\u017b': 'Z', '\u017d': 'Z',
+    '\u017a': 'z',  '\u017c': 'z', '\u017e': 'z',
+    '\u0132': 'IJ', '\u0133': 'ij',
+    '\u0152': 'Oe', '\u0153': 'oe',
+    '\u0149': "'n", '\u017f': 'ss'
   };
 
   /** Used to map characters to HTML entities. */
@@ -36109,10 +36103,10 @@ function mergeObjects(provided, overrides, defaults)
   var root = freeGlobal || freeSelf || Function('return this')();
 
   /** Detect free variable `exports`. */
-  var freeExports = freeGlobal && typeof exports == 'object' && exports;
+  var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
 
   /** Detect free variable `module`. */
-  var freeModule = freeExports && typeof module == 'object' && module;
+  var freeModule = freeExports && typeof module == 'object' && module && !module.nodeType && module;
 
   /** Detect the popular CommonJS extension `module.exports`. */
   var moduleExports = freeModule && freeModule.exports === freeExports;
@@ -36298,7 +36292,7 @@ function mergeObjects(provided, overrides, defaults)
    * specifying an index to search from.
    *
    * @private
-   * @param {Array} [array] The array to search.
+   * @param {Array} [array] The array to inspect.
    * @param {*} target The value to search for.
    * @returns {boolean} Returns `true` if `target` is found, else `false`.
    */
@@ -36311,7 +36305,7 @@ function mergeObjects(provided, overrides, defaults)
    * This function is like `arrayIncludes` except that it accepts a comparator.
    *
    * @private
-   * @param {Array} [array] The array to search.
+   * @param {Array} [array] The array to inspect.
    * @param {*} target The value to search for.
    * @param {Function} comparator The comparator invoked per element.
    * @returns {boolean} Returns `true` if `target` is found, else `false`.
@@ -36438,12 +36432,43 @@ function mergeObjects(provided, overrides, defaults)
   }
 
   /**
+   * Gets the size of an ASCII `string`.
+   *
+   * @private
+   * @param {string} string The string inspect.
+   * @returns {number} Returns the string size.
+   */
+  var asciiSize = baseProperty('length');
+
+  /**
+   * Converts an ASCII `string` to an array.
+   *
+   * @private
+   * @param {string} string The string to convert.
+   * @returns {Array} Returns the converted array.
+   */
+  function asciiToArray(string) {
+    return string.split('');
+  }
+
+  /**
+   * Splits an ASCII `string` into an array of its words.
+   *
+   * @private
+   * @param {string} The string to inspect.
+   * @returns {Array} Returns the words of `string`.
+   */
+  function asciiWords(string) {
+    return string.match(reAsciiWord) || [];
+  }
+
+  /**
    * The base implementation of methods like `_.findKey` and `_.findLastKey`,
    * without support for iteratee shorthands, which iterates over `collection`
    * using `eachFunc`.
    *
    * @private
-   * @param {Array|Object} collection The collection to search.
+   * @param {Array|Object} collection The collection to inspect.
    * @param {Function} predicate The function invoked per iteration.
    * @param {Function} eachFunc The function to iterate over `collection`.
    * @returns {*} Returns the found element or its key, else `undefined`.
@@ -36464,7 +36489,7 @@ function mergeObjects(provided, overrides, defaults)
    * support for iteratee shorthands.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} array The array to inspect.
    * @param {Function} predicate The function invoked per iteration.
    * @param {number} fromIndex The index to search from.
    * @param {boolean} [fromRight] Specify iterating from right to left.
@@ -36486,7 +36511,7 @@ function mergeObjects(provided, overrides, defaults)
    * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} array The array to inspect.
    * @param {*} value The value to search for.
    * @param {number} fromIndex The index to search from.
    * @returns {number} Returns the index of the matched value, else `-1`.
@@ -36510,7 +36535,7 @@ function mergeObjects(provided, overrides, defaults)
    * This function is like `baseIndexOf` except that it accepts a comparator.
    *
    * @private
-   * @param {Array} array The array to search.
+   * @param {Array} array The array to inspect.
    * @param {*} value The value to search for.
    * @param {number} fromIndex The index to search from.
    * @param {Function} comparator The comparator invoked per element.
@@ -36773,7 +36798,8 @@ function mergeObjects(provided, overrides, defaults)
   }
 
   /**
-   * Used by `_.deburr` to convert latin-1 supplementary letters to basic latin letters.
+   * Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A
+   * letters to basic Latin letters.
    *
    * @private
    * @param {string} letter The matched letter to deburr.
@@ -36811,6 +36837,28 @@ function mergeObjects(provided, overrides, defaults)
    */
   function getValue(object, key) {
     return object == null ? undefined : object[key];
+  }
+
+  /**
+   * Checks if `string` contains Unicode symbols.
+   *
+   * @private
+   * @param {string} string The string to inspect.
+   * @returns {boolean} Returns `true` if a symbol is found, else `false`.
+   */
+  function hasUnicode(string) {
+    return reHasUnicode.test(string);
+  }
+
+  /**
+   * Checks if `string` contains a word composed of Unicode symbols.
+   *
+   * @private
+   * @param {string} string The string to inspect.
+   * @returns {boolean} Returns `true` if a word is found, else `false`.
+   */
+  function hasUnicodeWord(string) {
+    return reHasUnicodeWord.test(string);
   }
 
   /**
@@ -36867,7 +36915,7 @@ function mergeObjects(provided, overrides, defaults)
   }
 
   /**
-   * Creates a function that invokes `func` with its first argument transformed.
+   * Creates a unary function that invokes `func` with its argument transformed.
    *
    * @private
    * @param {Function} func The function to wrap.
@@ -36947,14 +36995,9 @@ function mergeObjects(provided, overrides, defaults)
    * @returns {number} Returns the string size.
    */
   function stringSize(string) {
-    if (!(string && reHasComplexSymbol.test(string))) {
-      return string.length;
-    }
-    var result = reComplexSymbol.lastIndex = 0;
-    while (reComplexSymbol.test(string)) {
-      result++;
-    }
-    return result;
+    return hasUnicode(string)
+      ? unicodeSize(string)
+      : asciiSize(string);
   }
 
   /**
@@ -36965,7 +37008,9 @@ function mergeObjects(provided, overrides, defaults)
    * @returns {Array} Returns the converted array.
    */
   function stringToArray(string) {
-    return string.match(reComplexSymbol);
+    return hasUnicode(string)
+      ? unicodeToArray(string)
+      : asciiToArray(string);
   }
 
   /**
@@ -36976,6 +37021,43 @@ function mergeObjects(provided, overrides, defaults)
    * @returns {string} Returns the unescaped character.
    */
   var unescapeHtmlChar = basePropertyOf(htmlUnescapes);
+
+  /**
+   * Gets the size of a Unicode `string`.
+   *
+   * @private
+   * @param {string} string The string inspect.
+   * @returns {number} Returns the string size.
+   */
+  function unicodeSize(string) {
+    var result = reUnicode.lastIndex = 0;
+    while (reUnicode.test(string)) {
+      result++;
+    }
+    return result;
+  }
+
+  /**
+   * Converts a Unicode `string` to an array.
+   *
+   * @private
+   * @param {string} string The string to convert.
+   * @returns {Array} Returns the converted array.
+   */
+  function unicodeToArray(string) {
+    return string.match(reUnicode) || [];
+  }
+
+  /**
+   * Splits a Unicode `string` into an array of its words.
+   *
+   * @private
+   * @param {string} The string to inspect.
+   * @returns {Array} Returns the words of `string`.
+   */
+  function unicodeWords(string) {
+    return string.match(reUnicodeWord) || [];
+  }
 
   /*--------------------------------------------------------------------------*/
 
@@ -37016,20 +37098,23 @@ function mergeObjects(provided, overrides, defaults)
    * var defer = _.runInContext({ 'setTimeout': setImmediate }).defer;
    */
   function runInContext(context) {
-    context = context ? _.defaults({}, context, _.pick(root, contextProps)) : root;
+    context = context ? _.defaults(root.Object(), context, _.pick(root, contextProps)) : root;
 
     /** Built-in constructor references. */
     var Array = context.Array,
         Date = context.Date,
         Error = context.Error,
+        Function = context.Function,
         Math = context.Math,
+        Object = context.Object,
         RegExp = context.RegExp,
+        String = context.String,
         TypeError = context.TypeError;
 
     /** Used for built-in method references. */
-    var arrayProto = context.Array.prototype,
-        objectProto = context.Object.prototype,
-        stringProto = context.String.prototype;
+    var arrayProto = Array.prototype,
+        funcProto = Function.prototype,
+        objectProto = Object.prototype;
 
     /** Used to detect overreaching core-js shims. */
     var coreJsData = context['__core-js_shared__'];
@@ -37041,7 +37126,7 @@ function mergeObjects(provided, overrides, defaults)
     }());
 
     /** Used to resolve the decompiled source of functions. */
-    var funcToString = context.Function.prototype.toString;
+    var funcToString = funcProto.toString;
 
     /** Used to check objects for own properties. */
     var hasOwnProperty = objectProto.hasOwnProperty;
@@ -37054,7 +37139,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Used to resolve the
-     * [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+     * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
      * of values.
      */
     var objectToString = objectProto.toString;
@@ -37070,36 +37155,33 @@ function mergeObjects(provided, overrides, defaults)
 
     /** Built-in value references. */
     var Buffer = moduleExports ? context.Buffer : undefined,
-        Reflect = context.Reflect,
         Symbol = context.Symbol,
         Uint8Array = context.Uint8Array,
-        enumerate = Reflect ? Reflect.enumerate : undefined,
+        getPrototype = overArg(Object.getPrototypeOf, Object),
         iteratorSymbol = Symbol ? Symbol.iterator : undefined,
-        objectCreate = context.Object.create,
+        objectCreate = Object.create,
         propertyIsEnumerable = objectProto.propertyIsEnumerable,
         splice = arrayProto.splice,
         spreadableSymbol = Symbol ? Symbol.isConcatSpreadable : undefined;
 
-    /** Built-in method references that are mockable. */
-    var clearTimeout = function(id) { return context.clearTimeout.call(root, id); },
-        setTimeout = function(func, wait) { return context.setTimeout.call(root, func, wait); };
+    /** Mocked built-ins. */
+    var ctxClearTimeout = context.clearTimeout !== root.clearTimeout && context.clearTimeout,
+        ctxNow = Date && Date.now !== root.Date.now && Date.now,
+        ctxSetTimeout = context.setTimeout !== root.setTimeout && context.setTimeout;
 
     /* Built-in method references for those with the same name as other `lodash` methods. */
     var nativeCeil = Math.ceil,
         nativeFloor = Math.floor,
-        nativeGetPrototype = Object.getPrototypeOf,
         nativeGetSymbols = Object.getOwnPropertySymbols,
         nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined,
         nativeIsFinite = context.isFinite,
         nativeJoin = arrayProto.join,
-        nativeKeys = Object.keys,
+        nativeKeys = overArg(Object.keys, Object),
         nativeMax = Math.max,
         nativeMin = Math.min,
         nativeParseInt = context.parseInt,
         nativeRandom = Math.random,
-        nativeReplace = stringProto.replace,
-        nativeReverse = arrayProto.reverse,
-        nativeSplit = stringProto.split;
+        nativeReverse = arrayProto.reverse;
 
     /* Built-in method references that are verified to be native. */
     var DataView = getNative(context, 'DataView'),
@@ -37107,11 +37189,11 @@ function mergeObjects(provided, overrides, defaults)
         Promise = getNative(context, 'Promise'),
         Set = getNative(context, 'Set'),
         WeakMap = getNative(context, 'WeakMap'),
-        nativeCreate = getNative(context.Object, 'create');
+        nativeCreate = getNative(Object, 'create');
 
     /* Used to set `toString` methods. */
     var defineProperty = (function() {
-      var func = getNative(context.Object, 'defineProperty'),
+      var func = getNative(Object, 'defineProperty'),
           name = getNative.name;
 
       return (name && name.length > 2) ? func : undefined;
@@ -37940,6 +38022,33 @@ function mergeObjects(provided, overrides, defaults)
     /*------------------------------------------------------------------------*/
 
     /**
+     * Creates an array of the enumerable property names of the array-like `value`.
+     *
+     * @private
+     * @param {*} value The value to query.
+     * @param {boolean} inherited Specify returning inherited property names.
+     * @returns {Array} Returns the array of property names.
+     */
+    function arrayLikeKeys(value, inherited) {
+      // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+      // Safari 9 makes `arguments.length` enumerable in strict mode.
+      var result = (isArray(value) || isArguments(value))
+        ? baseTimes(value.length, String)
+        : [];
+
+      var length = result.length,
+          skipIndexes = !!length;
+
+      for (var key in value) {
+        if ((inherited || hasOwnProperty.call(value, key)) &&
+            !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+
+    /**
      * Used by `_.defaults` to customize its `_.assignIn` use.
      *
      * @private
@@ -37975,7 +38084,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Assigns `value` to `key` of `object` if the existing value is not equivalent
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @private
@@ -37995,7 +38104,7 @@ function mergeObjects(provided, overrides, defaults)
      * Gets the index at which the `key` is found in `array` of key-value pairs.
      *
      * @private
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {*} key The key to search for.
      * @returns {number} Returns the index of the matched value, else `-1`.
      */
@@ -38153,9 +38262,6 @@ function mergeObjects(provided, overrides, defaults)
         // Recursively populate clone (susceptible to call stack limits).
         assignValue(result, key, baseClone(subValue, isDeep, isFull, customizer, key, value, stack));
       });
-      if (!isFull) {
-        stack['delete'](value);
-      }
       return result;
     }
 
@@ -38186,14 +38292,13 @@ function mergeObjects(provided, overrides, defaults)
       if (object == null) {
         return !length;
       }
-      var index = length;
-      while (index--) {
-        var key = props[index],
+      object = Object(object);
+      while (length--) {
+        var key = props[length],
             predicate = source[key],
             value = object[key];
 
-        if ((value === undefined &&
-            !(key in Object(object))) || !predicate(value)) {
+        if ((value === undefined && !(key in object)) || !predicate(value)) {
           return false;
         }
       }
@@ -38220,7 +38325,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {Function} func The function to delay.
      * @param {number} wait The number of milliseconds to delay invocation.
      * @param {Array} args The arguments to provide to `func`.
-     * @returns {number} Returns the timer id.
+     * @returns {number|Object} Returns the timer id or timeout object.
      */
     function baseDelay(func, wait, args) {
       if (typeof func != 'function') {
@@ -38565,12 +38670,7 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {boolean} Returns `true` if `key` exists, else `false`.
      */
     function baseHas(object, key) {
-      // Avoid a bug in IE 10-11 where objects with a [[Prototype]] of `null`,
-      // that are composed entirely of index properties, return `false` for
-      // `hasOwnProperty` checks of them.
-      return object != null &&
-        (hasOwnProperty.call(object, key) ||
-          (typeof object == 'object' && key in object && getPrototype(object) === null));
+      return object != null && hasOwnProperty.call(object, key);
     }
 
     /**
@@ -38944,38 +39044,45 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * The base implementation of `_.keys` which doesn't skip the constructor
-     * property of prototypes or treat sparse arrays as dense.
+     * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
      *
      * @private
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of property names.
      */
-    var baseKeys = overArg(nativeKeys, Object);
+    function baseKeys(object) {
+      if (!isPrototype(object)) {
+        return nativeKeys(object);
+      }
+      var result = [];
+      for (var key in Object(object)) {
+        if (hasOwnProperty.call(object, key) && key != 'constructor') {
+          result.push(key);
+        }
+      }
+      return result;
+    }
 
     /**
-     * The base implementation of `_.keysIn` which doesn't skip the constructor
-     * property of prototypes or treat sparse arrays as dense.
+     * The base implementation of `_.keysIn` which doesn't treat sparse arrays as dense.
      *
      * @private
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of property names.
      */
     function baseKeysIn(object) {
-      object = object == null ? object : Object(object);
+      if (!isObject(object)) {
+        return nativeKeysIn(object);
+      }
+      var isProto = isPrototype(object),
+          result = [];
 
-      var result = [];
       for (var key in object) {
-        result.push(key);
+        if (!(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
+          result.push(key);
+        }
       }
       return result;
-    }
-
-    // Fallback for IE < 9 with es6-shim.
-    if (enumerate && !propertyIsEnumerable.call({ 'valueOf': 1 }, 'valueOf')) {
-      baseKeysIn = function(object) {
-        return iteratorToArray(enumerate(object));
-      };
     }
 
     /**
@@ -39062,7 +39169,7 @@ function mergeObjects(provided, overrides, defaults)
         return;
       }
       if (!(isArray(source) || isTypedArray(source))) {
-        var props = keysIn(source);
+        var props = baseKeysIn(source);
       }
       arrayEach(props || source, function(srcValue, key) {
         if (props) {
@@ -39422,13 +39529,16 @@ function mergeObjects(provided, overrides, defaults)
      * The base implementation of `_.set`.
      *
      * @private
-     * @param {Object} object The object to query.
+     * @param {Object} object The object to modify.
      * @param {Array|string} path The path of the property to set.
      * @param {*} value The value to set.
      * @param {Function} [customizer] The function to customize path creation.
      * @returns {Object} Returns `object`.
      */
     function baseSet(object, path, value, customizer) {
+      if (!isObject(object)) {
+        return object;
+      }
       path = isKey(path, object) ? [path] : castPath(path);
 
       var index = -1,
@@ -39437,20 +39547,19 @@ function mergeObjects(provided, overrides, defaults)
           nested = object;
 
       while (nested != null && ++index < length) {
-        var key = toKey(path[index]);
-        if (isObject(nested)) {
-          var newValue = value;
-          if (index != lastIndex) {
-            var objValue = nested[key];
-            newValue = customizer ? customizer(objValue, key, nested) : undefined;
-            if (newValue === undefined) {
-              newValue = objValue == null
-                ? (isIndex(path[index + 1]) ? [] : {})
-                : objValue;
-            }
+        var key = toKey(path[index]),
+            newValue = value;
+
+        if (index != lastIndex) {
+          var objValue = nested[key];
+          newValue = customizer ? customizer(objValue, key, nested) : undefined;
+          if (newValue === undefined) {
+            newValue = isObject(objValue)
+              ? objValue
+              : (isIndex(path[index + 1]) ? [] : {});
           }
-          assignValue(nested, key, newValue);
         }
+        assignValue(nested, key, newValue);
         nested = nested[key];
       }
       return object;
@@ -39743,14 +39852,14 @@ function mergeObjects(provided, overrides, defaults)
       object = parent(object, path);
 
       var key = toKey(last(path));
-      return !(object != null && baseHas(object, key)) || delete object[key];
+      return !(object != null && hasOwnProperty.call(object, key)) || delete object[key];
     }
 
     /**
      * The base implementation of `_.update`.
      *
      * @private
-     * @param {Object} object The object to query.
+     * @param {Object} object The object to modify.
      * @param {Array|string} path The path of the property to update.
      * @param {Function} updater The function to produce the updated value.
      * @param {Function} [customizer] The function to customize path creation.
@@ -39897,6 +40006,16 @@ function mergeObjects(provided, overrides, defaults)
       end = end === undefined ? length : end;
       return (!start && end >= length) ? array : baseSlice(array, start, end);
     }
+
+    /**
+     * A simple wrapper around the global [`clearTimeout`](https://mdn.io/clearTimeout).
+     *
+     * @private
+     * @param {number|Object} id The timer id or timeout object of the timer to clear.
+     */
+    var clearTimeout = ctxClearTimeout || function(id) {
+      return root.clearTimeout(id);
+    };
 
     /**
      * Creates a clone of  `buffer`.
@@ -40351,7 +40470,7 @@ function mergeObjects(provided, overrides, defaults)
       return function(string) {
         string = toString(string);
 
-        var strSymbols = reHasComplexSymbol.test(string)
+        var strSymbols = hasUnicode(string)
           ? stringToArray(string)
           : undefined;
 
@@ -40391,7 +40510,7 @@ function mergeObjects(provided, overrides, defaults)
     function createCtor(Ctor) {
       return function() {
         // Use a `switch` statement to work with class constructors. See
-        // http://ecma-international.org/ecma-262/6.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
+        // http://ecma-international.org/ecma-262/7.0/#sec-ecmascript-function-objects-call-thisargument-argumentslist
         // for more details.
         var args = arguments;
         switch (args.length) {
@@ -40694,7 +40813,7 @@ function mergeObjects(provided, overrides, defaults)
         return charsLength ? baseRepeat(chars, length) : chars;
       }
       var result = baseRepeat(chars, nativeCeil(length / stringSize(chars)));
-      return reHasComplexSymbol.test(chars)
+      return hasUnicode(chars)
         ? castSlice(stringToArray(result), 0, length).join('')
         : result.slice(0, length);
     }
@@ -40747,15 +40866,14 @@ function mergeObjects(provided, overrides, defaults)
           end = step = undefined;
         }
         // Ensure the sign of `-0` is preserved.
-        start = toNumber(start);
-        start = start === start ? start : 0;
+        start = toFinite(start);
         if (end === undefined) {
           end = start;
           start = 0;
         } else {
-          end = toNumber(end) || 0;
+          end = toFinite(end);
         }
-        step = step === undefined ? (start < end ? 1 : -1) : (toNumber(step) || 0);
+        step = step === undefined ? (start < end ? 1 : -1) : toFinite(step);
         return baseRange(start, end, step, fromRight);
       };
     }
@@ -41028,6 +41146,7 @@ function mergeObjects(provided, overrides, defaults)
         }
       }
       stack['delete'](array);
+      stack['delete'](other);
       return result;
     }
 
@@ -41079,7 +41198,7 @@ function mergeObjects(provided, overrides, defaults)
         case regexpTag:
         case stringTag:
           // Coerce regexes to strings and treat strings, primitives and objects,
-          // as equal. See http://www.ecma-international.org/ecma-262/6.0/#sec-regexp.prototype.tostring
+          // as equal. See http://www.ecma-international.org/ecma-262/7.0/#sec-regexp.prototype.tostring
           // for more details.
           return object == (other + '');
 
@@ -41141,7 +41260,7 @@ function mergeObjects(provided, overrides, defaults)
       var index = objLength;
       while (index--) {
         var key = objProps[index];
-        if (!(isPartial ? key in other : baseHas(other, key))) {
+        if (!(isPartial ? key in other : hasOwnProperty.call(other, key))) {
           return false;
         }
       }
@@ -41188,6 +41307,7 @@ function mergeObjects(provided, overrides, defaults)
         }
       }
       stack['delete'](object);
+      stack['delete'](other);
       return result;
     }
 
@@ -41277,19 +41397,6 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Gets the "length" property value of `object`.
-     *
-     * **Note:** This function is used to avoid a
-     * [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792) that affects
-     * Safari on at least iOS 8.1-8.3 ARM64.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @returns {*} Returns the "length" value.
-     */
-    var getLength = baseProperty('length');
-
-    /**
      * Gets the data for `map`.
      *
      * @private
@@ -41338,15 +41445,6 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Gets the `[[Prototype]]` of `value`.
-     *
-     * @private
-     * @param {*} value The value to query.
-     * @returns {null|Object} Returns the `[[Prototype]]`.
-     */
-    var getPrototype = overArg(nativeGetPrototype, Object);
-
-    /**
      * Creates an array of the own enumerable symbol properties of `object`.
      *
      * @private
@@ -41363,7 +41461,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {Object} object The object to query.
      * @returns {Array} Returns the array of symbols.
      */
-    var getSymbolsIn = !nativeGetSymbols ? getSymbols : function(object) {
+    var getSymbolsIn = !nativeGetSymbols ? stubArray : function(object) {
       var result = [];
       while (object) {
         arrayPush(result, getSymbols(object));
@@ -41382,7 +41480,7 @@ function mergeObjects(provided, overrides, defaults)
     var getTag = baseGetTag;
 
     // Fallback for data views, maps, sets, and weak maps in IE 11,
-    // for data views in Edge, and promises in Node.js.
+    // for data views in Edge < 14, and promises in Node.js.
     if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
         (Map && getTag(new Map) != mapTag) ||
         (Promise && getTag(Promise.resolve()) != promiseTag) ||
@@ -41474,7 +41572,7 @@ function mergeObjects(provided, overrides, defaults)
       }
       var length = object ? object.length : 0;
       return !!length && isLength(length) && isIndex(key, length) &&
-        (isArray(object) || isString(object) || isArguments(object));
+        (isArray(object) || isArguments(object));
     }
 
     /**
@@ -41559,23 +41657,6 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Creates an array of index keys for `object` values of arrays,
-     * `arguments` objects, and strings, otherwise `null` is returned.
-     *
-     * @private
-     * @param {Object} object The object to query.
-     * @returns {Array|null} Returns index keys, else `null`.
-     */
-    function indexKeys(object) {
-      var length = object ? object.length : undefined;
-      if (isLength(length) &&
-          (isArray(object) || isString(object) || isArguments(object))) {
-        return baseTimes(length, String);
-      }
-      return null;
-    }
-
-    /**
      * Inserts wrapper `details` in a comment at the top of the `source` body.
      *
      * @private
@@ -41601,7 +41682,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function isFlattenable(value) {
       return isArray(value) || isArguments(value) ||
-        !!(spreadableSymbol && value && value[spreadableSymbol])
+        !!(spreadableSymbol && value && value[spreadableSymbol]);
     }
 
     /**
@@ -41860,6 +41941,25 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
+     * This function is like
+     * [`Object.keys`](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+     * except that it includes inherited enumerable properties.
+     *
+     * @private
+     * @param {Object} object The object to query.
+     * @returns {Array} Returns the array of property names.
+     */
+    function nativeKeysIn(object) {
+      var result = [];
+      if (object != null) {
+        for (var key in Object(object)) {
+          result.push(key);
+        }
+      }
+      return result;
+    }
+
+    /**
      * Gets the parent value at `path` of `object`.
      *
      * @private
@@ -41928,6 +42028,18 @@ function mergeObjects(provided, overrides, defaults)
     }());
 
     /**
+     * A simple wrapper around the global [`setTimeout`](https://mdn.io/setTimeout).
+     *
+     * @private
+     * @param {Function} func The function to delay.
+     * @param {number} wait The number of milliseconds to delay invocation.
+     * @returns {number|Object} Returns the timer id or timeout object.
+     */
+    var setTimeout = ctxSetTimeout || function(func, wait) {
+      return root.setTimeout(func, wait);
+    };
+
+    /**
      * Sets the `toString` method of `wrapper` to mimic the source of `reference`
      * with wrapper details in a comment at the top of the source body.
      *
@@ -41954,8 +42066,13 @@ function mergeObjects(provided, overrides, defaults)
      * @returns {Array} Returns the property path array.
      */
     var stringToPath = memoize(function(string) {
+      string = toString(string);
+
       var result = [];
-      toString(string).replace(rePropName, function(match, number, quote, string) {
+      if (reLeadingDot.test(string)) {
+        result.push('');
+      }
+      string.replace(rePropName, function(match, number, quote, string) {
         result.push(quote ? string.replace(reEscapeChar, '$1') : (number || match));
       });
       return result;
@@ -42142,7 +42259,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Creates an array of `array` values not included in the other given arrays
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons. The order of result values is determined by the
      * order they occur in the first array.
      *
@@ -42436,7 +42553,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 1.1.0
      * @category Array
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=0] The index to search from.
@@ -42484,7 +42601,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 2.0.0
      * @category Array
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=array.length-1] The index to search from.
@@ -42645,7 +42762,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Gets the index at which the first occurrence of `value` is found in `array`
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons. If `fromIndex` is negative, it's used as the
      * offset from the end of `array`.
      *
@@ -42653,7 +42770,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 0.1.0
      * @category Array
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {*} value The value to search for.
      * @param {number} [fromIndex=0] The index to search from.
      * @returns {number} Returns the index of the matched value, else `-1`.
@@ -42693,12 +42810,13 @@ function mergeObjects(provided, overrides, defaults)
      * // => [1, 2]
      */
     function initial(array) {
-      return dropRight(array, 1);
+      var length = array ? array.length : 0;
+      return length ? baseSlice(array, 0, -1) : [];
     }
 
     /**
      * Creates an array of unique values that are included in all given arrays
-     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons. The order of result values is determined by the
      * order they occur in the first array.
      *
@@ -42837,7 +42955,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 0.1.0
      * @category Array
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {*} value The value to search for.
      * @param {number} [fromIndex=array.length-1] The index to search from.
      * @returns {number} Returns the index of the matched value, else `-1`.
@@ -42902,7 +43020,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Removes all given values from `array` using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * **Note:** Unlike `_.without`, this method mutates `array`. Use `_.remove`
@@ -43215,7 +43333,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 4.0.0
      * @category Array
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {*} value The value to search for.
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
@@ -43294,7 +43412,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 4.0.0
      * @category Array
-     * @param {Array} array The array to search.
+     * @param {Array} array The array to inspect.
      * @param {*} value The value to search for.
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
@@ -43371,7 +43489,8 @@ function mergeObjects(provided, overrides, defaults)
      * // => [2, 3]
      */
     function tail(array) {
-      return drop(array, 1);
+      var length = array ? array.length : 0;
+      return length ? baseSlice(array, 1, length) : [];
     }
 
     /**
@@ -43528,7 +43647,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Creates an array of unique values, in order, from all given arrays using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * @static
@@ -43609,7 +43728,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Creates a duplicate-free version of an array, using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons, in which only the first occurrence of each
      * element is kept.
      *
@@ -43754,7 +43873,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Creates an array excluding all given values using
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * for equality comparisons.
      *
      * **Note:** Unlike `_.pull`, this method returns a new array.
@@ -44325,6 +44444,11 @@ function mergeObjects(provided, overrides, defaults)
      * Iteration is stopped once `predicate` returns falsey. The predicate is
      * invoked with three arguments: (value, index|key, collection).
      *
+     * **Note:** This method returns `true` for
+     * [empty collections](https://en.wikipedia.org/wiki/Empty_set) because
+     * [everything is true](https://en.wikipedia.org/wiki/Vacuous_truth) of
+     * elements of empty collections.
+     *
      * @static
      * @memberOf _
      * @since 0.1.0
@@ -44417,7 +44541,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 0.1.0
      * @category Collection
-     * @param {Array|Object} collection The collection to search.
+     * @param {Array|Object} collection The collection to inspect.
      * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=0] The index to search from.
@@ -44455,7 +44579,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 2.0.0
      * @category Collection
-     * @param {Array|Object} collection The collection to search.
+     * @param {Array|Object} collection The collection to inspect.
      * @param {Function} [predicate=_.identity]
      *  The function invoked per iteration.
      * @param {number} [fromIndex=collection.length-1] The index to search from.
@@ -44642,7 +44766,7 @@ function mergeObjects(provided, overrides, defaults)
     /**
      * Checks if `value` is in `collection`. If `collection` is a string, it's
      * checked for a substring of `value`, otherwise
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * is used for equality comparisons. If `fromIndex` is negative, it's used as
      * the offset from the end of `collection`.
      *
@@ -44650,7 +44774,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 0.1.0
      * @category Collection
-     * @param {Array|Object|string} collection The collection to search.
+     * @param {Array|Object|string} collection The collection to inspect.
      * @param {*} value The value to search for.
      * @param {number} [fromIndex=0] The index to search from.
      * @param- {Object} [guard] Enables use as an iteratee for methods like `_.reduce`.
@@ -45083,7 +45207,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 0.1.0
      * @category Collection
-     * @param {Array|Object} collection The collection to inspect.
+     * @param {Array|Object|string} collection The collection to inspect.
      * @returns {number} Returns the collection size.
      * @example
      *
@@ -45101,16 +45225,13 @@ function mergeObjects(provided, overrides, defaults)
         return 0;
       }
       if (isArrayLike(collection)) {
-        var result = collection.length;
-        return (result && isString(collection)) ? stringSize(collection) : result;
+        return isString(collection) ? stringSize(collection) : collection.length;
       }
-      if (isObjectLike(collection)) {
-        var tag = getTag(collection);
-        if (tag == mapTag || tag == setTag) {
-          return collection.size;
-        }
+      var tag = getTag(collection);
+      if (tag == mapTag || tag == setTag) {
+        return collection.size;
       }
-      return keys(collection).length;
+      return baseKeys(collection).length;
     }
 
     /**
@@ -45222,9 +45343,9 @@ function mergeObjects(provided, overrides, defaults)
      * }, _.now());
      * // => Logs the number of milliseconds it took for the deferred invocation.
      */
-    function now() {
-      return Date.now();
-    }
+    var now = ctxNow || function() {
+      return root.Date.now();
+    };
 
     /*------------------------------------------------------------------------*/
 
@@ -45517,14 +45638,18 @@ function mergeObjects(provided, overrides, defaults)
      * milliseconds have elapsed since the last time the debounced function was
      * invoked. The debounced function comes with a `cancel` method to cancel
      * delayed `func` invocations and a `flush` method to immediately invoke them.
-     * Provide an options object to indicate whether `func` should be invoked on
-     * the leading and/or trailing edge of the `wait` timeout. The `func` is invoked
-     * with the last arguments provided to the debounced function. Subsequent calls
-     * to the debounced function return the result of the last `func` invocation.
+     * Provide `options` to indicate whether `func` should be invoked on the
+     * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+     * with the last arguments provided to the debounced function. Subsequent
+     * calls to the debounced function return the result of the last `func`
+     * invocation.
      *
-     * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
-     * on the trailing edge of the timeout only if the debounced function is
-     * invoked more than once during the `wait` timeout.
+     * **Note:** If `leading` and `trailing` options are `true`, `func` is
+     * invoked on the trailing edge of the timeout only if the debounced function
+     * is invoked more than once during the `wait` timeout.
+     *
+     * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+     * until to the next tick, similar to `setTimeout` with a timeout of `0`.
      *
      * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
      * for details over the differences between `_.debounce` and `_.throttle`.
@@ -45761,7 +45886,7 @@ function mergeObjects(provided, overrides, defaults)
      * **Note:** The cache is exposed as the `cache` property on the memoized
      * function. Its creation may be customized by replacing the `_.memoize.Cache`
      * constructor with one whose instances implement the
-     * [`Map`](http://ecma-international.org/ecma-262/6.0/#sec-properties-of-the-map-prototype-object)
+     * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
      * method interface of `delete`, `get`, `has`, and `set`.
      *
      * @static
@@ -46061,7 +46186,7 @@ function mergeObjects(provided, overrides, defaults)
     /**
      * Creates a function that invokes `func` with the `this` binding of the
      * create function and an array of arguments much like
-     * [`Function#apply`](http://www.ecma-international.org/ecma-262/6.0/#sec-function.prototype.apply).
+     * [`Function#apply`](http://www.ecma-international.org/ecma-262/7.0/#sec-function.prototype.apply).
      *
      * **Note:** This method is based on the
      * [spread operator](https://mdn.io/spread_operator).
@@ -46112,8 +46237,8 @@ function mergeObjects(provided, overrides, defaults)
      * Creates a throttled function that only invokes `func` at most once per
      * every `wait` milliseconds. The throttled function comes with a `cancel`
      * method to cancel delayed `func` invocations and a `flush` method to
-     * immediately invoke them. Provide an options object to indicate whether
-     * `func` should be invoked on the leading and/or trailing edge of the `wait`
+     * immediately invoke them. Provide `options` to indicate whether `func`
+     * should be invoked on the leading and/or trailing edge of the `wait`
      * timeout. The `func` is invoked with the last arguments provided to the
      * throttled function. Subsequent calls to the throttled function return the
      * result of the last `func` invocation.
@@ -46121,6 +46246,9 @@ function mergeObjects(provided, overrides, defaults)
      * **Note:** If `leading` and `trailing` options are `true`, `func` is
      * invoked on the trailing edge of the timeout only if the throttled function
      * is invoked more than once during the `wait` timeout.
+     *
+     * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+     * until to the next tick, similar to `setTimeout` with a timeout of `0`.
      *
      * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
      * for details over the differences between `_.throttle` and `_.debounce`.
@@ -46376,9 +46504,11 @@ function mergeObjects(provided, overrides, defaults)
     }
 
     /**
-     * Checks if `object` conforms to `source` by invoking the predicate properties
-     * of `source` with the corresponding property values of `object`. This method
-     * is equivalent to a `_.conforms` function when `source` is partially applied.
+     * Checks if `object` conforms to `source` by invoking the predicate
+     * properties of `source` with the corresponding property values of `object`.
+     *
+     * **Note:** This method is equivalent to `_.conforms` when `source` is
+     * partially applied.
      *
      * @static
      * @memberOf _
@@ -46403,7 +46533,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Performs a
-     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+     * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
      * comparison between two values to determine if they are equivalent.
      *
      * @static
@@ -46508,7 +46638,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => false
      */
     function isArguments(value) {
-      // Safari 8.1 incorrectly makes `arguments.callee` enumerable in strict mode.
+      // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
       return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
         (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
     }
@@ -46583,7 +46713,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => false
      */
     function isArrayLike(value) {
-      return value != null && isLength(getLength(value)) && !isFunction(value);
+      return value != null && isLength(value.length) && !isFunction(value);
     }
 
     /**
@@ -46683,8 +46813,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a DOM element,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a DOM element, else `false`.
      * @example
      *
      * _.isElement(document.body);
@@ -46732,22 +46861,23 @@ function mergeObjects(provided, overrides, defaults)
      */
     function isEmpty(value) {
       if (isArrayLike(value) &&
-          (isArray(value) || isString(value) || isFunction(value.splice) ||
-            isArguments(value) || isBuffer(value))) {
+          (isArray(value) || typeof value == 'string' ||
+            typeof value.splice == 'function' || isBuffer(value) || isArguments(value))) {
         return !value.length;
       }
-      if (isObjectLike(value)) {
-        var tag = getTag(value);
-        if (tag == mapTag || tag == setTag) {
-          return !value.size;
-        }
+      var tag = getTag(value);
+      if (tag == mapTag || tag == setTag) {
+        return !value.size;
+      }
+      if (nonEnumShadows || isPrototype(value)) {
+        return !nativeKeys(value).length;
       }
       for (var key in value) {
         if (hasOwnProperty.call(value, key)) {
           return false;
         }
       }
-      return !(nonEnumShadows && keys(value).length);
+      return true;
     }
 
     /**
@@ -46766,8 +46896,7 @@ function mergeObjects(provided, overrides, defaults)
      * @category Lang
      * @param {*} value The value to compare.
      * @param {*} other The other value to compare.
-     * @returns {boolean} Returns `true` if the values are equivalent,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
      * @example
      *
      * var object = { 'a': 1 };
@@ -46796,8 +46925,7 @@ function mergeObjects(provided, overrides, defaults)
      * @param {*} value The value to compare.
      * @param {*} other The other value to compare.
      * @param {Function} [customizer] The function to customize comparisons.
-     * @returns {boolean} Returns `true` if the values are equivalent,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
      * @example
      *
      * function isGreeting(value) {
@@ -46831,8 +46959,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 3.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is an error object,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is an error object, else `false`.
      * @example
      *
      * _.isError(new Error);
@@ -46860,8 +46987,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.1.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a finite number,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a finite number, else `false`.
      * @example
      *
      * _.isFinite(3);
@@ -46899,8 +47025,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function isFunction(value) {
       // The use of `Object#toString` avoids issues with the `typeof` operator
-      // in Safari 8 which returns 'object' for typed array and weak map constructors,
-      // and PhantomJS 1.9 which returns 'function' for `NodeList` instances.
+      // in Safari 8-9 which returns 'object' for typed array and other constructors.
       var tag = isObject(value) ? objectToString.call(value) : '';
       return tag == funcTag || tag == genTag;
     }
@@ -46938,16 +47063,15 @@ function mergeObjects(provided, overrides, defaults)
     /**
      * Checks if `value` is a valid array-like length.
      *
-     * **Note:** This function is loosely based on
-     * [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
+     * **Note:** This method is loosely based on
+     * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
      *
      * @static
      * @memberOf _
      * @since 4.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a valid length,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
      * @example
      *
      * _.isLength(3);
@@ -46969,7 +47093,7 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Checks if `value` is the
-     * [language type](http://www.ecma-international.org/ecma-262/6.0/#sec-ecmascript-language-types)
+     * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
      * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
      *
      * @static
@@ -47046,10 +47170,14 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Performs a partial deep comparison between `object` and `source` to
-     * determine if `object` contains equivalent property values. This method is
-     * equivalent to a `_.matches` function when `source` is partially applied.
+     * determine if `object` contains equivalent property values.
      *
-     * **Note:** This method supports comparing the same values as `_.isEqual`.
+     * **Note:** This method is equivalent to `_.matches` when `source` is
+     * partially applied.
+     *
+     * Partial comparisons will match empty array and empty object `source`
+     * values against any array or object value, respectively. See `_.isEqual`
+     * for a list of supported value comparisons.
      *
      * @static
      * @memberOf _
@@ -47262,8 +47390,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 0.8.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a plain object,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
      * @example
      *
      * function Foo() {
@@ -47327,8 +47454,7 @@ function mergeObjects(provided, overrides, defaults)
      * @since 4.0.0
      * @category Lang
      * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is a safe integer,
-     *  else `false`.
+     * @returns {boolean} Returns `true` if `value` is a safe integer, else `false`.
      * @example
      *
      * _.isSafeInteger(3);
@@ -47622,7 +47748,7 @@ function mergeObjects(provided, overrides, defaults)
      * Converts `value` to an integer.
      *
      * **Note:** This method is loosely based on
-     * [`ToInteger`](http://www.ecma-international.org/ecma-262/6.0/#sec-tointeger).
+     * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
      *
      * @static
      * @memberOf _
@@ -47656,7 +47782,7 @@ function mergeObjects(provided, overrides, defaults)
      * array-like object.
      *
      * **Note:** This method is based on
-     * [`ToLength`](http://ecma-international.org/ecma-262/6.0/#sec-tolength).
+     * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
      *
      * @static
      * @memberOf _
@@ -47713,7 +47839,7 @@ function mergeObjects(provided, overrides, defaults)
         return NAN;
       }
       if (isObject(value)) {
-        var other = isFunction(value.valueOf) ? value.valueOf() : value;
+        var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
         value = isObject(other) ? (other + '') : other;
       }
       if (typeof value != 'string') {
@@ -47885,13 +48011,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => { 'a': 1, 'b': 2, 'c': 3, 'd': 4 }
      */
     var assignIn = createAssigner(function(object, source) {
-      if (nonEnumShadows || isPrototype(source) || isArrayLike(source)) {
-        copyObject(source, keysIn(source), object);
-        return;
-      }
-      for (var key in source) {
-        assignValue(object, key, source[key]);
-      }
+      copyObject(source, keysIn(source), object);
     });
 
     /**
@@ -48077,7 +48197,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 1.1.0
      * @category Object
-     * @param {Object} object The object to search.
+     * @param {Object} object The object to inspect.
      * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {string|undefined} Returns the key of the matched element,
      *  else `undefined`.
@@ -48116,7 +48236,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 2.0.0
      * @category Object
-     * @param {Object} object The object to search.
+     * @param {Object} object The object to inspect.
      * @param {Function} [predicate=_.identity] The function invoked per iteration.
      * @returns {string|undefined} Returns the key of the matched element,
      *  else `undefined`.
@@ -48500,7 +48620,7 @@ function mergeObjects(provided, overrides, defaults)
      * Creates an array of the own enumerable property names of `object`.
      *
      * **Note:** Non-object values are coerced to objects. See the
-     * [ES spec](http://ecma-international.org/ecma-262/6.0/#sec-object.keys)
+     * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
      * for more details.
      *
      * @static
@@ -48525,23 +48645,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => ['0', '1']
      */
     function keys(object) {
-      var isProto = isPrototype(object);
-      if (!(isProto || isArrayLike(object))) {
-        return baseKeys(object);
-      }
-      var indexes = indexKeys(object),
-          skipIndexes = !!indexes,
-          result = indexes || [],
-          length = result.length;
-
-      for (var key in object) {
-        if (baseHas(object, key) &&
-            !(skipIndexes && (key == 'length' || isIndex(key, length))) &&
-            !(isProto && key == 'constructor')) {
-          result.push(key);
-        }
-      }
-      return result;
+      return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
     }
 
     /**
@@ -48568,23 +48672,7 @@ function mergeObjects(provided, overrides, defaults)
      * // => ['a', 'b', 'c'] (iteration order is not guaranteed)
      */
     function keysIn(object) {
-      var index = -1,
-          isProto = isPrototype(object),
-          props = baseKeysIn(object),
-          propsLength = props.length,
-          indexes = indexKeys(object),
-          skipIndexes = !!indexes,
-          result = indexes || [],
-          length = result.length;
-
-      while (++index < propsLength) {
-        var key = props[index];
-        if (!(skipIndexes && (key == 'length' || isIndex(key, length))) &&
-            !(key == 'constructor' && (isProto || !hasOwnProperty.call(object, key)))) {
-          result.push(key);
-        }
-      }
-      return result;
+      return isArrayLike(object) ? arrayLikeKeys(object, true) : baseKeysIn(object);
     }
 
     /**
@@ -49261,12 +49349,12 @@ function mergeObjects(provided, overrides, defaults)
      * // => true
      */
     function inRange(number, start, end) {
-      start = toNumber(start) || 0;
+      start = toFinite(start);
       if (end === undefined) {
         end = start;
         start = 0;
       } else {
-        end = toNumber(end) || 0;
+        end = toFinite(end);
       }
       number = toNumber(number);
       return baseInRange(number, start, end);
@@ -49322,12 +49410,12 @@ function mergeObjects(provided, overrides, defaults)
         upper = 1;
       }
       else {
-        lower = toNumber(lower) || 0;
+        lower = toFinite(lower);
         if (upper === undefined) {
           upper = lower;
           lower = 0;
         } else {
-          upper = toNumber(upper) || 0;
+          upper = toFinite(upper);
         }
       }
       if (lower > upper) {
@@ -49390,8 +49478,9 @@ function mergeObjects(provided, overrides, defaults)
 
     /**
      * Deburrs `string` by converting
-     * [latin-1 supplementary letters](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
-     * to basic latin letters and removing
+     * [Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+     * and [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)
+     * letters to basic Latin letters and removing
      * [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
      *
      * @static
@@ -49407,7 +49496,7 @@ function mergeObjects(provided, overrides, defaults)
      */
     function deburr(string) {
       string = toString(string);
-      return string && string.replace(reLatin1, deburrLetter).replace(reComboMark, '');
+      return string && string.replace(reLatin, deburrLetter).replace(reComboMark, '');
     }
 
     /**
@@ -49417,7 +49506,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 3.0.0
      * @category String
-     * @param {string} [string=''] The string to search.
+     * @param {string} [string=''] The string to inspect.
      * @param {string} [target] The string to search for.
      * @param {number} [position=string.length] The position to search up to.
      * @returns {boolean} Returns `true` if `string` ends with `target`,
@@ -49773,7 +49862,7 @@ function mergeObjects(provided, overrides, defaults)
       var args = arguments,
           string = toString(args[0]);
 
-      return args.length < 3 ? string : nativeReplace.call(string, args[1], args[2]);
+      return args.length < 3 ? string : string.replace(args[1], args[2]);
     }
 
     /**
@@ -49834,11 +49923,11 @@ function mergeObjects(provided, overrides, defaults)
             (separator != null && !isRegExp(separator))
           )) {
         separator = baseToString(separator);
-        if (separator == '' && reHasComplexSymbol.test(string)) {
+        if (!separator && hasUnicode(string)) {
           return castSlice(stringToArray(string), 0, limit);
         }
       }
-      return nativeSplit.call(string, separator, limit);
+      return string.split(separator, limit);
     }
 
     /**
@@ -49873,7 +49962,7 @@ function mergeObjects(provided, overrides, defaults)
      * @memberOf _
      * @since 3.0.0
      * @category String
-     * @param {string} [string=''] The string to search.
+     * @param {string} [string=''] The string to inspect.
      * @param {string} [target] The string to search for.
      * @param {number} [position=0] The position to search from.
      * @returns {boolean} Returns `true` if `string` starts with `target`,
@@ -50310,7 +50399,7 @@ function mergeObjects(provided, overrides, defaults)
       string = toString(string);
 
       var strLength = string.length;
-      if (reHasComplexSymbol.test(string)) {
+      if (hasUnicode(string)) {
         var strSymbols = stringToArray(string);
         strLength = strSymbols.length;
       }
@@ -50447,7 +50536,7 @@ function mergeObjects(provided, overrides, defaults)
       pattern = guard ? undefined : pattern;
 
       if (pattern === undefined) {
-        pattern = reHasComplexWord.test(string) ? reComplexWord : reBasicWord;
+        return hasUnicodeWord(string) ? unicodeWords(string) : asciiWords(string);
       }
       return string.match(pattern) || [];
     }
@@ -50573,6 +50662,9 @@ function mergeObjects(provided, overrides, defaults)
      * Creates a function that invokes the predicate properties of `source` with
      * the corresponding property values of a given object, returning `true` if
      * all predicates return truthy, else `false`.
+     *
+     * **Note:** The created function is equivalent to `_.conformsTo` with
+     * `source` partially applied.
      *
      * @static
      * @memberOf _
@@ -50759,10 +50851,14 @@ function mergeObjects(provided, overrides, defaults)
     /**
      * Creates a function that performs a partial deep comparison between a given
      * object and `source`, returning `true` if the given object has equivalent
-     * property values, else `false`. The created function is equivalent to
-     * `_.isMatch` with a `source` partially applied.
+     * property values, else `false`.
      *
-     * **Note:** This method supports comparing the same values as `_.isEqual`.
+     * **Note:** The created function is equivalent to `_.isMatch` with `source`
+     * partially applied.
+     *
+     * Partial comparisons will match empty array and empty object `source`
+     * values against any array or object value, respectively. See `_.isEqual`
+     * for a list of supported value comparisons.
      *
      * @static
      * @memberOf _
@@ -50789,7 +50885,9 @@ function mergeObjects(provided, overrides, defaults)
      * value at `path` of a given object to `srcValue`, returning `true` if the
      * object value is equivalent, else `false`.
      *
-     * **Note:** This method supports comparing the same values as `_.isEqual`.
+     * **Note:** Partial comparisons will match empty array and empty object
+     * `srcValue` values against any array or object value, respectively. See
+     * `_.isEqual` for a list of supported value comparisons.
      *
      * @static
      * @memberOf _
@@ -59746,28 +59844,28 @@ exports.shrinkBuf = function (buf, size) {
 var fnTyped = {
   arraySet: function (dest, src, src_offs, len, dest_offs) {
     if (src.subarray && dest.subarray) {
-      dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
+      dest.set(src.subarray(src_offs, src_offs+len), dest_offs);
       return;
     }
     // Fallback to ordinary array
-    for (var i = 0; i < len; i++) {
+    for (var i=0; i<len; i++) {
       dest[dest_offs + i] = src[src_offs + i];
     }
   },
   // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
+  flattenChunks: function(chunks) {
     var i, l, len, pos, chunk, result;
 
     // calculate data length
     len = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
+    for (i=0, l=chunks.length; i<l; i++) {
       len += chunks[i].length;
     }
 
     // join chunks
     result = new Uint8Array(len);
     pos = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
+    for (i=0, l=chunks.length; i<l; i++) {
       chunk = chunks[i];
       result.set(chunk, pos);
       pos += chunk.length;
@@ -59779,12 +59877,12 @@ var fnTyped = {
 
 var fnUntyped = {
   arraySet: function (dest, src, src_offs, len, dest_offs) {
-    for (var i = 0; i < len; i++) {
+    for (var i=0; i<len; i++) {
       dest[dest_offs + i] = src[src_offs + i];
     }
   },
   // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
+  flattenChunks: function(chunks) {
     return [].concat.apply([], chunks);
   }
 };
@@ -59843,9 +59941,6 @@ function adler32(adler, buf, len, pos) {
 module.exports = adler32;
 
 },{}],220:[function(require,module,exports){
-'use strict';
-
-
 module.exports = {
 
   /* Allowed flush values; see deflate() and inflate() below for details */
@@ -59906,10 +60001,10 @@ module.exports = {
 function makeTable() {
   var c, table = [];
 
-  for (var n = 0; n < 256; n++) {
+  for (var n =0; n < 256; n++) {
     c = n;
-    for (var k = 0; k < 8; k++) {
-      c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+    for (var k =0; k < 8; k++) {
+      c = ((c&1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
     }
     table[n] = c;
   }
@@ -59925,7 +60020,7 @@ function crc32(crc, buf, len, pos) {
   var t = crcTable,
       end = pos + len;
 
-  crc ^= -1;
+  crc = crc ^ (-1);
 
   for (var i = pos; i < end; i++) {
     crc = (crc >>> 8) ^ t[(crc ^ buf[i]) & 0xFF];
@@ -59944,7 +60039,7 @@ var utils   = require('../utils/common');
 var trees   = require('./trees');
 var adler32 = require('./adler32');
 var crc32   = require('./crc32');
-var msg     = require('./messages');
+var msg   = require('./messages');
 
 /* Public constants ==========================================================*/
 /* ===========================================================================*/
@@ -60017,7 +60112,7 @@ var D_CODES       = 30;
 /* number of distance codes */
 var BL_CODES      = 19;
 /* number of codes used to transfer the bit lengths */
-var HEAP_SIZE     = 2 * L_CODES + 1;
+var HEAP_SIZE     = 2*L_CODES + 1;
 /* maximum heap size */
 var MAX_BITS  = 15;
 /* All codes must not exceed MAX_BITS bits */
@@ -60083,7 +60178,7 @@ function flush_pending(strm) {
 }
 
 
-function flush_block_only(s, last) {
+function flush_block_only (s, last) {
   trees._tr_flush_block(s, (s.block_start >= 0 ? s.block_start : -1), s.strstart - s.block_start, last);
   s.block_start = s.strstart;
   flush_pending(s.strm);
@@ -60123,7 +60218,6 @@ function read_buf(strm, buf, start, size) {
 
   strm.avail_in -= len;
 
-  // zmemcpy(buf, strm->next_in, len);
   utils.arraySet(buf, strm.input, strm.next_in, len, start);
   if (strm.state.wrap === 1) {
     strm.adler = adler32(strm.adler, buf, len, start);
@@ -60354,7 +60448,7 @@ function fill_window(s) {
 //#endif
       while (s.insert) {
         /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
-        s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH - 1]) & s.hash_mask;
+        s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH-1]) & s.hash_mask;
 
         s.prev[str & s.w_mask] = s.head[s.ins_h];
         s.head[s.ins_h] = str;
@@ -60618,7 +60712,7 @@ function deflate_fast(s, flush) {
       /***/
     }
   }
-  s.insert = ((s.strstart < (MIN_MATCH - 1)) ? s.strstart : MIN_MATCH - 1);
+  s.insert = ((s.strstart < (MIN_MATCH-1)) ? s.strstart : MIN_MATCH-1);
   if (flush === Z_FINISH) {
     /*** FLUSH_BLOCK(s, 1); ***/
     flush_block_only(s, true);
@@ -60681,10 +60775,10 @@ function deflate_slow(s, flush) {
      */
     s.prev_length = s.match_length;
     s.prev_match = s.match_start;
-    s.match_length = MIN_MATCH - 1;
+    s.match_length = MIN_MATCH-1;
 
     if (hash_head !== 0/*NIL*/ && s.prev_length < s.max_lazy_match &&
-        s.strstart - hash_head <= (s.w_size - MIN_LOOKAHEAD)/*MAX_DIST(s)*/) {
+        s.strstart - hash_head <= (s.w_size-MIN_LOOKAHEAD)/*MAX_DIST(s)*/) {
       /* To simplify the code, we prevent matches with the string
        * of window index 0 (in particular we have to avoid a match
        * of the string with itself at the start of the input file).
@@ -60698,7 +60792,7 @@ function deflate_slow(s, flush) {
         /* If prev_match is also MIN_MATCH, match_start is garbage
          * but we will ignore the current match anyway.
          */
-        s.match_length = MIN_MATCH - 1;
+        s.match_length = MIN_MATCH-1;
       }
     }
     /* If there was a match at the previous step and the current
@@ -60712,13 +60806,13 @@ function deflate_slow(s, flush) {
 
       /***_tr_tally_dist(s, s.strstart - 1 - s.prev_match,
                      s.prev_length - MIN_MATCH, bflush);***/
-      bflush = trees._tr_tally(s, s.strstart - 1 - s.prev_match, s.prev_length - MIN_MATCH);
+      bflush = trees._tr_tally(s, s.strstart - 1- s.prev_match, s.prev_length - MIN_MATCH);
       /* Insert in hash table all strings up to the end of the match.
        * strstart-1 and strstart are already inserted. If there is not
        * enough lookahead, the last two strings are not inserted in
        * the hash table.
        */
-      s.lookahead -= s.prev_length - 1;
+      s.lookahead -= s.prev_length-1;
       s.prev_length -= 2;
       do {
         if (++s.strstart <= max_insert) {
@@ -60730,7 +60824,7 @@ function deflate_slow(s, flush) {
         }
       } while (--s.prev_length !== 0);
       s.match_available = 0;
-      s.match_length = MIN_MATCH - 1;
+      s.match_length = MIN_MATCH-1;
       s.strstart++;
 
       if (bflush) {
@@ -60749,7 +60843,7 @@ function deflate_slow(s, flush) {
        */
       //Tracevv((stderr,"%c", s->window[s->strstart-1]));
       /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-      bflush = trees._tr_tally(s, 0, s.window[s.strstart - 1]);
+      bflush = trees._tr_tally(s, 0, s.window[s.strstart-1]);
 
       if (bflush) {
         /*** FLUSH_BLOCK_ONLY(s, 0) ***/
@@ -60774,11 +60868,11 @@ function deflate_slow(s, flush) {
   if (s.match_available) {
     //Tracevv((stderr,"%c", s->window[s->strstart-1]));
     /*** _tr_tally_lit(s, s.window[s.strstart-1], bflush); ***/
-    bflush = trees._tr_tally(s, 0, s.window[s.strstart - 1]);
+    bflush = trees._tr_tally(s, 0, s.window[s.strstart-1]);
 
     s.match_available = 0;
   }
-  s.insert = s.strstart < MIN_MATCH - 1 ? s.strstart : MIN_MATCH - 1;
+  s.insert = s.strstart < MIN_MATCH-1 ? s.strstart : MIN_MATCH-1;
   if (flush === Z_FINISH) {
     /*** FLUSH_BLOCK(s, 1); ***/
     flush_block_only(s, true);
@@ -60958,13 +61052,13 @@ function deflate_huff(s, flush) {
  * exclude worst case performance for pathological files. Better values may be
  * found for specific files.
  */
-function Config(good_length, max_lazy, nice_length, max_chain, func) {
+var Config = function (good_length, max_lazy, nice_length, max_chain, func) {
   this.good_length = good_length;
   this.max_lazy = max_lazy;
   this.nice_length = nice_length;
   this.max_chain = max_chain;
   this.func = func;
-}
+};
 
 var configuration_table;
 
@@ -61114,8 +61208,8 @@ function DeflateState() {
   // Use flat array of DOUBLE size, with interleaved fata,
   // because JS does not support effective
   this.dyn_ltree  = new utils.Buf16(HEAP_SIZE * 2);
-  this.dyn_dtree  = new utils.Buf16((2 * D_CODES + 1) * 2);
-  this.bl_tree    = new utils.Buf16((2 * BL_CODES + 1) * 2);
+  this.dyn_dtree  = new utils.Buf16((2*D_CODES+1) * 2);
+  this.bl_tree    = new utils.Buf16((2*BL_CODES+1) * 2);
   zero(this.dyn_ltree);
   zero(this.dyn_dtree);
   zero(this.bl_tree);
@@ -61125,11 +61219,11 @@ function DeflateState() {
   this.bl_desc  = null;         /* desc. for bit length tree */
 
   //ush bl_count[MAX_BITS+1];
-  this.bl_count = new utils.Buf16(MAX_BITS + 1);
+  this.bl_count = new utils.Buf16(MAX_BITS+1);
   /* number of codes at each bit length for an optimal tree */
 
   //int heap[2*L_CODES+1];      /* heap used to build the Huffman trees */
-  this.heap = new utils.Buf16(2 * L_CODES + 1);  /* heap used to build the Huffman trees */
+  this.heap = new utils.Buf16(2*L_CODES+1);  /* heap used to build the Huffman trees */
   zero(this.heap);
 
   this.heap_len = 0;               /* number of elements in the heap */
@@ -61138,7 +61232,7 @@ function DeflateState() {
    * The same heap array is used to build all trees.
    */
 
-  this.depth = new utils.Buf16(2 * L_CODES + 1); //uch depth[2*L_CODES+1];
+  this.depth = new utils.Buf16(2*L_CODES+1); //uch depth[2*L_CODES+1];
   zero(this.depth);
   /* Depth of each subtree used as tie breaker for trees of equal frequency
    */
@@ -61304,16 +61398,9 @@ function deflateInit2(strm, level, method, windowBits, memLevel, strategy) {
   s.lit_bufsize = 1 << (memLevel + 6); /* 16K elements by default */
 
   s.pending_buf_size = s.lit_bufsize * 4;
-
-  //overlay = (ushf *) ZALLOC(strm, s->lit_bufsize, sizeof(ush)+2);
-  //s->pending_buf = (uchf *) overlay;
   s.pending_buf = new utils.Buf8(s.pending_buf_size);
 
-  // It is offset from `s.pending_buf` (size is `s.lit_bufsize * 2`)
-  //s->d_buf = overlay + s->lit_bufsize/sizeof(ush);
-  s.d_buf = 1 * s.lit_bufsize;
-
-  //s->l_buf = s->pending_buf + (1+sizeof(ush))*s->lit_bufsize;
+  s.d_buf = s.lit_bufsize >> 1;
   s.l_buf = (1 + 2) * s.lit_bufsize;
 
   s.level = level;
@@ -61686,94 +61773,12 @@ function deflateEnd(strm) {
   return status === BUSY_STATE ? err(strm, Z_DATA_ERROR) : Z_OK;
 }
 
-
 /* =========================================================================
- * Initializes the compression dictionary from the given byte
- * sequence without producing any compressed output.
+ * Copy the source state to the destination state
  */
-function deflateSetDictionary(strm, dictionary) {
-  var dictLength = dictionary.length;
-
-  var s;
-  var str, n;
-  var wrap;
-  var avail;
-  var next;
-  var input;
-  var tmpDict;
-
-  if (!strm/*== Z_NULL*/ || !strm.state/*== Z_NULL*/) {
-    return Z_STREAM_ERROR;
-  }
-
-  s = strm.state;
-  wrap = s.wrap;
-
-  if (wrap === 2 || (wrap === 1 && s.status !== INIT_STATE) || s.lookahead) {
-    return Z_STREAM_ERROR;
-  }
-
-  /* when using zlib wrappers, compute Adler-32 for provided dictionary */
-  if (wrap === 1) {
-    /* adler32(strm->adler, dictionary, dictLength); */
-    strm.adler = adler32(strm.adler, dictionary, dictLength, 0);
-  }
-
-  s.wrap = 0;   /* avoid computing Adler-32 in read_buf */
-
-  /* if dictionary would fill window, just replace the history */
-  if (dictLength >= s.w_size) {
-    if (wrap === 0) {            /* already empty otherwise */
-      /*** CLEAR_HASH(s); ***/
-      zero(s.head); // Fill with NIL (= 0);
-      s.strstart = 0;
-      s.block_start = 0;
-      s.insert = 0;
-    }
-    /* use the tail */
-    // dictionary = dictionary.slice(dictLength - s.w_size);
-    tmpDict = new utils.Buf8(s.w_size);
-    utils.arraySet(tmpDict, dictionary, dictLength - s.w_size, s.w_size, 0);
-    dictionary = tmpDict;
-    dictLength = s.w_size;
-  }
-  /* insert dictionary into window and hash */
-  avail = strm.avail_in;
-  next = strm.next_in;
-  input = strm.input;
-  strm.avail_in = dictLength;
-  strm.next_in = 0;
-  strm.input = dictionary;
-  fill_window(s);
-  while (s.lookahead >= MIN_MATCH) {
-    str = s.strstart;
-    n = s.lookahead - (MIN_MATCH - 1);
-    do {
-      /* UPDATE_HASH(s, s->ins_h, s->window[str + MIN_MATCH-1]); */
-      s.ins_h = ((s.ins_h << s.hash_shift) ^ s.window[str + MIN_MATCH - 1]) & s.hash_mask;
-
-      s.prev[str & s.w_mask] = s.head[s.ins_h];
-
-      s.head[s.ins_h] = str;
-      str++;
-    } while (--n);
-    s.strstart = str;
-    s.lookahead = MIN_MATCH - 1;
-    fill_window(s);
-  }
-  s.strstart += s.lookahead;
-  s.block_start = s.strstart;
-  s.insert = s.lookahead;
-  s.lookahead = 0;
-  s.match_length = s.prev_length = MIN_MATCH - 1;
-  s.match_available = 0;
-  strm.next_in = next;
-  strm.input = input;
-  strm.avail_in = avail;
-  s.wrap = wrap;
-  return Z_OK;
-}
-
+//function deflateCopy(dest, source) {
+//
+//}
 
 exports.deflateInit = deflateInit;
 exports.deflateInit2 = deflateInit2;
@@ -61782,12 +61787,12 @@ exports.deflateResetKeep = deflateResetKeep;
 exports.deflateSetHeader = deflateSetHeader;
 exports.deflate = deflate;
 exports.deflateEnd = deflateEnd;
-exports.deflateSetDictionary = deflateSetDictionary;
 exports.deflateInfo = 'pako deflate (from Nodeca project)';
 
 /* Not implemented
 exports.deflateBound = deflateBound;
 exports.deflateCopy = deflateCopy;
+exports.deflateSetDictionary = deflateSetDictionary;
 exports.deflateParams = deflateParams;
 exports.deflatePending = deflatePending;
 exports.deflatePrime = deflatePrime;
@@ -62126,10 +62131,10 @@ module.exports = function inflate_fast(strm, start) {
 'use strict';
 
 
-var utils         = require('../utils/common');
-var adler32       = require('./adler32');
-var crc32         = require('./crc32');
-var inflate_fast  = require('./inffast');
+var utils = require('../utils/common');
+var adler32 = require('./adler32');
+var crc32   = require('./crc32');
+var inflate_fast = require('./inffast');
 var inflate_table = require('./inftrees');
 
 var CODES = 0;
@@ -62217,7 +62222,7 @@ var MAX_WBITS = 15;
 var DEF_WBITS = MAX_WBITS;
 
 
-function zswap32(q) {
+function ZSWAP32(q) {
   return  (((q >>> 24) & 0xff) +
           ((q >>> 8) & 0xff00) +
           ((q & 0xff00) << 8) +
@@ -62410,13 +62415,13 @@ function fixedtables(state) {
     while (sym < 280) { state.lens[sym++] = 7; }
     while (sym < 288) { state.lens[sym++] = 8; }
 
-    inflate_table(LENS,  state.lens, 0, 288, lenfix,   0, state.work, { bits: 9 });
+    inflate_table(LENS,  state.lens, 0, 288, lenfix,   0, state.work, {bits: 9});
 
     /* distance table */
     sym = 0;
     while (sym < 32) { state.lens[sym++] = 5; }
 
-    inflate_table(DISTS, state.lens, 0, 32,   distfix, 0, state.work, { bits: 5 });
+    inflate_table(DISTS, state.lens, 0, 32,   distfix, 0, state.work, {bits: 5});
 
     /* do this just once */
     virgin = false;
@@ -62458,7 +62463,7 @@ function updatewindow(strm, src, end, copy) {
 
   /* copy state->wsize or less output bytes into the circular window */
   if (copy >= state.wsize) {
-    utils.arraySet(state.window, src, end - state.wsize, state.wsize, 0);
+    utils.arraySet(state.window,src, end - state.wsize, state.wsize, 0);
     state.wnext = 0;
     state.whave = state.wsize;
   }
@@ -62468,11 +62473,11 @@ function updatewindow(strm, src, end, copy) {
       dist = copy;
     }
     //zmemcpy(state->window + state->wnext, end - copy, dist);
-    utils.arraySet(state.window, src, end - copy, dist, state.wnext);
+    utils.arraySet(state.window,src, end - copy, dist, state.wnext);
     copy -= dist;
     if (copy) {
       //zmemcpy(state->window, end - copy, copy);
-      utils.arraySet(state.window, src, end - copy, copy, 0);
+      utils.arraySet(state.window,src, end - copy, copy, 0);
       state.wnext = copy;
       state.whave = state.wsize;
     }
@@ -62509,7 +62514,7 @@ function inflate(strm, flush) {
   var n; // temporary var for NEED_BITS
 
   var order = /* permutation of code lengths */
-    [ 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 ];
+    [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
 
 
   if (!strm || !strm.state || !strm.output ||
@@ -62836,7 +62841,7 @@ function inflate(strm, flush) {
         state.head.hcrc = ((state.flags >> 9) & 1);
         state.head.done = true;
       }
-      strm.adler = state.check = 0;
+      strm.adler = state.check = 0 /*crc32(0L, Z_NULL, 0)*/;
       state.mode = TYPE;
       break;
     case DICTID:
@@ -62848,7 +62853,7 @@ function inflate(strm, flush) {
         bits += 8;
       }
       //===//
-      strm.adler = state.check = zswap32(hold);
+      strm.adler = state.check = ZSWAP32(hold);
       //=== INITBITS();
       hold = 0;
       bits = 0;
@@ -63040,7 +63045,7 @@ function inflate(strm, flush) {
       state.lencode = state.lendyn;
       state.lenbits = 7;
 
-      opts = { bits: state.lenbits };
+      opts = {bits: state.lenbits};
       ret = inflate_table(CODES, state.lens, 0, 19, state.lencode, 0, state.work, opts);
       state.lenbits = opts.bits;
 
@@ -63171,7 +63176,7 @@ function inflate(strm, flush) {
          concerning the ENOUGH constants, which depend on those values */
       state.lenbits = 9;
 
-      opts = { bits: state.lenbits };
+      opts = {bits: state.lenbits};
       ret = inflate_table(LENS, state.lens, 0, state.nlen, state.lencode, 0, state.work, opts);
       // We have separate tables & no pointers. 2 commented lines below not needed.
       // state.next_index = opts.table_index;
@@ -63188,7 +63193,7 @@ function inflate(strm, flush) {
       //state.distcode.copy(state.codes);
       // Switch to use dynamic table
       state.distcode = state.distdyn;
-      opts = { bits: state.distbits };
+      opts = {bits: state.distbits};
       ret = inflate_table(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
       // We have separate tables & no pointers. 2 commented lines below not needed.
       // state.next_index = opts.table_index;
@@ -63236,7 +63241,7 @@ function inflate(strm, flush) {
       }
       state.back = 0;
       for (;;) {
-        here = state.lencode[hold & ((1 << state.lenbits) - 1)];  /*BITS(state.lenbits)*/
+        here = state.lencode[hold & ((1 << state.lenbits) -1)];  /*BITS(state.lenbits)*/
         here_bits = here >>> 24;
         here_op = (here >>> 16) & 0xff;
         here_val = here & 0xffff;
@@ -63255,7 +63260,7 @@ function inflate(strm, flush) {
         last_val = here_val;
         for (;;) {
           here = state.lencode[last_val +
-                  ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+                  ((hold & ((1 << (last_bits + last_op)) -1))/*BITS(last.bits + last.op)*/ >> last_bits)];
           here_bits = here >>> 24;
           here_op = (here >>> 16) & 0xff;
           here_val = here & 0xffff;
@@ -63312,7 +63317,7 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        state.length += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
+        state.length += hold & ((1 << state.extra) -1)/*BITS(state.extra)*/;
         //--- DROPBITS(state.extra) ---//
         hold >>>= state.extra;
         bits -= state.extra;
@@ -63325,7 +63330,7 @@ function inflate(strm, flush) {
       /* falls through */
     case DIST:
       for (;;) {
-        here = state.distcode[hold & ((1 << state.distbits) - 1)];/*BITS(state.distbits)*/
+        here = state.distcode[hold & ((1 << state.distbits) -1)];/*BITS(state.distbits)*/
         here_bits = here >>> 24;
         here_op = (here >>> 16) & 0xff;
         here_val = here & 0xffff;
@@ -63344,7 +63349,7 @@ function inflate(strm, flush) {
         last_val = here_val;
         for (;;) {
           here = state.distcode[last_val +
-                  ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+                  ((hold & ((1 << (last_bits + last_op)) -1))/*BITS(last.bits + last.op)*/ >> last_bits)];
           here_bits = here >>> 24;
           here_op = (here >>> 16) & 0xff;
           here_val = here & 0xffff;
@@ -63388,7 +63393,7 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        state.offset += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
+        state.offset += hold & ((1 << state.extra) -1)/*BITS(state.extra)*/;
         //--- DROPBITS(state.extra) ---//
         hold >>>= state.extra;
         bits -= state.extra;
@@ -63482,8 +63487,8 @@ function inflate(strm, flush) {
 
         }
         _out = left;
-        // NB: crc32 stored as signed 32-bit int, zswap32 returns signed too
-        if ((state.flags ? hold : zswap32(hold)) !== state.check) {
+        // NB: crc32 stored as signed 32-bit int, ZSWAP32 returns signed too
+        if ((state.flags ? hold : ZSWAP32(hold)) !== state.check) {
           strm.msg = 'incorrect data check';
           state.mode = BAD;
           break;
@@ -63605,41 +63610,6 @@ function inflateGetHeader(strm, head) {
   return Z_OK;
 }
 
-function inflateSetDictionary(strm, dictionary) {
-  var dictLength = dictionary.length;
-
-  var state;
-  var dictid;
-  var ret;
-
-  /* check state */
-  if (!strm /* == Z_NULL */ || !strm.state /* == Z_NULL */) { return Z_STREAM_ERROR; }
-  state = strm.state;
-
-  if (state.wrap !== 0 && state.mode !== DICT) {
-    return Z_STREAM_ERROR;
-  }
-
-  /* check for correct dictionary identifier */
-  if (state.mode === DICT) {
-    dictid = 1; /* adler32(0, null, 0)*/
-    /* dictid = adler32(dictid, dictionary, dictLength); */
-    dictid = adler32(dictid, dictionary, dictLength, 0);
-    if (dictid !== state.check) {
-      return Z_DATA_ERROR;
-    }
-  }
-  /* copy dictionary to window using updatewindow(), which will amend the
-   existing dictionary if appropriate */
-  ret = updatewindow(strm, dictionary, dictLength, dictLength);
-  if (ret) {
-    state.mode = MEM;
-    return Z_MEM_ERROR;
-  }
-  state.havedict = 1;
-  // Tracev((stderr, "inflate:   dictionary set\n"));
-  return Z_OK;
-}
 
 exports.inflateReset = inflateReset;
 exports.inflateReset2 = inflateReset2;
@@ -63649,7 +63619,6 @@ exports.inflateInit2 = inflateInit2;
 exports.inflate = inflate;
 exports.inflateEnd = inflateEnd;
 exports.inflateGetHeader = inflateGetHeader;
-exports.inflateSetDictionary = inflateSetDictionary;
 exports.inflateInfo = 'pako inflate (from Nodeca project)';
 
 /* Not implemented
@@ -63657,6 +63626,7 @@ exports.inflateCopy = inflateCopy;
 exports.inflateGetDictionary = inflateGetDictionary;
 exports.inflateMark = inflateMark;
 exports.inflatePrime = inflatePrime;
+exports.inflateSetDictionary = inflateSetDictionary;
 exports.inflateSync = inflateSync;
 exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
@@ -63722,8 +63692,8 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   var base_index = 0;
 //  var shoextra;    /* extra bits table to use */
   var end;                    /* use base and extra for symbol > end */
-  var count = new utils.Buf16(MAXBITS + 1); //[MAXBITS+1];    /* number of codes of each length */
-  var offs = new utils.Buf16(MAXBITS + 1); //[MAXBITS+1];     /* offsets in table for each length */
+  var count = new utils.Buf16(MAXBITS+1); //[MAXBITS+1];    /* number of codes of each length */
+  var offs = new utils.Buf16(MAXBITS+1); //[MAXBITS+1];     /* offsets in table for each length */
   var extra = null;
   var extra_index = 0;
 
@@ -63892,7 +63862,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
     return 1;
   }
 
-  var i = 0;
+  var i=0;
   /* process all codes and make table entries */
   for (;;) {
     i++;
@@ -63995,9 +63965,9 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
 'use strict';
 
 module.exports = {
-  2:      'need dictionary',     /* Z_NEED_DICT       2  */
-  1:      'stream end',          /* Z_STREAM_END      1  */
-  0:      '',                    /* Z_OK              0  */
+  '2':    'need dictionary',     /* Z_NEED_DICT       2  */
+  '1':    'stream end',          /* Z_STREAM_END      1  */
+  '0':    '',                    /* Z_OK              0  */
   '-1':   'file error',          /* Z_ERRNO         (-1) */
   '-2':   'stream error',        /* Z_STREAM_ERROR  (-2) */
   '-3':   'data error',          /* Z_DATA_ERROR    (-3) */
@@ -64064,7 +64034,7 @@ var D_CODES       = 30;
 var BL_CODES      = 19;
 /* number of codes used to transfer the bit lengths */
 
-var HEAP_SIZE     = 2 * L_CODES + 1;
+var HEAP_SIZE     = 2*L_CODES + 1;
 /* maximum heap size */
 
 var MAX_BITS      = 15;
@@ -64093,7 +64063,6 @@ var REPZ_3_10   = 17;
 var REPZ_11_138 = 18;
 /* repeat a zero length 11-138 times  (7 bits of repeat count) */
 
-/* eslint-disable comma-spacing,array-bracket-spacing */
 var extra_lbits =   /* extra bits for each length code */
   [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
 
@@ -64105,8 +64074,6 @@ var extra_blbits =  /* extra bits for each bit length code */
 
 var bl_order =
   [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
-/* eslint-enable comma-spacing,array-bracket-spacing */
-
 /* The lengths of the bit length codes are sent in order of decreasing
  * probability, to avoid transmitting the lengths for unused bit length codes.
  */
@@ -64120,7 +64087,7 @@ var bl_order =
 var DIST_CODE_LEN = 512; /* see definition of array dist_code below */
 
 // !!!! Use flat array insdead of structure, Freq = i*2, Len = i*2+1
-var static_ltree  = new Array((L_CODES + 2) * 2);
+var static_ltree  = new Array((L_CODES+2) * 2);
 zero(static_ltree);
 /* The static literal tree. Since the bit lengths are imposed, there is no
  * need for the L_CODES extra codes used during heap construction. However
@@ -64141,7 +64108,7 @@ zero(_dist_code);
  * the 15 bit distances.
  */
 
-var _length_code  = new Array(MAX_MATCH - MIN_MATCH + 1);
+var _length_code  = new Array(MAX_MATCH-MIN_MATCH+1);
 zero(_length_code);
 /* length code for each normalized match length (0 == MIN_MATCH) */
 
@@ -64154,7 +64121,7 @@ zero(base_dist);
 /* First normalized distance for each code (0 = distance of 1) */
 
 
-function StaticTreeDesc(static_tree, extra_bits, extra_base, elems, max_length) {
+var StaticTreeDesc = function (static_tree, extra_bits, extra_base, elems, max_length) {
 
   this.static_tree  = static_tree;  /* static tree or NULL */
   this.extra_bits   = extra_bits;   /* extra bits for each code or NULL */
@@ -64164,7 +64131,7 @@ function StaticTreeDesc(static_tree, extra_bits, extra_base, elems, max_length) 
 
   // show if `static_tree` has data or dummy - needed for monomorphic objects
   this.has_stree    = static_tree && static_tree.length;
-}
+};
 
 
 var static_l_desc;
@@ -64172,11 +64139,11 @@ var static_d_desc;
 var static_bl_desc;
 
 
-function TreeDesc(dyn_tree, stat_desc) {
+var TreeDesc = function(dyn_tree, stat_desc) {
   this.dyn_tree = dyn_tree;     /* the dynamic tree */
   this.max_code = 0;            /* largest code with non zero frequency */
   this.stat_desc = stat_desc;   /* the corresponding static tree */
-}
+};
 
 
 
@@ -64189,7 +64156,7 @@ function d_code(dist) {
  * Output a short LSB first on the stream.
  * IN assertion: there is enough room in pendingBuf.
  */
-function put_short(s, w) {
+function put_short (s, w) {
 //    put_byte(s, (uch)((w) & 0xff));
 //    put_byte(s, (uch)((ush)(w) >> 8));
   s.pending_buf[s.pending++] = (w) & 0xff;
@@ -64215,7 +64182,7 @@ function send_bits(s, value, length) {
 
 
 function send_code(s, c, tree) {
-  send_bits(s, tree[c * 2]/*.Code*/, tree[c * 2 + 1]/*.Len*/);
+  send_bits(s, tree[c*2]/*.Code*/, tree[c*2 + 1]/*.Len*/);
 }
 
 
@@ -64287,16 +64254,16 @@ function gen_bitlen(s, desc)
   /* In a first pass, compute the optimal bit lengths (which may
    * overflow in the case of the bit length tree).
    */
-  tree[s.heap[s.heap_max] * 2 + 1]/*.Len*/ = 0; /* root of the heap */
+  tree[s.heap[s.heap_max]*2 + 1]/*.Len*/ = 0; /* root of the heap */
 
-  for (h = s.heap_max + 1; h < HEAP_SIZE; h++) {
+  for (h = s.heap_max+1; h < HEAP_SIZE; h++) {
     n = s.heap[h];
-    bits = tree[tree[n * 2 + 1]/*.Dad*/ * 2 + 1]/*.Len*/ + 1;
+    bits = tree[tree[n*2 +1]/*.Dad*/ * 2 + 1]/*.Len*/ + 1;
     if (bits > max_length) {
       bits = max_length;
       overflow++;
     }
-    tree[n * 2 + 1]/*.Len*/ = bits;
+    tree[n*2 + 1]/*.Len*/ = bits;
     /* We overwrite tree[n].Dad which is no longer needed */
 
     if (n > max_code) { continue; } /* not a leaf node */
@@ -64304,12 +64271,12 @@ function gen_bitlen(s, desc)
     s.bl_count[bits]++;
     xbits = 0;
     if (n >= base) {
-      xbits = extra[n - base];
+      xbits = extra[n-base];
     }
     f = tree[n * 2]/*.Freq*/;
     s.opt_len += f * (bits + xbits);
     if (has_stree) {
-      s.static_len += f * (stree[n * 2 + 1]/*.Len*/ + xbits);
+      s.static_len += f * (stree[n*2 + 1]/*.Len*/ + xbits);
     }
   }
   if (overflow === 0) { return; }
@@ -64319,10 +64286,10 @@ function gen_bitlen(s, desc)
 
   /* Find the first bit length which could increase: */
   do {
-    bits = max_length - 1;
+    bits = max_length-1;
     while (s.bl_count[bits] === 0) { bits--; }
     s.bl_count[bits]--;      /* move one leaf down the tree */
-    s.bl_count[bits + 1] += 2; /* move one overflow item as its brother */
+    s.bl_count[bits+1] += 2; /* move one overflow item as its brother */
     s.bl_count[max_length]--;
     /* The brother of the overflow item also moves one step up,
      * but this does not affect bl_count[max_length]
@@ -64340,10 +64307,10 @@ function gen_bitlen(s, desc)
     while (n !== 0) {
       m = s.heap[--h];
       if (m > max_code) { continue; }
-      if (tree[m * 2 + 1]/*.Len*/ !== bits) {
+      if (tree[m*2 + 1]/*.Len*/ !== bits) {
         // Trace((stderr,"code %d bits %d->%d\n", m, tree[m].Len, bits));
-        s.opt_len += (bits - tree[m * 2 + 1]/*.Len*/) * tree[m * 2]/*.Freq*/;
-        tree[m * 2 + 1]/*.Len*/ = bits;
+        s.opt_len += (bits - tree[m*2 + 1]/*.Len*/)*tree[m*2]/*.Freq*/;
+        tree[m*2 + 1]/*.Len*/ = bits;
       }
       n--;
     }
@@ -64364,7 +64331,7 @@ function gen_codes(tree, max_code, bl_count)
 //    int max_code;              /* largest code with non zero frequency */
 //    ushf *bl_count;            /* number of codes at each bit length */
 {
-  var next_code = new Array(MAX_BITS + 1); /* next code value for each bit length */
+  var next_code = new Array(MAX_BITS+1); /* next code value for each bit length */
   var code = 0;              /* running code value */
   var bits;                  /* bit index */
   var n;                     /* code index */
@@ -64373,7 +64340,7 @@ function gen_codes(tree, max_code, bl_count)
    * without bit reversal.
    */
   for (bits = 1; bits <= MAX_BITS; bits++) {
-    next_code[bits] = code = (code + bl_count[bits - 1]) << 1;
+    next_code[bits] = code = (code + bl_count[bits-1]) << 1;
   }
   /* Check that the bit counts in bl_count are consistent. The last code
    * must be all ones.
@@ -64383,10 +64350,10 @@ function gen_codes(tree, max_code, bl_count)
   //Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
 
   for (n = 0;  n <= max_code; n++) {
-    var len = tree[n * 2 + 1]/*.Len*/;
+    var len = tree[n*2 + 1]/*.Len*/;
     if (len === 0) { continue; }
     /* Now reverse the bits */
-    tree[n * 2]/*.Code*/ = bi_reverse(next_code[len]++, len);
+    tree[n*2]/*.Code*/ = bi_reverse(next_code[len]++, len);
 
     //Tracecv(tree != static_ltree, (stderr,"\nn %3d %c l %2d c %4x (%x) ",
     //     n, (isgraph(n) ? n : ' '), len, tree[n].Code, next_code[len]-1));
@@ -64403,7 +64370,7 @@ function tr_static_init() {
   var length;   /* length value */
   var code;     /* code value */
   var dist;     /* distance index */
-  var bl_count = new Array(MAX_BITS + 1);
+  var bl_count = new Array(MAX_BITS+1);
   /* number of codes at each bit length for an optimal tree */
 
   // do check in _tr_init()
@@ -64420,9 +64387,9 @@ function tr_static_init() {
 
   /* Initialize the mapping length (0..255) -> length code (0..28) */
   length = 0;
-  for (code = 0; code < LENGTH_CODES - 1; code++) {
+  for (code = 0; code < LENGTH_CODES-1; code++) {
     base_length[code] = length;
-    for (n = 0; n < (1 << extra_lbits[code]); n++) {
+    for (n = 0; n < (1<<extra_lbits[code]); n++) {
       _length_code[length++] = code;
     }
   }
@@ -64431,13 +64398,13 @@ function tr_static_init() {
    * in two different ways: code 284 + 5 bits or code 285, so we
    * overwrite length_code[255] to use the best encoding:
    */
-  _length_code[length - 1] = code;
+  _length_code[length-1] = code;
 
   /* Initialize the mapping dist (0..32K) -> dist code (0..29) */
   dist = 0;
-  for (code = 0; code < 16; code++) {
+  for (code = 0 ; code < 16; code++) {
     base_dist[code] = dist;
-    for (n = 0; n < (1 << extra_dbits[code]); n++) {
+    for (n = 0; n < (1<<extra_dbits[code]); n++) {
       _dist_code[dist++] = code;
     }
   }
@@ -64445,7 +64412,7 @@ function tr_static_init() {
   dist >>= 7; /* from now on, all distances are divided by 128 */
   for (; code < D_CODES; code++) {
     base_dist[code] = dist << 7;
-    for (n = 0; n < (1 << (extra_dbits[code] - 7)); n++) {
+    for (n = 0; n < (1<<(extra_dbits[code]-7)); n++) {
       _dist_code[256 + dist++] = code;
     }
   }
@@ -64458,22 +64425,22 @@ function tr_static_init() {
 
   n = 0;
   while (n <= 143) {
-    static_ltree[n * 2 + 1]/*.Len*/ = 8;
+    static_ltree[n*2 + 1]/*.Len*/ = 8;
     n++;
     bl_count[8]++;
   }
   while (n <= 255) {
-    static_ltree[n * 2 + 1]/*.Len*/ = 9;
+    static_ltree[n*2 + 1]/*.Len*/ = 9;
     n++;
     bl_count[9]++;
   }
   while (n <= 279) {
-    static_ltree[n * 2 + 1]/*.Len*/ = 7;
+    static_ltree[n*2 + 1]/*.Len*/ = 7;
     n++;
     bl_count[7]++;
   }
   while (n <= 287) {
-    static_ltree[n * 2 + 1]/*.Len*/ = 8;
+    static_ltree[n*2 + 1]/*.Len*/ = 8;
     n++;
     bl_count[8]++;
   }
@@ -64481,18 +64448,18 @@ function tr_static_init() {
    * tree construction to get a canonical Huffman tree (longest code
    * all ones)
    */
-  gen_codes(static_ltree, L_CODES + 1, bl_count);
+  gen_codes(static_ltree, L_CODES+1, bl_count);
 
   /* The static distance tree is trivial: */
   for (n = 0; n < D_CODES; n++) {
-    static_dtree[n * 2 + 1]/*.Len*/ = 5;
-    static_dtree[n * 2]/*.Code*/ = bi_reverse(n, 5);
+    static_dtree[n*2 + 1]/*.Len*/ = 5;
+    static_dtree[n*2]/*.Code*/ = bi_reverse(n, 5);
   }
 
   // Now data ready and we can init static trees
-  static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS + 1, L_CODES, MAX_BITS);
+  static_l_desc = new StaticTreeDesc(static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS);
   static_d_desc = new StaticTreeDesc(static_dtree, extra_dbits, 0,          D_CODES, MAX_BITS);
-  static_bl_desc = new StaticTreeDesc(new Array(0), extra_blbits, 0,         BL_CODES, MAX_BL_BITS);
+  static_bl_desc =new StaticTreeDesc(new Array(0), extra_blbits, 0,         BL_CODES, MAX_BL_BITS);
 
   //static_init_done = true;
 }
@@ -64505,11 +64472,11 @@ function init_block(s) {
   var n; /* iterates over tree elements */
 
   /* Initialize the trees. */
-  for (n = 0; n < L_CODES;  n++) { s.dyn_ltree[n * 2]/*.Freq*/ = 0; }
-  for (n = 0; n < D_CODES;  n++) { s.dyn_dtree[n * 2]/*.Freq*/ = 0; }
-  for (n = 0; n < BL_CODES; n++) { s.bl_tree[n * 2]/*.Freq*/ = 0; }
+  for (n = 0; n < L_CODES;  n++) { s.dyn_ltree[n*2]/*.Freq*/ = 0; }
+  for (n = 0; n < D_CODES;  n++) { s.dyn_dtree[n*2]/*.Freq*/ = 0; }
+  for (n = 0; n < BL_CODES; n++) { s.bl_tree[n*2]/*.Freq*/ = 0; }
 
-  s.dyn_ltree[END_BLOCK * 2]/*.Freq*/ = 1;
+  s.dyn_ltree[END_BLOCK*2]/*.Freq*/ = 1;
   s.opt_len = s.static_len = 0;
   s.last_lit = s.matches = 0;
 }
@@ -64558,8 +64525,8 @@ function copy_block(s, buf, len, header)
  * the subtrees have equal frequency. This minimizes the worst case length.
  */
 function smaller(tree, n, m, depth) {
-  var _n2 = n * 2;
-  var _m2 = m * 2;
+  var _n2 = n*2;
+  var _m2 = m*2;
   return (tree[_n2]/*.Freq*/ < tree[_m2]/*.Freq*/ ||
          (tree[_n2]/*.Freq*/ === tree[_m2]/*.Freq*/ && depth[n] <= depth[m]));
 }
@@ -64580,7 +64547,7 @@ function pqdownheap(s, tree, k)
   while (j <= s.heap_len) {
     /* Set j to the smallest of the two sons: */
     if (j < s.heap_len &&
-      smaller(tree, s.heap[j + 1], s.heap[j], s.depth)) {
+      smaller(tree, s.heap[j+1], s.heap[j], s.depth)) {
       j++;
     }
     /* Exit if v is smaller than both sons */
@@ -64616,7 +64583,7 @@ function compress_block(s, ltree, dtree)
 
   if (s.last_lit !== 0) {
     do {
-      dist = (s.pending_buf[s.d_buf + lx * 2] << 8) | (s.pending_buf[s.d_buf + lx * 2 + 1]);
+      dist = (s.pending_buf[s.d_buf + lx*2] << 8) | (s.pending_buf[s.d_buf + lx*2 + 1]);
       lc = s.pending_buf[s.l_buf + lx];
       lx++;
 
@@ -64626,7 +64593,7 @@ function compress_block(s, ltree, dtree)
       } else {
         /* Here, lc is the match length - MIN_MATCH */
         code = _length_code[lc];
-        send_code(s, code + LITERALS + 1, ltree); /* send the length code */
+        send_code(s, code+LITERALS+1, ltree); /* send the length code */
         extra = extra_lbits[code];
         if (extra !== 0) {
           lc -= base_length[code];
@@ -64688,7 +64655,7 @@ function build_tree(s, desc)
       s.depth[n] = 0;
 
     } else {
-      tree[n * 2 + 1]/*.Len*/ = 0;
+      tree[n*2 + 1]/*.Len*/ = 0;
     }
   }
 
@@ -64704,7 +64671,7 @@ function build_tree(s, desc)
     s.opt_len--;
 
     if (has_stree) {
-      s.static_len -= stree[node * 2 + 1]/*.Len*/;
+      s.static_len -= stree[node*2 + 1]/*.Len*/;
     }
     /* node is 0 or 1 so it does not have extra bits */
   }
@@ -64735,7 +64702,7 @@ function build_tree(s, desc)
     /* Create a new node father of n and m */
     tree[node * 2]/*.Freq*/ = tree[n * 2]/*.Freq*/ + tree[m * 2]/*.Freq*/;
     s.depth[node] = (s.depth[n] >= s.depth[m] ? s.depth[n] : s.depth[m]) + 1;
-    tree[n * 2 + 1]/*.Dad*/ = tree[m * 2 + 1]/*.Dad*/ = node;
+    tree[n*2 + 1]/*.Dad*/ = tree[m*2 + 1]/*.Dad*/ = node;
 
     /* and insert the new node in the heap */
     s.heap[1/*SMALLEST*/] = node++;
@@ -64768,7 +64735,7 @@ function scan_tree(s, tree, max_code)
   var prevlen = -1;          /* last emitted length */
   var curlen;                /* length of current code */
 
-  var nextlen = tree[0 * 2 + 1]/*.Len*/; /* length of next code */
+  var nextlen = tree[0*2 + 1]/*.Len*/; /* length of next code */
 
   var count = 0;             /* repeat count of the current code */
   var max_count = 7;         /* max repeat count */
@@ -64778,11 +64745,11 @@ function scan_tree(s, tree, max_code)
     max_count = 138;
     min_count = 3;
   }
-  tree[(max_code + 1) * 2 + 1]/*.Len*/ = 0xffff; /* guard */
+  tree[(max_code+1)*2 + 1]/*.Len*/ = 0xffff; /* guard */
 
   for (n = 0; n <= max_code; n++) {
     curlen = nextlen;
-    nextlen = tree[(n + 1) * 2 + 1]/*.Len*/;
+    nextlen = tree[(n+1)*2 + 1]/*.Len*/;
 
     if (++count < max_count && curlen === nextlen) {
       continue;
@@ -64793,13 +64760,13 @@ function scan_tree(s, tree, max_code)
     } else if (curlen !== 0) {
 
       if (curlen !== prevlen) { s.bl_tree[curlen * 2]/*.Freq*/++; }
-      s.bl_tree[REP_3_6 * 2]/*.Freq*/++;
+      s.bl_tree[REP_3_6*2]/*.Freq*/++;
 
     } else if (count <= 10) {
-      s.bl_tree[REPZ_3_10 * 2]/*.Freq*/++;
+      s.bl_tree[REPZ_3_10*2]/*.Freq*/++;
 
     } else {
-      s.bl_tree[REPZ_11_138 * 2]/*.Freq*/++;
+      s.bl_tree[REPZ_11_138*2]/*.Freq*/++;
     }
 
     count = 0;
@@ -64834,7 +64801,7 @@ function send_tree(s, tree, max_code)
   var prevlen = -1;          /* last emitted length */
   var curlen;                /* length of current code */
 
-  var nextlen = tree[0 * 2 + 1]/*.Len*/; /* length of next code */
+  var nextlen = tree[0*2 + 1]/*.Len*/; /* length of next code */
 
   var count = 0;             /* repeat count of the current code */
   var max_count = 7;         /* max repeat count */
@@ -64848,7 +64815,7 @@ function send_tree(s, tree, max_code)
 
   for (n = 0; n <= max_code; n++) {
     curlen = nextlen;
-    nextlen = tree[(n + 1) * 2 + 1]/*.Len*/;
+    nextlen = tree[(n+1)*2 + 1]/*.Len*/;
 
     if (++count < max_count && curlen === nextlen) {
       continue;
@@ -64863,15 +64830,15 @@ function send_tree(s, tree, max_code)
       }
       //Assert(count >= 3 && count <= 6, " 3_6?");
       send_code(s, REP_3_6, s.bl_tree);
-      send_bits(s, count - 3, 2);
+      send_bits(s, count-3, 2);
 
     } else if (count <= 10) {
       send_code(s, REPZ_3_10, s.bl_tree);
-      send_bits(s, count - 3, 3);
+      send_bits(s, count-3, 3);
 
     } else {
       send_code(s, REPZ_11_138, s.bl_tree);
-      send_bits(s, count - 11, 7);
+      send_bits(s, count-11, 7);
     }
 
     count = 0;
@@ -64913,13 +64880,13 @@ function build_bl_tree(s) {
    * requires that at least 4 bit length codes be sent. (appnote.txt says
    * 3 but the actual value used is 4.)
    */
-  for (max_blindex = BL_CODES - 1; max_blindex >= 3; max_blindex--) {
-    if (s.bl_tree[bl_order[max_blindex] * 2 + 1]/*.Len*/ !== 0) {
+  for (max_blindex = BL_CODES-1; max_blindex >= 3; max_blindex--) {
+    if (s.bl_tree[bl_order[max_blindex]*2 + 1]/*.Len*/ !== 0) {
       break;
     }
   }
   /* Update opt_len to include the bit length tree and counts */
-  s.opt_len += 3 * (max_blindex + 1) + 5 + 5 + 4;
+  s.opt_len += 3*(max_blindex+1) + 5+5+4;
   //Tracev((stderr, "\ndyn trees: dyn %ld, stat %ld",
   //        s->opt_len, s->static_len));
 
@@ -64942,19 +64909,19 @@ function send_all_trees(s, lcodes, dcodes, blcodes)
   //Assert (lcodes <= L_CODES && dcodes <= D_CODES && blcodes <= BL_CODES,
   //        "too many codes");
   //Tracev((stderr, "\nbl counts: "));
-  send_bits(s, lcodes - 257, 5); /* not +255 as stated in appnote.txt */
-  send_bits(s, dcodes - 1,   5);
-  send_bits(s, blcodes - 4,  4); /* not -3 as stated in appnote.txt */
+  send_bits(s, lcodes-257, 5); /* not +255 as stated in appnote.txt */
+  send_bits(s, dcodes-1,   5);
+  send_bits(s, blcodes-4,  4); /* not -3 as stated in appnote.txt */
   for (rank = 0; rank < blcodes; rank++) {
     //Tracev((stderr, "\nbl code %2d ", bl_order[rank]));
-    send_bits(s, s.bl_tree[bl_order[rank] * 2 + 1]/*.Len*/, 3);
+    send_bits(s, s.bl_tree[bl_order[rank]*2 + 1]/*.Len*/, 3);
   }
   //Tracev((stderr, "\nbl tree: sent %ld", s->bits_sent));
 
-  send_tree(s, s.dyn_ltree, lcodes - 1); /* literal tree */
+  send_tree(s, s.dyn_ltree, lcodes-1); /* literal tree */
   //Tracev((stderr, "\nlit tree: sent %ld", s->bits_sent));
 
-  send_tree(s, s.dyn_dtree, dcodes - 1); /* distance tree */
+  send_tree(s, s.dyn_dtree, dcodes-1); /* distance tree */
   //Tracev((stderr, "\ndist tree: sent %ld", s->bits_sent));
 }
 
@@ -64982,7 +64949,7 @@ function detect_data_type(s) {
 
   /* Check for non-textual ("black-listed") bytes. */
   for (n = 0; n <= 31; n++, black_mask >>>= 1) {
-    if ((black_mask & 1) && (s.dyn_ltree[n * 2]/*.Freq*/ !== 0)) {
+    if ((black_mask & 1) && (s.dyn_ltree[n*2]/*.Freq*/ !== 0)) {
       return Z_BINARY;
     }
   }
@@ -65039,7 +65006,7 @@ function _tr_stored_block(s, buf, stored_len, last)
 //ulg stored_len;   /* length of input block */
 //int last;         /* one if this is the last block for a file */
 {
-  send_bits(s, (STORED_BLOCK << 1) + (last ? 1 : 0), 3);    /* send block type */
+  send_bits(s, (STORED_BLOCK<<1)+(last ? 1 : 0), 3);    /* send block type */
   copy_block(s, buf, stored_len, true); /* with header */
 }
 
@@ -65049,7 +65016,7 @@ function _tr_stored_block(s, buf, stored_len, last)
  * This takes 10 bits, of which 7 may remain in the bit buffer.
  */
 function _tr_align(s) {
-  send_bits(s, STATIC_TREES << 1, 3);
+  send_bits(s, STATIC_TREES<<1, 3);
   send_code(s, END_BLOCK, static_ltree);
   bi_flush(s);
 }
@@ -65094,8 +65061,8 @@ function _tr_flush_block(s, buf, stored_len, last)
     max_blindex = build_bl_tree(s);
 
     /* Determine the best encoding. Compute the block lengths in bytes. */
-    opt_lenb = (s.opt_len + 3 + 7) >>> 3;
-    static_lenb = (s.static_len + 3 + 7) >>> 3;
+    opt_lenb = (s.opt_len+3+7) >>> 3;
+    static_lenb = (s.static_len+3+7) >>> 3;
 
     // Tracev((stderr, "\nopt %lu(%lu) stat %lu(%lu) stored %lu lit %u ",
     //        opt_lenb, s->opt_len, static_lenb, s->static_len, stored_len,
@@ -65108,7 +65075,7 @@ function _tr_flush_block(s, buf, stored_len, last)
     opt_lenb = static_lenb = stored_len + 5; /* force a stored block */
   }
 
-  if ((stored_len + 4 <= opt_lenb) && (buf !== -1)) {
+  if ((stored_len+4 <= opt_lenb) && (buf !== -1)) {
     /* 4: two words for the lengths */
 
     /* The test buf != NULL is only necessary if LIT_BUFSIZE > WSIZE.
@@ -65121,12 +65088,12 @@ function _tr_flush_block(s, buf, stored_len, last)
 
   } else if (s.strategy === Z_FIXED || static_lenb === opt_lenb) {
 
-    send_bits(s, (STATIC_TREES << 1) + (last ? 1 : 0), 3);
+    send_bits(s, (STATIC_TREES<<1) + (last ? 1 : 0), 3);
     compress_block(s, static_ltree, static_dtree);
 
   } else {
-    send_bits(s, (DYN_TREES << 1) + (last ? 1 : 0), 3);
-    send_all_trees(s, s.l_desc.max_code + 1, s.d_desc.max_code + 1, max_blindex + 1);
+    send_bits(s, (DYN_TREES<<1) + (last ? 1 : 0), 3);
+    send_all_trees(s, s.l_desc.max_code+1, s.d_desc.max_code+1, max_blindex+1);
     compress_block(s, s.dyn_ltree, s.dyn_dtree);
   }
   // Assert (s->compressed_len == s->bits_sent, "bad compressed size");
@@ -65161,7 +65128,7 @@ function _tr_tally(s, dist, lc)
 
   if (dist === 0) {
     /* lc is the unmatched char */
-    s.dyn_ltree[lc * 2]/*.Freq*/++;
+    s.dyn_ltree[lc*2]/*.Freq*/++;
   } else {
     s.matches++;
     /* Here, lc is the match length - MIN_MATCH */
@@ -65170,7 +65137,7 @@ function _tr_tally(s, dist, lc)
     //       (ush)lc <= (ush)(MAX_MATCH-MIN_MATCH) &&
     //       (ush)d_code(dist) < (ush)D_CODES,  "_tr_tally: bad match");
 
-    s.dyn_ltree[(_length_code[lc] + LITERALS + 1) * 2]/*.Freq*/++;
+    s.dyn_ltree[(_length_code[lc]+LITERALS+1) * 2]/*.Freq*/++;
     s.dyn_dtree[d_code(dist) * 2]/*.Freq*/++;
   }
 
@@ -65197,7 +65164,7 @@ function _tr_tally(s, dist, lc)
 //  }
 //#endif
 
-  return (s.last_lit === s.lit_bufsize - 1);
+  return (s.last_lit === s.lit_bufsize-1);
   /* We avoid equality with lit_bufsize because of wraparound at 64K
    * on 16 bit machines and because stored blocks are restricted to
    * 64K-1 bytes.
@@ -66226,7 +66193,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = cachedSetTimeout.call(null, cleanUpNextTick);
+    var timeout = cachedSetTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -66243,7 +66210,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    cachedClearTimeout.call(null, timeout);
+    cachedClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -66255,7 +66222,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        cachedSetTimeout.call(null, drainQueue, 0);
+        cachedSetTimeout(drainQueue, 0);
     }
 };
 
@@ -69160,9 +69127,7 @@ module.exports = {
 
 var Utils = require('./utils');
 
-var has = Object.prototype.hasOwnProperty;
-
-var defaults = {
+var internals = {
     delimiter: '&',
     depth: 5,
     arrayLimit: 20,
@@ -69170,11 +69135,10 @@ var defaults = {
     strictNullHandling: false,
     plainObjects: false,
     allowPrototypes: false,
-    allowDots: false,
-    decoder: Utils.decode
+    allowDots: false
 };
 
-var parseValues = function parseValues(str, options) {
+internals.parseValues = function (str, options) {
     var obj = {};
     var parts = str.split(options.delimiter, options.parameterLimit === Infinity ? undefined : options.parameterLimit);
 
@@ -69182,25 +69146,28 @@ var parseValues = function parseValues(str, options) {
         var part = parts[i];
         var pos = part.indexOf(']=') === -1 ? part.indexOf('=') : part.indexOf(']=') + 1;
 
-        var key, val;
         if (pos === -1) {
-            key = options.decoder(part);
-            val = options.strictNullHandling ? null : '';
+            obj[Utils.decode(part)] = '';
+
+            if (options.strictNullHandling) {
+                obj[Utils.decode(part)] = null;
+            }
         } else {
-            key = options.decoder(part.slice(0, pos));
-            val = options.decoder(part.slice(pos + 1));
-        }
-        if (has.call(obj, key)) {
-            obj[key] = [].concat(obj[key]).concat(val);
-        } else {
-            obj[key] = val;
+            var key = Utils.decode(part.slice(0, pos));
+            var val = Utils.decode(part.slice(pos + 1));
+
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                obj[key] = [].concat(obj[key]).concat(val);
+            } else {
+                obj[key] = val;
+            }
         }
     }
 
     return obj;
 };
 
-var parseObject = function parseObject(chain, val, options) {
+internals.parseObject = function (chain, val, options) {
     if (!chain.length) {
         return val;
     }
@@ -69210,7 +69177,7 @@ var parseObject = function parseObject(chain, val, options) {
     var obj;
     if (root === '[]') {
         obj = [];
-        obj = obj.concat(parseObject(chain, val, options));
+        obj = obj.concat(internals.parseObject(chain, val, options));
     } else {
         obj = options.plainObjects ? Object.create(null) : {};
         var cleanRoot = root[0] === '[' && root[root.length - 1] === ']' ? root.slice(1, root.length - 1) : root;
@@ -69223,16 +69190,16 @@ var parseObject = function parseObject(chain, val, options) {
             (options.parseArrays && index <= options.arrayLimit)
         ) {
             obj = [];
-            obj[index] = parseObject(chain, val, options);
+            obj[index] = internals.parseObject(chain, val, options);
         } else {
-            obj[cleanRoot] = parseObject(chain, val, options);
+            obj[cleanRoot] = internals.parseObject(chain, val, options);
         }
     }
 
     return obj;
 };
 
-var parseKeys = function parseKeys(givenKey, val, options) {
+internals.parseKeys = function (givenKey, val, options) {
     if (!givenKey) {
         return;
     }
@@ -69255,7 +69222,7 @@ var parseKeys = function parseKeys(givenKey, val, options) {
     if (segment[1]) {
         // If we aren't using plain objects, optionally prefix keys
         // that would overwrite object prototype properties
-        if (!options.plainObjects && has.call(Object.prototype, segment[1])) {
+        if (!options.plainObjects && Object.prototype.hasOwnProperty(segment[1])) {
             if (!options.allowPrototypes) {
                 return;
             }
@@ -69269,7 +69236,7 @@ var parseKeys = function parseKeys(givenKey, val, options) {
     var i = 0;
     while ((segment = child.exec(key)) !== null && i < options.depth) {
         i += 1;
-        if (!options.plainObjects && has.call(Object.prototype, segment[1].replace(/\[|\]/g, ''))) {
+        if (!options.plainObjects && Object.prototype.hasOwnProperty(segment[1].replace(/\[|\]/g, ''))) {
             if (!options.allowPrototypes) {
                 continue;
             }
@@ -69283,32 +69250,30 @@ var parseKeys = function parseKeys(givenKey, val, options) {
         keys.push('[' + key.slice(segment.index) + ']');
     }
 
-    return parseObject(keys, val, options);
+    return internals.parseObject(keys, val, options);
 };
 
 module.exports = function (str, opts) {
     var options = opts || {};
-
-    if (options.decoder !== null && options.decoder !== undefined && typeof options.decoder !== 'function') {
-        throw new TypeError('Decoder has to be a function.');
-    }
-
-    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : defaults.delimiter;
-    options.depth = typeof options.depth === 'number' ? options.depth : defaults.depth;
-    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : defaults.arrayLimit;
+    options.delimiter = typeof options.delimiter === 'string' || Utils.isRegExp(options.delimiter) ? options.delimiter : internals.delimiter;
+    options.depth = typeof options.depth === 'number' ? options.depth : internals.depth;
+    options.arrayLimit = typeof options.arrayLimit === 'number' ? options.arrayLimit : internals.arrayLimit;
     options.parseArrays = options.parseArrays !== false;
-    options.decoder = typeof options.decoder === 'function' ? options.decoder : defaults.decoder;
-    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : defaults.allowDots;
-    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : defaults.plainObjects;
-    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : defaults.allowPrototypes;
-    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : defaults.parameterLimit;
-    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
+    options.allowDots = typeof options.allowDots === 'boolean' ? options.allowDots : internals.allowDots;
+    options.plainObjects = typeof options.plainObjects === 'boolean' ? options.plainObjects : internals.plainObjects;
+    options.allowPrototypes = typeof options.allowPrototypes === 'boolean' ? options.allowPrototypes : internals.allowPrototypes;
+    options.parameterLimit = typeof options.parameterLimit === 'number' ? options.parameterLimit : internals.parameterLimit;
+    options.strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
 
-    if (str === '' || str === null || typeof str === 'undefined') {
+    if (
+        str === '' ||
+        str === null ||
+        typeof str === 'undefined'
+    ) {
         return options.plainObjects ? Object.create(null) : {};
     }
 
-    var tempObj = typeof str === 'string' ? parseValues(str, options) : str;
+    var tempObj = typeof str === 'string' ? internals.parseValues(str, options) : str;
     var obj = options.plainObjects ? Object.create(null) : {};
 
     // Iterate over the keys and setup the new object
@@ -69316,7 +69281,7 @@ module.exports = function (str, opts) {
     var keys = Object.keys(tempObj);
     for (var i = 0; i < keys.length; ++i) {
         var key = keys[i];
-        var newObj = parseKeys(key, tempObj[key], options);
+        var newObj = internals.parseKeys(key, tempObj[key], options);
         obj = Utils.merge(obj, newObj, options);
     }
 
@@ -69328,45 +69293,45 @@ module.exports = function (str, opts) {
 
 var Utils = require('./utils');
 
-var arrayPrefixGenerators = {
-    brackets: function brackets(prefix) {
-        return prefix + '[]';
-    },
-    indices: function indices(prefix, key) {
-        return prefix + '[' + key + ']';
-    },
-    repeat: function repeat(prefix) {
-        return prefix;
-    }
-};
-
-var defaults = {
+var internals = {
     delimiter: '&',
+    arrayPrefixGenerators: {
+        brackets: function (prefix) {
+            return prefix + '[]';
+        },
+        indices: function (prefix, key) {
+            return prefix + '[' + key + ']';
+        },
+        repeat: function (prefix) {
+            return prefix;
+        }
+    },
     strictNullHandling: false,
     skipNulls: false,
-    encode: true,
-    encoder: Utils.encode
+    encode: true
 };
 
-var stringify = function stringify(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots) {
+internals.stringify = function (object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots) {
     var obj = object;
     if (typeof filter === 'function') {
         obj = filter(prefix, obj);
+    } else if (Utils.isBuffer(obj)) {
+        obj = String(obj);
     } else if (obj instanceof Date) {
         obj = obj.toISOString();
     } else if (obj === null) {
         if (strictNullHandling) {
-            return encoder ? encoder(prefix) : prefix;
+            return encode ? Utils.encode(prefix) : prefix;
         }
 
         obj = '';
     }
 
-    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean' || Utils.isBuffer(obj)) {
-        if (encoder) {
-            return [encoder(prefix) + '=' + encoder(obj)];
+    if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
+        if (encode) {
+            return [Utils.encode(prefix) + '=' + Utils.encode(obj)];
         }
-        return [prefix + '=' + String(obj)];
+        return [prefix + '=' + obj];
     }
 
     var values = [];
@@ -69391,9 +69356,9 @@ var stringify = function stringify(object, prefix, generateArrayPrefix, strictNu
         }
 
         if (Array.isArray(obj)) {
-            values = values.concat(stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
+            values = values.concat(internals.stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
         } else {
-            values = values.concat(stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
+            values = values.concat(internals.stringify(obj[key], prefix + (allowDots ? '.' + key : '[' + key + ']'), generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
         }
     }
 
@@ -69403,20 +69368,14 @@ var stringify = function stringify(object, prefix, generateArrayPrefix, strictNu
 module.exports = function (object, opts) {
     var obj = object;
     var options = opts || {};
-    var delimiter = typeof options.delimiter === 'undefined' ? defaults.delimiter : options.delimiter;
-    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : defaults.strictNullHandling;
-    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : defaults.skipNulls;
-    var encode = typeof options.encode === 'boolean' ? options.encode : defaults.encode;
-    var encoder = encode ? (typeof options.encoder === 'function' ? options.encoder : defaults.encoder) : null;
+    var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
+    var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
+    var skipNulls = typeof options.skipNulls === 'boolean' ? options.skipNulls : internals.skipNulls;
+    var encode = typeof options.encode === 'boolean' ? options.encode : internals.encode;
     var sort = typeof options.sort === 'function' ? options.sort : null;
     var allowDots = typeof options.allowDots === 'undefined' ? false : options.allowDots;
     var objKeys;
     var filter;
-
-    if (options.encoder !== null && options.encoder !== undefined && typeof options.encoder !== 'function') {
-        throw new TypeError('Encoder has to be a function.');
-    }
-
     if (typeof options.filter === 'function') {
         filter = options.filter;
         obj = filter('', obj);
@@ -69431,7 +69390,7 @@ module.exports = function (object, opts) {
     }
 
     var arrayFormat;
-    if (options.arrayFormat in arrayPrefixGenerators) {
+    if (options.arrayFormat in internals.arrayPrefixGenerators) {
         arrayFormat = options.arrayFormat;
     } else if ('indices' in options) {
         arrayFormat = options.indices ? 'indices' : 'repeat';
@@ -69439,7 +69398,7 @@ module.exports = function (object, opts) {
         arrayFormat = 'indices';
     }
 
-    var generateArrayPrefix = arrayPrefixGenerators[arrayFormat];
+    var generateArrayPrefix = internals.arrayPrefixGenerators[arrayFormat];
 
     if (!objKeys) {
         objKeys = Object.keys(obj);
@@ -69456,7 +69415,7 @@ module.exports = function (object, opts) {
             continue;
         }
 
-        keys = keys.concat(stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots));
+        keys = keys.concat(internals.stringify(obj[key], key, generateArrayPrefix, strictNullHandling, skipNulls, encode, filter, sort, allowDots));
     }
 
     return keys.join(delimiter);
@@ -69511,7 +69470,7 @@ exports.merge = function (target, source, options) {
         mergeTarget = exports.arrayToObject(target, options);
     }
 
-    return Object.keys(source).reduce(function (acc, key) {
+	return Object.keys(source).reduce(function (acc, key) {
         var value = source[key];
 
         if (Object.prototype.hasOwnProperty.call(acc, key)) {
@@ -69519,7 +69478,7 @@ exports.merge = function (target, source, options) {
         } else {
             acc[key] = value;
         }
-        return acc;
+		return acc;
     }, mergeTarget);
 };
 
@@ -69574,7 +69533,7 @@ exports.encode = function (str) {
 
         i += 1;
         c = 0x10000 + (((c & 0x3FF) << 10) | (string.charCodeAt(i) & 0x3FF));
-        out += hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)];
+        out += (hexTable[0xF0 | (c >> 18)] + hexTable[0x80 | ((c >> 12) & 0x3F)] + hexTable[0x80 | ((c >> 6) & 0x3F)] + hexTable[0x80 | (c & 0x3F)]);
     }
 
     return out;
@@ -69597,9 +69556,7 @@ exports.compact = function (obj, references) {
         var compacted = [];
 
         for (var i = 0; i < obj.length; ++i) {
-            if (obj[i] && typeof obj[i] === 'object') {
-                compacted.push(exports.compact(obj[i], refs));
-            } else if (typeof obj[i] !== 'undefined') {
+            if (typeof obj[i] !== 'undefined') {
                 compacted.push(obj[i]);
             }
         }
@@ -72973,7 +72930,6 @@ var http = require('http')
   , bl = require('bl')
   , hawk = require('hawk')
   , aws2 = require('aws-sign2')
-  , aws4 = require('aws4')
   , httpSignature = require('http-signature')
   , mime = require('mime-types')
   , stringstream = require('stringstream')
@@ -73033,6 +72989,20 @@ function filterOutReservedFunctions(reserved, options) {
   }
   return object
 
+}
+
+// Function for properly handling a connection error
+function connectionErrorHandler(error) {
+  var socket = this
+  if (socket.res) {
+    if (socket.res.request) {
+      socket.res.request.emit('error', error)
+    } else {
+      socket.res.emit('error', error)
+    }
+  } else {
+    socket._httpMessage.emit('error', error)
+  }
 }
 
 // Return a simpler request object to allow serialization
@@ -73286,7 +73256,7 @@ Request.prototype.init = function (options) {
     var formData = options.formData
     var requestForm = self.form()
     var appendFormValue = function (key, value) {
-      if (value && value.hasOwnProperty('value') && value.hasOwnProperty('options')) {
+      if (value.hasOwnProperty('value') && value.hasOwnProperty('options')) {
         requestForm.append(key, value.value, value.options)
       } else {
         requestForm.append(key, value)
@@ -73755,6 +73725,11 @@ Request.prototype.start = function () {
     self.emit('socket', socket)
   })
 
+  self.on('end', function() {
+    if ( self.req.connection ) {
+      self.req.connection.removeListener('error', connectionErrorHandler)
+    }
+  })
   self.emit('request', self.req)
 }
 
@@ -73789,6 +73764,11 @@ Request.prototype.onRequestResponse = function (response) {
     debug('response end', self.uri.href, response.statusCode, response.headers)
   })
 
+  // The check on response.connection is a workaround for browserify.
+  if (response.connection && response.connection.listeners('error').indexOf(connectionErrorHandler) === -1) {
+    response.connection.setMaxListeners(0)
+    response.connection.once('error', connectionErrorHandler)
+  }
   if (self._aborted) {
     debug('aborted', self.uri.href)
     response.resume()
@@ -74205,9 +74185,10 @@ Request.prototype.aws = function (opts, now) {
     self._aws = opts
     return self
   }
-
+  
   if (opts.sign_version == 4 || opts.sign_version == '4') {
-    // use aws4
+    var aws4 = require('aws4')
+    // use aws4  
     var options = {
       host: self.uri.host,
       path: self.uri.path,
@@ -81886,6 +81867,9 @@ var LOOSE_COOKIE_PAIR = /^((?:=)?([^=;]*)\s*=\s*)?([^\n\r\0]*)/;
 // Note ';' is \x3B
 var PATH_VALUE = /[\x20-\x3A\x3C-\x7E]+/;
 
+// Used for checking whether or not there is a trailing semi-colon
+var TRAILING_SEMICOLON = /;+$/;
+
 var DAY_OF_MONTH = /^(\d{1,2})[^\d]*$/;
 var TIME = /^(\d{1,2})[^\d]*:(\d{1,2})[^\d]*:(\d{1,2})[^\d]*$/;
 var MONTH = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i;
@@ -82142,6 +82126,12 @@ function parse(str, options) {
   }
   str = str.trim();
 
+  // S4.1.1 Trailing semi-colons are not part of the specification.
+  var semiColonCheck = TRAILING_SEMICOLON.exec(str);
+  if (semiColonCheck) {
+    str = str.slice(0, semiColonCheck.index);
+  }
+
   // We use a regex to parse the "name-value-pair" part of S5.2
   var firstSemi = str.indexOf(';'); // S5.2 step 1
   var pairRe = options.loose ? LOOSE_COOKIE_PAIR : COOKIE_PAIR;
@@ -82171,7 +82161,7 @@ function parse(str, options) {
   // S5.2.3 "unparsed-attributes consist of the remainder of the set-cookie-string
   // (including the %x3B (";") in question)." plus later on in the same section
   // "discard the first ";" and trim".
-  var unparsed = str.slice(firstSemi + 1).trim();
+  var unparsed = str.slice(firstSemi).replace(/^\s*;\s*/,'').trim();
 
   // "If the unparsed-attributes string is empty, skip the rest of these
   // steps."
@@ -82187,12 +82177,9 @@ function parse(str, options) {
    * cookie-attribute-list".  Therefore, in this implementation, we overwrite
    * the previous value.
    */
-  var cookie_avs = unparsed.split(';');
+  var cookie_avs = unparsed.split(/\s*;\s*/);
   while (cookie_avs.length) {
-    var av = cookie_avs.shift().trim();
-    if (av.length === 0) { // happens if ";;" appears
-      continue;
-    }
+    var av = cookie_avs.shift();
     var av_sep = av.indexOf('=');
     var av_key, av_value;
 
@@ -83624,53 +83611,51 @@ module.exports={
   "_args": [
     [
       {
-        "raw": "tough-cookie@~2.3.0",
-        "scope": null,
-        "escapedName": "tough-cookie",
         "name": "tough-cookie",
-        "rawSpec": "~2.3.0",
-        "spec": ">=2.3.0 <2.4.0",
+        "raw": "tough-cookie@~2.2.0",
+        "rawSpec": "~2.2.0",
+        "scope": null,
+        "spec": ">=2.2.0 <2.3.0",
         "type": "range"
       },
-      "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/request"
+      "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\request"
     ]
   ],
-  "_from": "tough-cookie@>=2.3.0 <2.4.0",
-  "_id": "tough-cookie@2.3.1",
+  "_from": "tough-cookie@>=2.2.0 <2.3.0",
+  "_id": "tough-cookie@2.2.2",
   "_inCache": true,
   "_installable": true,
   "_location": "/tough-cookie",
-  "_nodeVersion": "6.3.1",
+  "_nodeVersion": "5.1.1",
   "_npmOperationalInternal": {
-    "host": "packages-12-west.internal.npmjs.com",
-    "tmp": "tmp/tough-cookie-2.3.1.tgz_1469494891088_0.8524557144846767"
+    "host": "packages-13-west.internal.npmjs.com",
+    "tmp": "tmp/tough-cookie-2.2.2.tgz_1457564639182_0.5129188685677946"
   },
   "_npmUser": {
-    "name": "jstash",
-    "email": "jstash@gmail.com"
+    "email": "jstash@gmail.com",
+    "name": "jstash"
   },
-  "_npmVersion": "3.10.3",
+  "_npmVersion": "3.3.12",
   "_phantomChildren": {},
   "_requested": {
-    "raw": "tough-cookie@~2.3.0",
-    "scope": null,
-    "escapedName": "tough-cookie",
     "name": "tough-cookie",
-    "rawSpec": "~2.3.0",
-    "spec": ">=2.3.0 <2.4.0",
+    "raw": "tough-cookie@~2.2.0",
+    "rawSpec": "~2.2.0",
+    "scope": null,
+    "spec": ">=2.2.0 <2.3.0",
     "type": "range"
   },
   "_requiredBy": [
     "/request"
   ],
-  "_resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.3.1.tgz",
-  "_shasum": "99c77dfbb7d804249e8a299d4cb0fd81fef083fd",
+  "_resolved": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.2.2.tgz",
+  "_shasum": "c83a1830f4e5ef0b93ef2a3488e724f8de016ac7",
   "_shrinkwrap": null,
-  "_spec": "tough-cookie@~2.3.0",
-  "_where": "/Users/pascalbrewing/htdocs/relution-sdk/node_modules/request",
+  "_spec": "tough-cookie@~2.2.0",
+  "_where": "d:\\gofer-core\\gofer-workspace\\relution-sdk\\node_modules\\request",
   "author": {
-    "name": "Jeremy Stashewsky",
-    "email": "jstashewsky@salesforce.com"
+    "email": "jstashewsky@salesforce.com",
+    "name": "Jeremy Stashewsky"
   },
   "bugs": {
     "url": "https://github.com/SalesforceEng/tough-cookie/issues"
@@ -83699,21 +83684,20 @@ module.exports={
   "description": "RFC6265 Cookies and Cookie Jar for node.js",
   "devDependencies": {
     "async": "^1.4.2",
-    "string.prototype.repeat": "^0.2.0",
     "vows": "^0.8.1"
   },
   "directories": {},
   "dist": {
-    "shasum": "99c77dfbb7d804249e8a299d4cb0fd81fef083fd",
-    "tarball": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.3.1.tgz"
+    "shasum": "c83a1830f4e5ef0b93ef2a3488e724f8de016ac7",
+    "tarball": "https://registry.npmjs.org/tough-cookie/-/tough-cookie-2.2.2.tgz"
   },
   "engines": {
-    "node": ">=0.8"
+    "node": ">=0.10.0"
   },
   "files": [
     "lib"
   ],
-  "gitHead": "c11a2d11d12348a35ef595c809e30e641a804a7d",
+  "gitHead": "cc46628c4d7d2e8c372ecba29293ca8a207ec192",
   "homepage": "https://github.com/SalesforceEng/tough-cookie",
   "keywords": [
     "HTTP",
@@ -83729,12 +83713,12 @@ module.exports={
   "main": "./lib/cookie",
   "maintainers": [
     {
-      "name": "jstash",
-      "email": "jstash@gmail.com"
+      "email": "jeremy@goinstant.com",
+      "name": "jstash"
     },
     {
-      "name": "nexxy",
-      "email": "emily@contactvibe.com"
+      "email": "services@goinstant.com",
+      "name": "goinstant"
     }
   ],
   "name": "tough-cookie",
@@ -83748,7 +83732,7 @@ module.exports={
     "suffixup": "curl -o public_suffix_list.dat https://publicsuffix.org/list/public_suffix_list.dat && ./generate-pubsuffix.js",
     "test": "vows test/*_test.js"
   },
-  "version": "2.3.1"
+  "version": "2.2.2"
 }
 
 },{}],326:[function(require,module,exports){
