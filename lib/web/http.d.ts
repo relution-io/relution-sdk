@@ -1,8 +1,14 @@
+/**
+ * @module web
+ */
+/** */
+import * as _ from 'lodash';
 import * as Q from 'q';
 import * as request from 'request';
 import * as http from 'http';
 import * as init from '../core/init';
 import * as auth from '../security/auth';
+import * as roles from '../security/roles';
 /**
  * callback allowing customizing an object not immediately available at time of call.
  *
@@ -139,10 +145,17 @@ export declare function ajax<T>(options: HttpOptions): Q.Promise<T>;
  * This is equivalent to UserInfoWrapper in Java code.
  */
 export interface LoginResponse {
-    user: any;
-    roles: any;
-    organization: any;
-    licenseInfos: any;
+    user: roles.User;
+    roles: roles.RoleDto[];
+    organization: roles.Organization;
+    licenseInfos: {
+        licenseModelName: string;
+        licenseInfos: _.Dictionary<any>;
+    };
+    /**
+     * lists experimental features enabled on the server.
+     */
+    activeFeatureToggles?: string[];
     /**
      * eventually returned data of the LogonCallback is stored here.
      */

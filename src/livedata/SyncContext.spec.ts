@@ -115,14 +115,14 @@ describe(module.filename || __filename, function() {
           sortOrder: [ 'id' ]
         };
         return Q(collection.fetch(options)).thenResolve(options);
-      }).then(function scroll(options) {
+      }).then(function scroll(options): PromiseLike<any> {
         assert.equal(collection.models.length, counter, 'number of models retrieved so far');
         assert.deepEqual(collection.models.map(function (x) {
           delete x.attributes._time; // server adds this, we don't want it
           return x.attributes;
         }), approvals.slice(0, counter), 'elements are fetched properly');
         if (options.end) {
-          return options;
+          return Q.resolve(options);
         }
         return collection.fetchMore(options).then(function (results) {
           if (results.length === 0) {
@@ -149,14 +149,14 @@ describe(module.filename || __filename, function() {
           sortOrder: [ 'id' ]
         };
         return (<any>collection.fetch(options)).thenResolve(options);
-      }).then(function next(options) {
+      }).then(function next(options): PromiseLike<any> {
         assert.equal(collection.models.length, 1, 'number of models retrieved so far');
         assert.deepEqual(collection.models.map(function (x) {
           delete x.attributes._time; // server adds this, we don't want it
           return x.attributes;
         }), approvals.slice(i, i + 1), 'element fetched properly');
         if (!options.next && i > 1) {
-          return options;
+          return Q.resolve(options);
         }
         ++i;
         return collection.fetchNext(options).then(function (results) {
@@ -165,11 +165,11 @@ describe(module.filename || __filename, function() {
           assert.equal(options.next, i + 1 < approvals.length, 'can page next');
           return options;
         }).then(next);
-      }).then(function prev(options) {
+      }).then(function prev(options): PromiseLike<any> {
         assert.equal(options.prev, i > 0, 'can page prev');
         assert.equal(options.next, i + 1 < approvals.length, 'can page next');
         if (!options.prev) {
-          return options;
+          return Q.resolve(options);
         }
         return collection.fetchPrev(options).then(function (results) {
           assert.equal(results.length, 1, 'number of results returned');

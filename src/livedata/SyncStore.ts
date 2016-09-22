@@ -22,6 +22,7 @@
  */
 /** */
 
+import * as Backbone from 'backbone';
 import * as Q from 'q';
 import * as _ from 'lodash';
 
@@ -30,6 +31,7 @@ import * as objectid from '../core/objectid';
 import * as security from '../security';
 import * as web from '../web';
 
+import {localStorage} from '../web/offline';
 import {GetQuery} from '../query/GetQuery';
 import {Store, StoreCtor} from './Store';
 import {WebSqlStore} from './WebSqlStore';
@@ -137,7 +139,6 @@ export class SyncStore extends Store {
     if (this.orderOfflineChanges) {
       this.orderOfflineChanges = _.clone(this.orderOfflineChanges);
     }
-    diag.debug.trace('SyncStore', options);
 
     if (this.useSocketNotify && typeof io !== 'object') {
       diag.debug.warning('Socket.IO not present !!');
@@ -316,14 +317,14 @@ export class SyncStore extends Store {
       return this.lastMesgTime[channel];
     }
     // the | 0 below turns strings into numbers
-    var time = localStorage.getItem('__' + channel + 'lastMesgTime') || 0;
+    var time = localStorage().getItem('__' + channel + 'lastMesgTime') || 0;
     this.lastMesgTime[channel] = time;
     return time;
   }
 
   setLastMessageTime(channel: string, time: any): void {
     if (!time || time > this.getLastMessageTime(channel)) {
-      localStorage.setItem('__' + channel + 'lastMesgTime', time);
+      localStorage().setItem('__' + channel + 'lastMesgTime', time);
       this.lastMesgTime[channel] = time;
     }
   }

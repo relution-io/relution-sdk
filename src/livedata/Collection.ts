@@ -22,6 +22,7 @@
  */
 /** */
 
+import * as Backbone from 'backbone';
 import * as _ from 'lodash';
 import * as url from 'url';
 
@@ -31,7 +32,7 @@ import {Store} from './Store';
 import {Model, ModelCtor} from './Model';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
-
+import * as Q from 'q';
 import {ajax, sync} from './rest';
 
 /**
@@ -111,9 +112,6 @@ export class Collection extends Backbone.Collection<Model> {
       this.store.initCollection(this, options);
     }
   }
-
-  // following fixes DefinitelyTyped definitions of backbone.js not declaring modelId() method
-  public modelId: (attrs: any) => any;
 
   public ajax(options: any) {
     return ajax.apply(this, arguments);

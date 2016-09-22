@@ -1,6 +1,6 @@
 {
   "name": "relution-sdk",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
     "relution",
@@ -12,40 +12,56 @@
     "mvc"
   ],
   "main": "index.js",
+  "browser": "browser.js",
   "scripts": {
     "precommit": "npm run tslint",
     "tslint": "tslint src/**/*.ts",
     "test": "npm run build && mocha lib/**/*.spec.js",
     "build": "tsc -p .",
-    "api": "typedoc --options %CD%/typedoc.json",
+    "api-win": "typedoc --options %CD%/typedoc.json",
+    "api-mac": "typedoc --options $PWD/typedoc.json",
     "gh-pages": "git subtree push --prefix public/docs origin gh-pages",
     "watch": "tsc -p . -w",
-    "postinstall": "typings install",
-    "browserify": "browserify index.js -o browser.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql",
-    "testify": "browserify ./lib/index.spec.js -o browser.spec.js -u backbone -u jquery -u underscore -u socket.io-client -u node-localstorage -u websql"
+    "browserify": "browserify ./lib/index.lazy.js --standalone Relution --debug -u jquery -u socket.io-client -u node-localstorage -u websql | exorcist browser.js.map > browser.js",
+    "testify": "browserify ./lib/index.spec.js --standalone Relution --debug -u jquery -u socket.io-client -u node-localstorage -u websql | exorcist browser.spec.js.map > browser.spec.js"
   },
   "author": "Thomas Beckmann",
   "license": "Apache License",
   "devDependencies": {
+    "@reactivex/rxjs": "^5.0.0-beta.11",
+    "@types/chai": "^3.4.33",
+    "@types/mocha": "^2.2.32",
+    "@types/sinon": "^1.16.30",
     "browserify": "^13.0.0",
     "chai": "^3.5.0",
+    "exorcist": "^0.4.0",
     "mocha": "^2.4.5",
+    "semver": "^5.3.0",
+    "simple-git": "^1.47.0",
     "sinon": "^1.16.0",
     "tslint": "^3.8.1",
     "typedoc": "sierrasoftworks/typedoc#v1.8.10",
     "typedoc-plantuml": "git+https://github.com/0815fox/typedoc-plantuml.git",
     "typedoc-plugin-external-module-name": "^1.0.2",
-    "typescript": "^1.8.10",
-    "underscore": "~1.8.3"
+    "typescript": "2.0.2"
   },
   "dependencies": {
+    "@types/backbone": "^1.3.33",
+    "@types/cordova-plugin-device": "0.0.3",
+    "@types/lodash": "^4.14.35",
+    "@types/node": "^6.0.39",
+    "@types/phonegap-plugin-push": "0.0.30",
+    "@types/q": "0.0.31",
+    "@types/request": "0.0.31",
+    "@types/socket.io-client": "^1.4.27",
+    "@types/websql": "0.0.27",
+    "JSONPath": "^0.11.2",
     "backbone": "~1.2.1",
     "lodash": "^4.0.0",
     "node-localstorage": "^1.3.0",
     "q": "^1.4.1",
     "request": "^2.69.0",
     "socket.io-client": "~0.9.16",
-    "websql": "^0.4.4",
-    "JSONPath": "^0.11.2"
+    "websql": "^0.4.4"
   }
 }

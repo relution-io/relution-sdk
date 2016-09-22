@@ -30,7 +30,7 @@ import * as diag from './diag';
 import * as device from './device';
 
 // workaround Q promises being inherently incompatible with zone.js used by angular2
-Q.nextTick = (function detectNextTick(): typeof Q.nextTick {
+(<any>Q).nextTick = (function detectNextTick(): typeof Q.nextTick {
   // requires use of Q's nextTick(cb)
   (<any>Q).stopUnhandledRejectionTracking();
   // Q's nextTick(cb) is not compatible with thread-locals,
@@ -45,7 +45,7 @@ Q.nextTick = (function detectNextTick(): typeof Q.nextTick {
 })();
 
 // initialize to go in sync with init() call
-Q.longStackSupport = diag.debug.enabled;
+(<any>Q).longStackSupport = diag.debug.enabled;
 
 /**
  * applied on each successful authentication with the Relution server.
@@ -200,7 +200,7 @@ export function init(options: InitOptions = {}) {
 
   if ('debug' in options) {
     diag.debug.enabled = options.debug;
-    Q.longStackSupport = options.debug;
+    (<any>Q).longStackSupport = options.debug;
   }
 
   if ('serverUrl' in options) {

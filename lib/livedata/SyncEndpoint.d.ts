@@ -1,6 +1,7 @@
 import { Store } from './Store';
 import { Model, ModelCtor } from './Model';
 import { Collection } from './Collection';
+import * as Q from 'q';
 /**
  * manages connection of SyncStore to one entity.
  */

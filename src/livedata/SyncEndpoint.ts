@@ -27,7 +27,7 @@ import * as url from 'url';
 import {Store} from './Store';
 import {Model, ModelCtor} from './Model';
 import {Collection} from './Collection';
-
+import * as Q from 'q';
 /**
  * very simple hash coding implementation.
  *

@@ -346,7 +346,7 @@ class JsonFilterVisitor<T> extends FilterVisitorBase<JsonFilterFn<T>>
         // array case
         for (var i = 0; i < value.length; ++i) {
           var val = value[i];
-          if (regexp.test(val)) {
+          if (!_.isNil(val) && !_.isObjectLike(val) && regexp.test(val.toString())) {
             return true;
           }
         }

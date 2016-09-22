@@ -15,6 +15,13 @@
     "offline",
     "mvc"
   ],
+  "dependencies": {
+    "backbone": "~1.1.0",
+    "underscore": "~1.6.0",
+    "jquery": "~2.1.0",
+    "socket.io-client": "~0.9.16",
+    "momentjs": "~2.8.0"
+  },
   "homepage": "https://github.com/relution-io/relution-sdk",
   "ignore": [
     "**/.*",

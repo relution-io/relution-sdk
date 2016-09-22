@@ -1,4 +1,4 @@
-/*
+/**
  * @file core/device.ts
  * Relution SDK
  *
@@ -21,7 +21,6 @@
  * @module core
  */
 /** */
-
 import * as Q from 'q';
 
 import * as diag from './diag';
@@ -106,6 +105,12 @@ export const ready = (() => {
   const document: Document = global['document'];
   const window: Window = global['window'];
 
+  let resolveDocument: (val: Document | Q.Promise<Document>) => void;
+  const callback = () => {
+    document.removeEventListener('load', callback);
+    document.removeEventListener('DOMContentLoaded', callback);
+    return resolveDocument(document);
+  };
   return Q.Promise((resolve, reject) => {
     // resolves to document once the DOM is loaded
     try {
@@ -113,12 +118,7 @@ export const ready = (() => {
         resolve(document);
         return;
       }
-
-      function callback() {
-        resolve(document);
-        document.removeEventListener('load', callback);
-        document.removeEventListener('DOMContentLoaded', callback);
-      }
+      resolveDocument = resolve;
       document.addEventListener('DOMContentLoaded', callback, false);
       document.addEventListener('load', callback, false); // fallback
     } catch (error) {
@@ -136,14 +136,11 @@ export const ready = (() => {
           resolve(window);
           return;
         }
-
         // see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
-        function callback() {
-          resolve(window);
-          document.removeEventListener('deviceready', callback);
-        }
-
-        document.addEventListener('deviceready', callback, false);
+        document.addEventListener('deviceready', () => {
+            document.removeEventListener('deviceready', callback);
+            resolve(window);
+        }, false);
       } catch (error) {
         reject(error);
       }
@@ -181,7 +178,7 @@ export const ready = (() => {
       uuid: device && device.uuid,
       serial: device && device.serial,
 
-      language: navigator && (navigator.language || navigator.userLanguage),
+      language: navigator && (navigator.language || navigator['userLanguage']),
 
       platform: {
         id: platformId,

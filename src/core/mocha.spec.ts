@@ -31,7 +31,7 @@ describe(module.filename || __filename, function() {
       var x = {};
       // assert.valueOf(x, 'object', 'x is an object.');
       assert.isObject(x, 'x is an object.');
-      assert.ok(1 !== 2, '1 is not 2');
+      assert.ok(<number>1 !== <number>2, '1 is not 2');
       assert.equal(-1, [1, 2, 3].indexOf(5));
       assert.equal(-1, [1, 2, 3].indexOf(0));
     }),
