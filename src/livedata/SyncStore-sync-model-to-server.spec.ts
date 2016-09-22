@@ -51,10 +51,11 @@ describe(module.filename || __filename, function() {
         entity: 'User',
         store: store,
         urlRoot: urls.resolveUrl('api/v1/user/', {
-          serverUrl: testServer.serveUrl,
+          serverUrl: testServer.serverUrl,
           application: 'relutionsdk'
         })
       }) {}
+
       modelType = ModelType;
       model = new modelType({id: '12312'});
       promise = Q(model.fetch()).thenResolve(model);

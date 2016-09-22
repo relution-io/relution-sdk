@@ -91,7 +91,7 @@ describe(module.filename || __filename, function() {
 
       class Developer extends Model.defaults({
         idAttribute: '_id',
-        entity = 'Developer'
+        entity: 'Developer'
       }) {}
       TEST.Developer = Developer;
 

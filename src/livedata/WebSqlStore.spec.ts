@@ -265,7 +265,7 @@ describe(module.filename || __filename, function() {
         entity: 'test'
       }) {}
       TEST.TestModel2 = TestModel2;
-
+      
       TEST.Tests2 = new Collection(undefined, {
         model: TEST.TestModel2,
         store: TEST.store

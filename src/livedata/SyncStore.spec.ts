@@ -283,7 +283,7 @@ describe(module.filename || __filename, function() {
 
         ajax(options?: any) {
           // following simulates server reassigning ID value
-          return Model.prototype.ajax.apply(this, arguments).then((response: any) => {
+          return super.ajax.apply(this, arguments).then((response: any) => {
             if (this.id === oldId) {
               response._id = newId;
             } else if (this.id === newId) {
