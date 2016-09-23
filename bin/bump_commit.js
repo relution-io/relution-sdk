@@ -5,6 +5,9 @@ const path = require('path');
 const Observable = require('@reactivex/rxjs').Observable;
 const semver = require('semver');
 
+/**
+ * Bump the package json
+ */
 module.exports.Bump = class Bump {
   constructor(defaultType = 'patch', packages = [`${process.cwd()}/package.json`]) {
     this.packages = [];
@@ -67,7 +70,9 @@ module.exports.Bump = class Bump {
       });
   }
 }
-
+/**
+ * add a tag at the current branch and committ the changes
+ */
 module.exports.TagRepo = class TagRepo {
 
   constructor( message = 'v', repoPath = path.resolve(`${process.cwd()}`), commit = process.argv[3] ? process.argv[3] : false) {
@@ -91,7 +96,9 @@ module.exports.TagRepo = class TagRepo {
     })
   }
 }
-
+/**
+ * Check if there are uncommitted changes
+ */
 module.exports.RepoStats = class RepoStats {
   constructor(repoPath = path.resolve(`${process.cwd()}`), commit = process.argv[3] ? process.argv[3] : false) {
     this.simpleGit = require('simple-git')(repoPath);
@@ -100,10 +107,15 @@ module.exports.RepoStats = class RepoStats {
     return Observable.create((observer) => {
       this.simpleGit.status((e, stats) => {
         if (e) {
+          console.error('ERROR', e);
           return observer.error(e);
         }
-        observer.next(stats.modified);
-        observer.complete();
+        debugger;
+        if (stats && stats.modified) {
+          observer.next(stats.modified);
+        } else {
+          observer.next([]);
+        }
       });
     });
   }

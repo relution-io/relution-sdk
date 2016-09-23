@@ -17,7 +17,7 @@ const stats = new RepoStats();
     return stats.length <= 0;
   })
   .mergeMap(() => {
-    bumpClass.bump(defVer);
+    return bumpClass.bump(defVer);
   })
   .last()
   .mergeMap((version) => {
