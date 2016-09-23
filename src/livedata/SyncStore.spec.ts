@@ -75,23 +75,22 @@ describe(module.filename || __filename, function() {
     it('creating collection', () => {
       assert.isFunction(Collection, 'Collection is defined');
 
-      class TestModel extends Model.defaults({
-        idAttribute: '_id',
-        entity: 'test'
-      }) {}
-      TEST.TestModel = TestModel;
-
-      assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
-
       TEST.url = urls.resolveUrl('api/v1/test/', {
         serverUrl: testServer.serverUrl,
         application: 'relutionsdk'
       });
 
+      class TestModel extends Model.defaults({
+        idAttribute: '_id',
+        entity: 'test',
+        urlRoot: TEST.url
+      }) {}
+      TEST.TestModel = TestModel;
+
+      assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
+
       class TestsModelCollection extends Collection.defaults({
         model: TEST.TestModel,
-        url: TEST.url,
-        store: TEST.store,
         options: {
           sort: { sureName: 1 },
           fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
@@ -102,7 +101,7 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
 
-      TEST.Tests = new TEST.TestsModelCollection();
+      TEST.Tests = (<SyncStore>TEST.store).createCollection(TestsModelCollection);
 
       assert.isObject(TEST.Tests, 'Test collection successfully created.');
 
@@ -335,6 +334,7 @@ describe(module.filename || __filename, function() {
     }),
 
     it('cleanup records', (done) => {
+      assert.equal(TEST.Tests.models.length, TEST.Tests.length, 'backbone and array report the same length');
       if (TEST.Tests.length === 0) {
         done();
       } else {
@@ -358,6 +358,7 @@ describe(module.filename || __filename, function() {
             });
           }
         });
+        assert.equal(count, TEST.Tests.length, 'destroy executes asynchronously');
       }
     })
 

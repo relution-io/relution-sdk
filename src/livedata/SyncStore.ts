@@ -215,10 +215,20 @@ export class SyncStore extends Store {
     }
   }
 
+  /**
+   * @inheritdoc
+   * 
+   * @internal API only to be called by Model constructor.
+   */
   initModel(model: Model): void {
     model.endpoint = this.initEndpoint(model, <ModelCtor>model.constructor);
   }
 
+  /**
+   * @inheritdoc
+   * 
+   * @internal API only to be called by Collection constructor.
+   */
   initCollection(collection: Collection): void {
     collection.endpoint = this.initEndpoint(collection, collection.model);
   }

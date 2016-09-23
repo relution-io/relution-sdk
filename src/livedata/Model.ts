@@ -57,12 +57,22 @@ export interface ModelProps {
 /**
  * constructor function of Model.
  */
-export interface ModelCtor {
+export interface ModelCtorT<ModelType extends Model, AttributesType, OptionsType> {
+  /**
+   * prototype of constructor function.
+   */
+  prototype: ModelType;
+
   /**
    * @see Model#constructor
    */
-  new(attributes?: any, options?: any): Model;
+  new(attributes?: AttributesType, options?: OptionsType): ModelType;
 }
+
+/**
+ * constructor function of Model.
+ */
+export type ModelCtor = ModelCtorT<Model, any, any>;
 
 /**
  * tests whether a given object is a Model.
