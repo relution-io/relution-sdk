@@ -110,7 +110,6 @@ module.exports.RepoStats = class RepoStats {
           console.error('ERROR', e);
           return observer.error(e);
         }
-        debugger;
         if (stats && stats.modified) {
           observer.next(stats.modified);
         } else {

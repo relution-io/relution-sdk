@@ -24,13 +24,13 @@ const stats = new RepoStats();
     patchVersion = version;
     return Observable.fromEvent(_browserify, 'close')
   })
-//   .mergeMap((version) => {
-//     return taggingClass.addTag(patchVersion, defVer);
-//   })
-//   .mergeMap(() => {
-//     const npmPublish = spawn('npm', ['publish']);
-//     return Observable.fromEvent(npmPublish, 'close');
-//   })
+  .mergeMap((version) => {
+    return taggingClass.addTag(patchVersion, defVer);
+  })
+  .mergeMap(() => {
+    const npmPublish = spawn('npm', ['publish']);
+    return Observable.fromEvent(npmPublish, 'close');
+  })
   .subscribe(
     (log) => {
       console.log(log);
