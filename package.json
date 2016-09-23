@@ -11,6 +11,15 @@
     "offline",
     "mvc"
   ],
+  "author": "mway Solutions (https://relution.io/)",
+  "homepage": "https://relution.readme.io/docs/relution-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/relution-io/relution-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/relution-io/relution-sdk/issues"
+  },
   "main": "index.js",
   "browser": "browser.js",
   "scripts": {
@@ -25,7 +34,6 @@
     "browserify": "browserify ./lib/index.lazy.js --standalone Relution --debug -u jquery -u socket.io-client -u node-localstorage -u websql | exorcist browser.js.map > browser.js",
     "testify": "browserify ./lib/index.spec.js --standalone Relution --debug -u jquery -u socket.io-client -u node-localstorage -u websql | exorcist browser.spec.js.map > browser.spec.js"
   },
-  "author": "Thomas Beckmann",
   "license": "Apache License",
   "devDependencies": {
     "@reactivex/rxjs": "^5.0.0-beta.11",

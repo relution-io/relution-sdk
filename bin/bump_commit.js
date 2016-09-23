@@ -91,3 +91,20 @@ module.exports.TagRepo = class TagRepo {
     })
   }
 }
+
+module.exports.RepoStats = class RepoStats {
+  constructor(repoPath = path.resolve(`${process.cwd()}`), commit = process.argv[3] ? process.argv[3] : false) {
+    this.simpleGit = require('simple-git')(repoPath);
+  }
+  isAllCommited() {
+    return Observable.create((observer) => {
+      this.simpleGit.status((e, stats) => {
+        if (e) {
+          return observer.error(e);
+        }
+        observer.next(stats.modified);
+        observer.complete();
+      });
+    });
+  }
+}
