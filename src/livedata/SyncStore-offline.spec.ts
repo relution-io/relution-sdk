@@ -46,23 +46,24 @@ describe(module.filename || __filename, function() {
         useSocketNotify: false
       });
 
-      class ModelType extends Model {
+      class ModelType extends Model.defaults({
+        idAttribute: 'id',
+        entity: 'User',
+        store: store,
+        urlRoot: urls.resolveUrl('api/v1/user/', {
+          serverUrl: testServer.serverUrl,
+          application: 'relutionsdk'
+        }),
+        defaults: <any>{
+          username: 'admin',
+          password: 'admin'
+        }
+      }) {
         ajax() {
           debug.info('offline');
           return Q.reject(new Error('Not Online'));
         }
       }
-      ModelType.prototype.idAttribute = 'id';
-      ModelType.prototype.entity = 'User';
-      ModelType.prototype.store = store;
-      ModelType.prototype.urlRoot =  urls.resolveUrl('api/v1/user/', {
-        serverUrl: testServer.serverUrl,
-        application: 'relutionsdk'
-      });
-      ModelType.prototype.defaults = <any>{
-        username: 'admin',
-        password: 'admin'
-      };
       modelType = ModelType;
 
       model = new modelType({ id: '12312' });

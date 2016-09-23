@@ -38,14 +38,14 @@ describe(module.filename || __filename, function() {
   this.timeout(60000);
 
   // prepare model/collection types
-  class TestModel extends Model {
-  }
-  TestModel.prototype.idAttribute = 'id';
-  TestModel.prototype.entity = 'approval';
+  class TestModel extends Model.defaults({
+    idAttribute: 'id',
+    entity: 'approval'
+  }) {}
 
-  class TestCollection extends Collection {
-  }
-  TestCollection.prototype.model = TestModel;
+  class TestCollection extends Collection.defaults({
+    model: TestModel
+  }) {}
 
   before(function() {
     return testServer.login.then((result) => {

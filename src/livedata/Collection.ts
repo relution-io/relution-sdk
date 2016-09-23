@@ -36,13 +36,26 @@ import * as Q from 'q';
 import {ajax, sync} from './rest';
 
 /**
+ * prototype properties specified when subclassing using Collection.defaults().
+ */
+export interface CollectionProps {
+  model?: ModelCtor;
+  entity?: string;
+
+  options?: any;
+
+  url?: string | (() => string);
+  store?: Store;
+}
+
+/**
  * constructor function of Collection.
  */
 export interface CollectionCtor {
   /**
    * @see Collection#constructor
    */
-  new(models?: any, options?: any): Collection;
+  new(models?: Model[] | Object[], options?: any): Collection;
 }
 
 /**
@@ -89,7 +102,7 @@ export class Collection extends Backbone.Collection<Model> {
   public endpoint: SyncEndpoint;
   public channel: string;
 
-  public constructor(models?: any, options?: any) {
+  public constructor(models?: Model[] | Object[], options?: any) {
     super(models, options);
 
     if (this.url && this.url.charAt(this.url.length - 1) !== '/') {
@@ -99,7 +112,16 @@ export class Collection extends Backbone.Collection<Model> {
     this.init(models, options);
   }
 
-  protected init(models?: any, options?: any) {
+  /**
+   * sets up prototype properties when defining a Collection subclass.
+   * 
+   * @param {CollectionProps} properties of prototype to set.
+   */
+  public static defaults(properties: CollectionProps): CollectionCtor {
+    return super['extend'](properties);
+  }
+
+  protected init(models?: Model[] | Object[], options?: any) {
     options = options || {};
     this.store = options.store || this.store || (this.model ? this.model.prototype.store : null);
     this.entity = options.entity || this.entity || (this.model ? this.model.prototype.entity : null);

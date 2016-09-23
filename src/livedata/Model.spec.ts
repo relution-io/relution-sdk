@@ -61,12 +61,14 @@ describe(module.filename || __filename, function() {
 
     it('creating model', function () {
       assert.typeOf(Model, 'function', 'Model is defined.');
-      class Person extends Model {};
-      Person.prototype.idAttribute = 'id';
-      Person.prototype.defaults = <any>{
-        bmi: 0.0
-      };
-      Person.prototype.entity = 'person';
+      class Person extends Model.defaults({
+        idAttribute: 'id',
+        defaults: {
+          bmi: 0.0
+        },
+        entity: 'person',
+
+      }) {};
       assert.typeOf(Person, 'function', 'person model could be extended.');
       assert.typeOf(new Person(), 'object', 'empty person model could be created.');
 

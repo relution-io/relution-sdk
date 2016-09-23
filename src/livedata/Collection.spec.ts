@@ -89,16 +89,18 @@ describe(module.filename || __filename, function() {
     it('creating collection', function () {
       assert.typeOf(Collection, 'function', 'Collection is defined');
 
-      class Developer extends Model {};
-      Developer.prototype.idAttribute = '_id';
-      Developer.prototype.entity = 'Developer';
+      class Developer extends Model.defaults({
+        idAttribute: '_id',
+        entity: 'Developer'
+      }) {}
       TEST.Developer = Developer;
 
       assert.ok(typeof TEST.Developer === 'function', 'Developer model successfully extended.');
 
-      class DeveloperCollection extends Collection {};
-      DeveloperCollection.prototype.url = TEST.url;
-      DeveloperCollection.prototype.model = TEST.Developer;
+      class DeveloperCollection extends Collection.defaults({
+        url: TEST.url,
+        model: TEST.Developer
+      }) {};
       TEST.DeveloperCollection = DeveloperCollection;
 
       assert.ok(typeof TEST.DeveloperCollection === 'function', 'Developer collection successfully extended.');
