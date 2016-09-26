@@ -99,6 +99,10 @@ export class SyncStore extends Store {
    */
   protected serverUrl: string;
   /**
+   * application part used to resolve URLs may optionally be set using constructor options.
+   */
+  protected application: string;
+  /**
    * identity or user associated with this store.
    *
    * The ajax method will simulate an offline timeout when the user identity is changed. This is
@@ -144,6 +148,16 @@ export class SyncStore extends Store {
       diag.debug.warning('Socket.IO not present !!');
       this.useSocketNotify = false;
     }
+  }
+
+  /**
+   * overwritten to resolve relative URLs against the SyncStore#serverUrl.
+   */
+  protected resolveUrl(url: string) {
+    return web.resolveUrl(url, {
+      serverUrl: this.serverUrl,
+      application: this.application
+    });
   }
 
   /**
