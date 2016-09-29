@@ -29,7 +29,6 @@ import {Model} from './Model';
 import {Collection} from './Collection';
 import {SyncStore} from './SyncStore';
 
-import * as urls from '../web/urls';
 import {testServer} from '../web/http.spec';
 
 function backbone_error(done: Function) {
@@ -64,6 +63,7 @@ describe(module.filename || __filename, function() {
       assert.isFunction(SyncStore, 'SyncStore is defined');
 
       TEST.store = new SyncStore({
+        application: 'relutionsdk',
         useLocalStore: true,
         useSocketNotify: false
       });
@@ -75,23 +75,19 @@ describe(module.filename || __filename, function() {
     it('creating collection', () => {
       assert.isFunction(Collection, 'Collection is defined');
 
+      TEST.urlRoot = 'api/v1/test/';
+
       class TestModel extends Model.defaults({
         idAttribute: '_id',
-        entity: 'test'
+        entity: 'test',
+        urlRoot: TEST.urlRoot
       }) {}
       TEST.TestModel = TestModel;
 
       assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
 
-      TEST.url = urls.resolveUrl('api/v1/test/', {
-        serverUrl: testServer.serverUrl,
-        application: 'relutionsdk'
-      });
-
       class TestsModelCollection extends Collection.defaults({
         model: TEST.TestModel,
-        url: TEST.url,
-        store: TEST.store,
         options: {
           sort: { sureName: 1 },
           fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
@@ -102,7 +98,7 @@ describe(module.filename || __filename, function() {
 
       assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
 
-      TEST.Tests = new TEST.TestsModelCollection();
+      TEST.Tests = (<SyncStore>TEST.store).createCollection(TestsModelCollection);
 
       assert.isObject(TEST.Tests, 'Test collection successfully created.');
 
@@ -110,9 +106,9 @@ describe(module.filename || __filename, function() {
 
       var url = TEST.Tests.getUrl();
 
-      assert.ok(url !== TEST.url, 'The base url has been extended.');
+      assert.ok(url !== TEST.urlRoot, 'The base url has been extended.');
 
-      assert.equal(url.indexOf(TEST.url), 0, 'the new url starts with the set url.');
+      assert.ok(url.indexOf(TEST.urlRoot) > 0, 'the new url has the set url as a part.');
 
       assert.ok(url.indexOf('query=') > 0, 'query is part of the url.');
 
@@ -154,15 +150,14 @@ describe(module.filename || __filename, function() {
     it('fetching data with new model', (done) => {
 
       class TestModel2 extends Model.defaults({
-        url: TEST.url,
+        urlRoot: TEST.urlRoot,
         idAttribute: '_id',
-        store: TEST.store,
         entity: 'test'
       }) {}
       TEST.TestModel2 = TestModel2;
 
       var data = { _id: TEST.id };
-      var model = new TEST.TestModel2(data);
+      var model = (<SyncStore>TEST.store).createModel(TestModel2, data);
 
       assert.isObject(model, 'new model created');
 
@@ -183,14 +178,13 @@ describe(module.filename || __filename, function() {
 
     it('fetching model with no id using callbacks', (done) => {
       class TestModel3 extends Model.defaults({
-        url: TEST.url,
+        urlRoot: TEST.urlRoot,
         idAttribute: '_id',
-        store: TEST.store,
         entity: 'test'
       }) {}
       TEST.TestModel3 = TestModel3;
 
-      var model = new TEST.TestModel3({});
+      var model = (<SyncStore>TEST.store).createModel(TestModel3, {});
       model.fetch({
         success: function(model2: Model) {
           backbone_error(done)(model2, new Error('this should have failed!'));
@@ -203,14 +197,13 @@ describe(module.filename || __filename, function() {
 
     it('fetching model with empty-string id using promises', (done) => {
       class TestModel4 extends Model.defaults({
-        url: TEST.url,
+        urlRoot: TEST.urlRoot,
         idAttribute: '_id',
-        store: TEST.store,
         entity: 'test'
       }) {}
       TEST.TestModel4 = TestModel4;
 
-      var model = new TEST.TestModel4({
+      var model = (<SyncStore>TEST.store).createModel(TestModel4, {
         _id: ''
       });
       model.fetch().then(function() {
@@ -271,9 +264,8 @@ describe(module.filename || __filename, function() {
       var newId = '4711-' + oldId;
 
       class TestModel5 extends Model.defaults({
-        url: TEST.url,
+        urlRoot: TEST.urlRoot,
         idAttribute: '_id',
-        store: TEST.store,
         entity: 'test'
       }) {
         constructor(attrs: any) {
@@ -294,7 +286,7 @@ describe(module.filename || __filename, function() {
         }
       }
 
-      var testModel = new TestModel5(model.attributes);
+      var testModel = (<SyncStore>TEST.store).createModel(TestModel5, model.attributes);
 
       var options = {
         wait: true
@@ -307,7 +299,7 @@ describe(module.filename || __filename, function() {
         assert.isUndefined(TEST.Tests.get(oldId), 'model is missing in collection by old id.');
       }).then(function() {
         // reverts local changes
-        options['url'] = TEST.url + oldId; // must fix up URL as we hacked it
+        options['url'] = testModel.urlRoot + oldId; // must fix up URL as we hacked it
         return testModel.save(undefined, options).then(function() {
           assert.ok(testModel.id, 'record has an id.');
           assert.equal(testModel.id, oldId, 'record has new id.');
@@ -335,6 +327,7 @@ describe(module.filename || __filename, function() {
     }),
 
     it('cleanup records', (done) => {
+      assert.equal(TEST.Tests.models.length, TEST.Tests.length, 'backbone and array report the same length');
       if (TEST.Tests.length === 0) {
         done();
       } else {
@@ -358,6 +351,7 @@ describe(module.filename || __filename, function() {
             });
           }
         });
+        assert.equal(count, TEST.Tests.length, 'destroy executes asynchronously');
       }
     })
 

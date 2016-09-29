@@ -51,12 +51,22 @@ export interface CollectionProps {
 /**
  * constructor function of Collection.
  */
-export interface CollectionCtor {
+export interface CollectionCtorT<CollectionType extends Collection, ModelType extends Model, OptionsType> {
+  /**
+   * prototype of constructor function.
+   */
+  prototype: CollectionType;
+
   /**
    * @see Collection#constructor
    */
-  new(models?: Model[] | Object[], options?: any): Collection;
+  new(models?: ModelType[] | Object[], options?: any): CollectionType;
 }
+
+/**
+ * constructor function of Collection.
+ */
+export type CollectionCtor = CollectionCtorT<Collection, Model, any>;
 
 /**
  * tests whether a given object is a Collection.
