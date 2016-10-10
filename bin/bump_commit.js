@@ -62,11 +62,12 @@ module.exports.Bump = class Bump {
         // pkg.path = `${process.cwd()}/package1.json`;
         return writer(pkg.path, JSON.stringify(pkg.data, null, 2));
       })
-      .map((filePath) => {
+      .mergeMap((filePath) => {
         console.log(`update file ${filePath}`);
-      })
-      .map(() => {
-        return newVersion;
+        return Observable.create((ob) => {
+          ob.next(newVersion);
+          ob.complete();
+        });
       });
   }
 }
