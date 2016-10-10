@@ -12,16 +12,15 @@ let defVer = bumpClass.defaultType;
 let patchVersion = null;
 const stats = new RepoStats();
   stats.isAllCommited()
-  // .filter((stats) => {
-  //   if (stats.length) {
-  //     console.log(`You have uncommitted changes plz commit before ${stats.toString()}`);
-  //   }
-  //   return stats.length <= 0;
-  // })
+  .filter((stats) => {
+    if (stats.length) {
+      console.log(`You have uncommitted changes plz commit before ${stats.toString()}`);
+    }
+    return stats.length <= 0;
+  })
   .mergeMap(() => {
     return bumpClass.bump(defVer);
   })
-  // .last()
   .mergeMap((version) => {
     console.log('verison', version);
     patchVersion = version;
