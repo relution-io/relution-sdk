@@ -5,7 +5,9 @@ const {Bump, TagRepo, RepoStats} = require('./bump_commit');
 const bumpClass = new Bump();
 const taggingClass = new TagRepo();
 const spawn = require('child_process').spawn;
-const _browserify = spawn('npm', ['run', 'browserify']);
+// const _browserify = spawn('npm', ['run', 'browserify']);
+
+
 let defVer = bumpClass.defaultType;
 let patchVersion = null;
 const stats = new RepoStats();
@@ -22,14 +24,11 @@ const stats = new RepoStats();
   .last()
   .mergeMap((version) => {
     patchVersion = version;
-    return Observable.fromEvent(_browserify, 'close')
-  })
-  .mergeMap((version) => {
     return taggingClass.addTag(patchVersion, defVer);
   })
   .mergeMap(() => {
     const npmPublish = spawn('npm', ['publish']);
-    return Observable.fromEvent(npmPublish, 'close');
+    return Observable.fromEvent(npmPublish, 'exit');
   })
   .subscribe(
     (log) => {

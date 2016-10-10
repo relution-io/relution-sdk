@@ -83,6 +83,7 @@ module.exports.TagRepo = class TagRepo {
   addTag(tag, type) {
     const self = this;
     return Observable.create((observer) => {
+      console.log('adding files');
       this.simpleGit.add('./*')
         .commit(`${type} ${self.message}${tag}`)
         .addTag(`${tag}`)
