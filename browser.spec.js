@@ -1168,6 +1168,14 @@ var Collection = (function (_super) {
         }
         this.init(models, options);
     }
+    /**
+     * sets up prototype properties when defining a Collection subclass.
+     *
+     * @param {CollectionProps} properties of prototype to set.
+     */
+    Collection.defaults = function (properties) {
+        return _super['extend'].call(this, properties);
+    };
     Collection.prototype.init = function (models, options) {
         options = options || {};
         this.store = options.store || this.store || (this.model ? this.model.prototype.store : null);
@@ -1437,10 +1445,10 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return Developer;
-            }(Model_1.Model));
-            ;
-            Developer.prototype.idAttribute = '_id';
-            Developer.prototype.entity = 'Developer';
+            }(Model_1.Model.defaults({
+                idAttribute: '_id',
+                entity: 'Developer'
+            })));
             TEST.Developer = Developer;
             chai_1.assert.ok(typeof TEST.Developer === 'function', 'Developer model successfully extended.');
             var DeveloperCollection = (function (_super) {
@@ -1449,10 +1457,11 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return DeveloperCollection;
-            }(Collection_1.Collection));
+            }(Collection_1.Collection.defaults({
+                url: TEST.url,
+                model: TEST.Developer
+            })));
             ;
-            DeveloperCollection.prototype.url = TEST.url;
-            DeveloperCollection.prototype.model = TEST.Developer;
             TEST.DeveloperCollection = DeveloperCollection;
             chai_1.assert.ok(typeof TEST.DeveloperCollection === 'function', 'Developer collection successfully extended.');
             TEST.Developers = new TEST.DeveloperCollection();
@@ -1614,6 +1623,14 @@ var Model /*<AttributesType extends Object>*/ = (function (_super) {
         }
         this.init(attributes, options);
     }
+    /**
+     * sets up prototype properties when defining a Model subclass.
+     *
+     * @param {ModelProps} properties of prototype to set.
+     */
+    Model /*<AttributesType extends Object>*/.defaults = function (properties) {
+        return _super['extend'].call(this, properties);
+    };
     Model /*<AttributesType extends Object>*/.prototype.init = function (attributes, options) {
         options = options || {};
         this.collection = options.collection || this.collection;
@@ -1741,13 +1758,14 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return Person;
-            }(Model_1.Model));
+            }(Model_1.Model.defaults({
+                idAttribute: 'id',
+                defaults: {
+                    bmi: 0.0
+                },
+                entity: 'person',
+            })));
             ;
-            Person.prototype.idAttribute = 'id';
-            Person.prototype.defaults = {
-                bmi: 0.0
-            };
-            Person.prototype.entity = 'person';
             chai_1.assert.typeOf(Person, 'function', 'person model could be extended.');
             chai_1.assert.typeOf(new Person(), 'object', 'empty person model could be created.');
             var p = new Person({
@@ -1797,6 +1815,8 @@ var Backbone = require('backbone');
 var _ = require('lodash');
 var Q = require('q');
 var diag = require('../core/diag');
+var Model_1 = require('./Model');
+var Collection_1 = require('./Collection');
 /**
  * tests whether a given object is a Store.
  *
@@ -1821,6 +1841,13 @@ exports.isStore = isStore;
  */
 var Store = (function () {
     function Store(options) {
+        /**
+         * stores Model and Collection constructors by entity name.
+         *
+         * @see Store#makeModel
+         * @see Store#makeCollection
+         */
+        this.implementations = {};
         if (options) {
             // copy options values into the object
             _.extend(this, options);
@@ -1829,11 +1856,155 @@ var Store = (function () {
     Store.prototype.close = function () {
         // nothing to do
     };
+    /**
+     * factory method creating new Model instance bound to this Store.
+     *
+     * @param  modelType to instantiate.
+     * @param  attributes of new instance.
+     * @param  options at creation time.
+     * @return new Model instance.
+     *
+     * @see Store#createCollection
+     */
+    Store.prototype.createModel = function (modelType, attributes, options) {
+        return new (this.extendModel(modelType))(attributes, options);
+    };
+    /**
+     * factory method creating new Collection instance bound to this Store.
+     *
+     * @param  collectionType to instantiate.
+     * @param  models of new instance.
+     * @param  options at creation time.
+     * @return new Collection instance.
+     *
+     * @see Store#createModel
+     */
+    Store.prototype.createCollection = function (collectionType, models, options) {
+        return new (this.extendCollection(collectionType))(models, options);
+    };
+    /**
+     * additional initialization of Model instance.
+     *
+     * @see Store#initCollection
+     *
+     * @internal API only to be called by Model constructor.
+     */
     Store.prototype.initModel = function (model, options) {
         // may be overwritten
     };
+    /**
+     * additional initialization of Collection instance.
+     *
+     * @see Store#initModel
+     *
+     * @internal API only to be called by Collection constructor.
+     */
     Store.prototype.initCollection = function (collection, options) {
         // may be overwritten
+    };
+    /**
+     * subclasses a Model type such that it is linked to this Store.
+     *
+     * @param modelType to subclass.
+     * @return subclassed Model implementation.
+     *
+     * @see Store#createModel
+     * @see Store#defaultsModel
+     * @see Store#extendCollection
+     *
+     * @internal API only to be called by Store#createModel.
+     */
+    Store.prototype.extendModel = function (modelType) {
+        diag.debug.assert(function () { return Model_1.isModel(modelType.prototype); });
+        var entity = modelType.prototype.entity;
+        var implementation = this.implementations[entity];
+        if (implementation && implementation.modelCtor && implementation.modelCtor.prototype.__proto__.constructor === modelType) {
+            diag.debug.assert(implementation.modelCtor.prototype.store === this);
+        }
+        else {
+            if (implementation && implementation.modelCtor) {
+                diag.debug.warn('redefinition of model ' + entity + ' might not work as expected as existing collections remain bound to previous model type!');
+            }
+            // collectionType is reset so that newly created collections get bound to new model implementation
+            this.implementations[entity] = implementation = {
+                modelCtor: modelType['extend'](this.defaultsModel(modelType))
+            };
+        }
+        diag.debug.assert(function () { return Model_1.isModel(implementation.modelCtor.prototype); });
+        return implementation.modelCtor;
+    };
+    /**
+     * subclasses a Collection type such that it is linked to this Store.
+     *
+     * @param collectionType to subclass.
+     * @return subclassed Collection implementation.
+     *
+     * @see Store#createCollection
+     * @see Store#defaultsCollection
+     * @see Store#extendModel
+     *
+     * @internal API only to be called by Store#createCollection.
+     */
+    Store.prototype.extendCollection = function (collectionType) {
+        diag.debug.assert(function () { return Collection_1.isCollection(collectionType.prototype); });
+        var modelType = this.extendModel(collectionType.prototype.model);
+        var entity = modelType.prototype.entity;
+        var implementation = this.implementations[entity];
+        diag.debug.assert(implementation && implementation.modelCtor === modelType);
+        if (implementation.collectionCtor && implementation.collectionCtor.prototype.__proto__.constructor === collectionType) {
+            diag.debug.assert(implementation.collectionCtor.prototype.store === this);
+        }
+        else {
+            if (implementation && implementation.collectionCtor) {
+                diag.debug.warn('redefinition of collection ' + entity + ' might not work as expected as existing collections might exist!');
+            }
+            implementation.collectionCtor = collectionType['extend'](this.defaultsCollection(collectionType, modelType));
+        }
+        diag.debug.assert(function () { return Collection_1.isCollection(implementation.collectionCtor.prototype); });
+        return implementation.collectionCtor;
+    };
+    /**
+     * defines prototype properties used for a given Model type.
+     *
+     * @param modelType being subclassed.
+     * @return prototype properties of Model.
+     *
+     * @see Store#defaultsCollection
+     */
+    Store.prototype.defaultsModel = function (modelType) {
+        // may be overwritten
+        return {
+            urlRoot: this.resolveUrl(_.result(modelType.prototype, 'urlRoot')),
+            store: this
+        };
+    };
+    ;
+    /**
+     * defines prototype properties used for a given Collection type.
+     *
+     * @param collectionType being subclassed.
+     * @param modelType that was subclassed already, do not apply Store#extendModel on it!
+     * @return prototype properties of Collection.
+     *
+     * @see Store#defaultsModel
+     */
+    Store.prototype.defaultsCollection = function (collectionType, modelType) {
+        // may be overwritten
+        return {
+            model: modelType,
+            url: modelType.prototype.urlRoot,
+            store: this
+        };
+    };
+    /**
+     * may be overwritten to resolve relative URLs against the actual server.
+     *
+     * @param url to resolve.
+     * @return resolved url.
+     */
+    Store.prototype.resolveUrl = function (url) {
+        // may be overwritten
+        return url;
     };
     Store.prototype.sync = function (method, model, options) {
         // must be overwritten
@@ -1882,7 +2053,7 @@ var store = _.extend(Store.prototype, Backbone.Events, {
     name: 'relution-livedata'
 });
 diag.debug.assert(function () { return Store.prototype.isPrototypeOf(Object.create(store)); });
-},{"../core/diag":4,"backbone":83,"lodash":257,"q":294}],20:[function(require,module,exports){
+},{"../core/diag":4,"./Collection":14,"./Model":17,"backbone":83,"lodash":257,"q":294}],20:[function(require,module,exports){
 (function (__filename){
 /*
  * @file livedata/Store.spec.ts
@@ -2448,17 +2619,19 @@ describe(module.filename || __filename, function () {
             _super.apply(this, arguments);
         }
         return TestModel;
-    }(Model_1.Model));
-    TestModel.prototype.idAttribute = 'id';
-    TestModel.prototype.entity = 'approval';
+    }(Model_1.Model.defaults({
+        idAttribute: 'id',
+        entity: 'approval'
+    })));
     var TestCollection = (function (_super) {
         __extends(TestCollection, _super);
         function TestCollection() {
             _super.apply(this, arguments);
         }
         return TestCollection;
-    }(Collection_1.Collection));
-    TestCollection.prototype.model = TestModel;
+    }(Collection_1.Collection.defaults({
+        model: TestModel
+    })));
     before(function () {
         return http_spec_1.testServer.login.then(function (result) {
             TestCollection.prototype.store = new SyncStore_1.SyncStore({});
@@ -2796,18 +2969,19 @@ describe(module.filename || __filename, function () {
                     return Q.reject(new Error('Not Online'));
                 };
                 return ModelType;
-            }(Model_1.Model));
-            ModelType.prototype.idAttribute = 'id';
-            ModelType.prototype.entity = 'User';
-            ModelType.prototype.store = store;
-            ModelType.prototype.urlRoot = urls.resolveUrl('api/v1/user/', {
-                serverUrl: http_spec_1.testServer.serverUrl,
-                application: 'relutionsdk'
-            });
-            ModelType.prototype.defaults = {
-                username: 'admin',
-                password: 'admin'
-            };
+            }(Model_1.Model.defaults({
+                idAttribute: 'id',
+                entity: 'User',
+                store: store,
+                urlRoot: urls.resolveUrl('api/v1/user/', {
+                    serverUrl: http_spec_1.testServer.serverUrl,
+                    application: 'relutionsdk'
+                }),
+                defaults: {
+                    username: 'admin',
+                    password: 'admin'
+                }
+            })));
             modelType = ModelType;
             model = new modelType({ id: '12312' });
             return result;
@@ -2945,14 +3119,15 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return ModelType;
-            }(Model_1.Model));
-            ModelType.prototype.idAttribute = 'id';
-            ModelType.prototype.entity = 'User';
-            ModelType.prototype.store = store;
-            ModelType.prototype.urlRoot = urls.resolveUrl('api/v1/user/', {
-                serverUrl: http_spec_1.testServer.serverUrl,
-                application: 'relutionsdk'
-            });
+            }(Model_1.Model.defaults({
+                idAttribute: 'id',
+                entity: 'User',
+                store: store,
+                urlRoot: urls.resolveUrl('api/v1/user/', {
+                    serverUrl: http_spec_1.testServer.serverUrl,
+                    application: 'relutionsdk'
+                })
+            })));
             modelType = ModelType;
             model = new modelType({ id: '12312' });
             promise = Q(model.fetch()).thenResolve(model);
@@ -3150,6 +3325,15 @@ var SyncStore = (function (_super) {
         }
     }
     /**
+     * overwritten to resolve relative URLs against the SyncStore#serverUrl.
+     */
+    SyncStore.prototype.resolveUrl = function (url) {
+        return web.resolveUrl(url, {
+            serverUrl: this.serverUrl,
+            application: this.application
+        });
+    };
+    /**
      * binds the store to a target server when the first endpoint is created.
      *
      * @param urlRoot used to resolve the server to operate.
@@ -3218,9 +3402,19 @@ var SyncStore = (function (_super) {
             return endpoint;
         }
     };
+    /**
+     * @inheritdoc
+     *
+     * @internal API only to be called by Model constructor.
+     */
     SyncStore.prototype.initModel = function (model) {
         model.endpoint = this.initEndpoint(model, model.constructor);
     };
+    /**
+     * @inheritdoc
+     *
+     * @internal API only to be called by Collection constructor.
+     */
     SyncStore.prototype.initCollection = function (collection) {
         collection.endpoint = this.initEndpoint(collection, collection.model);
     };
@@ -4238,7 +4432,6 @@ var chai_1 = require('chai');
 var Model_1 = require('./Model');
 var Collection_1 = require('./Collection');
 var SyncStore_1 = require('./SyncStore');
-var urls = require('../web/urls');
 var http_spec_1 = require('../web/http.spec');
 function backbone_error(done) {
     return function (model, error) {
@@ -4265,6 +4458,7 @@ describe(module.filename || __filename, function () {
             chai_1.assert.isString(http_spec_1.testServer.serverUrl, 'Server url is defined.');
             chai_1.assert.isFunction(SyncStore_1.SyncStore, 'SyncStore is defined');
             TEST.store = new SyncStore_1.SyncStore({
+                application: 'relutionsdk',
                 useLocalStore: true,
                 useSocketNotify: false
             });
@@ -4274,44 +4468,42 @@ describe(module.filename || __filename, function () {
         }),
         it('creating collection', function () {
             chai_1.assert.isFunction(Collection_1.Collection, 'Collection is defined');
+            TEST.urlRoot = 'api/v1/test/';
             var TestModel = (function (_super) {
                 __extends(TestModel, _super);
                 function TestModel() {
                     _super.apply(this, arguments);
                 }
                 return TestModel;
-            }(Model_1.Model));
-            TestModel.prototype.idAttribute = '_id';
-            TestModel.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                idAttribute: '_id',
+                entity: 'test',
+                urlRoot: TEST.urlRoot
+            })));
             TEST.TestModel = TestModel;
             chai_1.assert.isFunction(TEST.TestModel, 'TestModel model successfully extended.');
-            TEST.url = urls.resolveUrl('api/v1/test/', {
-                serverUrl: http_spec_1.testServer.serverUrl,
-                application: 'relutionsdk'
-            });
             var TestsModelCollection = (function (_super) {
                 __extends(TestsModelCollection, _super);
                 function TestsModelCollection() {
                     _super.apply(this, arguments);
                 }
                 return TestsModelCollection;
-            }(Collection_1.Collection));
-            TestsModelCollection.prototype.model = TEST.TestModel;
-            TestsModelCollection.prototype.url = TEST.url;
-            TestsModelCollection.prototype.store = TEST.store;
-            TestsModelCollection.prototype.options = {
-                sort: { sureName: 1 },
-                fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
-                query: { age: { $gte: 25 } }
-            };
+            }(Collection_1.Collection.defaults({
+                model: TEST.TestModel,
+                options: {
+                    sort: { sureName: 1 },
+                    fields: { USERNAME: 1, sureName: 1, firstName: 1, age: 1 },
+                    query: { age: { $gte: 25 } }
+                }
+            })));
             TEST.TestsModelCollection = TestsModelCollection;
             chai_1.assert.isFunction(TEST.TestsModelCollection, 'Test collection successfully extended.');
-            TEST.Tests = new TEST.TestsModelCollection();
+            TEST.Tests = TEST.store.createCollection(TestsModelCollection);
             chai_1.assert.isObject(TEST.Tests, 'Test collection successfully created.');
             chai_1.assert.equal(TEST.Tests.store, TEST.store, 'Test collection has the correct store.');
             var url = TEST.Tests.getUrl();
-            chai_1.assert.ok(url !== TEST.url, 'The base url has been extended.');
-            chai_1.assert.equal(url.indexOf(TEST.url), 0, 'the new url starts with the set url.');
+            chai_1.assert.ok(url !== TEST.urlRoot, 'The base url has been extended.');
+            chai_1.assert.ok(url.indexOf(TEST.urlRoot) > 0, 'the new url has the set url as a part.');
             chai_1.assert.ok(url.indexOf('query=') > 0, 'query is part of the url.');
             chai_1.assert.ok(url.indexOf('fields=') > 0, 'fields is part of the url.');
             chai_1.assert.ok(url.indexOf('sort=') > 0, 'sort is part of the url.');
@@ -4343,14 +4535,14 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModel2;
-            }(Model_1.Model));
-            TestModel2.prototype.url = TEST.url;
-            TestModel2.prototype.idAttribute = '_id';
-            TestModel2.prototype.store = TEST.store;
-            TestModel2.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                urlRoot: TEST.urlRoot,
+                idAttribute: '_id',
+                entity: 'test'
+            })));
             TEST.TestModel2 = TestModel2;
             var data = { _id: TEST.id };
-            var model = new TEST.TestModel2(data);
+            var model = TEST.store.createModel(TestModel2, data);
             chai_1.assert.isObject(model, 'new model created');
             chai_1.assert.ok(_.isEqual(model.attributes, data), 'new model holds correct data attributes');
             model.fetch({
@@ -4372,13 +4564,13 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModel3;
-            }(Model_1.Model));
-            TestModel3.prototype.url = TEST.url;
-            TestModel3.prototype.idAttribute = '_id';
-            TestModel3.prototype.store = TEST.store;
-            TestModel3.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                urlRoot: TEST.urlRoot,
+                idAttribute: '_id',
+                entity: 'test'
+            })));
             TEST.TestModel3 = TestModel3;
-            var model = new TEST.TestModel3({});
+            var model = TEST.store.createModel(TestModel3, {});
             model.fetch({
                 success: function (model2) {
                     backbone_error(done)(model2, new Error('this should have failed!'));
@@ -4395,13 +4587,13 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModel4;
-            }(Model_1.Model));
-            TestModel4.prototype.url = TEST.url;
-            TestModel4.prototype.idAttribute = '_id';
-            TestModel4.prototype.store = TEST.store;
-            TestModel4.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                urlRoot: TEST.urlRoot,
+                idAttribute: '_id',
+                entity: 'test'
+            })));
             TEST.TestModel4 = TestModel4;
-            var model = new TEST.TestModel4({
+            var model = TEST.store.createModel(TestModel4, {
                 _id: ''
             });
             model.fetch().then(function () {
@@ -4461,7 +4653,7 @@ describe(module.filename || __filename, function () {
                 TestModel5.prototype.ajax = function (options) {
                     var _this = this;
                     // following simulates server reassigning ID value
-                    return Model_1.Model.prototype.ajax.apply(this, arguments).then(function (response) {
+                    return _super.prototype.ajax.apply(this, arguments).then(function (response) {
                         if (_this.id === oldId) {
                             response._id = newId;
                         }
@@ -4472,12 +4664,12 @@ describe(module.filename || __filename, function () {
                     });
                 };
                 return TestModel5;
-            }(Model_1.Model));
-            TestModel5.prototype.url = TEST.url;
-            TestModel5.prototype.idAttribute = '_id';
-            TestModel5.prototype.store = TEST.store;
-            TestModel5.prototype.entity = 'test';
-            var testModel = new TestModel5(model.attributes);
+            }(Model_1.Model.defaults({
+                urlRoot: TEST.urlRoot,
+                idAttribute: '_id',
+                entity: 'test'
+            })));
+            var testModel = TEST.store.createModel(TestModel5, model.attributes);
             var options = {
                 wait: true
             };
@@ -4489,7 +4681,7 @@ describe(module.filename || __filename, function () {
                 chai_1.assert.isUndefined(TEST.Tests.get(oldId), 'model is missing in collection by old id.');
             }).then(function () {
                 // reverts local changes
-                options['url'] = TEST.url + oldId; // must fix up URL as we hacked it
+                options['url'] = testModel.urlRoot + oldId; // must fix up URL as we hacked it
                 return testModel.save(undefined, options).then(function () {
                     chai_1.assert.ok(testModel.id, 'record has an id.');
                     chai_1.assert.equal(testModel.id, oldId, 'record has new id.');
@@ -4511,6 +4703,7 @@ describe(module.filename || __filename, function () {
             });
         }),
         it('cleanup records', function (done) {
+            chai_1.assert.equal(TEST.Tests.models.length, TEST.Tests.length, 'backbone and array report the same length');
             if (TEST.Tests.length === 0) {
                 done();
             }
@@ -4535,13 +4728,14 @@ describe(module.filename || __filename, function () {
                         });
                     }
                 });
+                chai_1.assert.equal(count, TEST.Tests.length, 'destroy executes asynchronously');
             }
         })
     ];
 });
 }).call(this,"/lib\\livedata\\SyncStore.spec.js")
 
-},{"../web/http.spec":49,"../web/urls":53,"./Collection":14,"./Model":17,"./SyncStore":27,"chai":123,"lodash":257}],29:[function(require,module,exports){
+},{"../web/http.spec":49,"./Collection":14,"./Model":17,"./SyncStore":27,"chai":123,"lodash":257}],29:[function(require,module,exports){
 (function (process,global){
 /*
  * @file livedata/WebSqlStore.ts
@@ -5216,8 +5410,9 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return SimpleModel;
-            }(Model_1.Model));
-            SimpleModel.prototype.idAttribute = 'key';
+            }(Model_1.Model.defaults({
+                idAttribute: 'key'
+            })));
             TEST.SimpleModel = SimpleModel;
             chai_1.assert.typeOf(TEST.SimpleModel, 'function', 'SimpleModel model successfully extended.');
             var SimpleModelCollection = (function (_super) {
@@ -5226,10 +5421,11 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return SimpleModelCollection;
-            }(Collection_1.Collection));
-            SimpleModelCollection.prototype.model = TEST.SimpleModel;
-            SimpleModelCollection.prototype.store = new WebSqlStore_1.WebSqlStore();
-            SimpleModelCollection.prototype.entity = 'test';
+            }(Collection_1.Collection.defaults({
+                model: TEST.SimpleModel,
+                store: new WebSqlStore_1.WebSqlStore(),
+                entity: 'test'
+            })));
             TEST.SimpleModelCollection = SimpleModelCollection;
             chai_1.assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
             TEST.Simple = new TEST.SimpleModelCollection();
@@ -5253,9 +5449,10 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModel;
-            }(Model_1.Model));
-            TestModel.prototype.idAttribute = 'key';
-            TestModel.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                idAttribute: 'key',
+                entity: 'test'
+            })));
             TEST.TestModel = TestModel;
             chai_1.assert.typeOf(TEST.TestModel, 'function', 'TestModel model successfully extended.');
             var TestModelCollection = (function (_super) {
@@ -5264,9 +5461,10 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModelCollection;
-            }(Collection_1.Collection));
-            TestModelCollection.prototype.model = TEST.TestModel;
-            TestModelCollection.prototype.store = TEST.store;
+            }(Collection_1.Collection.defaults({
+                model: TEST.TestModel,
+                store: TEST.store
+            })));
             TEST.TestModelCollection = TestModelCollection;
             chai_1.assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
             TEST.Tests = new TEST.TestModelCollection();
@@ -5309,10 +5507,11 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModel2;
-            }(Model_1.Model));
-            TestModel2.prototype.idAttribute = 'key';
-            TestModel2.prototype.store = TEST.store;
-            TestModel2.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                idAttribute: 'key',
+                store: TEST.store,
+                entity: 'test'
+            })));
             TEST.TestModel2 = TestModel2;
             var model = new TEST.TestModel2({
                 key: TEST.key
@@ -5375,10 +5574,11 @@ describe(module.filename || __filename, function () {
                     _super.apply(this, arguments);
                 }
                 return TestModel2;
-            }(Model_1.Model));
-            TestModel2.prototype.idAttribute = 'key';
-            TestModel2.prototype.store = TEST.store;
-            TestModel2.prototype.entity = 'test';
+            }(Model_1.Model.defaults({
+                idAttribute: 'key',
+                store: TEST.store,
+                entity: 'test'
+            })));
             TEST.TestModel2 = TestModel2;
             TEST.Tests2 = new Collection_1.Collection(undefined, {
                 model: TEST.TestModel2,

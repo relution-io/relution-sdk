@@ -1,3 +1,4 @@
+/// <reference types="chai" />
 /// <reference types="backbone" />
 /// <reference types="lodash" />
 /**
@@ -11,14 +12,32 @@ import { Model, ModelCtor } from './Model';
 import { SyncContext } from './SyncContext';
 import { SyncEndpoint } from './SyncEndpoint';
 /**
+ * prototype properties specified when subclassing using Collection.defaults().
+ */
+export interface CollectionProps {
+    model?: ModelCtor;
+    entity?: string;
+    options?: any;
+    url?: string | (() => string);
+    store?: Store;
+}
+/**
  * constructor function of Collection.
  */
-export interface CollectionCtor {
+export interface CollectionCtorT<CollectionType extends Collection, ModelType extends Model, OptionsType> {
+    /**
+     * prototype of constructor function.
+     */
+    prototype: CollectionType;
     /**
      * @see Collection#constructor
      */
-    new (models?: any, options?: any): Collection;
+    new (models?: ModelType[] | Object[], options?: any): CollectionType;
 }
+/**
+ * constructor function of Collection.
+ */
+export declare type CollectionCtor = CollectionCtorT<Collection, Model, any>;
 /**
  * tests whether a given object is a Collection.
  *
@@ -48,8 +67,14 @@ export declare class Collection extends Backbone.Collection<Model> {
     credentials: any;
     endpoint: SyncEndpoint;
     channel: string;
-    constructor(models?: any, options?: any);
-    protected init(models?: any, options?: any): void;
+    constructor(models?: Model[] | Object[], options?: any);
+    /**
+     * sets up prototype properties when defining a Collection subclass.
+     *
+     * @param {CollectionProps} properties of prototype to set.
+     */
+    static defaults(properties: CollectionProps): CollectionCtor;
+    protected init(models?: Model[] | Object[], options?: any): void;
     ajax(options: any): any;
     sync(method: string, model: Backbone.ModelBase, options?: any): any;
     private _entityFromUrl(urlStr);
