@@ -1,25 +1,26 @@
 {
-    "compilerOptions": {
-        "target": "ES5",
-        "module": "commonjs",
-        "declaration": true,
-        "inlineSourceMap": true,
-        "inlineSources": true,
-        "rootDir": "./src",
-        "outDir": "./lib",
-        "pretty": true,
-        "stripInternal": true,
-        "noEmitOnError": true,
-        "noImplicitAny": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "noFallthroughCasesInSwitch": false,
-        "noImplicitReturns": false,
-        "forceConsistentCasingInFileNames": true
-    },
-    "include": [
-        "src/**/*.ts"
-    ],
-    "exclude": [
-        "src/**/*.d.ts"
-    ]
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "commonjs",
+    "declaration": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "pretty": true,
+    "stripInternal": true,
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitReturns": false,
+    "forceConsistentCasingInFileNames": true,
+    "newLine": "LF"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.d.ts"
+  ]
 }

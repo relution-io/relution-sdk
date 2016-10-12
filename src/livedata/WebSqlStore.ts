@@ -65,7 +65,8 @@ export interface WebSqlError extends Error {
  */
 export function openDatabase(options: WebSqlOptions) {
   let db: Database;
-  if (global['sqlitePlugin']) {
+  const sqlitePlugin = 'sqlitePlugin';
+  if (global[sqlitePlugin]) {
     // device implementation
     options = _.clone(options);
     if (!options.key) {
@@ -80,7 +81,7 @@ export function openDatabase(options: WebSqlOptions) {
     if (!options.location) {
       options.location = 2;
     }
-    db = global['sqllitePlugin'].openDatabase(options);
+    db = global[sqlitePlugin].openDatabase(options);
   } else if (global['openDatabase']) {
     // native implementation
     db = global['openDatabase'](options.name, options.version || '', options.description || '', options.size || 1024 * 1024);
