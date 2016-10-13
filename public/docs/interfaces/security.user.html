@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -115,8 +113,13 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="security.user.html#position" class="tsd-kind-icon">position</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="security.user.html#preferences" class="tsd-kind-icon">preferences</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#provider" class="tsd-kind-icon">provider</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#readonly" class="tsd-kind-icon">readonly</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#roles" class="tsd-kind-icon">roles</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#rolesobjects" class="tsd-kind-icon">roles<wbr>Objects</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="security.user.html#salutation" class="tsd-kind-icon">salutation</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="security.user.html#surname" class="tsd-kind-icon">surname</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#sysroles" class="tsd-kind-icon">sys<wbr>Roles</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#type" class="tsd-kind-icon">type</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#uuid" class="tsd-kind-icon">uuid</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="security.user.html#version" class="tsd-kind-icon">version</a></li>
 							</ul>
@@ -143,7 +146,7 @@
 					<div class="tsd-signature tsd-kind-icon">activated<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:81</li>
+							<li>Defined in security/roles.ts:136</li>
 						</ul>
 					</aside>
 				</section>
@@ -164,7 +167,7 @@
 					<div class="tsd-signature tsd-kind-icon">confirmation<wbr>Token<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:82</li>
+							<li>Defined in security/roles.ts:137</li>
 						</ul>
 					</aside>
 				</section>
@@ -174,7 +177,7 @@
 					<div class="tsd-signature tsd-kind-icon">confirmation<wbr>Token<wbr>Valid<wbr>To<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:83</li>
+							<li>Defined in security/roles.ts:138</li>
 						</ul>
 					</aside>
 				</section>
@@ -184,7 +187,7 @@
 					<div class="tsd-signature tsd-kind-icon">country<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:77</li>
+							<li>Defined in security/roles.ts:132</li>
 						</ul>
 					</aside>
 				</section>
@@ -205,7 +208,7 @@
 					<div class="tsd-signature tsd-kind-icon">email<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:75</li>
+							<li>Defined in security/roles.ts:130</li>
 						</ul>
 					</aside>
 				</section>
@@ -216,7 +219,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#foreignkey">foreignKey</a></p>
 						<ul>
-							<li>Defined in security/roles.ts:33</li>
+							<li>Defined in security/roles.ts:76</li>
 						</ul>
 					</aside>
 				</section>
@@ -226,17 +229,17 @@
 					<div class="tsd-signature tsd-kind-icon">given<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:72</li>
+							<li>Defined in security/roles.ts:127</li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="lastloggedtime" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> last<wbr>Logged<wbr>Time</h3>
-					<div class="tsd-signature tsd-kind-icon">last<wbr>Logged<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span></div>
+					<div class="tsd-signature tsd-kind-icon">last<wbr>Logged<wbr>Time<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:78</li>
+							<li>Defined in security/roles.ts:133</li>
 						</ul>
 					</aside>
 				</section>
@@ -246,7 +249,7 @@
 					<div class="tsd-signature tsd-kind-icon">locked<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:80</li>
+							<li>Defined in security/roles.ts:135</li>
 						</ul>
 					</aside>
 				</section>
@@ -256,7 +259,7 @@
 					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:68</li>
+							<li>Defined in security/roles.ts:123</li>
 						</ul>
 					</aside>
 				</section>
@@ -266,27 +269,27 @@
 					<div class="tsd-signature tsd-kind-icon">organization<wbr>Uuid<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:67</li>
+							<li>Defined in security/roles.ts:122</li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="password" class="tsd-anchor"></a>
-					<h3>password</h3>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> password</h3>
 					<div class="tsd-signature tsd-kind-icon">password<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:69</li>
+							<li>Defined in security/roles.ts:124</li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="passwordexpires" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> password<wbr>Expires</h3>
-					<div class="tsd-signature tsd-kind-icon">password<wbr>Expires<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span></div>
+					<div class="tsd-signature tsd-kind-icon">password<wbr>Expires<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Date</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:79</li>
+							<li>Defined in security/roles.ts:134</li>
 						</ul>
 					</aside>
 				</section>
@@ -296,7 +299,7 @@
 					<div class="tsd-signature tsd-kind-icon">phone<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:76</li>
+							<li>Defined in security/roles.ts:131</li>
 						</ul>
 					</aside>
 				</section>
@@ -306,7 +309,7 @@
 					<div class="tsd-signature tsd-kind-icon">position<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:74</li>
+							<li>Defined in security/roles.ts:129</li>
 						</ul>
 					</aside>
 				</section>
@@ -316,7 +319,7 @@
 					<div class="tsd-signature tsd-kind-icon">preferences<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:85</li>
+							<li>Defined in security/roles.ts:140</li>
 						</ul>
 					</aside>
 				</section>
@@ -327,7 +330,40 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#provider">provider</a></p>
 						<ul>
-							<li>Defined in security/roles.ts:32</li>
+							<li>Defined in security/roles.ts:75</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="readonly" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> readonly</h3>
+					<div class="tsd-signature tsd-kind-icon">readonly<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#readonly">readonly</a></p>
+						<ul>
+							<li>Defined in security/roles.ts:79</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="roles" class="tsd-anchor"></a>
+					<h3>roles</h3>
+					<div class="tsd-signature tsd-kind-icon">roles<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#roles">roles</a></p>
+						<ul>
+							<li>Defined in security/roles.ts:72</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="rolesobjects" class="tsd-anchor"></a>
+					<h3>roles<wbr>Objects</h3>
+					<div class="tsd-signature tsd-kind-icon">roles<wbr>Objects<span class="tsd-signature-symbol">:</span> <a href="security.roledto.html" class="tsd-signature-type">RoleDto</a><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#rolesobjects">rolesObjects</a></p>
+						<ul>
+							<li>Defined in security/roles.ts:73</li>
 						</ul>
 					</aside>
 				</section>
@@ -337,7 +373,7 @@
 					<div class="tsd-signature tsd-kind-icon">salutation<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:71</li>
+							<li>Defined in security/roles.ts:126</li>
 						</ul>
 					</aside>
 				</section>
@@ -347,7 +383,29 @@
 					<div class="tsd-signature tsd-kind-icon">surname<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in security/roles.ts:73</li>
+							<li>Defined in security/roles.ts:128</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="sysroles" class="tsd-anchor"></a>
+					<h3>sys<wbr>Roles</h3>
+					<div class="tsd-signature tsd-kind-icon">sys<wbr>Roles<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#sysroles">sysRoles</a></p>
+						<ul>
+							<li>Defined in security/roles.ts:74</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+					<a name="type" class="tsd-anchor"></a>
+					<h3>type</h3>
+					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <a href="../modules/security.html#roletype" class="tsd-signature-type">RoleType</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="security.role.html">Role</a>.<a href="security.role.html#type">type</a></p>
+						<ul>
+							<li>Defined in security/roles.ts:71</li>
 						</ul>
 					</aside>
 				</section>
@@ -430,6 +488,9 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="security.role.html" class="tsd-kind-icon">Role</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="security.roledto.html" class="tsd-kind-icon">Role<wbr>Dto</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
@@ -495,11 +556,26 @@
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 								<a href="security.user.html#provider" class="tsd-kind-icon">provider</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="security.user.html#readonly" class="tsd-kind-icon">readonly</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="security.user.html#roles" class="tsd-kind-icon">roles</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="security.user.html#rolesobjects" class="tsd-kind-icon">roles<wbr>Objects</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="security.user.html#salutation" class="tsd-kind-icon">salutation</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="security.user.html#surname" class="tsd-kind-icon">surname</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="security.user.html#sysroles" class="tsd-kind-icon">sys<wbr>Roles</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+								<a href="security.user.html#type" class="tsd-kind-icon">type</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
 								<a href="security.user.html#uuid" class="tsd-kind-icon">uuid</a>
@@ -511,6 +587,12 @@
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/security.html#grouptype" class="tsd-kind-icon">Group<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/security.html#roletype" class="tsd-kind-icon">Role<wbr>Type</a>
+					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="../modules/security.html#anonymous_authorization" class="tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION</a>
 					</li>

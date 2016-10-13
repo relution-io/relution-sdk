@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -156,7 +154,7 @@
 					<div class="tsd-signature tsd-kind-icon">Platform<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"android"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"ios"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"windowsphone"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"blackberry"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"browser"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"node"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/device.ts:38</li>
+							<li>Defined in core/device.ts:37</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -193,7 +191,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="debug" class="tsd-anchor"></a>
 					<h3>debug</h3>
-					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <a href="../classes/core.diagnostics.html" class="tsd-signature-type">Diagnostics</a></div>
+					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <a href="../classes/core.diagnostics.html" class="tsd-signature-type">Diagnostics</a><span class="tsd-signature-symbol"> =&nbsp;new Diagnostics(true)</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in core/diag.ts:207</li>
@@ -223,10 +221,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="ready" class="tsd-anchor"></a>
 					<h3>ready</h3>
-					<div class="tsd-signature tsd-kind-icon">ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/core.information.html" class="tsd-signature-type">Information</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<div class="tsd-signature tsd-kind-icon">ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/core.information.html" class="tsd-signature-type">Information</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;(() &#x3D;&gt; {// must be extracted from global scope object as otherwise we get ReferenceError in node.jsconst document: Document &#x3D; global[&#x27;document&#x27;];const window: Window &#x3D; global[&#x27;window&#x27;];let resolveDocument: (val: Document | Q.Promise&lt;Document&gt;) &#x3D;&gt; void;const callback &#x3D; () &#x3D;&gt; {document.removeEventListener(&#x27;load&#x27;, callback);document.removeEventListener(&#x27;DOMContentLoaded&#x27;, callback);return resolveDocument(document);};return Q.Promise((resolve, reject) &#x3D;&gt; {// resolves to document once the DOM is loadedtry {if (!document || document.readyState &#x3D;&#x3D;&#x3D; &#x27;complete&#x27;) {resolve(document);return;}resolveDocument &#x3D; resolve;document.addEventListener(&#x27;DOMContentLoaded&#x27;, callback, false);document.addEventListener(&#x27;load&#x27;, callback, false); // fallback} catch (error) {reject(error);}}).then(() &#x3D;&gt; {// resolves to window once the device is readyreturn Q.Promise((resolve, reject) &#x3D;&gt; {try {if (!window || !(&#x27;cordova&#x27; in window ||&#x27;PhoneGap&#x27; in window || &#x27;phonegap&#x27; in window ||&#x27;forge&#x27; in window)) {resolve(window);return;}// see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#devicereadydocument.addEventListener(&#x27;deviceready&#x27;, () &#x3D;&gt; {document.removeEventListener(&#x27;deviceready&#x27;, callback);resolve(window);}, false);} catch (error) {reject(error);}});}).then(() &#x3D;&gt; {const navigator: Navigator &#x3D; window &amp;&amp; window.navigator;const userAgent &#x3D; navigator &amp;&amp; navigator.userAgent;const appVersion &#x3D; navigator &amp;&amp; navigator.appVersion;const device: Device &#x3D; window &amp;&amp; window[&#x27;device&#x27;];const platformName &#x3D; device &amp;&amp; device.platform || userAgent || process.platform;const platformVersion &#x3D; device &amp;&amp; device.version || process.version || appVersion;let platformId: PlatformId;if (/Android/i.test(platformName)) {platformId &#x3D; &#x27;android&#x27;;} else if (/iOS|iPhone|iPad|iPod/i.test(platformName)) {platformId &#x3D; &#x27;ios&#x27;;} else if (/Windows Phone/i.test(platformName) || device &amp;&amp;/WinCE|Win32NT/i.test(platformName)) {// see https://github.com/apache/cordova-plugin-device regarding Windows Phone 7/8 Quirksdiag.debug.assert(() &#x3D;&gt; !/WinCE/i.test(platformName),&#x27;WindowsCE devices like Windows Phone 7 and below are not officially supported!&#x27;);platformId &#x3D; &#x27;windowsphone&#x27;;} else if (/BlackBerry/i.test(platformName)) {platformId &#x3D; &#x27;blackberry&#x27;;} else if (navigator || process[&#x27;browser&#x27;]) {platformId &#x3D; &#x27;browser&#x27;;} else if (process &amp;&amp; require) {platformId &#x3D; &#x27;node&#x27;;} else {diag.debug.assert(!!platformId, &#x27;unknown platform: &#x27; + platformName);}return &lt;Information&gt;{uuid: device &amp;&amp; device.uuid,serial: device &amp;&amp; device.serial,language: navigator &amp;&amp; (navigator.language || navigator[&#x27;userLanguage&#x27;]),platform: {id: platformId,name: platformName,version: platformVersion},device: device};});})()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/device.ts:104</li>
+							<li>Defined in core/device.ts:103</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">

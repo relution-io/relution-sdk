@@ -1,4 +1,4 @@
-/**
+/*
  * @file core/device.ts
  * Relution SDK
  *

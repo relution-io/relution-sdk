@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -92,7 +90,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="livedata.websqlerror.html#message" class="tsd-kind-icon">message</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="livedata.websqlerror.html#name" class="tsd-kind-icon">name</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="livedata.websqlerror.html#sql" class="tsd-kind-icon">sql</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-inherited"><a href="livedata.websqlerror.html#stack" class="tsd-kind-icon">stack</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited"><a href="livedata.websqlerror.html#stack" class="tsd-kind-icon">stack</a></li>
 							</ul>
 						</section>
 					</div>
@@ -106,7 +104,7 @@
 					<div class="tsd-signature tsd-kind-icon">Error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ErrorConstructor</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:889</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:904</li>
 						</ul>
 					</aside>
 				</section>
@@ -117,7 +115,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Error.message</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:880</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:894</li>
 						</ul>
 					</aside>
 				</section>
@@ -128,7 +126,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Error.name</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:879</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:893</li>
 						</ul>
 					</aside>
 				</section>
@@ -147,14 +145,15 @@
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 					<a name="stack" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagOptional">Optional</span> stack</h3>
 					<div class="tsd-signature tsd-kind-icon">stack<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from Error.stack</p>
+						<p>Overwrites Error.stack</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/node/index.d.ts:4</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/typescript/lib/lib.d.ts:895</li>
 						</ul>
 					</aside>
 				</section>
@@ -221,14 +220,20 @@
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="../classes/livedata.websqlstore.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Store</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="livedata.collectionctort.html" class="tsd-kind-icon">Collection<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="livedata.collectionctor.html" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+						<a href="livedata.collectionprops.html" class="tsd-kind-icon">Collection<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="livedata.livedatamessage.html" class="tsd-kind-icon">Live<wbr>Data<wbr>Message</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="livedata.modelctort.html" class="tsd-kind-icon">Model<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="livedata.modelctor.html" class="tsd-kind-icon">Model<wbr>Ctor</a>
+						<a href="livedata.modelprops.html" class="tsd-kind-icon">Model<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="livedata.statement.html" class="tsd-kind-icon">Statement</a>
@@ -253,7 +258,7 @@
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="livedata.websqlerror.html#sql" class="tsd-kind-icon">sql</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-inherited">
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-overwrite tsd-is-inherited">
 								<a href="livedata.websqlerror.html#stack" class="tsd-kind-icon">stack</a>
 							</li>
 						</ul>
@@ -262,6 +267,12 @@
 				<ul class="after-current">
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="livedata.websqloptions.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/livedata.html#collectionctor" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/livedata.html#modelctor" class="tsd-kind-icon">Model<wbr>Ctor</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="../modules/livedata.html#backbone" class="tsd-kind-icon">Backbone</a>

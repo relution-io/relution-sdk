@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -63,19 +61,47 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<p>Relution SDK</p>
+				<h1 id="relution-sdk">Relution SDK</h1>
+				<p><a href="https://npmjs.org/package/relution-sdk"><img src="http://img.shields.io/npm/v/relution-sdk.svg?style=flat-square" alt="NPM version"></a>
+					<a href="https://david-dm.org/relution-io/relution-sdk"><img src="http://img.shields.io/david/relution-io/relution-sdk/master.svg?style=flat-square" alt="Dependency Status"></a>
+				<a href="https://npmjs.org/package/relution-sdk"><img src="http://img.shields.io/npm/dm/relution-sdk.svg?style=flat-square" alt="Download Month"></a></p>
+				<h2 id="docs">Docs</h2>
+				<p><a href="https://relution.readme.io/docs/relution-sdk">https://relution.readme.io/docs/relution-sdk</a></p>
+				<h2 id="installation-and-usage">Installation and Usage</h2>
+				<h3 id="es6-via-npm">ES6 via npm</h3>
+				<pre><code class="lang-bash">npm install relution-sdk --save
+</code></pre>
+				<p>To import the entire core set of functionality:</p>
+				<blockquote>
+					<p>Notice Relution SDK is lazy loaded</p>
+				</blockquote>
+				<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> Relution <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk'</span>;
+
+Relution.init ....
+</code></pre>
+				<p>To import only what you need by patching :</p>
+				<pre><code class="lang-javascript"><span class="hljs-keyword">import</span> {web} <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk/web'</span>;
+
+Relution.web. ....
+</code></pre>
+				<h3 id="es5-via-bower">ES5 via bower</h3>
+				<pre><code class="lang-bash">bower install relution-sdk --save
+</code></pre>
+				<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"{{Your path to your bower_components}}/relution-sdk/browser.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+				<pre><code class="lang-javascript">Relution.init ....
+</code></pre>
+				<p><a href="https://relution.readme.io/docs/relution-sdk">read more about Relution SDK</a>.</p>
 				<h3 id="dev-guide">Dev Guide</h3>
 				<hr>
 				<h5 id="installation-for-development">Installation for development</h5>
 				<pre><code class="lang-bash">$: git <span class="hljs-built_in">clone</span> git@github.com:relution-io/relution-sdk.git
-
-$: <span class="hljs-built_in">cd</span> relution-sdk
-
+$: <span class="hljs-built_in">cd</span> relution-sdk 
 $: npm i
-
-$: npm link
-
 $: npm run watch
+</code></pre>
+				<h3 id="build-browser-js">Build browser js</h3>
+				<pre><code class="lang-bash">npm run browserify
 </code></pre>
 				<h5 id="test">Test</h5>
 				<pre><code class="lang-bash">$: npm <span class="hljs-built_in">test</span>

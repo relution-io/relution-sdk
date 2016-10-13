@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -181,7 +179,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
 					<a name="pushmessage" class="tsd-anchor"></a>
 					<h3>Push<wbr>Message</h3>
-					<div class="tsd-signature tsd-kind-icon">Push<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NotificationEventResponse</span></div>
+					<div class="tsd-signature tsd-kind-icon">Push<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PhonegapPluginPush.NotificationEventResponse</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in push/cordova.ts:35</li>
@@ -279,7 +277,7 @@
 					<a name="listenpushnotification" class="tsd-anchor"></a>
 					<h3>listen<wbr>Push<wbr>Notification</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">listen<wbr>Push<wbr>Notification<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">?: </span><a href="push.html#pushcallback" class="tsd-signature-type">PushCallback</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">listen<wbr>Push<wbr>Notification<span class="tsd-signature-symbol">(</span>callback<span class="tsd-signature-symbol">?: </span><a href="push.html#pushcallback" class="tsd-signature-type">PushCallback</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">PhonegapPluginPush.RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -308,7 +306,7 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">PhonegapPluginPush.RegistrationEventResponse</span><span class="tsd-signature-symbol">&gt;</span></h4>
 							<p>promise of registration, for informal purposes.</p>
 						</li>
 					</ul>
@@ -356,7 +354,7 @@
 					<a name="pushdevicefilterbyusers" class="tsd-anchor"></a>
 					<h3>push<wbr>Device<wbr>Filter<wbr>ByUsers</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">push<wbr>Device<wbr>Filter<wbr>ByUsers<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>users<span class="tsd-signature-symbol">: </span><a href="../interfaces/security.user.html" class="tsd-signature-type">User</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/query.filter.html" class="tsd-signature-type">Filter</a></li>
+						<li class="tsd-signature tsd-kind-icon">push<wbr>Device<wbr>Filter<wbr>ByUsers<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>users<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/security.user.html" class="tsd-signature-type">User</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/query.filter.html" class="tsd-signature-type">Filter</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -374,7 +372,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>users: <a href="../interfaces/security.user.html" class="tsd-signature-type">User</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
+									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>users: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/security.user.html" class="tsd-signature-type">User</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/query.filter.html" class="tsd-signature-type">Filter</a></h4>

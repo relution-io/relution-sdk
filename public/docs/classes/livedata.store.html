@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -107,6 +105,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.store.html#_type" class="tsd-kind-icon">_type</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.store.html#endpoints" class="tsd-kind-icon">endpoints</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="livedata.store.html#entities" class="tsd-kind-icon">entities</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="livedata.store.html#implementations" class="tsd-kind-icon">implementations</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.store.html#iscollection" class="tsd-kind-icon">is<wbr>Collection</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.store.html#ismodel" class="tsd-kind-icon">is<wbr>Model</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.store.html#isstore" class="tsd-kind-icon">is<wbr>Store</a></li>
@@ -119,12 +118,19 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#close" class="tsd-kind-icon">close</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#create" class="tsd-kind-icon">create</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="livedata.store.html#createcollection" class="tsd-kind-icon">create<wbr>Collection</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="livedata.store.html#createmodel" class="tsd-kind-icon">create<wbr>Model</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected"><a href="livedata.store.html#defaultscollection" class="tsd-kind-icon">defaults<wbr>Collection</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected"><a href="livedata.store.html#defaultsmodel" class="tsd-kind-icon">defaults<wbr>Model</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#destroy" class="tsd-kind-icon">destroy</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private"><a href="livedata.store.html#extendcollection" class="tsd-kind-icon">extend<wbr>Collection</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private"><a href="livedata.store.html#extendmodel" class="tsd-kind-icon">extend<wbr>Model</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#fetch" class="tsd-kind-icon">fetch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="livedata.store.html#handleerror" class="tsd-kind-icon">handle<wbr>Error</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="livedata.store.html#handlesuccess" class="tsd-kind-icon">handle<wbr>Success</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#initcollection" class="tsd-kind-icon">init<wbr>Collection</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#initmodel" class="tsd-kind-icon">init<wbr>Model</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="livedata.store.html#resolveurl" class="tsd-kind-icon">resolve<wbr>Url</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#save" class="tsd-kind-icon">save</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="livedata.store.html#sync" class="tsd-kind-icon">sync</a></li>
 							</ul>
@@ -144,7 +150,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:74</li>
+									<li>Defined in livedata/Store.ts:98</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -176,7 +182,7 @@
 					<div class="tsd-signature tsd-kind-icon">endpoints<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Store.ts:74</li>
+							<li>Defined in livedata/Store.ts:98</li>
 						</ul>
 					</aside>
 				</section>
@@ -186,9 +192,32 @@
 					<div class="tsd-signature tsd-kind-icon">entities<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Store.ts:73</li>
+							<li>Defined in livedata/Store.ts:97</li>
 						</ul>
 					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="implementations" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> implementations</h3>
+					<div class="tsd-signature tsd-kind-icon">implementations<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Dictionary</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in livedata/Store.ts:79</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>stores Model and Collection constructors by entity name.</p>
+						</div>
+						<dl class="tsd-comment-tags">
+							<dt>see</dt>
+							<dd><p>Store#makeModel</p>
+							</dd>
+							<dt>see</dt>
+							<dd><p>Store#makeCollection</p>
+							</dd>
+						</dl>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="iscollection" class="tsd-anchor"></a>
@@ -236,7 +265,7 @@
 					<div class="tsd-signature tsd-kind-icon">trigger<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">trigger</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Store.ts:127</li>
+							<li>Defined in livedata/Store.ts:299</li>
 						</ul>
 					</aside>
 				</section>
@@ -253,7 +282,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:83</li>
+									<li>Defined in livedata/Store.ts:107</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -264,19 +293,19 @@
 					<a name="create" class="tsd-anchor"></a>
 					<h3>create</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.collectionctor.html" class="tsd-signature-type">CollectionCtor</a>, models<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="livedata.collection.html" class="tsd-signature-type">Collection</a></li>
+						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span>collection<span class="tsd-signature-symbol">: </span><a href="../modules/livedata.html#collectionctor" class="tsd-signature-type">CollectionCtor</a>, models<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="livedata.collection.html" class="tsd-signature-type">Collection</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:112</li>
+									<li>Defined in livedata/Store.ts:284</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>collection: <a href="../interfaces/livedata.collectionctor.html" class="tsd-signature-type">CollectionCtor</a></h5>
+									<h5>collection: <a href="../modules/livedata.html#collectionctor" class="tsd-signature-type">CollectionCtor</a></h5>
 								</li>
 								<li>
 									<h5>models: <a href="livedata.model.html" class="tsd-signature-type">Model</a><span class="tsd-signature-symbol">[]</span></h5>
@@ -286,6 +315,238 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="livedata.collection.html" class="tsd-signature-type">Collection</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+					<a name="createcollection" class="tsd-anchor"></a>
+					<h3>create<wbr>Collection</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Collection&lt;CollectionType, ModelType, OptionsType&gt;<span class="tsd-signature-symbol">(</span>collectionType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span>, models<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">[]</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">CollectionType</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:135</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>factory method creating new Collection instance bound to this Store.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#createModel</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>CollectionType<span class="tsd-signature-symbol">: </span><a href="livedata.collection.html" class="tsd-signature-type">Collection</a></h4>
+								</li>
+								<li>
+									<h4>ModelType<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a></h4>
+								</li>
+								<li>
+									<h4>OptionsType</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>collectionType: <a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to instantiate.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> models: <span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of new instance.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>at creation time.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">CollectionType</span></h4>
+							<p>new Collection instance.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+					<a name="createmodel" class="tsd-anchor"></a>
+					<h3>create<wbr>Model</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Model&lt;ModelType, AttributesType, OptionsType&gt;<span class="tsd-signature-symbol">(</span>modelType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span>, attributes<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">AttributesType</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ModelType</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:121</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>factory method creating new Model instance bound to this Store.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#createCollection</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>ModelType<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a></h4>
+								</li>
+								<li>
+									<h4>AttributesType</h4>
+								</li>
+								<li>
+									<h4>OptionsType</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>modelType: <a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to instantiate.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> attributes: <span class="tsd-signature-type">AttributesType</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of new instance.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">OptionsType</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>at creation time.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ModelType</span></h4>
+							<p>new Model instance.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected">
+					<a name="defaultscollection" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> defaults<wbr>Collection</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">defaults<wbr>Collection&lt;CollectionType, ModelType, OptionsType, AttributesType, ModelOptionsType&gt;<span class="tsd-signature-symbol">(</span>collectionType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span>, modelType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelOptionsType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.collectionprops.html" class="tsd-signature-type">CollectionProps</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:247</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>defines prototype properties used for a given Collection type.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#defaultsModel</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>CollectionType<span class="tsd-signature-symbol">: </span><a href="livedata.collection.html" class="tsd-signature-type">Collection</a></h4>
+								</li>
+								<li>
+									<h4>ModelType<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a></h4>
+								</li>
+								<li>
+									<h4>OptionsType</h4>
+								</li>
+								<li>
+									<h4>AttributesType</h4>
+								</li>
+								<li>
+									<h4>ModelOptionsType</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>collectionType: <a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>being subclassed.</p>
+									</div>
+								</li>
+								<li>
+									<h5>modelType: <a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelOptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>that was subclassed already, do not apply Store#extendModel on it!</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/livedata.collectionprops.html" class="tsd-signature-type">CollectionProps</a></h4>
+							<p>prototype properties of Collection.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected">
+					<a name="defaultsmodel" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> defaults<wbr>Model</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">defaults<wbr>Model&lt;ModelType, AttributesType, OptionsType&gt;<span class="tsd-signature-symbol">(</span>modelType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelprops.html" class="tsd-signature-type">ModelProps</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:230</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>defines prototype properties used for a given Model type.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#defaultsCollection</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>ModelType<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a></h4>
+								</li>
+								<li>
+									<h4>AttributesType</h4>
+								</li>
+								<li>
+									<h4>OptionsType</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>modelType: <a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>being subclassed.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/livedata.modelprops.html" class="tsd-signature-type">ModelProps</a></h4>
+							<p>prototype properties of Model.</p>
 						</li>
 					</ul>
 				</section>
@@ -299,7 +560,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:122</li>
+									<li>Defined in livedata/Store.ts:294</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -315,6 +576,122 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private">
+					<a name="extendcollection" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> extend<wbr>Collection</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">extend<wbr>Collection&lt;CollectionType, ModelType, OptionsType&gt;<span class="tsd-signature-symbol">(</span>collectionType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:204</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>subclasses a Collection type such that it is linked to this Store.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#createCollection</p>
+									</dd>
+									<dt>see</dt>
+									<dd><p>Store#defaultsCollection</p>
+									</dd>
+									<dt>see</dt>
+									<dd><p>Store#extendModel</p>
+									</dd>
+									<dt>internal</dt>
+									<dd><p>API only to be called by Store#createCollection.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>CollectionType<span class="tsd-signature-symbol">: </span><a href="livedata.collection.html" class="tsd-signature-type">Collection</a></h4>
+								</li>
+								<li>
+									<h4>ModelType<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a></h4>
+								</li>
+								<li>
+									<h4>OptionsType</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>collectionType: <a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to subclass.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">CollectionType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>subclassed Collection implementation.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private">
+					<a name="extendmodel" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> extend<wbr>Model</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">extend<wbr>Model&lt;ModelType, AttributesType, OptionsType&gt;<span class="tsd-signature-symbol">(</span>modelType<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:173</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>subclasses a Model type such that it is linked to this Store.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#createModel</p>
+									</dd>
+									<dt>see</dt>
+									<dd><p>Store#defaultsModel</p>
+									</dd>
+									<dt>see</dt>
+									<dd><p>Store#extendCollection</p>
+									</dd>
+									<dt>internal</dt>
+									<dd><p>API only to be called by Store#createModel.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>ModelType<span class="tsd-signature-symbol">: </span><a href="livedata.model.html" class="tsd-signature-type">Model</a></h4>
+								</li>
+								<li>
+									<h4>AttributesType</h4>
+								</li>
+								<li>
+									<h4>OptionsType</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>modelType: <a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to subclass.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ModelType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">AttributesType</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">OptionsType</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>subclassed Model implementation.</p>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="fetch" class="tsd-anchor"></a>
 					<h3>fetch</h3>
@@ -326,7 +703,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:100</li>
+									<li>Defined in livedata/Store.ts:272</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -352,7 +729,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:101</li>
+									<li>Defined in livedata/Store.ts:273</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -387,7 +764,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:137</li>
+									<li>Defined in livedata/Store.ts:309</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -415,7 +792,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:129</li>
+									<li>Defined in livedata/Store.ts:301</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -443,9 +820,22 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:91</li>
+									<li>Defined in livedata/Store.ts:157</li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>additional initialization of Collection instance.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#initModel</p>
+									</dd>
+									<dt>internal</dt>
+									<dd><p>API only to be called by Collection constructor.</p>
+									</dd>
+								</dl>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -469,9 +859,22 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:87</li>
+									<li>Defined in livedata/Store.ts:146</li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>additional initialization of Model instance.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Store#initCollection</p>
+									</dd>
+									<dt>internal</dt>
+									<dd><p>API only to be called by Model constructor.</p>
+									</dd>
+								</dl>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -485,6 +888,38 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="resolveurl" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> resolve<wbr>Url</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">resolve<wbr>Url<span class="tsd-signature-symbol">(</span>url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Store.ts:262</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>may be overwritten to resolve relative URLs against the actual server.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>url: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to resolve.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>resolved url.</p>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="save" class="tsd-anchor"></a>
 					<h3>save</h3>
@@ -495,7 +930,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:117</li>
+									<li>Defined in livedata/Store.ts:289</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -524,7 +959,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Store.ts:95</li>
+									<li>Defined in livedata/Store.ts:267</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -608,6 +1043,9 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
 								<a href="livedata.store.html#entities" class="tsd-kind-icon">entities</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="livedata.store.html#implementations" class="tsd-kind-icon">implementations</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="livedata.store.html#iscollection" class="tsd-kind-icon">is<wbr>Collection</a>
 							</li>
@@ -629,8 +1067,26 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="livedata.store.html#create" class="tsd-kind-icon">create</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+								<a href="livedata.store.html#createcollection" class="tsd-kind-icon">create<wbr>Collection</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
+								<a href="livedata.store.html#createmodel" class="tsd-kind-icon">create<wbr>Model</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected">
+								<a href="livedata.store.html#defaultscollection" class="tsd-kind-icon">defaults<wbr>Collection</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-protected">
+								<a href="livedata.store.html#defaultsmodel" class="tsd-kind-icon">defaults<wbr>Model</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="livedata.store.html#destroy" class="tsd-kind-icon">destroy</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private">
+								<a href="livedata.store.html#extendcollection" class="tsd-kind-icon">extend<wbr>Collection</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-private">
+								<a href="livedata.store.html#extendmodel" class="tsd-kind-icon">extend<wbr>Model</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="livedata.store.html#fetch" class="tsd-kind-icon">fetch</a>
@@ -646,6 +1102,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="livedata.store.html#initmodel" class="tsd-kind-icon">init<wbr>Model</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="livedata.store.html#resolveurl" class="tsd-kind-icon">resolve<wbr>Url</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="livedata.store.html#save" class="tsd-kind-icon">save</a>
@@ -669,14 +1128,20 @@
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="livedata.websqlstore.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Store</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../interfaces/livedata.collectionctort.html" class="tsd-kind-icon">Collection<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/livedata.collectionctor.html" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+						<a href="../interfaces/livedata.collectionprops.html" class="tsd-kind-icon">Collection<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.livedatamessage.html" class="tsd-kind-icon">Live<wbr>Data<wbr>Message</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../interfaces/livedata.modelctort.html" class="tsd-kind-icon">Model<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/livedata.modelctor.html" class="tsd-kind-icon">Model<wbr>Ctor</a>
+						<a href="../interfaces/livedata.modelprops.html" class="tsd-kind-icon">Model<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.statement.html" class="tsd-kind-icon">Statement</a>
@@ -689,6 +1154,12 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.websqloptions.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/livedata.html#collectionctor" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/livedata.html#modelctor" class="tsd-kind-icon">Model<wbr>Ctor</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="../modules/livedata.html#backbone" class="tsd-kind-icon">Backbone</a>

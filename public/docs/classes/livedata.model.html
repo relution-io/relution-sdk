@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -111,6 +109,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#changed" class="tsd-kind-icon">changed</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.model.html#changedsincesync" class="tsd-kind-icon">changed<wbr>Since<wbr>Sync</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#cid" class="tsd-kind-icon">cid</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#cidprefix" class="tsd-kind-icon">cid<wbr>Prefix</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite"><a href="livedata.model.html#collection" class="tsd-kind-icon">collection</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.model.html#credentials" class="tsd-kind-icon">credentials</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="livedata.model.html#endpoint" class="tsd-kind-icon">endpoint</a></li>
@@ -152,6 +151,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#keys" class="tsd-kind-icon">keys</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#listento" class="tsd-kind-icon">listen<wbr>To</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#listentoonce" class="tsd-kind-icon">listen<wbr>ToOnce</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#matches" class="tsd-kind-icon">matches</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#off" class="tsd-kind-icon">off</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#omit" class="tsd-kind-icon">omit</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#on" class="tsd-kind-icon">on</a></li>
@@ -173,6 +173,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#unset" class="tsd-kind-icon">unset</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#validate" class="tsd-kind-icon">validate</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="livedata.model.html#values" class="tsd-kind-icon">values</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="livedata.model.html#defaults-1" class="tsd-kind-icon">defaults</a></li>
 							</ul>
 						</section>
 					</div>
@@ -191,7 +192,7 @@
 							<aside class="tsd-sources">
 								<p>Overwrites Model.__constructor</p>
 								<ul>
-									<li>Defined in livedata/Model.ts:79</li>
+									<li>Defined in livedata/Model.ts:111</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -216,7 +217,7 @@
 					<div class="tsd-signature tsd-kind-icon">_type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:67</li>
+							<li>Defined in livedata/Model.ts:99</li>
 						</ul>
 					</aside>
 				</section>
@@ -227,7 +228,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.attributes</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:105</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:115</li>
 						</ul>
 					</aside>
 				</section>
@@ -238,7 +239,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.changed</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:106</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:116</li>
 						</ul>
 					</aside>
 				</section>
@@ -248,7 +249,7 @@
 					<div class="tsd-signature tsd-kind-icon">changed<wbr>Since<wbr>Sync<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:73</li>
+							<li>Defined in livedata/Model.ts:105</li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -264,7 +265,18 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.cid</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:107</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:118</li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="cidprefix" class="tsd-anchor"></a>
+					<h3>cid<wbr>Prefix</h3>
+					<div class="tsd-signature tsd-kind-icon">cid<wbr>Prefix<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from Model.cidPrefix</p>
+						<ul>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:117</li>
 						</ul>
 					</aside>
 				</section>
@@ -275,7 +287,7 @@
 					<aside class="tsd-sources">
 						<p>Overwrites Model.collection</p>
 						<ul>
-							<li>Defined in livedata/Model.ts:75</li>
+							<li>Defined in livedata/Model.ts:107</li>
 						</ul>
 					</aside>
 				</section>
@@ -285,7 +297,7 @@
 					<div class="tsd-signature tsd-kind-icon">credentials<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:77</li>
+							<li>Defined in livedata/Model.ts:109</li>
 						</ul>
 					</aside>
 				</section>
@@ -295,7 +307,7 @@
 					<div class="tsd-signature tsd-kind-icon">endpoint<span class="tsd-signature-symbol">:</span> <a href="livedata.syncendpoint.html" class="tsd-signature-type">SyncEndpoint</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:79</li>
+							<li>Defined in livedata/Model.ts:111</li>
 						</ul>
 					</aside>
 				</section>
@@ -305,7 +317,7 @@
 					<div class="tsd-signature tsd-kind-icon">entity<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:72</li>
+							<li>Defined in livedata/Model.ts:104</li>
 						</ul>
 					</aside>
 				</section>
@@ -316,7 +328,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.id</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:116</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:132</li>
 						</ul>
 					</aside>
 				</section>
@@ -327,7 +339,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.idAttribute</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:117</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:133</li>
 						</ul>
 					</aside>
 				</section>
@@ -337,7 +349,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Collection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:69</li>
+							<li>Defined in livedata/Model.ts:101</li>
 						</ul>
 					</aside>
 				</section>
@@ -347,7 +359,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Model<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:68</li>
+							<li>Defined in livedata/Model.ts:100</li>
 						</ul>
 					</aside>
 				</section>
@@ -357,7 +369,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Store<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:70</li>
+							<li>Defined in livedata/Model.ts:102</li>
 						</ul>
 					</aside>
 				</section>
@@ -367,7 +379,7 @@
 					<div class="tsd-signature tsd-kind-icon">store<span class="tsd-signature-symbol">:</span> <a href="livedata.store.html" class="tsd-signature-type">Store</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/Model.ts:76</li>
+							<li>Defined in livedata/Model.ts:108</li>
 						</ul>
 					</aside>
 				</section>
@@ -378,7 +390,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from ModelBase.url</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:92</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:102</li>
 						</ul>
 					</aside>
 				</section>
@@ -389,7 +401,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.urlRoot</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:119</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:135</li>
 						</ul>
 					</aside>
 				</section>
@@ -400,7 +412,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from Model.validationError</p>
 						<ul>
-							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:118</li>
+							<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:134</li>
 						</ul>
 					</aside>
 				</section>
@@ -417,7 +429,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Model.ts:108</li>
+									<li>Defined in livedata/Model.ts:149</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -441,7 +453,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.bind</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:82</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:92</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -471,7 +483,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.chain</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:174</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:197</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
@@ -482,23 +494,33 @@
 					<a name="changedattributes" class="tsd-anchor"></a>
 					<h3>changed<wbr>Attributes</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">changed<wbr>Attributes<span class="tsd-signature-symbol">(</span>attributes<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">changed<wbr>Attributes<span class="tsd-signature-symbol">(</span>attributes<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from Model.changedAttributes</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:145</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:168</li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return an object containing all the attributes that have changed, or
+										false if there are no changed attributes. Useful for determining what
+										parts of a view need to be updated and/or what attributes need to be
+										persisted to the server. Unset attributes will be set to undefined.
+										You can also pass an attributes object to diff against the model,
+									determining if there <em>would be</em> a change.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> attributes: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -513,7 +535,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.clear</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:146</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:169</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -537,7 +559,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.clone</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:147</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:170</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Model</span></h4>
@@ -555,7 +577,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.defaults</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:115</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:131</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -580,7 +602,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.destroy</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:148</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:171</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -604,7 +626,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.escape</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:149</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:172</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -628,7 +650,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.fetch</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:124</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:140</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -652,7 +674,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.get</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:133</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:149</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -687,7 +709,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Model.ts:129</li>
+									<li>Defined in livedata/Model.ts:170</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -705,7 +727,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.has</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:150</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:173</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -729,7 +751,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.hasChanged</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:151</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:174</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -752,7 +774,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Model.ts:93</li>
+									<li>Defined in livedata/Model.ts:134</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -779,7 +801,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.initialize</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:122</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:138</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -806,7 +828,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.invert</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:167</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:190</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
@@ -824,7 +846,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.isEmpty</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:175</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:198</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -842,7 +864,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.isNew</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:152</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:175</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -860,7 +882,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.isValid</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:153</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:176</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -884,7 +906,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.keys</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:164</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:187</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -902,7 +924,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.listenTo</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:86</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:96</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -932,7 +954,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.listenToOnce</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:87</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:97</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -952,6 +974,30 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="matches" class="tsd-anchor"></a>
+					<h3>matches</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">matches<span class="tsd-signature-symbol">(</span>attrs<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from Model.matches</p>
+								<ul>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:199</li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>attrs: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="off" class="tsd-anchor"></a>
 					<h3>off</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -962,7 +1008,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.off</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:80</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:90</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -994,7 +1040,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.omit</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:171</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:194</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1009,7 +1055,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.omit</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:172</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:195</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1024,7 +1070,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.omit</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:173</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:196</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1073,7 +1119,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.on</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:78</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:88</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1094,7 +1140,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.on</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:79</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:89</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1117,7 +1163,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Model.ts:115</li>
+									<li>Defined in livedata/Model.ts:156</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1143,7 +1189,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Model.ts:125</li>
+									<li>Defined in livedata/Model.ts:166</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1170,7 +1216,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.once</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:85</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:95</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1200,7 +1246,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.pairs</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:166</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:189</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -1218,7 +1264,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from ModelBase.parse</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:93</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:103</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1247,7 +1293,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.pick</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:168</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:191</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1262,7 +1308,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.pick</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:169</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:192</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1277,7 +1323,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.pick</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:170</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:193</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1325,7 +1371,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.previous</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:154</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:177</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1349,7 +1395,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.previousAttributes</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:155</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:178</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
@@ -1367,7 +1413,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.save</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:156</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:179</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1395,7 +1441,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.set</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:142</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:158</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1428,7 +1474,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.set</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:143</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:159</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1455,7 +1501,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.stopListening</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:88</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:98</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1485,7 +1531,7 @@
 							<aside class="tsd-sources">
 								<p>Overwrites ModelBase.sync</p>
 								<ul>
-									<li>Defined in livedata/Model.ts:111</li>
+									<li>Defined in livedata/Model.ts:152</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1515,7 +1561,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from ModelBase.toJSON</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:94</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:104</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1539,7 +1585,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.trigger</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:81</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:91</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1566,7 +1612,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Events.unbind</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:83</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:93</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1596,7 +1642,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.unset</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:157</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:180</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1623,7 +1669,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.validate</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:158</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:181</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1650,10 +1696,41 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Model.values</p>
 								<ul>
-									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/typings/globals/backbone-global/index.d.ts:165</li>
+									<li>Defined in D:/gofer-core/gofer-workspace/relution-sdk/node_modules/@types/backbone/index.d.ts:188</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="defaults-1" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> defaults</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">defaults<span class="tsd-signature-symbol">(</span>properties<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.modelprops.html" class="tsd-signature-type">ModelProps</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/livedata.html#modelctor" class="tsd-signature-type">ModelCtor</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in livedata/Model.ts:130</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>sets up prototype properties when defining a Model subclass.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>properties: <a href="../interfaces/livedata.modelprops.html" class="tsd-signature-type">ModelProps</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>of prototype to set.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/livedata.html#modelctor" class="tsd-signature-type">ModelCtor</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1724,6 +1801,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="livedata.model.html#cid" class="tsd-kind-icon">cid</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="livedata.model.html#cidprefix" class="tsd-kind-icon">cid<wbr>Prefix</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
 								<a href="livedata.model.html#collection" class="tsd-kind-icon">collection</a>
@@ -1834,6 +1914,9 @@
 								<a href="livedata.model.html#listentoonce" class="tsd-kind-icon">listen<wbr>ToOnce</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="livedata.model.html#matches" class="tsd-kind-icon">matches</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="livedata.model.html#off" class="tsd-kind-icon">off</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -1896,6 +1979,9 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="livedata.model.html#values" class="tsd-kind-icon">values</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="livedata.model.html#defaults-1" class="tsd-kind-icon">defaults</a>
+							</li>
 						</ul>
 					</li>
 				</ul>
@@ -1915,14 +2001,20 @@
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="livedata.websqlstore.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Store</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../interfaces/livedata.collectionctort.html" class="tsd-kind-icon">Collection<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/livedata.collectionctor.html" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+						<a href="../interfaces/livedata.collectionprops.html" class="tsd-kind-icon">Collection<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.livedatamessage.html" class="tsd-kind-icon">Live<wbr>Data<wbr>Message</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../interfaces/livedata.modelctort.html" class="tsd-kind-icon">Model<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/livedata.modelctor.html" class="tsd-kind-icon">Model<wbr>Ctor</a>
+						<a href="../interfaces/livedata.modelprops.html" class="tsd-kind-icon">Model<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.statement.html" class="tsd-kind-icon">Statement</a>
@@ -1935,6 +2027,12 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.websqloptions.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/livedata.html#collectionctor" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="../modules/livedata.html#modelctor" class="tsd-kind-icon">Model<wbr>Ctor</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="../modules/livedata.html#backbone" class="tsd-kind-icon">Backbone</a>
