@@ -29,7 +29,6 @@ import {debug} from '../core/diag';
 import {Model, ModelCtor} from './Model';
 import {SyncStore} from './SyncStore';
 import {openDatabase} from './WebSqlStore';
-import * as urls from '../web/urls';
 import {testServer} from '../web/http.spec';
 
 describe(module.filename || __filename, function() {
@@ -38,10 +37,12 @@ describe(module.filename || __filename, function() {
   var model: Model = null;
   var store: SyncStore = null;
   var modelType: ModelCtor = null;
+  var urlRoot = 'api/v1/user/';
 
   before(function() {
     return testServer.login.then((result) => {
       store = new SyncStore({
+        application: 'relutionsdk',
         useLocalStore: true,
         useSocketNotify: false
       });
@@ -49,11 +50,7 @@ describe(module.filename || __filename, function() {
       class ModelType extends Model.defaults({
         idAttribute: 'id',
         entity: 'User',
-        store: store,
-        urlRoot: urls.resolveUrl('api/v1/user/', {
-          serverUrl: testServer.serverUrl,
-          application: 'relutionsdk'
-        }),
+        urlRoot: urlRoot,
         defaults: <any>{
           username: 'admin',
           password: 'admin'
@@ -66,7 +63,7 @@ describe(module.filename || __filename, function() {
       }
       modelType = ModelType;
 
-      model = new modelType({ id: '12312' });
+      model = store.createModel(ModelType, { id: '12312' });
 
       return result;
     });

@@ -36,11 +36,14 @@ import {testServer} from '../web/http.spec';
 
 describe(module.filename || __filename, function() {
   this.timeout(60000);
+  var urlRoot = 'api/v1/approvals/';
+  var store: SyncStore;
 
   // prepare model/collection types
   class TestModel extends Model.defaults({
     idAttribute: 'id',
-    entity: 'approval'
+    entity: 'approval',
+    urlRoot: urlRoot
   }) {}
 
   class TestCollection extends Collection.defaults({
@@ -49,9 +52,7 @@ describe(module.filename || __filename, function() {
 
   before(function() {
     return testServer.login.then((result) => {
-      TestCollection.prototype.store = new SyncStore({});
-      TestCollection.prototype.url = urls.resolveUrl('api/v1/approvals/', {
-        serverUrl: testServer.serverUrl,
+      store = new SyncStore({
         application: 'relutionsdk'
       });
       return result;
@@ -87,7 +88,7 @@ describe(module.filename || __filename, function() {
   function loadApprovals() {
     if (!qApprovals) {
       var approvals = makeApprovals();
-      var collection = new TestCollection();
+      var collection = store.createCollection(TestCollection);
       qApprovals = loadCollection(collection, approvals).then(function () {
         collection.stopListening(); // no longer live
         return approvals.sort(function (a, b) {
@@ -106,7 +107,7 @@ describe(module.filename || __filename, function() {
 
     it('infinite scrolling', () => {
       var approvals: any[];
-      var collection = new TestCollection();
+      var collection = store.createCollection(TestCollection);
       var counter = 10;
       return loadApprovals().then(function (data) {
         approvals = data;
@@ -140,7 +141,7 @@ describe(module.filename || __filename, function() {
 
     it('next/prev paging', () => {
       var approvals: any[];
-      var collection = new TestCollection();
+      var collection = store.createCollection(TestCollection);
       var i = 0;
       return loadApprovals().then(function (data) {
         approvals = data;
