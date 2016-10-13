@@ -79,14 +79,13 @@ describe(module.filename || __filename, function() {
 
       class SimpleModelCollection extends Collection.defaults({
         model: TEST.SimpleModel,
-        store: new WebSqlStore(),
         entity: 'test'
       }) {}
       TEST.SimpleModelCollection = SimpleModelCollection;
 
       assert.typeOf(TEST.SimpleModelCollection, 'function', 'Simple collection successfully extended.');
 
-      TEST.Simple = new TEST.SimpleModelCollection();
+      TEST.Simple = new WebSqlStore().createCollection(SimpleModelCollection);
 
       assert.typeOf(TEST.Simple, 'object', 'Simple collection successfully created.');
 
@@ -123,13 +122,12 @@ describe(module.filename || __filename, function() {
 
       class TestModelCollection extends Collection.defaults({
         model: TEST.TestModel,
-        store: TEST.store
       }) {}
       TEST.TestModelCollection = TestModelCollection;
 
       assert.typeOf(TEST.TestModelCollection, 'function', 'Test collection successfully extended.');
 
-      TEST.Tests = new TEST.TestModelCollection();
+      TEST.Tests = (<WebSqlStore>TEST.store).createCollection(TestModelCollection);
 
       assert.typeOf(TEST.Tests, 'object', 'Test collection successfully created.');
 
@@ -188,14 +186,11 @@ describe(module.filename || __filename, function() {
 
       class TestModel2 extends Model.defaults({
         idAttribute: 'key',
-        store: TEST.store,
         entity: 'test'
       }) {}
       TEST.TestModel2 = TestModel2;
 
-      var model = new TEST.TestModel2({
-        key: TEST.key
-      });
+      var model = (<WebSqlStore>TEST.store).createModel(TestModel2, { key: TEST.key });
 
       assert.isObject(model, 'new model created');
 
@@ -261,15 +256,13 @@ describe(module.filename || __filename, function() {
 
       class TestModel2 extends Model.defaults({
         idAttribute: 'key',
-        store: TEST.store,
         entity: 'test'
       }) {}
       TEST.TestModel2 = TestModel2;
-      
-      TEST.Tests2 = new Collection(undefined, {
-        model: TEST.TestModel2,
-        store: TEST.store
-      });
+
+      TEST.Tests2 = (<WebSqlStore>TEST.store).createCollection(Collection.defaults({
+        model: TEST.TestModel2
+      }));
       assert.isObject(TEST.Tests2, 'Collection created');
 
       TEST.data = {
