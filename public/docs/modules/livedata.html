@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -89,13 +87,22 @@
 						<section class="tsd-index-section ">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.collectionctor.html" class="tsd-kind-icon">Collection<wbr>Ctor</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/livedata.collectionctort.html" class="tsd-kind-icon">Collection<wbr>CtorT</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.collectionprops.html" class="tsd-kind-icon">Collection<wbr>Props</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.livedatamessage.html" class="tsd-kind-icon">Live<wbr>Data<wbr>Message</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.modelctor.html" class="tsd-kind-icon">Model<wbr>Ctor</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/livedata.modelctort.html" class="tsd-kind-icon">Model<wbr>CtorT</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.modelprops.html" class="tsd-kind-icon">Model<wbr>Props</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.statement.html" class="tsd-kind-icon">Statement</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.storector.html" class="tsd-kind-icon">Store<wbr>Ctor</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.websqlerror.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Error</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/livedata.websqloptions.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Options</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Type aliases</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="livedata.html#collectionctor" class="tsd-kind-icon">Collection<wbr>Ctor</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="livedata.html#modelctor" class="tsd-kind-icon">Model<wbr>Ctor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -122,11 +129,44 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="collectionctor" class="tsd-anchor"></a>
+					<h3>Collection<wbr>Ctor</h3>
+					<div class="tsd-signature tsd-kind-icon">Collection<wbr>Ctor<span class="tsd-signature-symbol">:</span> <a href="../interfaces/livedata.collectionctort.html" class="tsd-signature-type">CollectionCtorT</a><span class="tsd-signature-symbol">&lt;</span><a href="../classes/livedata.collection.html" class="tsd-signature-type">Collection</a><span class="tsd-signature-symbol">, </span><a href="../classes/livedata.model.html" class="tsd-signature-type">Model</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in livedata/Collection.ts:69</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>constructor function of Collection.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="modelctor" class="tsd-anchor"></a>
+					<h3>Model<wbr>Ctor</h3>
+					<div class="tsd-signature tsd-kind-icon">Model<wbr>Ctor<span class="tsd-signature-symbol">:</span> <a href="../interfaces/livedata.modelctort.html" class="tsd-signature-type">ModelCtorT</a><span class="tsd-signature-symbol">&lt;</span><a href="../classes/livedata.model.html" class="tsd-signature-type">Model</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in livedata/Model.ts:75</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>constructor function of Model.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Variables</h2>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="backbone" class="tsd-anchor"></a>
 					<h3>Backbone</h3>
-					<div class="tsd-signature tsd-kind-icon">Backbone<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<div class="tsd-signature tsd-kind-icon">Backbone<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;global[&#x27;Backbone&#x27;] || // native implementationtypeof require &#x3D;&#x3D;&#x3D; &#x27;function&#x27; &amp;&amp;            // or when require is available(global[&#x27;Backbone&#x27;] &#x3D; require(&#x27;backbone&#x27;))</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in livedata/rest.ts:41</li>
@@ -147,7 +187,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="bareboneoptions" class="tsd-anchor"></a>
 					<h3>barebone<wbr>Options</h3>
-					<div class="tsd-signature tsd-kind-icon">barebone<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+					<div class="tsd-signature tsd-kind-icon">barebone<wbr>Options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;Object.freeze({// indicates not to rely on Collection contents to aware code, not used by backbone.jsbarebone: true,// prevents any mutation of the Collection contentsadd: false,remove: false,merge: false,// does not resort once the response data arrivessort: false,// omits events from being firedsilent: true})</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in livedata/rest.ts:52</li>
@@ -170,10 +210,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="io" class="tsd-anchor"></a>
 					<h3>io</h3>
-					<div class="tsd-signature tsd-kind-icon">io<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">SocketIOClientStatic</span></div>
+					<div class="tsd-signature tsd-kind-icon">io<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">SocketIOClientStatic</span><span class="tsd-signature-symbol"> =&nbsp;global[&#x27;io&#x27;] || // native implementationtypeof require &#x3D;&#x3D;&#x3D; &#x27;function&#x27; &amp;&amp;                      // or when require is available((function requireSocketIo() {                        // required version// here we are in an immediately invoked function requiring socket.io-client, if availabletry {return (global[&#x27;io&#x27;] &#x3D; require(&#x27;socket.io-client&#x27;));} catch (error) {diag.debug.warn(&#x27;optional socket.io-client module is not available: &#x27; + error &amp;&amp; error.message);}})())</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in livedata/SyncStore.ts:50</li>
+							<li>Defined in livedata/SyncStore.ts:52</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -258,7 +298,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Collection.ts:53</li>
+									<li>Defined in livedata/Collection.ts:77</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -290,7 +330,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in livedata/Model.ts:51</li>
+									<li>Defined in livedata/Model.ts:83</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -348,7 +388,7 @@
 					<a name="opendatabase" class="tsd-anchor"></a>
 					<h3>open<wbr>Database</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">open<wbr>Database<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.websqloptions.html" class="tsd-signature-type">WebSqlOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Database</span></li>
+						<li class="tsd-signature tsd-kind-icon">open<wbr>Database<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/livedata.websqloptions.html" class="tsd-signature-type">WebSqlOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">unknown</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -373,7 +413,7 @@
 									<h5>options: <a href="../interfaces/livedata.websqloptions.html" class="tsd-signature-type">WebSqlOptions</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Database</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">unknown</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -469,14 +509,20 @@
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="../classes/livedata.websqlstore.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Store</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../interfaces/livedata.collectionctort.html" class="tsd-kind-icon">Collection<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/livedata.collectionctor.html" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+						<a href="../interfaces/livedata.collectionprops.html" class="tsd-kind-icon">Collection<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.livedatamessage.html" class="tsd-kind-icon">Live<wbr>Data<wbr>Message</a>
 					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../interfaces/livedata.modelctort.html" class="tsd-kind-icon">Model<wbr>CtorT</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/livedata.modelctor.html" class="tsd-kind-icon">Model<wbr>Ctor</a>
+						<a href="../interfaces/livedata.modelprops.html" class="tsd-kind-icon">Model<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.statement.html" class="tsd-kind-icon">Statement</a>
@@ -489,6 +535,12 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/livedata.websqloptions.html" class="tsd-kind-icon">Web<wbr>Sql<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="livedata.html#collectionctor" class="tsd-kind-icon">Collection<wbr>Ctor</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="livedata.html#modelctor" class="tsd-kind-icon">Model<wbr>Ctor</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="livedata.html#backbone" class="tsd-kind-icon">Backbone</a>

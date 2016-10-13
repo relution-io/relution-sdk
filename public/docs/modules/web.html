@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -124,7 +122,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Request</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:59</li>
+							<li>Defined in web/http.ts:61</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -139,7 +137,7 @@
 					<div class="tsd-signature tsd-kind-icon">Http<wbr>Response<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IncomingMessage</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in web/http.ts:63</li>
+							<li>Defined in web/http.ts:65</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -161,7 +159,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:183</li>
+									<li>Defined in web/http.ts:185</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -186,21 +184,21 @@
 									HttpError rejection is to being used. For deeper inspection provide an
 								[[options.responseCallback]].</p>
 								<pre><code class="lang-javascript">Relution.init({
-   serverUrl: <span class="hljs-string">'http://localhost:8080'</span>,
-   organization: <span class="hljs-string">'myOrga'</span>
+   <span class="hljs-attr">serverUrl</span>: <span class="hljs-string">'http://localhost:8080'</span>,
+   <span class="hljs-attr">organization</span>: <span class="hljs-string">'myOrga'</span>
 });
 
-<span class="hljs-keyword">let</span> httpOptions: HttpOptions = {method: <span class="hljs-string">'GET'</span>, url: <span class="hljs-string">'api/v1/posts'</span>};
+<span class="hljs-keyword">let</span> httpOptions: HttpOptions = {<span class="hljs-attr">method</span>: <span class="hljs-string">'GET'</span>, <span class="hljs-attr">url</span>: <span class="hljs-string">'api/v1/posts'</span>};
 
 <span class="hljs-comment">//usage as Promise</span>
 Relution.web.ajax(httpOptions)
- .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp);)
- .catch((e:Relution.web.HttpError) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
- .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>));
+ .then(<span class="hljs-function">(<span class="hljs-params">resp</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp);)
+ .catch(<span class="hljs-function">(<span class="hljs-params">e:Relution.web.HttpError</span>) =&gt;</span> <span class="hljs-built_in">console</span>.error(e.message, e))
+ .finally(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>));
 
 <span class="hljs-comment">// as Observable</span>
 Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
- (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp),
+ <span class="hljs-function">(<span class="hljs-params">resp: any</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'posts'</span>, resp),
  (e:Relution.web.HttpError) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
  () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'loading complete!'</span>)
 )
@@ -543,7 +541,7 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:460</li>
+									<li>Defined in web/http.ts:474</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -560,25 +558,25 @@ Observable.fromPromise(Relution.web.ajax(httpOptions)).subscribe(
 <span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> Relution <span class="hljs-keyword">from</span> <span class="hljs-string">'relution-sdk'</span>;
 <span class="hljs-comment">//config</span>
 Relution.init({
-   serverUrl: <span class="hljs-string">'http://localhost:8080'</span>
+   <span class="hljs-attr">serverUrl</span>: <span class="hljs-string">'http://localhost:8080'</span>
 });
 
 <span class="hljs-keyword">let</span> credentials = {
-   userName: <span class="hljs-string">'myusername'</span>,
-   password: <span class="hljs-string">'mypassword'</span>
+   <span class="hljs-attr">userName</span>: <span class="hljs-string">'myusername'</span>,
+   <span class="hljs-attr">password</span>: <span class="hljs-string">'mypassword'</span>
 };
 
 <span class="hljs-comment">//usage</span>
 
 <span class="hljs-comment">// Promise</span>
 Relution.web.login(credentials)
- .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
- .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
- .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'complete'</span>));
+ .then(<span class="hljs-function">(<span class="hljs-params">resp</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
+ .catch(<span class="hljs-function">(<span class="hljs-params">e:<span class="hljs-built_in">Error</span></span>) =&gt;</span> <span class="hljs-built_in">console</span>.error(e.message, e))
+ .finally(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'complete'</span>));
 
 <span class="hljs-comment">//Observable</span>
 Observable.fromPromise(Relution.web.login(credentials)).subscribe(
- (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp),
+ <span class="hljs-function">(<span class="hljs-params">resp: any</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp),
  (e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
  () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'complete'</span>)
 )
@@ -616,7 +614,7 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in web/http.ts:623</li>
+									<li>Defined in web/http.ts:641</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -630,13 +628,13 @@ Observable.fromPromise(Relution.web.login(credentials)).subscribe(
 									<dt>example</dt>
 									<dd><pre><code class="lang-javascript">
 Relution.web.logout()
- .then((resp) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
- .catch((e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e))
- .finally(() =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'bye bye'</span>));
+ .then(<span class="hljs-function">(<span class="hljs-params">resp</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp);)
+ .catch(<span class="hljs-function">(<span class="hljs-params">e:<span class="hljs-built_in">Error</span></span>) =&gt;</span> <span class="hljs-built_in">console</span>.error(e.message, e))
+ .finally(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'bye bye'</span>));
 
 <span class="hljs-comment">//Observable</span>
 Observable.fromPromise(Relution.web.logout()).subscribe(
- (resp: any) =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp),
+ <span class="hljs-function">(<span class="hljs-params">resp: any</span>) =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'resp'</span>, resp),
  (e:<span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">console</span>.error(e.message, e);,
  () =&gt; <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'bye bye'</span>)
 )

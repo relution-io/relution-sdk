@@ -39,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -87,7 +85,15 @@
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/security.loginobject.html" class="tsd-kind-icon">Login<wbr>Object</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/security.organization.html" class="tsd-kind-icon">Organization</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/security.role.html" class="tsd-kind-icon">Role</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/security.roledto.html" class="tsd-kind-icon">Role<wbr>Dto</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/security.user.html" class="tsd-kind-icon">User</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Type aliases</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="security.html#grouptype" class="tsd-kind-icon">Group<wbr>Type</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="security.html#roletype" class="tsd-kind-icon">Role<wbr>Type</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -119,11 +125,44 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="grouptype" class="tsd-anchor"></a>
+					<h3>Group<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">Group<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"SYSTEM_PERMISSION"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"GROUP"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"SYSTEM_GROUP"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in security/roles.ts:36</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A Group can have one of these types.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="roletype" class="tsd-anchor"></a>
+					<h3>Role<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">Role<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"GROUP"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"USER"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in security/roles.ts:30</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Role is either a User or a Group.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Variables</h2>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="anonymous_authorization" class="tsd-anchor"></a>
 					<h3>ANONYMOUS_<wbr>AUTHORIZATION</h3>
-					<div class="tsd-signature tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION<span class="tsd-signature-symbol">:</span> <a href="../interfaces/security.authorization.html" class="tsd-signature-type">Authorization</a></div>
+					<div class="tsd-signature tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION<span class="tsd-signature-symbol">:</span> <a href="../interfaces/security.authorization.html" class="tsd-signature-type">Authorization</a><span class="tsd-signature-symbol"> =&nbsp;freezeAuthorization({name: void 0,roles: [USER_ANYONE]})</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in security/auth.ts:102</li>
@@ -143,7 +182,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="role_admin" class="tsd-anchor"></a>
 					<h3>ROLE_<wbr>ADMIN</h3>
-					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>ADMIN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>ADMIN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;ADMIN&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in security/auth.ts:91</li>
@@ -159,7 +198,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="role_authenticated" class="tsd-anchor"></a>
 					<h3>ROLE_<wbr>AUTHENTICATED</h3>
-					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>AUTHENTICATED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<div class="tsd-signature tsd-kind-icon">ROLE_<wbr>AUTHENTICATED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;user.authenticated&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in security/auth.ts:86</li>
@@ -174,7 +213,7 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
 					<a name="user_anyone" class="tsd-anchor"></a>
 					<h3>USER_<wbr>ANYONE</h3>
-					<div class="tsd-signature tsd-kind-icon">USER_<wbr>ANYONE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<div class="tsd-signature tsd-kind-icon">USER_<wbr>ANYONE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;user.anyone&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
 							<li>Defined in security/auth.ts:96</li>
@@ -295,7 +334,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in security/roles.ts:55</li>
+									<li>Defined in security/roles.ts:110</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -332,7 +371,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in security/roles.ts:96</li>
+									<li>Defined in security/roles.ts:151</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -599,7 +638,16 @@
 						<a href="../interfaces/security.role.html" class="tsd-kind-icon">Role</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/security.roledto.html" class="tsd-kind-icon">Role<wbr>Dto</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/security.user.html" class="tsd-kind-icon">User</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="security.html#grouptype" class="tsd-kind-icon">Group<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="security.html#roletype" class="tsd-kind-icon">Role<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 						<a href="security.html#anonymous_authorization" class="tsd-kind-icon">ANONYMOUS_<wbr>AUTHORIZATION</a>
