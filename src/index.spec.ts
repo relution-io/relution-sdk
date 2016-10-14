@@ -37,6 +37,7 @@ export default [
   // web
   require('./web/http.spec'),
   require('./web/urls.spec'),
+  require('./web/online.spec'),
   require('./web/offline.spec'),
 
   // model

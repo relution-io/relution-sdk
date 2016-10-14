@@ -27,6 +27,7 @@ import * as Q from 'q';
 import * as assert from 'assert';
 import * as web from './index';
 import * as offline from './offline';
+import * as urls from './urls';
 import {debug} from '../core/diag';
 
 import * as security from '../security';
@@ -41,7 +42,7 @@ export class TestServer {
   }
 
   public get serverUrl(): string {
-    return this.resetProperty('serverUrl', offline.localStorage().getItem('test.serverUrl') || 'http://localhost:8080');
+    return this.resetProperty('serverUrl', urls.resolveServer(offline.localStorage().getItem('test.serverUrl') || 'http://localhost:8080'));
   }
 
   public get credentials(): security.LoginObject {
