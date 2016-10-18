@@ -33,8 +33,11 @@ module.exports.BuildBrowserFile = class BuildBrowserFile {
         .on('end', () => {
           console.log(`${process.cwd()}/browser.js written`);
           console.log(path.join(process.cwd(), 'browser.js.map') + ' written');
-          observer.next('browserify are done');
-          observer.complete();
+          //workaround exorcist
+          setTimeout(() => {
+            observer.next('browserify are done');
+            observer.complete();
+          }, 3000);
         })
         .pipe(exorcist(path.join(process.cwd(), 'browser.js.map')))
         .pipe(fs.createWriteStream(`${process.cwd()}/browser.js`));
