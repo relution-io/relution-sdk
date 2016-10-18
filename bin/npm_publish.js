@@ -34,7 +34,7 @@ stats.isAllCommited()
     return taggingClass.addTag(patchVersion, defVer);
   })
   .mergeMap(() => {
-    console.log('start npm publish', version);
+    console.log('start npm publish', patchVersion);
     const npmPublish = spawn('npm', ['publish']);
     return Observable.fromEvent(npmPublish, 'exit');
   })
