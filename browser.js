@@ -94779,7 +94779,7 @@ function extend() {
 },{}],345:[function(require,module,exports){
 module.exports={
   "name": "relution-sdk",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
     "relution",
