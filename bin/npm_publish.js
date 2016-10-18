@@ -2,6 +2,9 @@
 'use strict';
 const Observable = require('@reactivex/rxjs').Observable;
 const {Bump, TagRepo, RepoStats} = require('./bump_commit');
+const {BuildBrowserFile} = require('./browserify_build');
+
+const browserify = new BuildBrowserFile();
 const bumpClass = new Bump();
 const taggingClass = new TagRepo();
 const spawn = require('child_process').spawn;
@@ -11,14 +14,18 @@ const spawn = require('child_process').spawn;
 let defVer = bumpClass.defaultType;
 let patchVersion = null;
 const stats = new RepoStats();
-  stats.isAllCommited()
+
+stats.isAllCommited()
   .filter((stats) => {
     if (stats.length) {
       console.log(`You have uncommitted changes plz commit before ${stats.toString()}`);
     }
     return stats.length <= 0;
   })
-  .mergeMap(() => {
+  .exhaustMap(() => {
+    return browserify.build();
+  })
+  .exhaustMap(() => {
     return bumpClass.bump(defVer);
   })
   .mergeMap((version) => {

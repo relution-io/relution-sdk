@@ -89,6 +89,7 @@ module.exports.TagRepo = class TagRepo {
         .commit(`${type} ${self.message}${tag}`)
         .addTag(`${tag}`)
         .pushTags(['-u', 'origin', 'master'], function () {
+          console.log(`adding tag`);
           observer.next(`${tag} pushed`);
         })
         .push(['-u', 'origin', 'master'], function () {
