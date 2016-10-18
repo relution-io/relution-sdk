@@ -29,17 +29,21 @@ stats.isAllCommited()
     return bumpClass.bump(defVer);
   })
   .mergeMap((version) => {
-    console.log('verison', version);
+    console.log('version', version);
     patchVersion = version;
     return taggingClass.addTag(patchVersion, defVer);
   })
   .mergeMap(() => {
+    console.log('start npm publish', version);
     const npmPublish = spawn('npm', ['publish']);
     return Observable.fromEvent(npmPublish, 'exit');
   })
   .subscribe(
     (log) => {
-      console.log(log);
+      if (log === 1) {
+        console.log('almost done');
+      }
+      // console.log(log);
     },
     (e) => {
       console.error(e)
