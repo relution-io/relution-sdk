@@ -31,8 +31,9 @@ module.exports.BuildBrowserFile = class BuildBrowserFile {
       bui.bundle()
         .on('error', err => observer.error(err))
         .on('end', () => {
-          observer.next(`${process.cwd()}/browser.js written`);
-          observer.next(path.join(process.cwd(), 'browser.js.map') + ' written');
+          console.log(`${process.cwd()}/browser.js written`);
+          console.log(path.join(process.cwd(), 'browser.js.map') + ' written');
+          observer.next('browserify are done');
           observer.complete();
         })
         .pipe(exorcist(path.join(process.cwd(), 'browser.js.map')))

@@ -14,28 +14,29 @@ const spawn = require('child_process').spawn;
 let defVer = bumpClass.defaultType;
 let patchVersion = null;
 const stats = new RepoStats();
-  stats.isAllCommited()
+
+stats.isAllCommited()
   .filter((stats) => {
     if (stats.length) {
       console.log(`You have uncommitted changes plz commit before ${stats.toString()}`);
     }
     return stats.length <= 0;
   })
-  .mergeMap(() => {
+  .exhaustMap(() => {
     return browserify.build();
   })
-  .mergeMap(() => {
+  .exhaustMap(() => {
     return bumpClass.bump(defVer);
   })
-  // .mergeMap((version) => {
-  //   console.log('verison', version);
-  //   patchVersion = version;
-  //   return taggingClass.addTag(patchVersion, defVer);
-  // })
-  // .mergeMap(() => {
-  //   const npmPublish = spawn('npm', ['publish']);
-  //   return Observable.fromEvent(npmPublish, 'exit');
-  // })
+  .mergeMap((version) => {
+    console.log('verison', version);
+    patchVersion = version;
+    return taggingClass.addTag(patchVersion, defVer);
+  })
+  .mergeMap(() => {
+    const npmPublish = spawn('npm', ['publish']);
+    return Observable.fromEvent(npmPublish, 'exit');
+  })
   .subscribe(
     (log) => {
       console.log(log);
