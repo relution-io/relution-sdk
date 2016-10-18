@@ -28,12 +28,12 @@ stats.isAllCommited()
   .exhaustMap(() => {
     return bumpClass.bump(defVer);
   })
-  .mergeMap((version) => {
+  .exhaustMap((version) => {
     console.log('version', version);
     patchVersion = version;
     return taggingClass.addTag(patchVersion, defVer);
   })
-  .mergeMap(() => {
+  .exhaustMap(() => {
     console.log('start npm publish', patchVersion);
     const npmPublish = spawn('npm', ['publish']);
     return Observable.fromEvent(npmPublish, 'exit');
