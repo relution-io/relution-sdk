@@ -30,7 +30,6 @@ import * as http from 'http';
 
 import * as diag from '../core/diag';
 import * as init from '../core/init';
-import * as domain from '../core/domain';
 import * as auth from '../security/auth';
 import * as roles from '../security/roles';
 import * as server from '../security/server';
@@ -290,46 +289,54 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
 
           if (!response) {
             // network connectivity problem
+            serverObj.serverInfos = null;
             diag.debug.assertIsError(error);
             if (promiseResponse) {
               rejectResponse(error); // will also rejectResult(error)
             } else {
               rejectResult(error); // promiseResponse not constructed yet
             }
-          } else if (response.statusCode === 503 || response.statusCode === 500 &&
-            error.className === 'java.util.concurrent.TimeoutException') {
-            // 503 (service unavailable) indicates the server is temporarily overloaded, and unable
-            // handling the request. This happens when async delegation timed out on the Java side,
-            // usually after about 2 minutes. In this case retry the request until we are done...
-            diag.debug.info('server overloaded, retrying request.');
-            // here promiseResponse must have been resolved already,
-            // we chain anyways because of error propagation
-            promiseResponse.thenResolve(ajax<T>(options)).done(resolveResult, rejectResult);
-            return; // early exit as result is handled by done call above
           } else {
-            // logon session processing
-            let sessionUserUuid = resp.headers['x-gofer-user'];
-            if (sessionUserUuid) {
-              serverObj.sessionUserUuid = sessionUserUuid;
-            } else if (response.statusCode === 401) {
-              // apparently our session is lost!
-              serverObj.sessionUserUuid = null;
-              diag.debug.assert(() => !!error);
-              diag.debug.warn('server session is lost!', error);
-              const credentials = serverObj.credentials;
-              if (credentials) {
-                // recover by attempting login,
-                // here promiseResponse must have been resolved already,
-                // we chain anyways because of error propagation
-                serverObj.credentials = null;
-                promiseResponse.thenResolve(login(credentials, {
-                  serverUrl: serverUrl
-                }).then(() => {
-                  diag.debug.assert(() => !!serverObj.sessionUserUuid);
-                  diag.debug.info('server session recovered.');
-                  return ajax<T>(options);
-                })).done(resolveResult, rejectResult);
-                return; // early exit as result is handled by done call above
+            // server information
+            serverObj.serverInfos = {
+              version: resp.headers['x-relution-version'],
+              description: resp.headers['x-server']
+            };
+            if (response.statusCode === 503 ||
+                response.statusCode === 500 && error.className === 'java.util.concurrent.TimeoutException') {
+              // 503 (service unavailable) indicates the server is temporarily overloaded, and unable
+              // handling the request. This happens when async delegation timed out on the Java side,
+              // usually after about 2 minutes. In this case retry the request until we are done...
+              diag.debug.info('server overloaded, retrying request.');
+              // here promiseResponse must have been resolved already,
+              // we chain anyways because of error propagation
+              promiseResponse.thenResolve(ajax<T>(options)).done(resolveResult, rejectResult);
+              return; // early exit as result is handled by done call above
+            } else {
+              // logon session processing
+              let sessionUserUuid = resp.headers['x-gofer-user'];
+              if (sessionUserUuid) {
+                serverObj.sessionUserUuid = sessionUserUuid;
+              } else if (response.statusCode === 401) {
+                // apparently our session is lost!
+                serverObj.sessionUserUuid = null;
+                diag.debug.assert(() => !!error);
+                diag.debug.warn('server session is lost!', error);
+                const credentials = serverObj.credentials;
+                if (credentials) {
+                  // recover by attempting login,
+                  // here promiseResponse must have been resolved already,
+                  // we chain anyways because of error propagation
+                  serverObj.credentials = null;
+                  promiseResponse.thenResolve(login(credentials, {
+                    serverUrl: serverUrl
+                  }).then(() => {
+                    diag.debug.assert(() => !!serverObj.sessionUserUuid);
+                    diag.debug.info('server session recovered.');
+                    return ajax<T>(options);
+                  })).done(resolveResult, rejectResult);
+                  return; // early exit as result is handled by done call above
+                }
               }
             }
           }
@@ -588,7 +595,7 @@ export function login(credentials: auth.Credentials,
           (offlineError) => {
             diag.debug.warn('offline login store failed', offlineError);
             return response;
-  });
+          });
       }
       return response;
     }, (error) => {

@@ -31,6 +31,8 @@ import * as diag from '../core/diag';
 import * as auth from './auth';
 import * as roles from './roles';
 
+import * as online from '../web/online';
+
 /**
  * per-server state management.
  *
@@ -83,12 +85,14 @@ export class Server {
     /**
      * copy of credentials required for reestablishing the session when it timed out, for example.
      */
-    credentials: auth.Credentials
+    credentials: auth.Credentials,
+    serverInfos: online.ServerInformation
   } = {
     authorization: auth.ANONYMOUS_AUTHORIZATION,
     organization: null,
     user: null,
-    credentials: null
+    credentials: null,
+    serverInfos: null
   };
 
   /**
@@ -156,6 +160,17 @@ export class Server {
       this.state.credentials = auth.freezeCredentials(auth.cloneCredentials(credentials));
     } else {
       this.state.credentials = null;
+    }
+  }
+
+  get serverInfos(): online.ServerInformation {
+    return this.state.serverInfos;
+  }
+  set serverInfos(serverInfos: online.ServerInformation) {
+    if (serverInfos) {
+      this.state.serverInfos = online.freezeServerInformation(serverInfos);
+    } else {
+      this.state.serverInfos = null;
     }
   }
 
