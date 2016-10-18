@@ -16,12 +16,12 @@ let patchVersion = null;
 const stats = new RepoStats();
 
 stats.isAllCommited()
-  .filter((stats) => {
-    if (stats.length) {
-      console.log(`You have uncommitted changes plz commit before ${stats.toString()}`);
-    }
-    return stats.length <= 0;
-  })
+  // .filter((stats) => {
+  //   if (stats.length) {
+  //     console.log(`You have uncommitted changes plz commit before ${stats.toString()}`);
+  //   }
+  //   return stats.length <= 0;
+  // })
   .exhaustMap(() => {
     return browserify.build();
   })
@@ -43,6 +43,7 @@ stats.isAllCommited()
       if (log === 1) {
         console.log('almost done');
       }
+      console.log('the new Version is now available at npm.');
       // console.log(log);
     },
     (e) => {
