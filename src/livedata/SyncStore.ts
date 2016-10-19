@@ -231,7 +231,7 @@ export class SyncStore extends Store {
 
   /**
    * @inheritdoc
-   * 
+   *
    * @internal API only to be called by Model constructor.
    */
   initModel(model: Model): void {
@@ -240,7 +240,7 @@ export class SyncStore extends Store {
 
   /**
    * @inheritdoc
-   * 
+   *
    * @internal API only to be called by Collection constructor.
    */
   initCollection(collection: Collection): void {
@@ -294,6 +294,7 @@ export class SyncStore extends Store {
 
       // resource
       let connectVo: any = {
+        'force new connection': true
       };
       let resource = endpoint.socketPath; // remove leading /
       connectVo.resource = (resource && resource.indexOf('/') === 0) ? resource.substr(1) : resource;
