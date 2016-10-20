@@ -198,12 +198,13 @@ export class SyncStore extends Store {
   }
 
   protected initEndpoint(modelOrCollection: Model | Collection, modelType: ModelCtor): SyncEndpoint {
-    var urlRoot = modelOrCollection.getUrlRoot();
-    var entity = modelOrCollection.entity;
+    let urlRoot = modelOrCollection.getUrlRoot();
+    let entity = modelOrCollection.entity;
     if (urlRoot && entity) {
       // get or create endpoint for this url
       this.initServer(urlRoot);
-      var endpoint = this.endpoints[entity];
+      urlRoot = this.resolveUrl(urlRoot);
+      let endpoint = this.endpoints[entity];
       if (!endpoint) {
         diag.debug.info('Relution.livedata.SyncStore.initEndpoint: ' + entity);
         endpoint = new SyncEndpoint({

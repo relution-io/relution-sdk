@@ -24,9 +24,9 @@
 
 import * as url from 'url';
 
-import {Store} from './Store';
-import {Model, ModelCtor} from './Model';
-import {Collection} from './Collection';
+import { Store } from './Store';
+import { Model, ModelCtor } from './Model';
+import { Collection } from './Collection';
 import * as Q from 'q';
 /**
  * very simple hash coding implementation.
@@ -89,22 +89,21 @@ export class SyncEndpoint {
     this.urlRoot = options.urlRoot;
     this.socketPath = options.socketPath;
     this.userUuid = options.userUuid;
-
-    var href = url.parse(options.urlRoot);
+    // notice socket.io needs port even for standard protocols
+    const href = url.parse(options.urlRoot);
     this.host = href.protocol + '//' + href.hostname;
-    if (!href.port) {
-      // socket.io needs port event for standard protocols
-      if (href.protocol === 'https:') {
-        this.host += ':443';
-      } else if (href.protocol === 'http:') {
-        this.host += ':80';
-      }
+    if (href.port) {
+      this.host += ':' + href.port;
+    } else if (href.protocol === 'https:') {
+      this.host += ':443';
+    } else if (href.protocol === 'http:') {
+      this.host += ':80';
     }
     this.path = href.pathname;
 
-    var user = options.userUuid ? options.userUuid + '/' : '';
-    var name = options.entity;
-    var hash = hashCode(this.host);
+    const user = options.userUuid ? options.userUuid + '/' : '';
+    const name = options.entity;
+    const hash = hashCode(this.host);
     this.channel = user + name + '/' + hash;
   }
 
