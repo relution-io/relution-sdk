@@ -11,7 +11,8 @@ module.exports.BuildBrowserFile = class BuildBrowserFile {
   build() {
     return Observable.create(observer => {
       const buiOptions = {
-        debug: true
+        debug: true,
+        standalone: 'Relution'
       };
       const excludes = [
         'jquery',
@@ -23,6 +24,7 @@ module.exports.BuildBrowserFile = class BuildBrowserFile {
       const bui = browserify(buiOptions);
 
       bui.add(addFile);
+
       // bui.require(require.resolve(addFile), { entry: true });
       excludes.map((file) => {
         bui.exclude(file);
