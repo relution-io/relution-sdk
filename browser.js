@@ -2165,16 +2165,17 @@ var SyncEndpoint = (function () {
         this.urlRoot = options.urlRoot;
         this.socketPath = options.socketPath;
         this.userUuid = options.userUuid;
+        // notice socket.io needs port even for standard protocols
         var href = url.parse(options.urlRoot);
         this.host = href.protocol + '//' + href.hostname;
-        if (!href.port) {
-            // socket.io needs port event for standard protocols
-            if (href.protocol === 'https:') {
-                this.host += ':443';
-            }
-            else if (href.protocol === 'http:') {
-                this.host += ':80';
-            }
+        if (href.port) {
+            this.host += ':' + href.port;
+        }
+        else if (href.protocol === 'https:') {
+            this.host += ':443';
+        }
+        else if (href.protocol === 'http:') {
+            this.host += ':80';
         }
         this.path = href.pathname;
         var user = options.userUuid ? options.userUuid + '/' : '';
@@ -2366,29 +2367,30 @@ var SyncStore = (function (_super) {
         if (urlRoot && entity) {
             // get or create endpoint for this url
             this.initServer(urlRoot);
-            var endpoint = this.endpoints[entity];
-            if (!endpoint) {
+            urlRoot = this.resolveUrl(urlRoot);
+            var endpoint_1 = this.endpoints[entity];
+            if (!endpoint_1) {
                 diag.debug.info('Relution.livedata.SyncStore.initEndpoint: ' + entity);
-                endpoint = new SyncEndpoint_1.SyncEndpoint({
+                endpoint_1 = new SyncEndpoint_1.SyncEndpoint({
                     entity: entity,
                     modelType: modelType,
                     urlRoot: urlRoot,
                     socketPath: this.socketPath,
                     userUuid: this.userUuid
                 });
-                this.endpoints[entity] = endpoint;
-                endpoint.localStore = this.createLocalStore(endpoint);
-                endpoint.priority = this.orderOfflineChanges && (_.lastIndexOf(this.orderOfflineChanges, endpoint.entity) + 1);
+                this.endpoints[entity] = endpoint_1;
+                endpoint_1.localStore = this.createLocalStore(endpoint_1);
+                endpoint_1.priority = this.orderOfflineChanges && (_.lastIndexOf(this.orderOfflineChanges, endpoint_1.entity) + 1);
                 this.createMsgCollection();
-                endpoint.socket = this.createSocket(endpoint, entity);
-                endpoint.info = this.fetchServerInfo(endpoint);
+                endpoint_1.socket = this.createSocket(endpoint_1, entity);
+                endpoint_1.info = this.fetchServerInfo(endpoint_1);
             }
             else {
                 // configuration can not change, must recreate store instead...
-                diag.debug.assert(function () { return endpoint.urlRoot === urlRoot; }, 'can not change urlRoot, must recreate store instead!');
-                diag.debug.assert(function () { return endpoint.userUuid === _this.userUuid; }, 'can not change user identity, must recreate store instead!');
+                diag.debug.assert(function () { return endpoint_1.urlRoot === urlRoot; }, 'can not change urlRoot, must recreate store instead!');
+                diag.debug.assert(function () { return endpoint_1.userUuid === _this.userUuid; }, 'can not change user identity, must recreate store instead!');
             }
-            return endpoint;
+            return endpoint_1;
         }
     };
     /**
@@ -94866,7 +94868,7 @@ function extend() {
 },{}],346:[function(require,module,exports){
 module.exports={
   "name": "relution-sdk",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
     "relution",
