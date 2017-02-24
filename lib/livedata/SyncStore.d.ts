@@ -91,9 +91,9 @@ export declare class SyncStore extends Store {
      */
     createMsgCollection(): Collection;
     createSocket(endpoint: SyncEndpoint, name: string): SocketIOClient.Socket;
-    _bindChannel(endpoint: SyncEndpoint, name?: string): void;
-    getLastMessageTime(channel: string): any;
-    setLastMessageTime(channel: string, time: any): void;
+    _bindChannel(endpoint: SyncEndpoint, name?: string): Q.Promise<SyncEndpoint>;
+    getLastMessageTime(channel: string): Q.Promise<any>;
+    setLastMessageTime(channel: string, time: any): Q.Promise<any>;
     onConnect(endpoint: SyncEndpoint): Q.Promise<void>;
     onDisconnect(endpoint: SyncEndpoint): Q.Promise<void>;
     _fixMessage(endpoint: SyncEndpoint, msg: LiveDataMessage): LiveDataMessage;
@@ -153,7 +153,7 @@ export declare class SyncStore extends Store {
     private _sendMessages();
     private storeMessage(endpoint, qMsg);
     private removeMessage(endpoint, msg, qMessage);
-    clear(collection: Collection): void;
+    clear(collection: Collection): Q.Promise<any>;
     /**
      * close the socket explicit
      */
