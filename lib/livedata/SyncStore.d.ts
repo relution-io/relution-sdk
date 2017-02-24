@@ -58,6 +58,8 @@ export declare class SyncStore extends Store {
         [entity: string]: SyncEndpoint;
     };
     private lastMesgTime;
+    private timestamps;
+    private timestampsPromise;
     /**
      * when set, indicates which entity caused a disconnection.
      *
@@ -90,10 +92,15 @@ export declare class SyncStore extends Store {
      * @returns {*}
      */
     createMsgCollection(): Collection;
+    createTimestampCollection(): Collection;
     createSocket(endpoint: SyncEndpoint, name: string): SocketIOClient.Socket;
     _bindChannel(endpoint: SyncEndpoint, name?: string): Q.Promise<SyncEndpoint>;
-    getLastMessageTime(channel: string): Q.Promise<any>;
-    setLastMessageTime(channel: string, time: any): Q.Promise<any>;
+    private keyLastMessage(channel);
+    private getLastMessageTime(channel);
+    private setLastMessageTime(channel, time);
+    private getTimestampModel(channel);
+    getTimestamp(channel: string): Q.Promise<any>;
+    setTimestamp(channel: string, time: any): Q.Promise<any>;
     onConnect(endpoint: SyncEndpoint): Q.Promise<void>;
     onDisconnect(endpoint: SyncEndpoint): Q.Promise<void>;
     _fixMessage(endpoint: SyncEndpoint, msg: LiveDataMessage): LiveDataMessage;

@@ -25,6 +25,7 @@
 
 export * from './Collection';
 export * from './LiveDataMessage';
+export * from './LiveDataTimestamp';
 export * from './Model';
 export * from './Store';
 export * from './SyncContext';
