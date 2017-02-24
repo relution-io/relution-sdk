@@ -1351,6 +1351,11 @@ export class SyncStore extends Store {
       this.messages = null;
     }
 
+    if (this.timestamps && this.timestamps.store) {
+      this.timestamps.store.close();
+      this.timestamps = null;
+    }
+
     var keys = Object.keys(this.endpoints);
     for (var i = 0, l = keys.length; i < l; i++) {
       this.endpoints[keys[i]].close();
