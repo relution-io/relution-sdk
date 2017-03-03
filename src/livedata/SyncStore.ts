@@ -38,6 +38,7 @@ import {WebSqlStore} from './WebSqlStore';
 import {SyncContext} from './SyncContext';
 import {SyncEndpoint} from './SyncEndpoint';
 import {LiveDataMessage, LiveDataMessageModel} from './LiveDataMessage';
+import {LiveDataTimestamp, LiveDataTimestampModel} from './LiveDataTimestamp';
 import {Model, ModelCtor, isModel} from './Model';
 import {Collection, isCollection} from './Collection';
 
@@ -116,7 +117,9 @@ export class SyncStore extends Store {
     [entity: string]: SyncEndpoint;
   } = {};
 
-  private lastMesgTime: any;
+  private lastMesgTime: any; // deprecated: kept for migration and as a failsafe
+  private timestamps: Collection;
+  private timestampsPromise: Q.Promise<Collection>;
 
   /**
    * when set, indicates which entity caused a disconnection.
@@ -219,6 +222,7 @@ export class SyncStore extends Store {
         endpoint.localStore = this.createLocalStore(endpoint);
         endpoint.priority = this.orderOfflineChanges && (_.lastIndexOf(this.orderOfflineChanges, endpoint.entity) + 1);
         this.createMsgCollection();
+        this.createTimestampCollection();
         endpoint.socket = this.createSocket(endpoint, entity);
         endpoint.info = this.fetchServerInfo(endpoint);
       } else {
@@ -289,6 +293,16 @@ export class SyncStore extends Store {
     return this.messages;
   }
 
+  createTimestampCollection(): Collection {
+    if (this.useLocalStore && !this.timestamps) {
+      this.timestamps = new Collection(undefined, {
+        model: LiveDataTimestampModel,
+        store: new this.localStore(this.localStoreOptions)
+      });
+    }
+    return this.timestamps;
+  }
+
   createSocket(endpoint: SyncEndpoint, name: string) {
     if (this.useSocketNotify && endpoint && endpoint.socketPath) {
       diag.debug.trace('Relution.livedata.SyncStore.createSocket: ' + name);
@@ -306,8 +320,10 @@ export class SyncStore extends Store {
       // socket
       endpoint.socket = io.connect(endpoint.host, connectVo);
       endpoint.socket.on('connect', () => {
-        this._bindChannel(endpoint, name);
-        return this.onConnect(endpoint).done();
+        (this._bindChannel(endpoint, name) || Q.resolve(endpoint)).then((ep) => {
+          diag.debug.assert(() => ep === endpoint);
+          return this.onConnect(ep);
+        }).done();
       });
       endpoint.socket.on('disconnect', () => {
         diag.debug.info('socket.io: disconnect');
@@ -326,33 +342,100 @@ export class SyncStore extends Store {
 
       var channel = endpoint.channel;
       var socket = endpoint.socket;
-      var time = this.getLastMessageTime(channel);
       name = name || endpoint.entity;
-      socket.emit('bind', {
-        entity: name,
-        channel: channel,
-        time: time
+      return this.getTimestamp(channel).then((time) => {
+        socket.emit('bind', {
+          entity: name,
+          channel: channel,
+          time: time
+        });
+        return Q.resolve(endpoint);
       });
     }
   }
 
-  getLastMessageTime(channel: string): any {
+  private keyLastMessage(channel: string): string {
+    return '__' + channel + 'lastMesgTime';
+  }
+
+  // deprecated: use getTimestamp instead!
+  private getLastMessageTime(channel: string): any {
     if (!this.lastMesgTime) {
       this.lastMesgTime = {};
     } else if (this.lastMesgTime[channel] !== undefined) {
       return this.lastMesgTime[channel];
     }
     // the | 0 below turns strings into numbers
-    var time = localStorage().getItem('__' + channel + 'lastMesgTime') || 0;
+    var time = localStorage().getItem(this.keyLastMessage(channel)) || 0;
     this.lastMesgTime[channel] = time;
     return time;
   }
 
-  setLastMessageTime(channel: string, time: any): void {
-    if (!time || time > this.getLastMessageTime(channel)) {
-      localStorage().setItem('__' + channel + 'lastMesgTime', time);
-      this.lastMesgTime[channel] = time;
+  // deprecated: use setTimestamp instead!
+  private setLastMessageTime(channel: string, time: any): any {
+    if (!time) {
+      localStorage().removeItem(this.keyLastMessage(channel));
+    } else if(time > this.getLastMessageTime(channel)) {
+      localStorage().setItem(this.keyLastMessage(channel), time);
+    } else {
+      return this.lastMesgTime[channel];
     }
+    this.lastMesgTime[channel] = time;
+    return time;
+  }
+
+  private getTimestampModel(channel: string): Q.Promise<LiveDataTimestampModel> {
+    if (this.timestamps) {
+      if (!this.timestampsPromise) {
+        // initially fetch all messages
+        this.timestampsPromise = Q(this.timestamps.fetch());
+      }
+      return this.timestampsPromise.then(() => {
+        return this.timestamps.get(channel) || this.timestamps.add(new this.timestamps.model({
+            channel: channel,
+            timestamp: this.getLastMessageTime(channel)
+          }, {
+            store: this.timestamps.store
+          }));
+      });
+    }
+  }
+
+  getTimestamp(channel: string): Q.Promise<any> {
+    let q = this.getTimestampModel(channel);
+    if (!q) {
+      return Q.resolve(this.getLastMessageTime(channel));
+    }
+
+    this.timestampsPromise = q.then((model) => {
+      return model.attributes.timestamp;
+    }).catch((err) => {
+      diag.debug.error('Relution.livedata.SyncStore.getTimestamp: ' + channel, err);
+      return this.getLastMessageTime(channel);
+    });
+    return this.timestampsPromise;
+  }
+
+  setTimestamp(channel: string, time: any): Q.Promise<any> {
+    let q = this.getTimestampModel(channel);
+    if (!q) {
+      return this.setLastMessageTime(channel, time);
+    }
+
+    this.timestampsPromise = q.then((model) => {
+      if (!time || time > model.attributes.timestamp) {
+        return model.save({
+          timestamp: time
+        }).thenResolve(time);
+      }
+      return model.attributes.timestamp;
+    }).catch((err) => {
+      diag.debug.error('Relution.livedata.SyncStore.setTimestamp: ' + channel, err);
+      return time;
+    }).finally(() => {
+      return this.setLastMessageTime(channel, time);
+    });
+    return this.timestampsPromise;
   }
 
   onConnect(endpoint: SyncEndpoint): Q.Promise<void> {
@@ -470,13 +553,11 @@ export class SyncStore extends Store {
 
     // finally set the message time
     return q.then(() => {
-      if (msg.time) {
-        this.setLastMessageTime(channel, msg.time);
-      }
-
-      // update all collections listening
-      this.trigger('sync:' + channel, msg); // SyncContext.onMessage
-      return msg;
+      return Q.resolve(msg.time && this.setTimestamp(channel, msg.time)).then(() => {
+        // update all collections listening
+        this.trigger('sync:' + channel, msg); // SyncContext.onMessage
+        return msg;
+      });
     }, (error: Error) => {
       // not setting message time in error case
 
@@ -522,14 +603,12 @@ export class SyncStore extends Store {
           if (method === 'create') {
             model.set(model.idAttribute, objectid.makeObjectID());
           } else {
-            let error = new Error('no (valid) id: ' + model.id);
-            return Q.reject(this.handleError(options, error) || error);
+            throw new Error('no (valid) id: ' + model.id);
           }
         }
       } else {
         // something is really at odds here...
-        let error = new Error('target of sync is neither a model nor a collection!?!');
-        return Q.reject(this.handleError(options, error) || error);
+        throw new Error('target of sync is neither a model nor a collection!?!');
       }
 
       // at this point the target server is known, check making sure the correct server is being hit
@@ -541,61 +620,66 @@ export class SyncStore extends Store {
       }
 
       var channel = endpoint.channel;
-      var time = this.getLastMessageTime(channel);
-      // only send read messages if no other store can do this or for initial load
-      if (method === 'read' && endpoint.localStore && time && !options.reset) {
-        // read data from localStore and fetch changes remote
-        var opts = _.clone(options);
-        opts.store = endpoint.localStore;
-        opts.entity = endpoint.entity;
-        delete opts.success;
-        delete opts.error;
-        return endpoint.localStore.sync(method, model, opts).then((resp) => {
-          // backbone success callback alters the collection now
-          resp = this.handleSuccess(options, resp) || resp;
-          if (endpoint.socket || options.fetchMode === 'local') {
-            // no need to fetch changes as we got a websocket, that is either connected or attempts reconnection
-            return resp;
+      return this.getTimestamp(channel).then((time) => {
+        try {
+          // only send read messages if no other store can do this or for initial load
+          if (method === 'read' && endpoint.localStore && time && !options.reset) {
+            // read data from localStore and fetch changes remote
+            var opts = _.clone(options);
+            opts.store = endpoint.localStore;
+            opts.entity = endpoint.entity;
+            delete opts.success;
+            delete opts.error;
+            return endpoint.localStore.sync(method, model, opts).then((resp) => {
+              // backbone success callback alters the collection now
+              resp = this.handleSuccess(options, resp) || resp;
+              if (endpoint.socket || options.fetchMode === 'local') {
+                // no need to fetch changes as we got a websocket, that is either connected or attempts reconnection
+                return resp;
+              }
+
+              // when we are disconnected, try to connect now
+              if (!endpoint.isConnected) {
+                return this.fetchServerInfo(endpoint).then((info): any => {
+                  // trigger reconnection when disconnected
+                  var result: Q.Promise<void>;
+                  if (!endpoint.isConnected) {
+                    result = this.onConnect(endpoint);
+                  }
+                  return result || info;
+                }, (xhr: web.HttpError) => {
+                  // trigger disconnection when disconnected
+                  var result: Q.Promise<void>;
+                  if (!xhr.statusCode && endpoint.isConnected) {
+                    result = this.onDisconnect(endpoint);
+                  }
+                  return result || resp;
+                }).thenResolve(resp);
+              } // else...
+
+              // load changes only (will happen AFTER success callback is invoked,
+              // but returned promise will resolve only after changes were processed.
+              return this.fetchChanges(endpoint).catch((xhr: web.HttpError) => {
+                if (!xhr.statusCode && endpoint.isConnected) {
+                  return this.onDisconnect(endpoint) || resp;
+                }
+
+                // can not do much about it...
+                this.trigger('error:' + channel, xhr, model);
+                return resp;
+              }).thenResolve(resp); // caller expects original XHR response as changes body data is NOT compatible
+            }, () => {
+              // fall-back to loading full data set
+              return this._addMessage(method, model, options, endpoint);
+            });
           }
 
-          // when we are disconnected, try to connect now
-          if (!endpoint.isConnected) {
-            return this.fetchServerInfo(endpoint).then((info): any => {
-              // trigger reconnection when disconnected
-              var result: Q.Promise<void>;
-              if (!endpoint.isConnected) {
-                result = this.onConnect(endpoint);
-              }
-              return result || info;
-            }, (xhr: web.HttpError) => {
-              // trigger disconnection when disconnected
-              var result: Q.Promise<void>;
-              if (!xhr.statusCode && endpoint.isConnected) {
-                result = this.onDisconnect(endpoint);
-              }
-              return result || resp;
-            }).thenResolve(resp);
-          } // else...
-
-          // load changes only (will happen AFTER success callback is invoked,
-          // but returned promise will resolve only after changes were processed.
-          return this.fetchChanges(endpoint).catch((xhr: web.HttpError) => {
-            if (!xhr.statusCode && endpoint.isConnected) {
-              return this.onDisconnect(endpoint) || resp;
-            }
-
-            // can not do much about it...
-            this.trigger('error:' + channel, xhr, model);
-            return resp;
-          }).thenResolve(resp); // caller expects original XHR response as changes body data is NOT compatible
-        }, () => {
-          // fall-back to loading full data set
+          // do backbone rest
           return this._addMessage(method, model, options, endpoint);
-        });
-      }
-
-      // do backbone rest
-      return this._addMessage(method, model, options, endpoint);
+        } catch (error) {
+          return Q.reject(this.handleError(options, error) || error);
+        }
+      });
     } catch (error) {
       return Q.reject(this.handleError(options, error) || error);
     }
@@ -787,7 +871,7 @@ export class SyncStore extends Store {
       // update local store state
       if (data) {
         // no data if server asks not to alter state
-        // this.setLastMessageTime(channel, msg.time);
+        // this.setTimestamp(channel, msg.time);
         var promises: Q.Promise<LiveDataMessage>[] = [];
         var dataIds: any; // model id -> attributes data
         if (msg.method !== 'read') {
@@ -879,12 +963,17 @@ export class SyncStore extends Store {
         });
       }
     }).then((response) => {
+      let qTime: Q.Promise<any>;
       if (msg.method === 'read' && isCollection(model)) {
         // TODO: extract Date header from options.xhr instead of using clientTime
-        this.setLastMessageTime(endpoint.channel, clientTime);
+        qTime = this.setTimestamp(endpoint.channel, clientTime);
+      } else {
+        qTime = Q.resolve(undefined);
       }
-      // invoke success callback, if any
-      return this.handleSuccess(options, response) || response;
+      return qTime.then(() => {
+        // invoke success callback, if any
+        return this.handleSuccess(options, response) || response;
+      });
     }, (error: web.HttpError) => {
       // invoke error callback, if any
       return this.handleError(options, error) || Q.reject(error);
@@ -907,37 +996,39 @@ export class SyncStore extends Store {
       }
     }
 
-    let time = this.getLastMessageTime(channel);
-    if (!time) {
-      diag.debug.error(channel + ' can not fetch changes at this time!');
-      return promise || Q.resolve<Collection>(undefined);
-    }
+    return this.getTimestamp(channel).then((time) => {
+      if (!time) {
+        diag.debug.error(channel + ' can not fetch changes at this time!');
+        return promise || Q.resolve<Collection>(undefined);
+      }
 
-    // initiate a new request for changes
-    diag.debug.info(channel + ' initiating changes request...');
-    let changes: Collection = new (<any>this.messages).constructor();
-    promise = this.checkServer(endpoint.urlRoot + 'changes/' + time).then((url) => {
-      return Q(changes.fetch(<Backbone.CollectionFetchOptions>{
-        url: url,
-        store: {}, // really go to remote server
+      // initiate a new request for changes
+      diag.debug.info(channel + ' initiating changes request...');
+      let changes: Collection = new (<any>this.messages).constructor();
+      promise = this.checkServer(endpoint.urlRoot + 'changes/' + time).then((url) => {
+        return Q(changes.fetch(<Backbone.CollectionFetchOptions>{
+          url: url,
+          store: {}, // really go to remote server
 
-        success: (model, response, options) => {
+          success: (model, response, options) => {
+            return response || options.xhr;
+          }
+        })).then(() => {
           if (changes.models.length > 0) {
-            changes.each((change: LiveDataMessageModel) => {
+            return Q.all(changes.map((change) => {
               let msg: LiveDataMessage = change.attributes;
-              this.onMessage(endpoint, this._fixMessage(endpoint, msg));
-            });
+              return this.onMessage(endpoint, this._fixMessage(endpoint, msg));
+            }));
           } else {
             // following should use server time!
-            this.setLastMessageTime(channel, now);
+            return this.setTimestamp(channel, now);
           }
-          return response || options.xhr;
-        }
-      })).thenResolve(changes);
+        }).thenResolve(changes);
+      });
+      endpoint.promiseFetchingChanges = promise;
+      endpoint.timestampFetchingChanges = now;
+      return promise;
     });
-    endpoint.promiseFetchingChanges = promise;
-    endpoint.timestampFetchingChanges = now;
-    return promise;
   }
 
   private fetchServerInfo(endpoint: SyncEndpoint): Q.Promise<Model> {
@@ -952,7 +1043,6 @@ export class SyncStore extends Store {
     }
 
     var info = new Model();
-    var time = this.getLastMessageTime(endpoint.channel);
     var url = endpoint.urlRoot;
     if (url.charAt((url.length - 1)) !== '/') {
       url += '/';
@@ -961,10 +1051,17 @@ export class SyncStore extends Store {
       return Q(info.fetch(<Backbone.ModelFetchOptions>({
         url: url,
         success: (model, response, options) => {
-          // @todo why we set a server time here ?
-          if (!time && info.get('time')) {
-            this.setLastMessageTime(endpoint.channel, info.get('time'));
-          }
+          return response || options.xhr;
+        }
+        }))).then(() => {
+          //@todo why we set a server time here ?
+          return this.getTimestamp(endpoint.channel).then((time) => {
+            if (!time && info.get('time')) {
+              return this.setTimestamp(endpoint.channel, info.get('time'));
+            }
+            return time;
+          });
+        }).then(() => {
           if (!endpoint.socketPath && info.get('socketPath')) {
             endpoint.socketPath = info.get('socketPath');
             var name = info.get('entity') || endpoint.entity;
@@ -972,9 +1069,8 @@ export class SyncStore extends Store {
               endpoint.socket = this.createSocket(endpoint, name);
             }
           }
-          return response || options.xhr;
-        }
-      }))).thenResolve(info);
+          return info;
+        });
     });
     endpoint.promiseFetchingServerInfo = promise;
     endpoint.timestampFetchingServerInfo = now;
@@ -1233,7 +1329,7 @@ export class SyncStore extends Store {
     });
   }
 
-  public clear(collection: Collection) {
+  public clear(collection: Collection): Q.Promise<any> {
     if (collection) {
       var endpoint: SyncEndpoint = this.getEndpoint(collection);
       if (endpoint) {
@@ -1241,7 +1337,7 @@ export class SyncStore extends Store {
           this.messages.destroy();
         }
         collection.reset();
-        this.setLastMessageTime(endpoint.channel, '');
+        return this.setTimestamp(endpoint.channel, '');
       }
     }
   }
@@ -1253,6 +1349,11 @@ export class SyncStore extends Store {
     if (this.messages.store) {
       this.messages.store.close();
       this.messages = null;
+    }
+
+    if (this.timestamps && this.timestamps.store) {
+      this.timestamps.store.close();
+      this.timestamps = null;
     }
 
     var keys = Object.keys(this.endpoints);
