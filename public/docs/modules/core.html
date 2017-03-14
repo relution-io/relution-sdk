@@ -139,7 +139,7 @@
 					<div class="tsd-signature tsd-kind-icon">Assertion<wbr>Error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">assert.AssertionError</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/diag.ts:38</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/diag.ts#L38">core/diag.ts:38</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -154,7 +154,7 @@
 					<div class="tsd-signature tsd-kind-icon">Platform<wbr>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"android"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"ios"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"windowsphone"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"blackberry"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"browser"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"node"</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/device.ts:37</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/device.ts#L37">core/device.ts:37</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -176,7 +176,7 @@
 					<div class="tsd-signature tsd-kind-icon">assertions<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/diag.ts:47</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/diag.ts#L47">core/diag.ts:47</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -194,7 +194,7 @@
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <a href="../classes/core.diagnostics.html" class="tsd-signature-type">Diagnostics</a><span class="tsd-signature-symbol"> =&nbsp;new Diagnostics(true)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/diag.ts:207</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/diag.ts#L207">core/diag.ts:207</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -204,7 +204,7 @@
 					<div class="tsd-signature tsd-kind-icon">init<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="../interfaces/core.initoptions.html" class="tsd-signature-type">InitOptions</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/init.ts:191</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/init.ts#L191">core/init.ts:191</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -224,7 +224,7 @@
 					<div class="tsd-signature tsd-kind-icon">ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/core.information.html" class="tsd-signature-type">Information</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;(() &#x3D;&gt; {// must be extracted from global scope object as otherwise we get ReferenceError in node.jsconst document: Document &#x3D; global[&#x27;document&#x27;];const window: Window &#x3D; global[&#x27;window&#x27;];let resolveDocument: (val: Document | Q.Promise&lt;Document&gt;) &#x3D;&gt; void;const callback &#x3D; () &#x3D;&gt; {document.removeEventListener(&#x27;load&#x27;, callback);document.removeEventListener(&#x27;DOMContentLoaded&#x27;, callback);return resolveDocument(document);};return Q.Promise((resolve, reject) &#x3D;&gt; {// resolves to document once the DOM is loadedtry {if (!document || document.readyState &#x3D;&#x3D;&#x3D; &#x27;complete&#x27;) {resolve(document);return;}resolveDocument &#x3D; resolve;document.addEventListener(&#x27;DOMContentLoaded&#x27;, callback, false);document.addEventListener(&#x27;load&#x27;, callback, false); // fallback} catch (error) {reject(error);}}).then(() &#x3D;&gt; {// resolves to window once the device is readyreturn Q.Promise((resolve, reject) &#x3D;&gt; {try {if (!window || !(&#x27;cordova&#x27; in window ||&#x27;PhoneGap&#x27; in window || &#x27;phonegap&#x27; in window ||&#x27;forge&#x27; in window)) {resolve(window);return;}// see https://cordova.apache.org/docs/en/latest/cordova/events/events.html#devicereadydocument.addEventListener(&#x27;deviceready&#x27;, () &#x3D;&gt; {document.removeEventListener(&#x27;deviceready&#x27;, callback);resolve(window);}, false);} catch (error) {reject(error);}});}).then(() &#x3D;&gt; {const navigator: Navigator &#x3D; window &amp;&amp; window.navigator;const userAgent &#x3D; navigator &amp;&amp; navigator.userAgent;const appVersion &#x3D; navigator &amp;&amp; navigator.appVersion;const device: Device &#x3D; window &amp;&amp; window[&#x27;device&#x27;];const platformName &#x3D; device &amp;&amp; device.platform || userAgent || process.platform;const platformVersion &#x3D; device &amp;&amp; device.version || process.version || appVersion;let platformId: PlatformId;if (/Android/i.test(platformName)) {platformId &#x3D; &#x27;android&#x27;;} else if (/iOS|iPhone|iPad|iPod/i.test(platformName)) {platformId &#x3D; &#x27;ios&#x27;;} else if (/Windows Phone/i.test(platformName) || device &amp;&amp;/WinCE|Win32NT/i.test(platformName)) {// see https://github.com/apache/cordova-plugin-device regarding Windows Phone 7/8 Quirksdiag.debug.assert(() &#x3D;&gt; !/WinCE/i.test(platformName),&#x27;WindowsCE devices like Windows Phone 7 and below are not officially supported!&#x27;);platformId &#x3D; &#x27;windowsphone&#x27;;} else if (/BlackBerry/i.test(platformName)) {platformId &#x3D; &#x27;blackberry&#x27;;} else if (navigator || process[&#x27;browser&#x27;]) {platformId &#x3D; &#x27;browser&#x27;;} else if (process &amp;&amp; require) {platformId &#x3D; &#x27;node&#x27;;} else {diag.debug.assert(!!platformId, &#x27;unknown platform: &#x27; + platformName);}return &lt;Information&gt;{uuid: device &amp;&amp; device.uuid,serial: device &amp;&amp; device.serial,language: navigator &amp;&amp; (navigator.language || navigator[&#x27;userLanguage&#x27;]),platform: {id: platformId,name: platformName,version: platformVersion},device: device};});})()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in core/device.ts:103</li>
+							<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/device.ts#L103">core/device.ts:103</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -251,7 +251,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/init.ts:144</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/init.ts#L144">core/init.ts:144</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -283,7 +283,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/cipher.ts:100</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/cipher.ts#L100">core/cipher.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -332,7 +332,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/cipher.ts:68</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/cipher.ts#L68">core/cipher.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -383,7 +383,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/domain.ts:61</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/domain.ts#L61">core/domain.ts:61</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -426,7 +426,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/cipher.ts:156</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/cipher.ts#L156">core/cipher.ts:156</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -469,7 +469,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/cipher.ts:126</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/cipher.ts#L126">core/cipher.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -513,7 +513,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/init.ts:199</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/init.ts#L199">core/init.ts:199</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -545,7 +545,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/objectid.ts:38</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/objectid.ts#L38">core/objectid.ts:38</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -562,7 +562,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in core/domain.ts:81</li>
+									<li>Defined in <a href="https://github.com/relution-io/relution-sdk/blob/8d536ed/src/core/domain.ts#L81">core/domain.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
