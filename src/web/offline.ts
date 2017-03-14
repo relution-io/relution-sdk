@@ -23,11 +23,10 @@
 /** */
 
 import * as Q from 'q';
-
-import * as init from '../core/init';
-import * as cipher from '../core/cipher';
 import * as auth from '../security/auth';
+import * as cipher from '../core/cipher';
 import * as http from './http';
+import * as init from '../core/init';
 
 /**
  * localStorage of browser or via require node-localstorage.
@@ -119,4 +118,8 @@ Q.Promise<http.LoginResponse> {
   } catch (error) {
     return Q.reject<http.LoginResponse>(error);
   }
+}
+
+export const emptyInternal = () => {
+  return 'hello';
 }
