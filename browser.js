@@ -7344,6 +7344,9 @@ function fetchOfflineLogin(credentials, serverOptions) {
     }
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
+exports.emptyInternal = function () {
+    return 'hello';
+};
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib/web/offline.js")
 
