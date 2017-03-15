@@ -6672,16 +6672,16 @@ exports.getCurrentUser = getCurrentUser;
  */
 /** */
 "use strict";
-var _ = require('lodash');
 var Q = require('q');
-var request = require('request');
-var http = require('http');
-var diag = require('../core/diag');
-var init = require('../core/init');
+var _ = require('lodash');
 var auth = require('../security/auth');
+var diag = require('../core/diag');
+var http = require('http');
+var init = require('../core/init');
+var offline = require('./offline');
+var request = require('request');
 var server = require('../security/server');
 var urls = require('./urls');
-var offline = require('./offline');
 // require request.js to manage cookies for us
 var requestDefaults = {
     json: true,
@@ -6851,8 +6851,8 @@ function ajax(options) {
                     else {
                         // server information
                         serverObj.serverInfos = {
-                            version: resp.headers['x-relution-version'],
-                            description: resp.headers['x-server']
+                            version: response.headers['x-relution-version'],
+                            description: response.headers['x-server']
                         };
                         if (response.statusCode === 503 ||
                             response.statusCode === 500 && error.className === 'java.util.concurrent.TimeoutException') {
@@ -6867,7 +6867,7 @@ function ajax(options) {
                         }
                         else {
                             // logon session processing
-                            var sessionUserUuid = resp.headers['x-gofer-user'];
+                            var sessionUserUuid = response.headers['x-gofer-user'];
                             if (sessionUserUuid) {
                                 serverObj.sessionUserUuid = sessionUserUuid;
                             }
@@ -94709,7 +94709,7 @@ function extend() {
 },{}],345:[function(require,module,exports){
 module.exports={
   "name": "relution-sdk",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Relution Software Development Kit for TypeScript and JavaScript",
   "keywords": [
     "relution",
