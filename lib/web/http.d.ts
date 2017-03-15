@@ -6,12 +6,12 @@
  * @module web
  */
 /** */
-import * as _ from 'lodash';
 import * as Q from 'q';
-import * as request from 'request';
+import * as _ from 'lodash';
+import * as auth from '../security/auth';
 import * as http from 'http';
 import * as init from '../core/init';
-import * as auth from '../security/auth';
+import * as request from 'request';
 import * as roles from '../security/roles';
 /**
  * callback allowing customizing an object not immediately available at time of call.

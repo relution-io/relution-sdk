@@ -22,19 +22,17 @@
  */
 /** */
 
-import * as _ from 'lodash';
 import * as Q from 'q';
-
-import * as request from 'request';
-import * as http from 'http';
-
-import * as diag from '../core/diag';
-import * as init from '../core/init';
+import * as _ from 'lodash';
 import * as auth from '../security/auth';
+import * as diag from '../core/diag';
+import * as http from 'http';
+import * as init from '../core/init';
+import * as offline from './offline';
+import * as request from 'request';
 import * as roles from '../security/roles';
 import * as server from '../security/server';
 import * as urls from './urls';
-import * as offline from './offline';
 
 // require request.js to manage cookies for us
 let requestDefaults = {
@@ -299,8 +297,8 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
           } else {
             // server information
             serverObj.serverInfos = {
-              version: resp.headers['x-relution-version'],
-              description: resp.headers['x-server']
+              version: response.headers['x-relution-version'],
+              description: response.headers['x-server']
             };
             if (response.statusCode === 503 ||
                 response.statusCode === 500 && error.className === 'java.util.concurrent.TimeoutException') {
@@ -314,7 +312,7 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
               return; // early exit as result is handled by done call above
             } else {
               // logon session processing
-              let sessionUserUuid = resp.headers['x-gofer-user'];
+              let sessionUserUuid = response.headers['x-gofer-user'];
               if (sessionUserUuid) {
                 serverObj.sessionUserUuid = sessionUserUuid;
               } else if (response.statusCode === 401) {
