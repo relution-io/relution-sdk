@@ -215,6 +215,10 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
   options = _.clone(options);
   options.agentOptions = currentOptions.agentOptions;
   options.agentClass = currentOptions.agentClass;
+  if (currentOptions.clientCertificate) {
+    // apply certificate options (must copy options.agentOptions)
+    options.agentOptions = _.defaults({}, currentOptions.clientCertificate, options.agentOptions);
+  }
   let headers = {};
   if (serverObj.sessionUserUuid) {
     // add X-Gofer-User header so that server may check we are running under correct identity
@@ -232,10 +236,6 @@ export function ajax<T>(options: HttpOptions): Q.Promise<T> {
       let resp: http.IncomingMessage;
       let req: request.Request;
       try {
-        if (options.clientCertificate) {
-          // apply certificate options
-          _.extend(options, options.clientCertificate);
-        }
         req = requestWithDefaults(url, options, (error: HttpError, response = resp, body?: any) => {
           // node.js assigns status string as body for status codes not having body data
           if (response && response.statusCode === 202) {
