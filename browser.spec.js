@@ -19338,16 +19338,16 @@ describe(module.filename || __filename, function () {
  */
 /** */
 "use strict";
-var _ = require('lodash');
 var Q = require('q');
-var request = require('request');
-var http = require('http');
-var diag = require('../core/diag');
-var init = require('../core/init');
+var _ = require('lodash');
 var auth = require('../security/auth');
+var diag = require('../core/diag');
+var http = require('http');
+var init = require('../core/init');
+var offline = require('./offline');
+var request = require('request');
 var server = require('../security/server');
 var urls = require('./urls');
-var offline = require('./offline');
 // require request.js to manage cookies for us
 var requestDefaults = {
     json: true,
@@ -19433,6 +19433,10 @@ function ajax(options) {
     options = _.clone(options);
     options.agentOptions = currentOptions.agentOptions;
     options.agentClass = currentOptions.agentClass;
+    if (currentOptions.clientCertificate) {
+        // apply certificate options (must copy options.agentOptions)
+        options.agentOptions = _.defaults({}, currentOptions.clientCertificate, options.agentOptions);
+    }
     var headers = {};
     if (serverObj.sessionUserUuid) {
         // add X-Gofer-User header so that server may check we are running under correct identity
@@ -19450,10 +19454,6 @@ function ajax(options) {
             var resp;
             var req;
             try {
-                if (options.clientCertificate) {
-                    // apply certificate options
-                    _.extend(options, options.clientCertificate);
-                }
                 req = requestWithDefaults(url, options, function (error, response, body) {
                     if (response === void 0) { response = resp; }
                     // node.js assigns status string as body for status codes not having body data
@@ -19517,8 +19517,8 @@ function ajax(options) {
                     else {
                         // server information
                         serverObj.serverInfos = {
-                            version: resp.headers['x-relution-version'],
-                            description: resp.headers['x-server']
+                            version: response.headers['x-relution-version'],
+                            description: response.headers['x-server']
                         };
                         if (response.statusCode === 503 ||
                             response.statusCode === 500 && error.className === 'java.util.concurrent.TimeoutException') {
@@ -19533,7 +19533,7 @@ function ajax(options) {
                         }
                         else {
                             // logon session processing
-                            var sessionUserUuid = resp.headers['x-gofer-user'];
+                            var sessionUserUuid = response.headers['x-gofer-user'];
                             if (sessionUserUuid) {
                                 serverObj.sessionUserUuid = sessionUserUuid;
                             }
@@ -20138,6 +20138,9 @@ function fetchOfflineLogin(credentials, serverOptions) {
     }
 }
 exports.fetchOfflineLogin = fetchOfflineLogin;
+exports.emptyInternal = function () {
+    return 'hello';
+};
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib\\web\\offline.js")
 
